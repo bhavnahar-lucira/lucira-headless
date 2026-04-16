@@ -7,7 +7,7 @@ export async function POST() {
     const client = await clientPromise;
     const db = client.db();
 
-    // 1. Fetch menu structure (only valid fields for Admin API)
+    // 1. Fetch menu structure
     const menusQuery = `
       query {
         menus(first: 25) {
@@ -56,29 +56,20 @@ export async function POST() {
       return NextResponse.json({ success: false, error: "No menus found" }, { status: 404 });
     }
 
-    // 2. Collect all unique resource IDs (Collections, Products, etc.)
+    // 2. Collect unique resource IDs
     const resourceIds = new Set();
     const traverseItems = (items) => {
       for (const item of items) {
-        if (item.resourceId) {
-          resourceIds.add(item.resourceId);
-        }
-        if (item.items && item.items.length > 0) {
-          traverseItems(item.items);
-        }
+        if (item.resourceId) resourceIds.add(item.resourceId);
+        if (item.items && item.items.length > 0) traverseItems(item.items);
       }
     };
-
     menus.forEach(menu => traverseItems(menu.items));
     const uniqueIds = Array.from(resourceIds);
 
-    // 3. Fetch metafields for these resources in batches
-    console.log(`Fetching metafields for ${uniqueIds.length} resources...`);
+    // 3. Fetch resource details (with fields from Liquid file)
     const resourceMap = {};
-    
-    // Shopify 'nodes' query allows fetching multiple IDs at once
     if (uniqueIds.length > 0) {
-      // Split into batches of 50 to avoid query limits
       for (let i = 0; i < uniqueIds.length; i += 50) {
         const batch = uniqueIds.slice(i, i + 50);
         const resourcesQuery = `
@@ -87,24 +78,19 @@ export async function POST() {
               ... on Collection {
                 id
                 handle
-                image {
-                  url
+                productsCount {
+                  count
                 }
-                metafields(first: 20) {
+                image { url }
+                metafields(first: 25) {
                   nodes {
                     namespace
                     key
                     value
                     type
                     reference {
-                      ... on MediaImage {
-                        image {
-                          url
-                        }
-                      }
-                      ... on GenericFile {
-                        url
-                      }
+                      ... on MediaImage { image { url } }
+                      ... on GenericFile { url }
                     }
                   }
                 }
@@ -112,22 +98,13 @@ export async function POST() {
               ... on Product {
                 id
                 handle
-                featuredImage {
-                  url
-                }
-                metafields(first: 20) {
+                featuredImage { url }
+                metafields(first: 10) {
                   nodes {
                     namespace
                     key
                     value
                     type
-                    reference {
-                      ... on MediaImage {
-                        image {
-                          url
-                        }
-                      }
-                    }
                   }
                 }
               }
@@ -146,7 +123,6 @@ export async function POST() {
             }
           }
         `;
-        
         const resourceData = await shopifyAdminFetch(resourcesQuery, { ids: batch });
         if (resourceData.nodes) {
           resourceData.nodes.forEach(node => {
@@ -156,7 +132,7 @@ export async function POST() {
       }
     }
 
-    // 4. Attach resource data back to menu items and save to MongoDB
+    // 4. Enrich and Save
     const enrichItems = (items) => {
       return items.map(item => {
         const enriched = { ...item };
@@ -177,21 +153,10 @@ export async function POST() {
         items: enrichItems(menu.items),
         updatedAt: new Date()
       };
-
-      await collection.updateOne(
-        { handle: menu.handle },
-        { $set: enrichedMenu },
-        { upsert: true }
-      );
+      await collection.updateOne({ handle: menu.handle }, { $set: enrichedMenu }, { upsert: true });
     }
 
-    return NextResponse.json({ 
-      success: true, 
-      message: `Successfully synced ${menus.length} menus with resource metafields.`,
-      count: menus.length,
-      menuTitles: menus.map(m => m.title)
-    });
-
+    return NextResponse.json({ success: true, count: menus.length });
   } catch (error) {
     console.error("Sync Menu Error:", error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });

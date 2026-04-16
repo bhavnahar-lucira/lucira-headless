@@ -10,6 +10,7 @@ import "swiper/css/navigation";
 import "swiper/css/pagination";
 import { Button } from "../ui/button";
 import LazyImage from "../common/LazyImage";
+import Image from "next/image";
 
 const slides = [
   "/images/heroslider/banner-1.jpg",
@@ -70,13 +71,22 @@ export default function HeroBanner() {
 
                 {/* RIGHT IMAGE */}
                 <div className="relative h-full">
-                  <LazyImage
-                    src={img}
-                    alt="Hero Banner"
-                    fill
-                    priority={index === 0}
-                    className="object-cover"
-                  />
+                  {index === 0 ? (
+                    <Image
+                      src={img}
+                      alt="Hero Banner"
+                      fill
+                      priority
+                      className="object-cover"
+                    />
+                  ) : (
+                    <LazyImage
+                      src={img}
+                      alt="Hero Banner"
+                      fill
+                      className="object-cover"
+                    />
+                  )}
                 </div>
 
               </div>

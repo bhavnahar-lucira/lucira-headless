@@ -151,13 +151,10 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice }) => {
   const isWishlisted = productId ? wishlistIds.includes(productId) : false;
 
   const currentVariant = getVariantForBase(product, activeBase);
-  const displayPrice = fixedPrice ?? ((currentVariant?.inStock && currentVariant?.price != null)
-    ? currentVariant.price
-    : (product.price ?? currentVariant?.price));
-  const displayComparePrice = fixedComparePrice ?? ((currentVariant?.inStock && (currentVariant.compare_price != null || currentVariant.compareAtPrice != null))
-    ? (currentVariant.compare_price ?? currentVariant.compareAtPrice)
-    : (product.compare_price ?? product.compareAtPrice ?? currentVariant?.compare_price ?? currentVariant?.compareAtPrice));
 
+  // Keep price consistent regardless of color swatch selection
+  const displayPrice = fixedPrice ?? (product.price ?? currentVariant?.price);
+  const displayComparePrice = fixedComparePrice ?? (product.compare_price ?? product.compareAtPrice ?? currentVariant?.compare_price ?? currentVariant?.compareAtPrice);
 
    const hasDiscount = displayPrice > 0 && displayPrice < displayComparePrice;
     const discountPercent = hasDiscount
