@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import Link from "next/link";
-import Image from "next/image";
+import LazyImage from "../common/LazyImage";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/navigation";
@@ -293,21 +293,13 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice }) => {
                   {galleryImages.map((image, index) => (
                     <SwiperSlide key={`${image.url}-${index}`}>
                       <div className="relative w-full h-full">
-                        {!loadedImages[`main-${index}`] && (
-                          <div className="absolute inset-0 flex items-center justify-center bg-[#fafafa] z-[5]">
-                            <Image src="/images/loader.gif" alt="Loading..." width={48} height={48} className="object-contain" />
-                          </div>
-                        )}
-                        <Image
+                        <LazyImage
                           src={image.url}
                           alt={image.alt || `${product.title}${activeBase ? ` - ${activeBase}` : ""}`}
                           fill
                           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                           priority={index === 0}
-                          onLoad={() => setLoadedImages(prev => ({ ...prev, [`main-${index}`]: true }))}
-                          className={`object-contain p-6 grayscale-[0.2] group-hover:grayscale-0 transition-all duration-300 ${
-                            loadedImages[`main-${index}`] ? "opacity-100" : "opacity-0"
-                          }`}
+                          className={`object-contain p-6 grayscale-[0.2] group-hover:grayscale-0 transition-all duration-300`}
                         />
                       </div>
                     </SwiperSlide>
@@ -437,19 +429,11 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice }) => {
                               <div key={itemId} className="space-y-4">
                                 <Link href={`/products/${item.handle}`} onClick={() => setShowSimilar(false)} className="block space-y-4 group">
                                   <div className="aspect-square relative rounded-md bg-[#F9F9F9] overflow-hidden transition-all duration-300 group-hover:bg-[#f3f3f3]">
-                                    {!loadedImages[`similar-${itemId}`] && (
-                                      <div className="absolute inset-0 flex items-center justify-center bg-[#F9F9F9] z-[5]">
-                                        <Image src="/images/loader.gif" alt="Loading..." width={32} height={32} className="object-contain" />
-                                      </div>
-                                    )}
-                                    <Image
+                                    <LazyImage
                                       src={item.image}
                                       alt={item.title}
                                       fill
-                                      onLoad={() => setLoadedImages(prev => ({ ...prev, [`similar-${itemId}`]: true }))}
-                                      className={`object-contain p-4 mix-blend-multiply transition-all duration-500 group-hover:scale-105 ${
-                                        loadedImages[`similar-${itemId}`] ? "opacity-100" : "opacity-0"
-                                      }`}
+                                      className={`object-contain p-4 mix-blend-multiply transition-all duration-500 group-hover:scale-105`}
                                     />
                                   </div>
                                 <div className="space-y-2 px-0">

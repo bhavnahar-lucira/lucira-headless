@@ -5,14 +5,18 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { MEGA_MENU } from "@/data/megaMenu";
+import { MEGA_MENU as STATIC_MENU } from "@/data/megaMenu";
 import { ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useMenu } from "@/hooks/useMenu";
 
 export default function Navbar({ hideTop }) {
+  const { menuData, loading } = useMenu("main-menu-official");
   const [activeMenu, setActiveMenu] = useState(null);
   const pathname = usePathname();
   const timeoutRef = useRef(null);
+
+  const MEGA_MENU = menuData || STATIC_MENU;
 
   const handleEnter = (index) => {
     clearTimeout(timeoutRef.current);
@@ -209,8 +213,7 @@ export default function Navbar({ hideTop }) {
                                     onClick={closeMenu}
                                     className="flex items-center gap-2 hover:text-black transition"
                                   >
-                                    {/*icon disabled for sometime */}
-                                    {/* {col.type === "icon" && item.icon && (
+                                    {col.type === "icon" && item.icon && (
                                       <div className="relative h-4 w-4 shrink-0">
                                         <Image
                                           src={item.icon}
@@ -219,7 +222,7 @@ export default function Navbar({ hideTop }) {
                                           className="object-contain"
                                         />
                                       </div>
-                                    )} */}
+                                    )}
                                     <span>{item.label}</span>
                                   </Link>
                                 </li>

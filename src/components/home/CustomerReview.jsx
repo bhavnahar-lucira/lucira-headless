@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useId, useState, useEffect } from "react";
-import Image from "next/image";
+import LazyImage from "../common/LazyImage";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination } from "swiper/modules";
 import { ChevronLeft, ChevronRight, Star, BadgeCheck } from "lucide-react";
@@ -22,17 +22,11 @@ function ReviewCard({ item, onClick }) {
     >
       <div className="block">
         <div className="relative aspect-[0.92/1] w-full bg-gray-50 overflow-hidden">
-          {!isLoaded && (
-            <div className="absolute inset-0 flex items-center justify-center z-[5]">
-              <Image src="/images/loader.gif" alt="Loading..." width={48} height={48} className="object-contain" />
-            </div>
-          )}
-          <Image
+          <LazyImage
             src={item.personImage || "/images/review/1.jpg"}
             alt={item.personName}
             fill
-            onLoad={() => setIsLoaded(true)}
-            className={`object-cover group-hover:scale-105 transition-all duration-700 ${isLoaded ? "opacity-100" : "opacity-0"}`}
+            className={`object-cover group-hover:scale-105 transition-all duration-700`}
           />
         </div>
 
@@ -62,7 +56,7 @@ function ReviewCard({ item, onClick }) {
         >
           <div className="flex items-center gap-3">
             <div className="relative h-9 w-9 shrink-0 overflow-hidden rounded-full border border-[#ddd] bg-white">
-              <Image
+              <LazyImage
                 src={item.productImage || "/images/product/1.jpg"}
                 alt={item.productTitle}
                 fill

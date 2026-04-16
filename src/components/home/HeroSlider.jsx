@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, Autoplay } from "swiper/modules";
 import { ChevronLeft, ChevronRight} from "lucide-react";
@@ -10,6 +9,7 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import { Button } from "../ui/button";
+import LazyImage from "../common/LazyImage";
 
 const slides = [
   "/images/heroslider/banner-1.jpg",
@@ -70,12 +70,11 @@ export default function HeroBanner() {
 
                 {/* RIGHT IMAGE */}
                 <div className="relative h-full">
-                  <Image
+                  <LazyImage
                     src={img}
                     alt="Hero Banner"
                     fill
-                    priority
-                    fetchPriority="high"
+                    priority={index === 0}
                     className="object-cover"
                   />
                 </div>

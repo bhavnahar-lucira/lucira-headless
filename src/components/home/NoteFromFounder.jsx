@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import LazyImage from "../common/LazyImage";
 
 export default function NoteFromFounder() {
   return (
@@ -9,7 +9,7 @@ export default function NoteFromFounder() {
         <div className="grid grid-cols-1 md:grid-cols-2 bg-[#FAF5F2] shadow-sm rounded-sm overflow-hidden min-h-[450px]">
           {/* Left Column: Image */}
           <div className="relative aspect-[4/3] md:aspect-auto">
-            <Image
+            <LazyImage
               src="/images/founder.jpg" // Using existing founder placeholder image
               alt="Rupesh Jain - Founder & CEO"
               fill
@@ -34,7 +34,7 @@ export default function NoteFromFounder() {
 
             {/* Signature Image */}
             <div className="absolute bottom-10 right-10 md:bottom-12 md:right-16 opacity-90">
-               <Image 
+               <LazyImage 
                 src="/images/signature.png" 
                 alt="Rupesh Jain Signature" 
                 width={84} 

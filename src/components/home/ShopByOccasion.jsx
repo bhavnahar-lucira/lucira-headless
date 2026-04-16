@@ -1,8 +1,8 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import LazyImage from "../common/LazyImage";
 
 const OCCASIONS = [
   { name: "Engagement", image: "/images/occasion/1.jpg", href: "/collections/engagement-rings" },
@@ -28,7 +28,7 @@ export default function ShopByOccasion() {
               href={occ.href}
               className="relative aspect-3/4 overflow-hidden group bg-gray-100 rounded-sm"
             >
-              <Image 
+              <LazyImage 
                 src={occ.image} 
                 alt={occ.name} 
                 fill 

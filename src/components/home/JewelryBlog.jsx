@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import LazyImage from "../common/LazyImage";
 import Link from "next/link";
 
 const BLOGS = [
@@ -53,7 +53,7 @@ function BlogCard({ blog }) {
       className="group block overflow-hidden rounded-sm border border-[#ddd6d2] bg-white"
     >
       <div className="relative aspect-[1/1.02] w-full overflow-hidden">
-        <Image
+        <LazyImage
           src={blog.image}
           alt={blog.title}
           fill

@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import LazyImage from "../common/LazyImage";
 
 const PROPS = [
   {
@@ -29,7 +29,7 @@ export default function ValuePropsBar() {
           {PROPS.map((prop, index) => (
             <div key={index} className="flex items-center gap-3">
               <div className="w-6 h-6 relative grayscale opacity-70">
-                <Image src={prop.icon} alt={prop.text} fill className="object-contain" />
+                <LazyImage src={prop.icon} alt={prop.text} fill className="object-contain" />
               </div>
               <span className="text-xs uppercase font-medium tracking-wider text-gray-700">
                 {prop.text}

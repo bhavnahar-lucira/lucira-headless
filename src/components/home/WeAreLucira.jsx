@@ -1,8 +1,8 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { RefreshCcw, Truck } from "lucide-react";
+import LazyImage from "../common/LazyImage";
 
 const features = [
   {
@@ -35,7 +35,7 @@ export default function WeAreLucira() {
         <div className="grid grid-rows-2">
           <div className="grid h-full grid-cols-[30%_70%]">
             <div className="relative min-h-40 overflow-hidden">
-              <Image
+              <LazyImage
                 src="/images/we-are-lucira/1.jpg"
                 alt="Lucira store product display"
                 fill
@@ -43,7 +43,7 @@ export default function WeAreLucira() {
               />
             </div>
             <div className="relative min-h-40 overflow-hidden">
-              <Image
+              <LazyImage
                 src="/images/we-are-lucira/2.jpg"
                 alt="Lucira store interior"
                 fill
@@ -54,7 +54,7 @@ export default function WeAreLucira() {
 
           <div className="grid h-full grid-cols-[70%_30%]">
             <div className="relative min-h-40 overflow-hidden">
-              <Image
+              <LazyImage
                 src="/images/we-are-lucira/3.jpg"
                 alt="Jewelry lifestyle portrait"
                 fill
@@ -62,7 +62,7 @@ export default function WeAreLucira() {
               />
             </div>
             <div className="relative min-h-40 overflow-hidden">
-              <Image
+              <LazyImage
                 src="/images/we-are-lucira/4.jpg"
                 alt="Jewelry close-up on hands"
                 fill
@@ -77,7 +77,7 @@ export default function WeAreLucira() {
           <div className="max-w-135">
             <div className="mb-2.5 flex justify-center">
               <div className="flex h-10 w-10 items-center justify-center">
-                <Image
+                <LazyImage
                   src="/images/icons/small-logo.svg"
                   alt="Lucira Jewelry"
                   width={20}
@@ -100,12 +100,12 @@ export default function WeAreLucira() {
                     return (
                         <div key={item.text} className="flex items-center gap-3">
                         {item.type === "image" ? (
-                            <Image
-                            src={item.icon}
-                            alt={item.text}
-                            width={18}
-                            height={18}
-                            className="shrink-0"
+                            <LazyImage
+                              src={item.icon}
+                              alt={item.text}
+                              width={18}
+                              height={18}
+                              className="shrink-0"
                             />
                         ) : (
                             <item.icon size={18} className="shrink-0" />
@@ -134,7 +134,7 @@ export default function WeAreLucira() {
         <div className="grid grid-rows-2">
           <div className="grid h-full grid-cols-[70%_30%]">
             <div className="relative min-h-40 overflow-hidden">
-              <Image
+              <LazyImage
                 src="/images/we-are-lucira/5.jpg"
                 alt="Jewelry close-up portrait"
                 fill
@@ -142,7 +142,7 @@ export default function WeAreLucira() {
               />
             </div>
             <div className="relative min-h-40 overflow-hidden">
-              <Image
+              <LazyImage
                 src="/images/we-are-lucira/6.jpg"
                 alt="Lucira gift box"
                 fill
@@ -153,7 +153,7 @@ export default function WeAreLucira() {
 
           <div className="grid h-full grid-cols-[30%_70%]">
             <div className="relative min-h-40 overflow-hidden">
-              <Image
+              <LazyImage
                 src="/images/we-are-lucira/7.jpg"
                 alt="Two women wearing jewelry"
                 fill
@@ -161,7 +161,7 @@ export default function WeAreLucira() {
               />
             </div>
             <div className="relative min-h-40 overflow-hidden">
-              <Image
+              <LazyImage
                 src="/images/we-are-lucira/8.jpg"
                 alt="Lucira store display"
                 fill

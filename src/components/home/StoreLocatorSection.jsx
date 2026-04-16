@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
+import LazyImage from "../common/LazyImage";
 import {
   MapPinned,
   Phone,
@@ -100,7 +100,7 @@ function ServiceCard({ item }) {
     <div className="flex flex-col items-center justify-center rounded-md bg-white px-3 py-4 text-center">
       {item.icon ? (
         <div className="relative mb-3 h-15 w-15">
-          <Image src={item.icon} alt={item.title} fill className="object-contain" />
+          <LazyImage src={item.icon} alt={item.title} fill className="object-contain" />
         </div>
       ) : null}
       <p className="text-sm font-semibold text-primary">{item.title}</p>
@@ -142,7 +142,7 @@ export default function StoreLocatorSection() {
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,42fr)_minmax(0,58fr)]">
           <div className="relative overflow-hidden rounded-sm">
             <div className="relative aspect-[4/4.3] w-full">
-              <Image
+              <LazyImage
                 src={activeStore.image}
                 alt={activeStore.name}
                 fill

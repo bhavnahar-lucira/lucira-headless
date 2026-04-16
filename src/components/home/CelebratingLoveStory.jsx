@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import LazyImage from "../common/LazyImage";
 
 const ITEMS = [
   "/images/product/1.jpg",
@@ -23,7 +23,7 @@ export default function CelebratingLoveStory() {
         <div className="columns-2 md:columns-3 lg:columns-4 gap-4 space-y-4">
           {ITEMS.map((img, index) => (
             <div key={index} className="relative overflow-hidden rounded-sm group">
-              <Image 
+              <LazyImage 
                 src={img} 
                 alt={`Love Story ${index + 1}`} 
                 width={400} 

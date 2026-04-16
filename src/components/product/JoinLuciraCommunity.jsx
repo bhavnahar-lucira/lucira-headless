@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import Image from "next/image";
+import LazyImage from "../common/LazyImage";
 
 export function JoinLuciraCommunity() {
   return (
@@ -11,7 +11,7 @@ export function JoinLuciraCommunity() {
         {/* Left Side: Images */}
         <div className="flex h-80">
           <div className="w-1/2 relative bg-[#E5E5E5]">
-            <Image
+            <LazyImage
               src="/images/subscribe-2.jpg"
               alt="Community 1"
               fill
@@ -19,7 +19,7 @@ export function JoinLuciraCommunity() {
             />
           </div>
           <div className="w-1/2 relative bg-[#F0F0F0]">
-            <Image
+            <LazyImage
               src="/images/subscribe-1.jpg"
               alt="Community 2"
               fill

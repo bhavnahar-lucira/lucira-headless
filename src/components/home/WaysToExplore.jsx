@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import Image from "next/image";
+import LazyImage from "../common/LazyImage";
 import { Button } from "@/components/ui/button";
 import VideoCallPopup from "./VideoCallPopup";
 import TryAtHomePopup from "./TryAtHomePopup";
@@ -55,7 +55,7 @@ export default function WaysToExplore() {
             {WAYS.map((way, index) => (
               <div key={index} className="flex flex-col h-full bg-white rounded-sm overflow-hidden group p-5 md:p-4 lg:p-5 shadow-sm">
                 <div className="relative aspect-[395/295] overflow-hidden rounded-sm mb-5">
-                  <Image 
+                  <LazyImage 
                     src={way.image} 
                     alt={way.title} 
                     fill 
