@@ -62,13 +62,13 @@ export default function Footer() {
                 Lucira Jewelry Guide
               </h4>
               <ul className="space-y-2.5 text-sm text-white font-figtree">
-                <li><Link href="diamond-education">Diamond Education</Link></li>
-                <li><Link href="metal-education">Metal Education</Link></li>
-                <li><Link href="size-guide-1">Size Guide</Link></li>
-                <li><Link href="how-to-wear-2">How To Wear</Link></li>
-                <li><Link href="new-tips-care">Jewelry Care Tips</Link></li>
+                <li><Link href="/pages/diamond-education">Diamond Education</Link></li>
+                <li><Link href="/pages/metal-education">Metal Education</Link></li>
+                <li><Link href="/pages/size-guide-1">Size Guide</Link></li>
+                <li><Link href="/pages/how-to-wear-2">How To Wear</Link></li>
+                <li><Link href="/pages/new-tips-care">Jewelry Care Tips</Link></li>
                 <li><Link href="#">LGD vs Mined</Link></li>
-                <li><Link href="product-passport">Product Passport</Link></li>
+                <li><Link href="/pages/product-passport">Product Passport</Link></li>
                 <li><Link href="#">Diamond Shapes</Link></li>
               </ul>
             </div>
@@ -77,15 +77,15 @@ export default function Footer() {
             <div>
               <h4 className="mb-4 text-lg font-extrabold font-abhaya">About Lucira</h4>
               <ul className="space-y-2.5 text-sm text-white font-figtree">
-                <li><Link href="about-our-company">About Our Company</Link></li>
-                <li><Link href="purpose-and-value">Purpose & Value</Link></li>
+                <li><Link href="/pages/about-our-company">About Our Company</Link></li>
+                <li><Link href="/pages/purpose-and-value">Purpose & Value</Link></li>
                 <li><Link href="#">Blogs</Link></li>
-                <li><Link href="rewards">Rewards</Link></li>
-                <li><Link href="featured-in">Featured In</Link></li>
-                <li><Link href="sitemap">Sitemap</Link></li>
-                <li><Link href="craftmanship">Craftsmanship</Link></li>
-                <li><Link href="mordern-slavery-policy">Modern Slavery Policy</Link></li>
-                <li><Link href="supplier-code-of-conduct">Supplier Code of Conduct</Link></li>
+                <li><Link href="/pages/rewards">Rewards</Link></li>
+                <li><Link href="/pages/featured-in">Featured In</Link></li>
+                <li><Link href="/pages/sitemap">Sitemap</Link></li>
+                <li><Link href="/pages/craftmanship">Craftsmanship</Link></li>
+                <li><Link href="/pages/mordern-slavery-policy">Modern Slavery Policy</Link></li>
+                <li><Link href="/pages/supplier-code-of-conduct">Supplier Code of Conduct</Link></li>
               </ul>
             </div>
 
@@ -93,17 +93,17 @@ export default function Footer() {
             <div>
               <h4 className="mb-4 text-lg font-extrabold font-abhaya">Help</h4>
               <ul className="space-y-2.5 text-sm text-white font-figtree">
-                <li><Link href="contact-us">Contact Us</Link></li>
-                <li><Link href="faqs">FAQ's</Link></li>
-                <li><Link href="reviews">Reviews</Link></li>
-                <li><Link href="15-days-return">15-Days Return</Link></li>
-                <li><Link href="cancel-refund">Cancel & Refund</Link></li>
-                <li><Link href="lifetime-exchange-buyback-policy">Lifetime Exchange & Buyback</Link></li>
-                <li><Link href="old-gold-exchange">Old Gold Exchange</Link></li>
-                <li><Link href="shipping-policy-1">Shipping Policy</Link></li>
-                <li><Link href="privacy-policy">Privacy Policy</Link></li>
+                <li><Link href="/pages/contact-us">Contact Us</Link></li>
+                <li><Link href="/pages/faqs">FAQ's</Link></li>
+                <li><Link href="/pages/reviews">Reviews</Link></li>
+                <li><Link href="/pages/15-days-return">15-Days Return</Link></li>
+                <li><Link href="/pages/cancel-refund">Cancel & Refund</Link></li>
+                <li><Link href="/pages/lifetime-exchange-buyback-policy">Lifetime Exchange & Buyback</Link></li>
+                <li><Link href="/pages/old-gold-exchange">Old Gold Exchange</Link></li>
+                <li><Link href="/pages/shipping-policy-1">Shipping Policy</Link></li>
+                <li><Link href="/pages/privacy-policy">Privacy Policy</Link></li>
                 <li><Link href="#">Offers T&C</Link></li>
-                <li><Link href="terms-condition">Terms & Conditions</Link></li>
+                <li><Link href="/pages/terms-condition">Terms & Conditions</Link></li>
               </ul>
             </div>
 
@@ -128,8 +128,8 @@ export default function Footer() {
                   Experience Lucira
                 </h5>
                 <ul className="space-y-2.5 text-sm text-white font-figtree">
-                  <li><Link href="careers">Careers</Link></li>
-                  <li><Link href="franchise-page">Franchise</Link></li>
+                  <li><Link href="/pages/careers">Careers</Link></li>
+                  <li><Link href="/pages/franchise-page">Franchise</Link></li>
                   <li><Link href="#">Bespoke</Link></li>
                   <li><Link href="store-packaging">Packaging</Link></li>
                 </ul>
@@ -166,9 +166,9 @@ export default function Footer() {
           </p>
 
           <div className="flex items-center gap-4 text-white text-base">
-            <Link href="privacy-policy">Privacy policy</Link>
+            <Link href="/pages/privacy-policy">Privacy policy</Link>
             <span>|</span>
-            <Link href="terms-condition">Terms of service</Link>
+            <Link href="/pages/terms-condition">Terms of service</Link>
             <span>|</span>
             <Link href="#">Cookie Settings</Link>
           </div>
