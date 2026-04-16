@@ -64,8 +64,8 @@ export default function CustomerDashboardLayout({ children }) {
 
   const fName = user?.first_name || user?.firstName || "";
   const lName = user?.last_name || user?.lastName || "";
-  const displayName = user ? `${fName} ${lName}`.trim() : "";
-  const userInitials = user ? `${fName?.[0] || ""}${lName?.[0] || ""}`.toUpperCase() : "LU";
+  const displayName = (user ? `${fName} ${lName}`.trim() : "") || user?.name || "";
+  const userInitials = user ? (fName && lName ? `${fName[0]}${lName[0]}` : (user.name ? user.name.split(' ').map(n => n[0]).join('').substring(0, 2) : "LU")) : "LU";
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] flex">

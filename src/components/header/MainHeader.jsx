@@ -174,11 +174,12 @@ export default function MainHeader() {
 
           {user ? (
             <div className="relative group flex items-center">
-
-              <Avatar className="cursor-pointer">
-                {user.avatar && <AvatarImage src={user.avatar} alt={user.name} />}
-                <AvatarFallback>{getInitials(user?.name)}</AvatarFallback>
-              </Avatar>
+              <Link href="/admin">
+                <Avatar className="h-9 w-9 cursor-pointer border border-gray-100 shadow-sm">
+                  {user.avatar && <AvatarImage src={user.avatar} alt={user.name} />}
+                  <AvatarFallback className="bg-gray-50 text-gray-600 font-bold text-xs">{getInitials(user?.name)}</AvatarFallback>
+                </Avatar>
+              </Link>
 
               <div className="absolute top-[calc(100%+8px)] left-1/2 -translate-x-1/2 w-64 bg-white shadow-xl rounded-lg border opacity-0 invisible translate-y-2 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 transition-all duration-200 z-50">
                 <div className="px-4 py-3 border-b">
