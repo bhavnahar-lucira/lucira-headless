@@ -10,7 +10,7 @@ export default async function BlogsPage() {
   const articles = data.articles.edges.map(e => e.node);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-10">
+    <div className="max-w-7xl mx-auto p-10">
       {/* <h1 className="text-3xl font-bold mb-8">Blogs</h1> */}
 
       <InfiniteBlogList
