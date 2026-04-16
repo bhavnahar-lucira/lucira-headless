@@ -19,7 +19,7 @@ export default function BlogCard({ article }) {
 
           {/* Meta (you can replace read time dynamically later) */}
           <p className="text-xs text-gray-500">
-            5 min read &nbsp; | &nbsp;{" "}
+            
             {new Date(article.publishedAt).toLocaleDateString("en-US", {
               month: "long",
               day: "2-digit",
