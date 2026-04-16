@@ -1,0 +1,179 @@
+import clientPromise from "@/lib/mongodb";
+import { NextResponse } from "next/server";
+import { resolveSearchMatch } from "@/lib/search";
+
+export async function GET(request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const handle = searchParams.get("handle");
+    const limit = parseInt(searchParams.get("limit") || "20");
+    const page = parseInt(searchParams.get("page") || "1");
+    const query = searchParams.get("q");
+    const sort = searchParams.get("sort") || "best_selling";
+
+    const SORT_MAP = {
+      best_selling: { "reviews.count": -1, title: 1, _id: 1 },
+      price_low_high: { price: 1, _id: 1 },
+      price_high_low: { price: -1, _id: 1 },
+      az: { title: 1, _id: 1 },
+    };
+
+    const sortConfig = SORT_MAP[sort] || SORT_MAP.best_selling;
+
+    const client = await clientPromise;
+    const db = client.db("next_local_db");
+    const productsCollection = db.collection("products");
+    const shopifyCollections = db.collection("shopify_collections");
+
+    let filter = {};
+
+    // 1. Collection filtering (if not overridden by search query or in addition to it)
+    if (handle && handle !== "all") {
+      const isRealCollection = await shopifyCollections.findOne({ handle });
+
+      if (isRealCollection || !handle.startsWith("all-")) {
+        filter.collectionHandles = handle;
+      } else {
+        const keywords = handle.replace("all-", "").split("-").map(k => k.replace(/s$/, ""));
+        const handleFilter = keywords.map(kw => {
+          return {
+            $or: [
+              { collectionHandles: { $regex: kw, $options: "i" } },
+              { type: { $regex: kw, $options: "i" } },
+              { tags: { $regex: kw, $options: "i" } },
+              { title: { $regex: kw, $options: "i" } }
+            ]
+          };
+        });
+        
+        if (filter.$and) {
+          filter.$and.push(...handleFilter);
+        } else {
+          filter.$and = handleFilter;
+        }
+      }
+    }
+
+    // 2. Definitive Field Mapping
+    const KEY_MAP = {
+      // Simple keys (current frontend)
+      "in_store_available": "variants.metafields.in_store_available",
+      "ring_size": "variants.metafields.ring_size_inventory",
+      "shop_for": "productMetafields.shop_for",
+      "weight": "productMetafields.weight",
+      "shape": "variants.metafields.diamonds.shape",
+      "gemstone_shape": "variants.metafields.gemstones.shape",
+      "carat_range": "productMetafields.carat_range",
+      "material_type": "productMetafields.material_type",
+      "product_type": "type",
+      "metal_purity": "variants.metafields.metal_purity",
+      "finishing": "productMetafields.finishing",
+      "fit": "productMetafields.fit",
+      
+      // Shopify-style keys (support both)
+      "filter.v.m.custom.in_store_available": "variants.metafields.in_store_available",
+      "filter.p.m.custom.ring_size": "variants.metafields.ring_size_inventory",
+      "filter.p.m.custom.shop_for": "productMetafields.shop_for",
+      "filter.p.m.custom.weight": "productMetafields.weight",
+      "filter.v.m.custom.shape": "variants.metafields.diamonds.shape",
+      "filter.v.m.custom.gemstone_shape": "variants.metafields.gemstones.shape",
+      "filter.p.m.custom.carat_range": "productMetafields.carat_range",
+      "filter.p.m.custom.material_type": "productMetafields.material_type",
+      "filter.p.product_type": "type",
+      "filter.v.m.custom.metal_purity": "variants.metafields.metal_purity",
+      "filter.p.m.custom.finishing": "productMetafields.finishing",
+      "filter.p.m.custom.fit": "productMetafields.fit"
+    };
+
+    const variantFilters = {};
+    const productFilters = {};
+
+    searchParams.forEach((value, key) => {
+      if (!value || key === "handle" || key === "page" || key === "limit" || key === "sort" || key === "q") return;
+      
+      let mongoKey = KEY_MAP[key];
+      
+      // Fallback dynamic mapping if not in KEY_MAP
+      if (!mongoKey) {
+        if (key.startsWith("filter.v.m.")) {
+          mongoKey = `variants.metafields.${key.split(".").slice(4).join(".")}`;
+        } else if (key.startsWith("filter.p.m.")) {
+          mongoKey = `productMetafields.${key.split(".").slice(4).join(".")}`;
+        } else if (key === "filter.p.product_type") {
+          mongoKey = "type";
+        }
+      }
+
+      if (mongoKey) {
+        if (mongoKey.startsWith("variants.")) {
+          const vKey = mongoKey.replace("variants.", "");
+          if (!variantFilters[vKey]) variantFilters[vKey] = [];
+          variantFilters[vKey].push(value);
+        } else {
+          if (!productFilters[mongoKey]) productFilters[mongoKey] = [];
+          productFilters[mongoKey].push(value);
+        }
+      }
+    });
+
+    // Apply product-level filters (including type)
+    Object.entries(productFilters).forEach(([mKey, mValues]) => {
+      const uniqueValues = [...new Set(mValues)];
+      const expandedValues = [];
+      uniqueValues.forEach(v => {
+        expandedValues.push(v);
+        expandedValues.push(JSON.stringify([v])); // Support JSON encoded strings in DB
+      });
+      filter[mKey] = { $in: expandedValues };
+    });
+
+    // Apply variant-level filters using $elemMatch to ensure all variant criteria match the same variant
+    if (Object.keys(variantFilters).length > 0) {
+      const elemMatch = {};
+      Object.entries(variantFilters).forEach(([vKey, vValues]) => {
+        const uniqueValues = [...new Set(vValues)];
+        const expandedValues = [];
+        uniqueValues.forEach(v => {
+          expandedValues.push(v);
+          expandedValues.push(JSON.stringify([v]));
+        });
+        elemMatch[vKey] = { $in: expandedValues };
+      });
+      filter.variants = { $elemMatch: elemMatch };
+    }
+
+    // Handle price range separately
+    const minPrice = searchParams.get("filter.v.price.gte");
+    const maxPrice = searchParams.get("filter.v.price.lte");
+    if (minPrice || maxPrice) {
+      filter.price = {};
+      if (minPrice) filter.price.$gte = Number(minPrice);
+      if (maxPrice) filter.price.$lte = Number(maxPrice);
+    }
+
+    const { filter: resolvedFilter } = await resolveSearchMatch(productsCollection, filter, query || "");
+
+    const products = await productsCollection
+      .find(resolvedFilter)
+      .project({
+        description: 0,
+        "reviews.list": 0,
+        productMetafields: 0,
+      })
+      .sort(sortConfig)
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .toArray();
+
+    const total = await productsCollection.countDocuments(resolvedFilter);
+
+    return NextResponse.json({
+      products,
+      pagination: { total, page, limit, totalPages: Math.ceil(total / limit) }
+    });
+
+  } catch (error) {
+    console.error("Search Error:", error);
+    return NextResponse.json({ error: "Failed to search products", message: error.message }, { status: 500 });
+  }
+}

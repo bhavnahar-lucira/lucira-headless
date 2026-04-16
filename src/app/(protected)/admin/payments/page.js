@@ -1,0 +1,133 @@
+"use client";
+
+import { CreditCard, Plus, ShieldCheck, Trash2, CheckCircle2 } from "lucide-react";
+import Image from "next/image";
+
+const savedCards = [
+  {
+    id: "card-1",
+    type: "Visa",
+    number: "**** **** **** 4242",
+    expiry: "12/28",
+    name: "AMIT JHA",
+    isDefault: true,
+    bg: "bg-gradient-to-br from-zinc-900 to-zinc-800",
+    logo: "https://upload.wikimedia.org/wikipedia/commons/d/d6/Visa_2021.svg"
+  },
+  {
+    id: "card-2",
+    type: "Mastercard",
+    number: "**** **** **** 8890",
+    expiry: "05/27",
+    name: "AMIT JHA",
+    isDefault: false,
+    bg: "bg-gradient-to-br from-blue-900 to-indigo-900",
+    logo: "https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg"
+  }
+];
+
+export default function PaymentMethodsPage() {
+  return (
+    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 className="text-3xl font-black text-zinc-900 tracking-tight mb-1">Payment Methods</h2>
+          <p className="text-zinc-500 font-medium">Securely manage your cards and digital wallets.</p>
+        </div>
+        <button className="px-6 py-3 bg-zinc-900 text-white text-xs font-black uppercase tracking-[0.2em] rounded-2xl hover:bg-zinc-800 transition-colors shadow-lg shadow-zinc-900/20 flex items-center gap-2">
+          <Plus size={16} />
+          Add New Card
+        </button>
+      </div>
+
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+        <div className="space-y-6">
+          <h3 className="text-xl font-black text-zinc-900 flex items-center gap-2">
+            Your Cards
+            <span className="px-2 py-0.5 rounded-md bg-zinc-100 text-zinc-400 text-[10px] font-black">{savedCards.length}</span>
+          </h3>
+          
+          <div className="space-y-4">
+            {savedCards.map((card) => (
+              <div key={card.id} className="bg-white rounded-[2.5rem] border border-zinc-100 p-2 shadow-sm hover:shadow-xl transition-all duration-500 group">
+                <div className="p-6 flex flex-col md:flex-row gap-6 items-center">
+                  {/* Card Visual */}
+                  <div className={`w-full md:w-64 h-40 rounded-[1.5rem] ${card.bg} p-6 text-white relative overflow-hidden shadow-2xl group-hover:scale-[1.02] transition-transform duration-500`}>
+                    <div className="absolute -right-10 -top-10 size-32 bg-white/10 rounded-full blur-2xl" />
+                    <div className="relative z-10 h-full flex flex-col justify-between">
+                      <div className="flex justify-between items-start">
+                        <div className="size-10 rounded-lg bg-white/20 backdrop-blur-md flex items-center justify-center">
+                          <CreditCard size={24} />
+                        </div>
+                        <Image src={card.logo} alt={card.type} height={16} width={48} className="h-4 w-auto brightness-0 invert opacity-80" />
+                        </div>
+                        <div>
+                        <p className="text-sm font-black tracking-[0.2em] mb-1">{card.number}</p>
+                        <div className="flex justify-between items-end">
+                          <p className="text-[10px] font-bold opacity-60 uppercase">{card.name}</p>
+                          <p className="text-[10px] font-bold opacity-60">{card.expiry}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Card Info */}
+                  <div className="flex-1 space-y-4 text-center md:text-left">
+                    <div>
+                      <div className="flex items-center justify-center md:justify-start gap-2 mb-1">
+                        <h4 className="font-bold text-zinc-900">{card.type} Ending in {card.number.split(' ').pop()}</h4>
+                        {card.isDefault && <span className="text-[8px] font-black uppercase bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-full">Default</span>}
+                      </div>
+                      <p className="text-xs text-zinc-400 font-medium">Expires {card.expiry}</p>
+                    </div>
+                    
+                    <div className="flex items-center justify-center md:justify-start gap-3">
+                      <button className="text-[10px] font-black uppercase tracking-widest text-primary hover:underline">Edit</button>
+                      <span className="size-1 bg-zinc-200 rounded-full" />
+                      <button className="text-[10px] font-black uppercase tracking-widest text-rose-500 hover:underline">Remove</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="space-y-6">
+          <h3 className="text-xl font-black text-zinc-900">Security & Privacy</h3>
+          <div className="bg-white rounded-[2.5rem] border border-zinc-100 p-8 space-y-8">
+            <div className="flex gap-6">
+              <div className="size-14 rounded-2xl bg-primary/5 flex items-center justify-center text-primary shrink-0">
+                <ShieldCheck size={28} />
+              </div>
+              <div className="space-y-2">
+                <h4 className="text-lg font-black text-zinc-900 leading-tight">PCI-DSS Compliant</h4>
+                <p className="text-sm text-zinc-500 font-medium leading-relaxed">
+                  We don't store your full card details. All transactions are encrypted and processed by our secure partners.
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Other Payment Options</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="p-4 rounded-2xl border border-zinc-100 flex items-center gap-4 hover:border-primary/20 transition-colors cursor-pointer group">
+                  <div className="size-10 rounded-xl bg-zinc-50 flex items-center justify-center group-hover:bg-primary/5 transition-colors">
+                    <Image src="https://upload.wikimedia.org/wikipedia/commons/e/e1/UPI-Logo.png" alt="UPI" height={12} width={40} className="h-3 w-auto opacity-40 group-hover:opacity-100 grayscale group-hover:grayscale-0 transition-all" />
+                  </div>
+                  <span className="text-xs font-bold text-zinc-600">UPI IDs</span>
+                </div>
+                <div className="p-4 rounded-2xl border border-zinc-100 flex items-center gap-4 hover:border-primary/20 transition-colors cursor-pointer group">
+                  <div className="size-10 rounded-xl bg-zinc-50 flex items-center justify-center group-hover:bg-primary/5 transition-colors">
+                    <Image src="https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg" alt="PayPal" height={16} width={64} className="h-4 w-auto opacity-40 group-hover:opacity-100 grayscale group-hover:grayscale-0 transition-all" />
+                  </div>
+                  <span className="text-xs font-bold text-zinc-600">PayPal</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
