@@ -39,13 +39,17 @@ const COUPON_MAP = {
   "1500_off": "GRAND1500",
 };
 
-export function OtpSpinAuth({ onSuccess, initialMobile = "" }) {
+export function OtpSpinAuth({ onSuccess, onClose, initialMobile = "" }) {
   const router = useRouter();
   const dispatch = useDispatch();
   const controls = useAnimation();
 
   const [step, setStep] = useState("login"); // login, otp, register, success
   const [mobile, setMobile] = useState(initialMobile);
+
+  useEffect(() => {
+    if (initialMobile) setMobile(initialMobile);
+  }, [initialMobile]);
   const [otp, setOtp] = useState(["", "", "", ""]);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -238,6 +242,14 @@ export function OtpSpinAuth({ onSuccess, initialMobile = "" }) {
 
   return (
     <div className={`otp-spin-auth-wrapper ${step === "register" ? "signup-active" : ""}`}>
+      <button 
+        className="absolute top-4 right-4 text-gray-400 hover:text-black z-[20]" 
+        onClick={onClose || onSuccess}
+        aria-label="Close"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+
       {step === "register" && (
         <div className="spin-wheel-wrapper">
           <div className="wheel-container">

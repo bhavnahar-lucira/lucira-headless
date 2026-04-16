@@ -12,7 +12,7 @@ export function AuthDialog({ open, onOpenChange }) {
       open={open}
       onOpenChange={onOpenChange}
     >
-      <DialogContent className="max-w-[fit-content] p-0 border-none bg-transparent">
+      <DialogContent className="max-w-none w-auto p-0 border-none bg-transparent shadow-none">
         <OtpSpinAuth onSuccess={() => onOpenChange(false)} />
       </DialogContent>
     </Dialog>
