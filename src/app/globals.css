@@ -420,3 +420,12 @@
   }
 }
 /*swiper*/
+
+@layer components {
+  .footer-pages h2 {
+    @apply text-2xl mb-4
+  }
+  .footer-pages p {
+    @apply text-base my-4
+  }
+}
