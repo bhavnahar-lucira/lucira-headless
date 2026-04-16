@@ -1,7 +1,7 @@
 "use client";
 
 import { X, ChevronLeft, ChevronRight, Play } from "lucide-react";
-import Image from "next/image";
+import LazyImage from "../common/LazyImage";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules";
 import "swiper/css";
@@ -88,7 +88,7 @@ export default function VideoPopup({ isOpen, onClose, videoData, initialIndex })
                         {item.products && item.products.map((product, pIdx) => (
                         <div key={pIdx} className="flex items-center gap-6 pb-6 border-b border-gray-100 last:border-0 last:pb-0">
                             <div className="w-24 h-24 bg-gray-50 rounded-lg overflow-hidden flex-shrink-0 border border-gray-100 relative">
-                            <Image 
+                            <LazyImage 
                                 src={product.image} 
                                 alt={product.title} 
                                 fill

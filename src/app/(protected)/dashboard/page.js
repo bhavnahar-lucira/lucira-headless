@@ -3,19 +3,22 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import ProductTable from "./ProductTable";
-import { RefreshCw, LayoutDashboard, Store, MessageSquare } from "lucide-react";
+import { RefreshCw, LayoutDashboard, Store, MessageSquare, Menu } from "lucide-react";
 
 export default function Dashboard() {
   const [syncing, setSyncing] = useState(false);
-  const [syncType, setSyncType] = useState(""); // "products" or "reviews"
+  const [syncType, setSyncType] = useState(""); // "products", "reviews", or "menu"
   const [status, setStatus] = useState("");
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState(null);
   const [shopifyTotal, setShopifyTotal] = useState(0);
   
   const [products, setProducts] = useState([]);
+  const [menus, setMenus] = useState([]);
+  const [selectedMenu, setSelectedMenu] = useState(null);
   const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0, totalPages: 0 });
   const [loadingProducts, setLoadingProducts] = useState(true);
+  const [loadingMenus, setLoadingMenus] = useState(true);
 
   // Fetch count of products available on Shopify
   const fetchShopifyCount = async () => {
@@ -25,6 +28,20 @@ export default function Dashboard() {
       setShopifyTotal(data.count || 0);
     } catch (e) {
       console.error("Failed to fetch Shopify count", e);
+    }
+  };
+
+  // Fetch menus from our MongoDB
+  const fetchMenus = async () => {
+    setLoadingMenus(true);
+    try {
+      const res = await fetch("/api/menus");
+      const data = await res.json();
+      setMenus(data.menus || []);
+    } catch (e) {
+      console.error("Failed to fetch menus", e);
+    } finally {
+      setLoadingMenus(false);
     }
   };
 
@@ -46,6 +63,7 @@ export default function Dashboard() {
   useEffect(() => {
     fetchShopifyCount();
     fetchLocalProducts();
+    fetchMenus();
   }, [fetchLocalProducts]);
 
   const startSync = async (type = "products") => {
@@ -54,6 +72,25 @@ export default function Dashboard() {
     setStatus(`Initiating ${type} sync...`);
     setProgress(0);
     setError(null);
+
+    if (type === "menu") {
+      try {
+        const response = await fetch("/api/sync-menu", { method: "POST" });
+        const data = await response.json();
+        if (data.success) {
+          setStatus(data.message);
+          setProgress(100);
+          fetchMenus(); // Refresh menus list
+          setTimeout(() => setSyncing(false), 2000);
+        } else {
+          throw new Error(data.error || "Failed to sync menu");
+        }
+      } catch (err) {
+        setError(err.message);
+        setSyncing(false);
+      }
+      return;
+    }
 
     const apiPath = type === "products" ? "/api/sync-shopify" : "/api/sync-reviews";
 
@@ -113,6 +150,15 @@ export default function Dashboard() {
           </div>
           
           <div className="flex items-center gap-4">
+            <button 
+              onClick={() => startSync("menu")} 
+              disabled={syncing}
+              className={`flex items-center gap-2 bg-white dark:bg-zinc-900 px-6 py-2 rounded-xl border border-zinc-200 dark:border-zinc-800 shadow-sm font-bold text-sm uppercase tracking-widest hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors ${syncing ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
+              <Menu size={18} className="text-zinc-400" />
+              Sync Menu
+            </button>
+
             <button 
               onClick={() => startSync("reviews")} 
               disabled={syncing}
@@ -184,7 +230,106 @@ export default function Dashboard() {
           </div>
         </div>
 
+        {/* Menus Section */}
+        <div className="bg-white dark:bg-zinc-950 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm overflow-hidden">
+          <div className="p-6 border-b border-zinc-100 dark:border-zinc-800 flex items-center justify-between">
+            <h2 className="text-xl font-bold">Synced Menus</h2>
+            {loadingMenus && <span className="text-xs text-zinc-500 animate-pulse">Loading menus...</span>}
+          </div>
+          
+          <div className="p-6">
+            {menus.length === 0 && !loadingMenus ? (
+              <p className="text-zinc-500 text-center py-10">No menus synced yet. Click "Sync Menu" to start.</p>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {menus.map((menu) => (
+                  <div 
+                    key={menu.id} 
+                    onClick={() => setSelectedMenu(menu)}
+                    className="bg-zinc-50 dark:bg-zinc-900/50 p-5 rounded-xl border border-zinc-200 dark:border-zinc-800 space-y-3 cursor-pointer hover:border-zinc-400 dark:hover:border-zinc-600 transition-colors group"
+                  >
+                    <div className="flex justify-between items-start">
+                      <h3 className="font-bold text-lg group-hover:text-black dark:group-hover:text-white">{menu.title}</h3>
+                      <span className="text-xs font-mono bg-zinc-200 dark:bg-zinc-800 px-2 py-1 rounded text-zinc-600 dark:text-zinc-400">
+                        {menu.handle}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-zinc-500">
+                      <Menu size={14} />
+                      <span>{menu.items?.length || 0} top-level items</span>
+                    </div>
+                    <div className="pt-2 text-[10px] text-zinc-400 uppercase tracking-widest flex justify-between">
+                      <span>Last Synced</span>
+                      <span>{new Date(menu.updatedAt).toLocaleString()}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
       </div>
+
+      {/* Menu Details Modal */}
+      {selectedMenu && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="bg-white dark:bg-zinc-900 w-full max-w-4xl max-h-[90vh] rounded-2xl shadow-2xl overflow-hidden flex flex-col">
+            <div className="p-6 border-b border-zinc-200 dark:border-zinc-800 flex justify-between items-center">
+              <div>
+                <h2 className="text-2xl font-bold">{selectedMenu.title}</h2>
+                <p className="text-sm text-zinc-500 font-mono">{selectedMenu.handle}</p>
+              </div>
+              <button 
+                onClick={() => setSelectedMenu(null)}
+                className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-full transition-colors"
+              >
+                <RefreshCw size={20} className="rotate-45" />
+              </button>
+            </div>
+            
+            <div className="flex-1 overflow-y-auto p-6 space-y-4">
+              <MenuTree items={selectedMenu.items} />
+            </div>
+            
+            <div className="p-4 border-t border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50 flex justify-end">
+              <button 
+                onClick={() => setSelectedMenu(null)}
+                className="px-6 py-2 bg-zinc-900 text-white dark:bg-white dark:text-black rounded-lg font-bold text-sm"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function MenuTree({ items, level = 0 }) {
+  if (!items || items.length === 0) return null;
+
+  return (
+    <div className={`space-y-2 ${level > 0 ? "ml-6 border-l border-zinc-200 dark:border-zinc-800 pl-4" : ""}`}>
+      {items.map((item) => (
+        <div key={item.id} className="group">
+          <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors">
+            <span className="text-sm font-medium">{item.title}</span>
+            {item.type && (
+              <span className="text-[10px] px-1.5 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-500 uppercase font-bold">
+                {item.type}
+              </span>
+            )}
+            {item.resource?.metafields?.nodes?.length > 0 && (
+              <span className="text-[10px] text-green-600 dark:text-green-500 font-bold italic">
+                +{item.resource.metafields.nodes.length} metafields
+              </span>
+            )}
+          </div>
+          {item.items && <MenuTree items={item.items} level={level + 1} />}
+        </div>
+      ))}
     </div>
   );
 }

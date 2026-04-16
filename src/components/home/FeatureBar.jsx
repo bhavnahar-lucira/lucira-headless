@@ -1,4 +1,4 @@
-import Image from "next/image";
+import LazyImage from "../common/LazyImage";
 import { Truck, RefreshCcw, Gem } from "lucide-react";
 
 const moneyBack = "/images/icons/money-back.svg";
@@ -40,7 +40,7 @@ export default function FeatureBar() {
                 {Icon && <Icon size={26} strokeWidth={1.5} />}
 
                 {item.image && (
-                  <Image
+                  <LazyImage
                     src={item.image}
                     alt={item.text}
                     width={26}

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
+import LazyImage from "../common/LazyImage";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
@@ -51,7 +51,7 @@ export default function ShopByShape() {
               className="flex flex-col items-center gap-4 group"
             >
               <div className="w-20 h-20 relative flex items-center justify-center grayscale opacity-60 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-500">
-                <Image 
+                <LazyImage 
                   src={shape.icon} 
                   alt={shape.name} 
                   width={60} 

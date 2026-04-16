@@ -1,6 +1,6 @@
-import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import LazyImage from "../common/LazyImage";
 
 const CATEGORIES = [
   { name: "Rings", image: "/images/range/1.jpg", href: "/collections/rings" },
@@ -29,7 +29,7 @@ export default function ExploreRange() {
               href={cat.href}
               className="group relative aspect-313/362 overflow-hidden rounded-sm bg-gray-100"
             >
-              <Image 
+              <LazyImage 
                 src={cat.image} 
                 alt={cat.name} 
                 fill 

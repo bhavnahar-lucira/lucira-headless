@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import FilterSkeleton from "./FilterSkeleton";
+import LazyImage from "../common/LazyImage";
 
 const CATEGORIES = [
   { label: "All", slug: "all" },
@@ -216,7 +216,7 @@ export default function ShopByCategory() {
                     className="flex flex-col border border-transparent items-center gap-2 p-4 rounded-md hover:bg-secondary transition hover:border-primary hover:cursor-pointer"
                   >
                     <div className="relative w-14 h-14">
-                      <Image
+                      <LazyImage
                         src={item.img}
                         alt={item.label}
                         fill

@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Play, Instagram } from "lucide-react";
@@ -8,25 +7,19 @@ import { useState, useEffect } from "react";
 import InstaPopup from "./InstaPopup";
 import "swiper/css";
 
-function InstaSlide({ item, onClick, idx }) {
-  const [isLoaded, setIsLoaded] = useState(false);
+import LazyImage from "../common/LazyImage";
 
+function InstaSlide({ item, onClick, idx }) {
   return (
     <div 
       onClick={onClick}
       className="relative aspect-[4/5] w-full overflow-hidden rounded-2xl group cursor-pointer shadow-[0_10px_40px_-15px_rgba(0,0,0,0.1)] bg-gray-50 border border-gray-100"
     >
-      {!isLoaded && (
-        <div className="absolute inset-0 flex items-center justify-center z-[5]">
-          <Image src="/images/loader.gif" alt="Loading..." width={48} height={48} className="object-contain" />
-        </div>
-      )}
-      <Image
+      <LazyImage
         src={item.image}
         alt={`Instagram Feed ${item.id}`}
         fill
-        onLoad={() => setIsLoaded(true)}
-        className={`object-cover transition-all duration-1000 group-hover:scale-110 group-hover:rotate-1 ${isLoaded ? "opacity-100" : "opacity-0"}`}
+        className={`object-cover transition-all duration-1000 group-hover:scale-110 group-hover:rotate-1`}
       />
       
       {/* Overlay */}

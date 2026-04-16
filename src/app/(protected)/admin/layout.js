@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
   ShoppingBag,
@@ -18,6 +18,8 @@ import {
   MapPin,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { useDispatch, useSelector } from "react-redux";
+import { logout, selectUser } from "@/redux/features/user/userSlice";
 
 const sidebarLinks = [
   { name: "My Overview", href: "/admin", icon: LayoutDashboard, color: "text-blue-500", bg: "bg-blue-500/10" },
@@ -30,6 +32,9 @@ const sidebarLinks = [
 
 export default function CustomerDashboardLayout({ children }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const dispatch = useDispatch();
+  const user = useSelector(selectUser);
   const [avatar, setAvatar] = useState(null);
 
   useEffect(() => {
@@ -46,6 +51,21 @@ export default function CustomerDashboardLayout({ children }) {
     }
     fetchAvatar();
   }, [pathname]); // Refresh on navigation just in case
+
+  const handleSignOut = async () => {
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+      dispatch(logout());
+      router.push("/login");
+    } catch (err) {
+      console.error("Logout failed", err);
+    }
+  };
+
+  const fName = user?.first_name || user?.firstName || "";
+  const lName = user?.last_name || user?.lastName || "";
+  const displayName = (user ? `${fName} ${lName}`.trim() : "") || user?.name || "";
+  const userInitials = user ? (fName && lName ? `${fName[0]}${lName[0]}` : (user.name ? user.name.split(' ').map(n => n[0]).join('').substring(0, 2) : "LU")) : "LU";
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] flex">
@@ -97,7 +117,10 @@ export default function CustomerDashboardLayout({ children }) {
             </div>
             <p className="text-[10px] text-zinc-500 mt-2 font-medium">250 points to Diamond tier</p>
           </div>
-          <button className="w-full flex items-center gap-3 px-4 py-3 text-red-600 text-sm font-bold hover:bg-red-50 rounded-xl transition-colors">
+          <button 
+            onClick={handleSignOut}
+            className="w-full flex items-center gap-3 px-4 py-3 text-red-600 text-sm font-bold hover:bg-red-50 rounded-xl transition-colors cursor-pointer"
+          >
             <LogOut size={18} />
             Sign Out
           </button>
@@ -110,7 +133,7 @@ export default function CustomerDashboardLayout({ children }) {
         <header className="h-20 bg-white/80 backdrop-blur-md border-b border-zinc-200 sticky top-0 z-40 flex items-center justify-between px-8">
           <div>
             <h2 className="text-sm font-bold text-zinc-400">Welcome back,</h2>
-            <p className="text-lg font-black text-zinc-900 leading-none">Amit Jha</p>
+            <p className="text-lg font-black text-zinc-900 leading-none">{displayName || "User"}</p>
           </div>
           
           <div className="flex items-center gap-6">
@@ -131,7 +154,7 @@ export default function CustomerDashboardLayout({ children }) {
                 {avatar ? (
                   <Image src={avatar} alt="User Avatar" fill className="object-cover" />
                 ) : (
-                  "AJ"
+                  userInitials
                 )}
               </div>
             </Link>

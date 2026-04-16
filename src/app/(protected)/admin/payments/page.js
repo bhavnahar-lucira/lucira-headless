@@ -2,6 +2,8 @@
 
 import { CreditCard, Plus, ShieldCheck, Trash2, CheckCircle2 } from "lucide-react";
 import Image from "next/image";
+import { useSelector } from "react-redux";
+import { selectUser } from "@/redux/features/user/userSlice";
 
 const savedCards = [
   {
@@ -9,7 +11,6 @@ const savedCards = [
     type: "Visa",
     number: "**** **** **** 4242",
     expiry: "12/28",
-    name: "AMIT JHA",
     isDefault: true,
     bg: "bg-gradient-to-br from-zinc-900 to-zinc-800",
     logo: "https://upload.wikimedia.org/wikipedia/commons/d/d6/Visa_2021.svg"
@@ -19,7 +20,6 @@ const savedCards = [
     type: "Mastercard",
     number: "**** **** **** 8890",
     expiry: "05/27",
-    name: "AMIT JHA",
     isDefault: false,
     bg: "bg-gradient-to-br from-blue-900 to-indigo-900",
     logo: "https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg"
@@ -27,6 +27,11 @@ const savedCards = [
 ];
 
 export default function PaymentMethodsPage() {
+  const user = useSelector(selectUser);
+  const fName = user?.first_name || user?.firstName || "";
+  const lName = user?.last_name || user?.lastName || "";
+  const fullName = `${fName} ${lName}`.toUpperCase().trim() || "VALUED CUSTOMER";
+
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -64,7 +69,7 @@ export default function PaymentMethodsPage() {
                         <div>
                         <p className="text-sm font-black tracking-[0.2em] mb-1">{card.number}</p>
                         <div className="flex justify-between items-end">
-                          <p className="text-[10px] font-bold opacity-60 uppercase">{card.name}</p>
+                          <p className="text-[10px] font-bold opacity-60 uppercase">{fullName}</p>
                           <p className="text-[10px] font-bold opacity-60">{card.expiry}</p>
                         </div>
                       </div>
@@ -100,30 +105,26 @@ export default function PaymentMethodsPage() {
               <div className="size-14 rounded-2xl bg-primary/5 flex items-center justify-center text-primary shrink-0">
                 <ShieldCheck size={28} />
               </div>
-              <div className="space-y-2">
-                <h4 className="text-lg font-black text-zinc-900 leading-tight">PCI-DSS Compliant</h4>
-                <p className="text-sm text-zinc-500 font-medium leading-relaxed">
-                  We don't store your full card details. All transactions are encrypted and processed by our secure partners.
-                </p>
+              <div className="space-y-1">
+                <h4 className="font-bold text-zinc-900">PCI DSS Compliant</h4>
+                <p className="text-sm text-zinc-500 font-medium leading-relaxed">Your payment information is processed through highly secure, encrypted channels ensuring maximum safety.</p>
               </div>
             </div>
 
-            <div className="space-y-4">
-              <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Other Payment Options</p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="p-4 rounded-2xl border border-zinc-100 flex items-center gap-4 hover:border-primary/20 transition-colors cursor-pointer group">
-                  <div className="size-10 rounded-xl bg-zinc-50 flex items-center justify-center group-hover:bg-primary/5 transition-colors">
-                    <Image src="https://upload.wikimedia.org/wikipedia/commons/e/e1/UPI-Logo.png" alt="UPI" height={12} width={40} className="h-3 w-auto opacity-40 group-hover:opacity-100 grayscale group-hover:grayscale-0 transition-all" />
-                  </div>
-                  <span className="text-xs font-bold text-zinc-600">UPI IDs</span>
-                </div>
-                <div className="p-4 rounded-2xl border border-zinc-100 flex items-center gap-4 hover:border-primary/20 transition-colors cursor-pointer group">
-                  <div className="size-10 rounded-xl bg-zinc-50 flex items-center justify-center group-hover:bg-primary/5 transition-colors">
-                    <Image src="https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg" alt="PayPal" height={16} width={64} className="h-4 w-auto opacity-40 group-hover:opacity-100 grayscale group-hover:grayscale-0 transition-all" />
-                  </div>
-                  <span className="text-xs font-bold text-zinc-600">PayPal</span>
-                </div>
+            <div className="flex gap-6">
+              <div className="size-14 rounded-2xl bg-emerald-500/5 flex items-center justify-center text-emerald-600 shrink-0">
+                <CheckCircle2 size={28} />
               </div>
+              <div className="space-y-1">
+                <h4 className="font-bold text-zinc-900">Verified Transactions</h4>
+                <p className="text-sm text-zinc-500 font-medium leading-relaxed">Every transaction is monitored and verified for authenticity to protect you against fraud.</p>
+              </div>
+            </div>
+
+            <div className="pt-4">
+              <button className="w-full py-4 border-2 border-zinc-100 rounded-2xl text-xs font-black uppercase tracking-[0.2em] text-zinc-400 hover:bg-zinc-50 hover:text-zinc-900 transition-all">
+                Manage Security Settings
+              </button>
             </div>
           </div>
         </div>

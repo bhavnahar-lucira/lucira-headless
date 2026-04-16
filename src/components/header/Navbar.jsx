@@ -5,14 +5,18 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { MEGA_MENU } from "@/data/megaMenu";
+import { MEGA_MENU as STATIC_MENU } from "@/data/megaMenu";
 import { ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useMenu } from "@/hooks/useMenu";
 
 export default function Navbar({ hideTop }) {
+  const { menuData, loading } = useMenu("main-menu-official");
   const [activeMenu, setActiveMenu] = useState(null);
   const pathname = usePathname();
   const timeoutRef = useRef(null);
+
+  const MEGA_MENU = menuData || STATIC_MENU;
 
   const handleEnter = (index) => {
     clearTimeout(timeoutRef.current);
@@ -117,14 +121,15 @@ export default function Navbar({ hideTop }) {
             {(() => {
               const menu = MEGA_MENU[activeMenu];
 
-              /* ===== IMAGE GRID ===== */
-              if (menu.type === "image-grid") {
+              /* ===== IMAGE GRID (Alternative View) ===== */
+              if (menu.type === "image-grid" || (menu.columns?.length === 0 && menu.cards?.length > 0)) {
+                const items = menu.items || menu.cards;
                 return (
                   <div className="grid grid-cols-4 gap-6">
-                    {menu.items.map((item, i) => (
+                    {items.map((item, i) => (
                       <Link
                         key={i}
-                        href={item.href}
+                        href={item.href || "#"}
                         onClick={closeMenu}
                         className="group relative block overflow-hidden rounded-md"
                       >
@@ -136,8 +141,6 @@ export default function Navbar({ hideTop }) {
                             fill
                             className="object-cover transition duration-500 group-hover:scale-105"
                           />
-
-                          {/* GRADIENT */}
                           <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/20 to-transparent" />
                         </div>
 
@@ -147,19 +150,13 @@ export default function Navbar({ hideTop }) {
                             {item.title}
                           </p>
                           <p className="text-xs mt-1 opacity-90 line-clamp-2">
-                            {item.description}
+                            {item.subtitle || item.description}
                           </p>
                         </div>
 
-                        {/* ARROW BUTTON */}
                         <div className="absolute bottom-4 right-4">
                           <div className="flex h-10 w-10 items-center justify-center rounded-full border border-white bg-transparent text-white transition-all duration-300 group-hover:bg-white group-hover:text-black">
-
-                            <ArrowRight
-                              size={18}
-                              className="transition-transform duration-300 group-hover:translate-x-0.5"
-                            />
-
+                            <ArrowRight size={18} className="transition-transform duration-300 group-hover:translate-x-0.5" />
                           </div>
                         </div>
                       </Link>
@@ -169,154 +166,96 @@ export default function Navbar({ hideTop }) {
               }
 
               const isFiveCol = menu.layout === "5-col-featured";
-              const isThreeCol = menu.layout === "3-col";
-              const isFourNoFeatured = menu.layout === "4-col-no-featured";
-
+              
+              /* ===== DYNAMIC COLUMNS + CARDS (MEGA) ===== */
               return (
-                <div className="flex items-start justify-between gap-12">
+                <div className="w-full">
+                    <div className={cn(
+                        "grid gap-x-8",
+                        menu.featured ? "grid-cols-6" : (menu.cards?.length > 0 ? "grid-cols-5" : `grid-cols-${Math.min(menu.columns?.length || 1, 5)}`)
+                    )}>
 
-                  {/* LEFT CONTENT */}
-                  <div className="flex-1">
+                        {/* 1. FEATURED (Conditional) */}
+                        {menu.featured && (
+                          <div className="pr-8 border-r border-zinc-100">
+                            <h4 className="mb-6 text-sm font-bold uppercase tracking-[0.1em] text-black">
+                              {menu.featured.title}
+                            </h4>
+                            <ul className="space-y-4 text-[13px] font-medium text-zinc-500">
+                              {menu.featured.items?.map((item, i) => (
+                                <li key={i} className="hover:text-black transition-colors">
+                                  <Link href={item.href || "#"} onClick={closeMenu}>
+                                    {item.label}
+                                  </Link>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
 
-                    {/* ===== 5 COL FEATURED ===== */}
-                    {isFiveCol && (
-                      <div className="grid grid-cols-[180px_repeat(4,minmax(0,1fr))] gap-10">
-
-                        {/* FEATURED */}
-                        <div className="pr-6 border-r border-gray-200">
-                          <h4 className="mb-3 text-lg font-semibold">Featured</h4>
-                          <ul className="space-y-3 text-base text-gray-600">
-                            {menu.featured?.map((item, i) => (
-                              <li key={i}>
-                                <Link href={item.href || "#"} onClick={closeMenu}>
-                                  {item.label}
-                                </Link>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-
-                        {/* COLUMNS */}
+                        {/* 2. TEXT COLUMNS */}
                         {menu.columns?.map((col, i) => (
                           <div key={i}>
-                            <h4 className="mb-3 text-lg font-semibold">{col.title}</h4>
-
-                            <ul className="space-y-3 text-base text-gray-600">
+                            <h4 className="mb-6 text-sm font-bold uppercase tracking-[0.1em] text-black whitespace-nowrap">{col.title}</h4>
+                            <ul className="space-y-4 text-[13px] font-medium text-zinc-500">
                               {col.items.map((item, j) => (
-                                <li key={j}>
-                                  <Link
-                                    href={item.href || "#"}
-                                    onClick={closeMenu}
-                                    className="flex items-center gap-2 hover:text-black transition"
-                                  >
-                                    {/*icon disabled for sometime */}
-                                    {/* {col.type === "icon" && item.icon && (
-                                      <div className="relative h-4 w-4 shrink-0">
-                                        <Image
-                                          src={item.icon}
-                                          alt={item.label}
-                                          fill
-                                          className="object-contain"
-                                        />
-                                      </div>
-                                    )} */}
+                                <li key={j} className="hover:text-black transition-colors">
+                                  <Link href={item.href || "#"} onClick={closeMenu} className="flex items-center gap-3">
+                                    {col.type === "metal" ? (
+                                      <span className="w-4 h-4 rounded-full border border-zinc-200" style={{ 
+                                          background: item.label.toLowerCase().includes("yellow") ? "linear-gradient(135deg, #E2C07E 0%, #D4AF37 100%)" :
+                                                     item.label.toLowerCase().includes("rose") ? "linear-gradient(135deg, #E9B4AB 0%, #C48D82 100%)" :
+                                                     item.label.toLowerCase().includes("white") ? "#E5E4E2" :
+                                                     item.label.toLowerCase().includes("silver") ? "#C0C0C0" :
+                                                     item.label.toLowerCase().includes("platinum") ? "#E5E4E2" : "#ddd"
+                                      }} />
+                                    ) : (
+                                      item.svgSprite ? (
+                                        <span className="w-4.5 h-4.5 shrink-0 grayscale group-hover:grayscale-0 transition-all flex items-center justify-center [&_svg]:w-full [&_svg]:h-full" dangerouslySetInnerHTML={{ __html: item.svgSprite }} />
+                                      ) : (item.megaMenuImage || (col.type === "icon" && item.icon)) ? (
+                                        <div className="relative h-4.5 w-4.5 shrink-0 grayscale group-hover:grayscale-0 transition-all">
+                                          <Image src={item.megaMenuImage || item.icon} alt={item.label} fill className="object-contain" />
+                                        </div>
+                                      ) : null
+                                    )}
                                     <span>{item.label}</span>
                                   </Link>
                                 </li>
                               ))}
+                              <li className="pt-2">
+                                <Link href={menu.href || "#"} onClick={closeMenu} className="text-[11px] font-bold uppercase tracking-widest text-zinc-400 hover:text-black transition-colors">
+                                  {col.title.toLowerCase().includes("price") ? "Shop All Price Range" : 
+                                   col.title.toLowerCase().includes("metal") || col.title.toLowerCase().includes("material") ? "Shop All Metal" :
+                                   col.title.toLowerCase().includes("shape") ? "Shop All Shapes" :
+                                   col.title.toLowerCase().includes("style") ? "Shop All Styles" :
+                                   col.title.replace("Shop By", "Shop All")}
+                                </Link>
+                              </li>
                             </ul>
                           </div>
                         ))}
-                      </div>
-                    )}
 
-                    {/* ===== 3 COL ===== */}
-                    {isThreeCol && (
-                      <div className="grid grid-cols-3 gap-10">
-                        {menu.columns?.map((col, i) => (
-                          <div key={i}>
-                            <h4 className="mb-3 text-lg font-semibold">{col.title}</h4>
-
-                            <ul className="space-y-3 text-base text-gray-600">
-                              {col.items.map((item, j) => (
-                                <li key={j}>
-                                  <Link href={item.href || "#"} onClick={closeMenu}>
-                                    {item.label}
-                                  </Link>
-                                </li>
-                              ))}
-                            </ul>
+                        {/* 3. CARDS / BANNERS (The right-hand visuals) */}
+                        {menu.cards?.map((card, i) => (
+                          <div key={i} className="col-span-1">
+                            <Link href={card.href || "#"} onClick={closeMenu} className="group relative block">
+                              <div className="relative aspect-[5/5.5] overflow-hidden rounded-md">
+                                <Image src={card.image} alt={card.title} fill className="object-cover" />
+                                <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/20 to-transparent" />
+                              </div>
+                              <div className="absolute bottom-4 left-4 text-white">
+                                <p className="text-lg font-semibold">{card.title}</p>
+                                <p className="text-sm opacity-90">{card.subtitle}</p>
+                              </div>
+                              <div className="absolute bottom-4 right-4">
+                                <div className="flex h-10 w-10 items-center justify-center rounded-full border border-white bg-transparent text-white transition-all duration-300 group-hover:bg-white group-hover:text-black">
+                                  <ArrowRight size={18} className="transition-transform duration-300 group-hover:translate-x-0.5" />
+                                </div>
+                              </div>
+                            </Link>
                           </div>
                         ))}
-                      </div>
-                    )}
-
-                    {/* ===== 4 COL ===== */}
-                    {isFourNoFeatured && (
-                      <div className="grid grid-cols-4 gap-10">
-                        {menu.columns?.map((col, i) => (
-                          <div key={i}>
-                            <h4 className="mb-3 text-lg font-semibold">{col.title}</h4>
-
-                            <ul className="space-y-3 text-base text-gray-600">
-                              {col.items.map((item, j) => (
-                                <li key={j}>
-                                  <Link href={item.href || "#"} onClick={closeMenu}>
-                                    {item.label}
-                                  </Link>
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-
-                  </div>
-
-                  {/* RIGHT IMAGE (FIXED RIGHT) */}
-                  {menu.banner && (
-                    <div className="w-86.25 shrink-0">
-                      <Link href={menu.banner.href || "#"} onClick={closeMenu} className="group relative block">
-                        {/* IMAGE */}
-                        <div className="relative aspect-5/6 overflow-hidden rounded-md">
-                          <Image
-                            src={menu.banner.image}
-                            alt={menu.banner.title}
-                            fill
-                            className="object-cover"
-                          />
-
-                          {/* GRADIENT OVERLAY */}
-                          <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/20 to-transparent" />
-                        </div>
-
-                        {/* TEXT */}
-                        <div className="absolute bottom-4 left-4 text-white">
-                          <p className="text-lg font-semibold">
-                            {menu.banner.title}
-                          </p>
-                          <p className="text-sm opacity-90">
-                            {menu.banner.subtitle}
-                          </p>
-                        </div>
-
-                        {/* ARROW BUTTON */}
-                        <div className="absolute bottom-4 right-4">
-                          <div className="flex h-10 w-10 items-center justify-center rounded-full border border-white bg-transparent text-white transition-all duration-300 group-hover:bg-white group-hover:text-black">
-
-                            <ArrowRight
-                              size={18}
-                              className="transition-transform duration-300 group-hover:translate-x-0.5"
-                            />
-
-                          </div>
-                        </div>
-
-                      </Link>
                     </div>
-                  )}
-
                 </div>
               );
             })()}

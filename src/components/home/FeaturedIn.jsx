@@ -1,7 +1,7 @@
 "use client";
 
-import Image from "next/image";
 import Marquee from "react-fast-marquee";
+import LazyImage from "../common/LazyImage";
 
 export default function FeaturedIn() {
 
@@ -46,7 +46,7 @@ export default function FeaturedIn() {
             <div className="flex items-center gap-16 px-8">
 
               {logos.map((logo, index) => (
-                <Image
+                <LazyImage
                   key={index}
                   src={logo}
                   alt="media logo"
@@ -59,7 +59,7 @@ export default function FeaturedIn() {
               {/* duplicate for seamless loop */}
 
               {logos.map((logo, index) => (
-                <Image
+                <LazyImage
                   key={`dup-${index}`}
                   src={logo}
                   alt="media logo duplicate"

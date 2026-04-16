@@ -1,8 +1,8 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import LazyImage from "../common/LazyImage";
 
 const OCCASIONS = [
   {
@@ -187,7 +187,7 @@ export default function CuratedLooks() {
               className="relative aspect-3/4 overflow-visible rounded-sm bg-gray-100"
             >
               <Link href={occ.href} className="block h-full w-full">
-                <Image
+                <LazyImage
                   src={occ.image}
                   alt={occ.name}
                   fill
@@ -234,7 +234,7 @@ export default function CuratedLooks() {
                             className="flex items-center gap-3"
                           >
                             <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-md bg-white">
-                              <Image
+                              <LazyImage
                                 src={spot.product.image}
                                 alt={spot.product.name}
                                 fill

@@ -1,8 +1,8 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import LazyImage from "../common/LazyImage";
 
 const OCCASIONS = [
   { name: "Spark", label:"0.25 ct – 0.40 ct", image: "/images/solitaire/Spark.jpg", href: "/collections/spark" },
@@ -28,7 +28,7 @@ export default function EveryoneYouLove() {
               href={occ.href}
               className="relative aspect-3/4 overflow-hidden group bg-gray-100 rounded-sm"
             >
-              <Image 
+              <LazyImage 
                 src={occ.image} 
                 alt={occ.name} 
                 fill 

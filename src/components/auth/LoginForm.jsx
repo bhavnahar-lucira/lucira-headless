@@ -42,6 +42,8 @@ export function LoginForm({ onSuccess, initialMobile = "" }) {
       login({
         id: userId,
         mobile,
+        first_name: data.user?.first_name,
+        last_name: data.user?.last_name,
         name:
           data.user?.first_name && data.user?.last_name
             ? `${data.user.first_name} ${data.user.last_name}`

@@ -1,7 +1,7 @@
 "use client";
 
 import { X, ChevronLeft, ChevronRight, Instagram } from "lucide-react";
-import Image from "next/image";
+import LazyImage from "../common/LazyImage";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -74,7 +74,7 @@ export default function InstaPopup({ isOpen, onClose, data, activeIndex, onIndex
                 />
             ) : (
                 <div className="relative w-full h-full">
-                    <Image
+                    <LazyImage
                         src={item.image}
                         alt="Instagram Media"
                         fill
@@ -93,7 +93,7 @@ export default function InstaPopup({ isOpen, onClose, data, activeIndex, onIndex
               <div className="flex items-center gap-4">
                 <div className="w-14 h-14 rounded-full bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-600 p-0.5 shadow-md">
                     <div className="w-full h-full rounded-full border-2 border-white overflow-hidden relative">
-                        <Image src="/public/images/icons/small-logo.svg" alt="Lucira" fill className="object-cover bg-black p-2" />
+                        <LazyImage src="/images/icons/small-logo.svg" alt="Lucira" fill className="object-cover bg-black p-2" />
                     </div>
                 </div>
                 <div>

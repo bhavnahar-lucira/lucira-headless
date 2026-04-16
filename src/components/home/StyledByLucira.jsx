@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules";
 import StyledVideoCard from "./StyledCard";
@@ -167,22 +167,6 @@ export default function StyledByLucira() {
   const [popupState, setPopupState] = useState({ isOpen: false, index: 0 });
   const swiperRef = useRef(null);
 
-  const handleAllVideosPlayback = (isPlaying) => {
-    const allVideos = document.querySelectorAll(".lucira-swiper video");
-    allVideos.forEach((v) => {
-      if (isPlaying) {
-        v.muted = true;
-        v.play().catch(() => {});
-      } else {
-        v.pause();
-      }
-    });
-  };
-
-  useEffect(() => {
-    handleAllVideosPlayback(!popupState.isOpen);
-  }, [popupState.isOpen]);
-
   return (
     <section className="w-full mt-15 bg-white overflow-hidden">
       <div className="container-main">
@@ -195,7 +179,6 @@ export default function StyledByLucira() {
             modules={[Navigation]}
             onSwiper={(swiper) => {
               swiperRef.current = swiper;
-              setTimeout(() => handleAllVideosPlayback(true), 300);
             }}
             navigation={{
               prevEl: ".main-prev",
@@ -217,9 +200,6 @@ export default function StyledByLucira() {
                 slidesPerView: 5,
                 spaceBetween: 30
               }
-            }}
-            onSlideChangeTransitionEnd={() => {
-              if (!popupState.isOpen) handleAllVideosPlayback(true);
             }}
             className="lucira-swiper overflow-visible!"
           >

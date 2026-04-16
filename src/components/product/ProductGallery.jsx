@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useMemo, useState, useEffect } from "react";
-import Image from "next/image";
+import LazyImage from "../common/LazyImage";
 import { Play, Copy, X, ChevronLeft, ChevronRight, Maximize2, Share2, ZoomIn, ZoomOut } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import ProductGallerySkeleton from "./ProductGallerySkeleton";
@@ -177,7 +177,7 @@ export default function ProductGallery({ media = [], title = "", activeColor = "
 
   return (
     <>
-      <div className="grid grid-cols-2 gap-4 sticky top-5">
+      <div className="grid grid-cols-2 gap-4 sticky top-20">
         {sortedMedia.map((item, index) => {
           const isVideo = item.type === "VIDEO" || item.type === "EXTERNAL_VIDEO";
           const isFirst = index === 0;
@@ -214,7 +214,7 @@ export default function ProductGallery({ media = [], title = "", activeColor = "
                   )}
                 </video>
               ) : (
-                <Image 
+                <LazyImage 
                   src={item.url || "/images/product/1.jpg"} 
                   alt={item.alt || title} 
                   fill
@@ -333,7 +333,7 @@ export default function ProductGallery({ media = [], title = "", activeColor = "
                       className="max-w-full max-h-full object-contain shadow-2xl"
                     />
                   ) : (
-                    <Image 
+                    <LazyImage 
                       src={sortedMedia[currentIndex].url || "/images/product/1.jpg"}
                       alt={sortedMedia[currentIndex].alt || title}
                       fill

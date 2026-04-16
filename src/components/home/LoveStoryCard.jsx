@@ -1,7 +1,7 @@
 "use client";
 
 import { useId, useState } from "react";
-import Image from "next/image";
+import LazyImage from "../common/LazyImage";
 import Link from "next/link";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination } from "swiper/modules";
@@ -59,7 +59,7 @@ function LoveStoryCard({ item }) {
     <div className="overflow-hidden rounded-sm border border-transparent transition-all hover:border-black/5">
       <Link href={item.href} className="group block overflow-hidden rounded-sm">
         <div className="relative aspect-[0.78/1] w-full overflow-hidden rounded-sm">
-          <Image
+          <LazyImage
             src={item.image}
             alt={item.title}
             fill
