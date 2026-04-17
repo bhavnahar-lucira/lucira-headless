@@ -268,10 +268,7 @@ export function OtpSpinAuth({ onSuccess, onClose, initialMobile = "" }) {
               className="spin-wheel-cta"
             />
           </div>
-          <div className="winner-ticker">
-            <div className="dot" />
-            <span>Someone recently won ₹1,500 OFF!</span>
-          </div>
+         
         </div>
       )}
 
