@@ -42,6 +42,7 @@ export async function POST(req) {
     }
 
     const shippingAddress = body?.shippingAddress;
+    const billingAddress = body?.billingAddress;
     const customer = body?.customer;
 
     // STEP 1: Create Shopify Draft Order
@@ -81,6 +82,17 @@ export async function POST(req) {
         zip: shippingAddress.zip,
         country: shippingAddress.country,
         phone: shippingAddress.phone
+      } : undefined,
+      billingAddress: billingAddress ? {
+        firstName: billingAddress.firstName,
+        lastName: billingAddress.lastName,
+        address1: billingAddress.address1,
+        address2: billingAddress.address2,
+        city: billingAddress.city,
+        province: billingAddress.province,
+        zip: billingAddress.zip,
+        country: billingAddress.country,
+        phone: billingAddress.phone
       } : undefined,
       useCustomerDefaultAddress: false,
       taxExempt: true // Ensure Shopify doesn't add extra GST on top of tax-inclusive prices

@@ -44,12 +44,13 @@ export default function CheckoutSummary() {
     }
   ];
 
-  // Use real items or mock, and sort to put insurance at the bottom
-  const displayItems = [...(items.length > 0 ? items : mockItems)].sort((a, b) => {
-    if (a.variantId === INSURANCE_VARIANT_ID) return 1;
-    if (b.variantId === INSURANCE_VARIANT_ID) return -1;
-    return 0;
-  });
+  // Use real items or mock, and filter out special items (insurance/gold coin) 
+  // as they are already shown in the pricing breakdown below
+  const displayItems = [...(items.length > 0 ? items : mockItems)].filter(
+    (item) =>
+      item.variantId !== INSURANCE_VARIANT_ID &&
+      item.variantId !== GOLDCOIN_VARIANT_ID
+  );
 
   return (
     <div className="space-y-6">
