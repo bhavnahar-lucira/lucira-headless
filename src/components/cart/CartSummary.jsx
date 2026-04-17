@@ -7,15 +7,68 @@ import { Tag, Phone, MessageSquare, Gift, Truck, MessageCircle } from "lucide-re
 import { Input } from "@/components/ui/input";
 import Image from "next/image";
 import { useSelector } from "react-redux";
+import InsuranceOption from "./InsuranceOption";
+import GoldCoinOption, { GOLDCOIN_VARIANT_ID } from "./GoldCoinOption";
+import { useCart } from "@/hooks/useCart";
+import { useEffect } from "react";
+
+const INSURANCE_VARIANT_ID = "gid://shopify/ProductVariant/47709366026458";
 
 export default function CartSummary({ onPlaceOrder }) {
   const [isVoucherOpen, setIsVoucherOpen] = useState(false);
-  const { totalAmount, totalQuantity } = useSelector((state) => state.cart);
+  const { items, totalAmount, totalQuantity, updateCartItem, removeFromCart } = useCart();
 
-  const subtotal = totalAmount; // For now, subtotal is totalAmount
+  const otherItemsQuantity = items
+    .filter(item => item.variantId !== INSURANCE_VARIANT_ID && item.variantId !== GOLDCOIN_VARIANT_ID)
+    .reduce((acc, item) => acc + (item.quantity || 1), 0);
+
+  const diamondTotal = items
+    .filter(item => item.variantId !== INSURANCE_VARIANT_ID && item.variantId !== GOLDCOIN_VARIANT_ID && (item.diamondCharges > 0))
+    .reduce((acc, item) => acc + (item.price * (item.quantity || 1)), 0);
+
+  const eligibleGoldCoins = Math.floor(diamondTotal / 20000);
+
+  const insuranceItem = items.find(item => item.variantId === INSURANCE_VARIANT_ID);
+  const insuranceAmount = insuranceItem ? insuranceItem.price * (insuranceItem.quantity || 1) : 0;
+
+  const goldCoinItem = items.find(item => item.variantId === GOLDCOIN_VARIANT_ID);
+
+  // Auto-sync insurance and gold coin quantities
+  useEffect(() => {
+    // Sync Insurance
+    if (insuranceItem) {
+      if (otherItemsQuantity <= 0) {
+        removeFromCart(INSURANCE_VARIANT_ID);
+      } else if (insuranceItem.quantity !== otherItemsQuantity) {
+        updateCartItem({
+          currentVariantId: INSURANCE_VARIANT_ID,
+          quantity: otherItemsQuantity
+        });
+      }
+    }
+
+    // Sync Gold Coin
+    if (goldCoinItem) {
+      if (eligibleGoldCoins <= 0) {
+        removeFromCart(GOLDCOIN_VARIANT_ID);
+      } else if (goldCoinItem.quantity !== eligibleGoldCoins) {
+        updateCartItem({
+          currentVariantId: GOLDCOIN_VARIANT_ID,
+          quantity: eligibleGoldCoins
+        });
+      }
+    }
+  }, [otherItemsQuantity, insuranceItem?.quantity, eligibleGoldCoins, goldCoinItem?.quantity, updateCartItem, removeFromCart]);
+
+  // Subtotal is total cart amount MINUS insurance amount
+  const subtotal = totalAmount - insuranceAmount;
   const discount = 0; // Logic for discounts can be added later
   const shipping = 0; // Free shipping
-  const totalCost = subtotal - discount + shipping;
+  const grandTotal = subtotal + insuranceAmount - discount + shipping;
+
+  const handleRemoveInsurance = async () => {
+    await removeFromCart(INSURANCE_VARIANT_ID);
+  };
 
   const coupons = [
     { code: "PRESET10", description: "Flat 10% off on Preset Solitaires" },
@@ -33,40 +86,45 @@ export default function CartSummary({ onPlaceOrder }) {
           <span>Subtotal</span>
           <span className="font-medium text-zinc-900">₹ {subtotal.toLocaleString('en-IN')}</span>
         </div>
-        <div className="flex justify-between text-sm text-[#189351]">
-          <span>Cart Discount</span>
-          <span className="font-bold">- ₹ {discount.toLocaleString('en-IN')}</span>
-        </div>
+        {discount > 0 && (
+          <div className="flex justify-between text-sm text-[#189351]">
+            <span>Cart Discount</span>
+            <span className="font-bold">- ₹ {discount.toLocaleString('en-IN')}</span>
+          </div>
+        )}
+        {goldCoinItem && (
+          <div className="flex justify-between text-sm text-green-600">
+            <span>Free Gold Coin ({goldCoinItem.quantity})</span>
+            <span className="font-bold">₹ 0</span>
+          </div>
+        )}
+        {insuranceItem && (
+          <div className="flex justify-between text-sm text-zinc-600">
+            <span>Insurance</span>
+            <span className="font-medium text-zinc-900">₹ {insuranceAmount.toLocaleString('en-IN')}</span>
+          </div>
+        )}
         <div className="flex justify-between text-sm text-[#189351]">
           <span>Shipping (Standard)</span>
           <span className="font-bold">Free</span>
         </div>
         
         <div className="border-t border-zinc-100 my-4 pt-4 flex justify-between items-center">
-          <span className="text-base font-bold text-[#443360] uppercase tracking-wider">TOTAL COST</span>
-          <span className="text-lg font-bold text-[#443360]">₹ {totalCost.toLocaleString('en-IN')}</span>
+          <span className="text-base font-bold text-[#443360] uppercase tracking-wider">GRAND TOTAL</span>
+          <span className="text-lg font-bold text-[#443360]">₹ {grandTotal.toLocaleString('en-IN')}</span>
         </div>
       </div>
 
       {/* Actions (Voucher, Gift, Place Order) */}
       <div className="space-y-4">
-        <div className="bg-zinc-50 p-3 rounded-lg flex items-center justify-between group cursor-pointer hover:bg-zinc-100 transition-colors border border-zinc-100">
-          <div className="flex flex-col">
-            <span className="text-xs font-bold text-zinc-800">Gift Message</span>
-            <span className="text-[10px] text-zinc-500 uppercase font-bold tracking-widest">(Optional)</span>
-          </div>
-          <div className="flex items-center gap-1.5 text-[#005BD3] text-xs font-bold uppercase tracking-wider">
-            <Gift size={14} />
-            Add
-          </div>
-        </div>
-
         <Button 
           onClick={onPlaceOrder}
           className="w-full bg-primary hover:bg-primary/90 text-white font-bold h-14 uppercase tracking-[0.2em] shadow-lg shadow-zinc-100 transition-all rounded-lg text-base"
         >
           Place Order
         </Button>
+
+        <GoldCoinOption />
 
         <div className="space-y-3">
           <Sheet open={isVoucherOpen} onOpenChange={setIsVoucherOpen}>
@@ -117,6 +175,19 @@ export default function CartSummary({ onPlaceOrder }) {
             Voucher only applicable on sparkle100 jewellery.
           </p>
         </div>
+
+        <div className="bg-zinc-50 p-3 rounded-lg flex items-center justify-between group cursor-pointer hover:bg-zinc-100 transition-colors border border-zinc-100">
+          <div className="flex flex-col">
+            <span className="text-xs font-bold text-zinc-800">Gift Message</span>
+            <span className="text-[10px] text-zinc-500 uppercase font-bold tracking-widest">(Optional)</span>
+          </div>
+          <div className="flex items-center gap-1.5 text-[#005BD3] text-xs font-bold uppercase tracking-wider">
+            <Gift size={14} />
+            Add
+          </div>
+        </div>
+
+        <InsuranceOption />
       </div>
 
       {/* Contact Section (Same as Shipping/Payment) */}

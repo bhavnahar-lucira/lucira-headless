@@ -45,6 +45,9 @@ export default function CartItem({ item, onAuthRequired }) {
   const isInStock = currentVariant?.inStock ?? item.inStock ?? true;
   const canEditSelection = !isInStock;
   const lineAmount = (item.price || 0) * (item.quantity || 1);
+  const lineCompareAmount = (item.comparePrice || 0) * (item.quantity || 1);
+  const hasDiscount = lineCompareAmount > lineAmount;
+
   const statusLabel = isInStock ? "In Stock" : "Made to Order";
   const statusClass = isInStock ? "text-green-500" : "text-primary";
   const sizeOptions =
@@ -170,8 +173,15 @@ export default function CartItem({ item, onAuthRequired }) {
                 </p>
               )}
             </div>
-            <div className="whitespace-nowrap text-xl font-bold text-zinc-900">
-              ₹ {lineAmount.toLocaleString("en-IN")}
+            <div className="flex flex-col items-end whitespace-nowrap">
+              <div className="text-xl font-bold text-zinc-900">
+                ₹ {lineAmount.toLocaleString("en-IN")}
+              </div>
+              {hasDiscount && (
+                <div className="text-sm text-zinc-400 line-through">
+                  ₹ {lineCompareAmount.toLocaleString("en-IN")}
+                </div>
+              )}
             </div>
           </div>
 
