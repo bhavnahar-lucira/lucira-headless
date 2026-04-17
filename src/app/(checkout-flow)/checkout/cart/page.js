@@ -12,6 +12,9 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { pushViewCart, pushBeginCheckout } from "@/lib/gtm";
 
+const INSURANCE_VARIANT_ID = "gid://shopify/ProductVariant/47709366026458";
+const GOLDCOIN_VARIANT_ID = "gid://shopify/ProductVariant/47661824082138";
+
 export default function CartPage() {
   const router = useRouter();
   const { items, totalQuantity, totalAmount } = useSelector((state) => state.cart);
@@ -81,22 +84,24 @@ export default function CartPage() {
     <div className="bg-white min-h-screen overflow-x-hidden pb-20 lg:pb-0">
       <div className="max-w-7xl w-full mx-auto relative z-10 px-4">
         <div className="flex flex-col lg:flex-row lg:items-start min-h-[calc(100vh-80px)]">
-          
+
           {/* Left Column: Cart Items (60%) */}
           <div className="grow lg:basis-[60%] lg:shrink-0 py-10 px-4 lg:pr-12 bg-white">
-            <div className="flex items-baseline gap-2 mb-5">
-              <h1 className="text-xl font-bold text-zinc-800 font-abhaya">My Shopping Cart</h1>
-              <span className="text-sm text-zinc-500 font-medium">({totalQuantity} Item{totalQuantity !== 1 ? 's' : ''})</span>
-            </div>
+            <div className="lg:sticky lg:top-10">
+              <div className="flex items-baseline gap-2 mb-5">
+                <h1 className="text-xl font-bold text-zinc-800 font-abhaya">My Shopping Cart</h1>
+                <span className="text-sm text-zinc-500 font-medium">({totalQuantity} Item{totalQuantity !== 1 ? 's' : ''})</span>
+              </div>
 
-            <div className="space-y-4">
-              {items.map((item, index) => (
-                <CartItem 
-                  key={item.variantId || index} 
-                  item={item} 
-                  onAuthRequired={() => setIsAuthDialogOpen(true)}
-                />
-              ))}
+              <div className="space-y-4">
+                {filteredItems.map((item, index) => (
+                  <CartItem
+                    key={item.variantId || index}
+                    item={item}
+                    onAuthRequired={() => setIsAuthDialogOpen(true)}
+                  />
+                ))}
+              </div>
             </div>
           </div>
 
@@ -104,7 +109,7 @@ export default function CartPage() {
           <div className="w-full lg:basis-[40%] lg:shrink-0 lg:self-start relative">
             {/* Background Layer that stretches to the right edge of screen */}
             <div className="hidden lg:block absolute inset-y-0 left-0 w-screen bg-[#FAFAFA] border-l border-zinc-100 z-0" />
-            
+
             <div className="relative z-10 py-10 px-4 lg:pl-12 bg-[#FAFAFA] lg:bg-transparent min-h-full">
               <div className="lg:sticky lg:top-6">
                 <CartSummary onPlaceOrder={handlePlaceOrder} />
@@ -120,7 +125,7 @@ export default function CartPage() {
           <span className="text-[10px] text-zinc-400 uppercase font-bold tracking-widest">Total Payable</span>
           <span className="text-lg font-bold text-zinc-900 leading-none">₹ {totalAmount.toLocaleString('en-IN')}</span>
         </div>
-        <Button 
+        <Button
           onClick={handlePlaceOrder}
           className="grow bg-primary hover:bg-primary/90 text-white font-bold h-12 uppercase tracking-widest rounded-sm"
         >
