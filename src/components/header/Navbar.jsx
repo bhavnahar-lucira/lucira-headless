@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 import { useMenu } from "@/hooks/useMenu";
 
 export default function Navbar({ hideTop }) {
-  const { menuData, loading } = useMenu("main-menu-official");
+  const { menuData } = useMenu("main-menu-official");
   const [activeMenu, setActiveMenu] = useState(null);
   const pathname = usePathname();
   const timeoutRef = useRef(null);
@@ -34,20 +34,28 @@ export default function Navbar({ hideTop }) {
     setActiveMenu(null);
   };
 
-  const hasDropdown = (menu) => menu.type === "mega" || menu.type === "image-grid";
+  const hasDropdown = (menu) =>
+    menu.type === "mega" || menu.type === "image-grid";
 
-  // Find the most specific active menu item (longest href match)
   const activeMenuPath = [...MEGA_MENU]
-    .filter(menu => pathname === menu.href || (menu.href !== "/" && pathname.startsWith(menu.href + "/")))
+    .filter(
+      (menu) =>
+        pathname === menu.href ||
+        (menu.href !== "/" && pathname.startsWith(menu.href + "/"))
+    )
     .sort((a, b) => b.href.length - a.href.length)[0]?.href;
 
-  // Handle exact match separately to prioritize it
-  const currentActiveHref = pathname === "/" ? "/" : (pathname === activeMenuPath ? activeMenuPath : (MEGA_MENU.find(m => m.href === pathname)?.href || activeMenuPath));
+  const currentActiveHref =
+    pathname === "/"
+      ? "/"
+      : pathname === activeMenuPath
+      ? activeMenuPath
+      : MEGA_MENU.find((m) => m.href === pathname)?.href ||
+        activeMenuPath;
 
   return (
     <nav className="relative border-t bg-white">
       <div className="page-width relative">
-        {/* Sticky Logo */}
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{
@@ -67,11 +75,12 @@ export default function Navbar({ hideTop }) {
             />
           </Link>
         </motion.div>
-
-        {/* MENU */}
         <ul className="flex justify-center gap-12 text-sm uppercase">
           {MEGA_MENU.map((menu, index) => {
-            const isActive = pathname === menu.href || (currentActiveHref === menu.href);
+            const isActive =
+              pathname === menu.href ||
+              currentActiveHref === menu.href;
+
             const isHovered = activeMenu === index;
 
             return (
@@ -86,19 +95,19 @@ export default function Navbar({ hideTop }) {
                   onClick={closeMenu}
                   className={cn(
                     "block py-6 tracking-wide transition-all duration-200",
-                    (isActive || isHovered) ? "text-primary" : "text-gray-700 hover:text-primary",
+                    isActive || isHovered
+                      ? "text-primary"
+                      : "text-gray-700 hover:text-primary",
                     isActive ? "font-semibold" : "font-medium"
                   )}
                 >
                   {menu.label}
                 </Link>
 
-                {/* Underline */}
                 {(isHovered || (isActive && activeMenu === null)) && (
                   <motion.div
                     layoutId="nav-underline"
                     className="absolute bottom-3 left-0 right-0 h-0.5 bg-primary"
-                    transition={{ type: "spring", stiffness: 380, damping: 30 }}
                   />
                 )}
               </li>
@@ -107,161 +116,218 @@ export default function Navbar({ hideTop }) {
         </ul>
       </div>
 
-      {/* MEGA MENU */}
-      {activeMenu !== null && hasDropdown(MEGA_MENU[activeMenu]) && (
-        <motion.div
-          onMouseEnter={() => handleEnter(activeMenu)}
-          onMouseLeave={handleLeave}
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.2 }}
-          className="absolute left-0 top-full w-full bg-white shadow-xl z-50 border-t"
-        >
-          <div className="container-main mx-auto py-8">
-            {(() => {
-              const menu = MEGA_MENU[activeMenu];
+      {activeMenu !== null &&
+        hasDropdown(MEGA_MENU[activeMenu]) && (
+          <motion.div
+            onMouseEnter={() => handleEnter(activeMenu)}
+            onMouseLeave={handleLeave}
+            className="absolute left-0 top-full w-full bg-white shadow-xl z-50 border-t"
+          >
+            <div className="container-main mx-auto py-8">
+              {(() => {
+                const menu = MEGA_MENU[activeMenu];
 
-              /* ===== IMAGE GRID (Alternative View) ===== */
-              if (menu.type === "image-grid" || (menu.columns?.length === 0 && menu.cards?.length > 0)) {
-                const items = menu.items || menu.cards;
-                return (
-                  <div className="grid grid-cols-4 gap-6">
-                    {items.map((item, i) => (
-                      <Link
-                        key={i}
-                        href={item.href || "#"}
-                        onClick={closeMenu}
-                        className="group relative block overflow-hidden rounded-md"
-                      >
-                        {/* IMAGE */}
-                        <div className="relative aspect-4/5 w-full overflow-hidden rounded-md">
-                          <Image
-                            src={item.image}
-                            alt={item.title}
-                            fill
-                            className="object-cover transition duration-500 group-hover:scale-105"
-                          />
-                          <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/20 to-transparent" />
-                        </div>
+                const baseCols = menu.columns?.length || 0;
+                const featuredCol = menu.featured ? 1 : 0;
+                const cardCols = menu.cards?.length || 0;
+                const totalCols =
+                  baseCols + featuredCol + cardCols || 1;
 
-                        {/* TEXT */}
-                        <div className="absolute bottom-4 left-4 right-12 text-white">
-                          <p className="text-lg font-semibold leading-tight">
-                            {item.title}
-                          </p>
-                          <p className="text-xs mt-1 opacity-90 line-clamp-2">
-                            {item.subtitle || item.description}
-                          </p>
-                        </div>
+                const isImageOnly =
+                  menu.type === "image-grid" ||
+                  (baseCols === 0 && cardCols > 0);
 
-                        <div className="absolute bottom-4 right-4">
-                          <div className="flex h-10 w-10 items-center justify-center rounded-full border border-white bg-transparent text-white transition-all duration-300 group-hover:bg-white group-hover:text-black">
-                            <ArrowRight size={18} className="transition-transform duration-300 group-hover:translate-x-0.5" />
+                let gridTemplate;
+
+                if (isImageOnly) {
+                  gridTemplate = `repeat(${totalCols}, minmax(0, 1fr))`;
+                } else {
+                  const normalCols = totalCols - cardCols;
+
+                  gridTemplate = `
+                    ${Array(normalCols)
+                      .fill("minmax(0, 1fr)")
+                      .join(" ")}
+                    ${Array(cardCols)
+                      .fill("minmax(0, 1.5fr)")
+                      .join(" ")}
+                  `;
+                }
+
+                /* IMAGE GRID */
+                if (isImageOnly) {
+                  const items = menu.items || menu.cards;
+                  return (
+                    <div
+                      className="grid gap-6"
+                      style={{ gridTemplateColumns: gridTemplate }}
+                    >
+                      {items.map((item, i) => (
+                        <Link
+                          key={i}
+                          href={item.href || "#"}
+                          onClick={closeMenu}
+                          className="group relative block overflow-hidden rounded-md"
+                        >
+                          <div className="relative aspect-4/5 w-full overflow-hidden rounded-md">
+                            <Image
+                              src={item.image}
+                              alt={item.title}
+                              fill
+                              className="object-cover transition duration-500 group-hover:scale-105"
+                            />
+                            <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/20 to-transparent" />
                           </div>
-                        </div>
-                      </Link>
+
+                          <div className="absolute bottom-4 left-4 right-12 text-white">
+                            <p className="text-lg font-semibold">
+                              {item.title}
+                            </p>
+                            <p className="text-xs mt-1 opacity-90">
+                              {item.subtitle || item.description}
+                            </p>
+                          </div>
+
+                          <div className="absolute bottom-4 right-4">
+                            <div className="flex h-10 w-10 items-center justify-center rounded-full border border-white text-white group-hover:bg-white group-hover:text-black">
+                              <ArrowRight size={18} />
+                            </div>
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                  );
+                }
+
+                /* MEGA MENU */
+                return (
+                  <div
+                    className="grid gap-x-4"
+                    style={{ gridTemplateColumns: gridTemplate }}
+                  >
+                    {/* FEATURED */}
+                    {menu.featured && (
+                      <div className="pr-4 border-r border-zinc-100">
+                        <h4 className="mb-6 text-sm font-bold uppercase tracking-[0.1em] text-black">
+                          {menu.featured.title}
+                        </h4>
+                        <ul className="space-y-4 text-[13px] font-medium text-zinc-500">
+                          {menu.featured.items?.map((item, i) => (
+                            <li key={i} className="hover:text-black transition-colors">
+                              <Link href={item.href || "#"} onClick={closeMenu}>
+                                {item.label}
+                              </Link>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    {/* TEXT COLUMNS (RESTORED ICON LOGIC) */}
+                    {menu.columns?.map((col, i) => (
+                      <div key={i}>
+                        <h4 className="mb-6 text-sm font-bold uppercase tracking-[0.1em] text-black whitespace-nowrap">
+                          {col.title}
+                        </h4>
+
+                        <ul className="space-y-4 text-[13px] font-medium text-zinc-500">
+                          {col.items.map((item, j) => (
+                            <li key={j} className="hover:text-black transition-colors">
+                              <Link
+                                href={item.href || "#"}
+                                onClick={closeMenu}
+                                className="flex items-center gap-3 group"
+                              >
+                                {/* ✅ METAL SWATCH */}
+                                {col.type === "metal" ? (
+                                  <span
+                                    className="w-4 h-4 rounded-full border border-zinc-200"
+                                    style={{
+                                      background: item.label.toLowerCase().includes("yellow")
+                                        ? "linear-gradient(135deg, #E2C07E 0%, #D4AF37 100%)"
+                                        : item.label.toLowerCase().includes("rose")
+                                        ? "linear-gradient(135deg, #E9B4AB 0%, #C48D82 100%)"
+                                        : item.label.toLowerCase().includes("white")
+                                        ? "#E5E4E2"
+                                        : item.label.toLowerCase().includes("silver")
+                                        ? "#C0C0C0"
+                                        : item.label.toLowerCase().includes("platinum")
+                                        ? "#E5E4E2"
+                                        : "#ddd",
+                                    }}
+                                  />
+                                ) : item.svgSprite ? (
+                                  <span
+                                    className="w-4.5 h-4.5 shrink-0 grayscale group-hover:grayscale-0 transition-all flex items-center justify-center [&_svg]:w-full [&_svg]:h-full"
+                                    dangerouslySetInnerHTML={{ __html: item.svgSprite }}
+                                  />
+                                ) : item.megaMenuImage || (col.type === "icon" && item.icon) ? (
+                                  <div className="relative h-4.5 w-4.5 shrink-0 grayscale group-hover:grayscale-0 transition-all">
+                                    <Image
+                                      src={item.megaMenuImage || item.icon}
+                                      alt={item.label}
+                                      fill
+                                      className="object-contain"
+                                    />
+                                  </div>
+                                ) : null}
+
+                                <span>{item.label}</span>
+                              </Link>
+                            </li>
+                          ))}
+
+                          {/* SHOP ALL */}
+                          <li className="pt-2">
+                            <Link
+                              href={menu.href || "#"}
+                              onClick={closeMenu}
+                              className="text-[11px] font-bold uppercase tracking-widest text-zinc-400 hover:text-black transition-colors"
+                            >
+                              {col.title.replace("Shop By", "Shop All")}
+                            </Link>
+                          </li>
+                        </ul>
+                      </div>
+                    ))}
+
+                    {/* CARDS (UNCHANGED UI) */}
+                    {menu.cards?.map((card, i) => (
+                      <div key={i} className="col-span-1">
+                        <Link
+                          href={card.href || "#"}
+                          onClick={closeMenu}
+                          className="group relative block"
+                        >
+                          <div className="relative aspect-[5/5.5] overflow-hidden rounded-md">
+                            <Image
+                              src={card.image}
+                              alt={card.title}
+                              fill
+                              className="object-cover"
+                            />
+                            <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/20 to-transparent" />
+                          </div>
+
+                          <div className="absolute bottom-4 left-4 text-white">
+                            <p className="text-lg font-semibold">{card.title}</p>
+                            <p className="text-sm opacity-90">{card.subtitle}</p>
+                          </div>
+
+                          <div className="absolute bottom-4 right-4">
+                            <div className="flex h-10 w-10 items-center justify-center rounded-full border border-white text-white group-hover:bg-white group-hover:text-black">
+                              <ArrowRight size={18} />
+                            </div>
+                          </div>
+                        </Link>
+                      </div>
                     ))}
                   </div>
                 );
-              }
-
-              const isFiveCol = menu.layout === "5-col-featured";
-              
-              /* ===== DYNAMIC COLUMNS + CARDS (MEGA) ===== */
-              return (
-                <div className="w-full">
-                    <div className={cn(
-                        "grid gap-x-8",
-                        menu.featured ? "grid-cols-6" : (menu.cards?.length > 0 ? "grid-cols-5" : `grid-cols-${Math.min(menu.columns?.length || 1, 5)}`)
-                    )}>
-
-                        {/* 1. FEATURED (Conditional) */}
-                        {menu.featured && (
-                          <div className="pr-8 border-r border-zinc-100">
-                            <h4 className="mb-6 text-sm font-bold uppercase tracking-[0.1em] text-black">
-                              {menu.featured.title}
-                            </h4>
-                            <ul className="space-y-4 text-[13px] font-medium text-zinc-500">
-                              {menu.featured.items?.map((item, i) => (
-                                <li key={i} className="hover:text-black transition-colors">
-                                  <Link href={item.href || "#"} onClick={closeMenu}>
-                                    {item.label}
-                                  </Link>
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
-
-                        {/* 2. TEXT COLUMNS */}
-                        {menu.columns?.map((col, i) => (
-                          <div key={i}>
-                            <h4 className="mb-6 text-sm font-bold uppercase tracking-[0.1em] text-black whitespace-nowrap">{col.title}</h4>
-                            <ul className="space-y-4 text-[13px] font-medium text-zinc-500">
-                              {col.items.map((item, j) => (
-                                <li key={j} className="hover:text-black transition-colors">
-                                  <Link href={item.href || "#"} onClick={closeMenu} className="flex items-center gap-3">
-                                    {col.type === "metal" ? (
-                                      <span className="w-4 h-4 rounded-full border border-zinc-200" style={{ 
-                                          background: item.label.toLowerCase().includes("yellow") ? "linear-gradient(135deg, #E2C07E 0%, #D4AF37 100%)" :
-                                                     item.label.toLowerCase().includes("rose") ? "linear-gradient(135deg, #E9B4AB 0%, #C48D82 100%)" :
-                                                     item.label.toLowerCase().includes("white") ? "#E5E4E2" :
-                                                     item.label.toLowerCase().includes("silver") ? "#C0C0C0" :
-                                                     item.label.toLowerCase().includes("platinum") ? "#E5E4E2" : "#ddd"
-                                      }} />
-                                    ) : (
-                                      item.svgSprite ? (
-                                        <span className="w-4.5 h-4.5 shrink-0 grayscale group-hover:grayscale-0 transition-all flex items-center justify-center [&_svg]:w-full [&_svg]:h-full" dangerouslySetInnerHTML={{ __html: item.svgSprite }} />
-                                      ) : (item.megaMenuImage || (col.type === "icon" && item.icon)) ? (
-                                        <div className="relative h-4.5 w-4.5 shrink-0 grayscale group-hover:grayscale-0 transition-all">
-                                          <Image src={item.megaMenuImage || item.icon} alt={item.label} fill className="object-contain" />
-                                        </div>
-                                      ) : null
-                                    )}
-                                    <span>{item.label}</span>
-                                  </Link>
-                                </li>
-                              ))}
-                              <li className="pt-2">
-                                <Link href={menu.href || "#"} onClick={closeMenu} className="text-[11px] font-bold uppercase tracking-widest text-zinc-400 hover:text-black transition-colors">
-                                  {col.title.toLowerCase().includes("price") ? "Shop All Price Range" : 
-                                   col.title.toLowerCase().includes("metal") || col.title.toLowerCase().includes("material") ? "Shop All Metal" :
-                                   col.title.toLowerCase().includes("shape") ? "Shop All Shapes" :
-                                   col.title.toLowerCase().includes("style") ? "Shop All Styles" :
-                                   col.title.replace("Shop By", "Shop All")}
-                                </Link>
-                              </li>
-                            </ul>
-                          </div>
-                        ))}
-
-                        {/* 3. CARDS / BANNERS (The right-hand visuals) */}
-                        {menu.cards?.map((card, i) => (
-                          <div key={i} className="col-span-1">
-                            <Link href={card.href || "#"} onClick={closeMenu} className="group relative block">
-                              <div className="relative aspect-[5/5.5] overflow-hidden rounded-md">
-                                <Image src={card.image} alt={card.title} fill className="object-cover" />
-                                <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/20 to-transparent" />
-                              </div>
-                              <div className="absolute bottom-4 left-4 text-white">
-                                <p className="text-lg font-semibold">{card.title}</p>
-                                <p className="text-sm opacity-90">{card.subtitle}</p>
-                              </div>
-                              <div className="absolute bottom-4 right-4">
-                                <div className="flex h-10 w-10 items-center justify-center rounded-full border border-white bg-transparent text-white transition-all duration-300 group-hover:bg-white group-hover:text-black">
-                                  <ArrowRight size={18} className="transition-transform duration-300 group-hover:translate-x-0.5" />
-                                </div>
-                              </div>
-                            </Link>
-                          </div>
-                        ))}
-                    </div>
-                </div>
-              );
-            })()}
-          </div>
-        </motion.div>
-      )}
+              })()}
+            </div>
+          </motion.div>
+        )}
     </nav>
   );
 }

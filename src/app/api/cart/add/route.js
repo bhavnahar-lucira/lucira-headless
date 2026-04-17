@@ -77,6 +77,12 @@ export async function POST(req) {
     const totalQuantity = cart.items.reduce((acc, item) => acc + (item.quantity || 0), 0);
     const totalAmount = cart.items.reduce((acc, item) => acc + (item.price * (item.quantity || 1)), 0);
 
+    // Persist totals
+    await cartCollection.updateOne(
+      { _id: cart._id },
+      { $set: { totalQuantity, totalAmount } }
+    );
+
     return NextResponse.json({ ...cart, totalQuantity, totalAmount });
   } catch (err) {
     console.error("ADD TO CART ERROR:", err);
