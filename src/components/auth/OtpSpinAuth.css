@@ -1,105 +1,164 @@
-@import "tailwindcss";
 .otp-spin-auth-wrapper {
   @apply relative flex flex-col items-center w-full max-w-[450px] transition-all duration-[0.4s] ease-in-out overflow-hidden mx-auto my-0 p-[30px] rounded-xl;
   background: #fff;
 }
-.otp-spin-auth-wrapper.signup-active {
-  @apply max-w-[950px] flex-row items-center gap-[50px] p-[50px];
+
+.otp-spin-auth-wrapper.login-active {
+  @apply max-w-[450px];
 }
-@media (max-width: 1024px) {
-  .otp-spin-auth-wrapper.signup-active {
-    @apply max-w-[900px] gap-[30px] p-10;
+
+@media (min-width: 768px) {
+  .otp-spin-auth-wrapper.login-active {
+    @apply flex-row max-w-[850px] items-stretch p-0;
   }
 }
+
+.otp-spin-auth-wrapper.signup-active {
+  @apply max-w-[950px] flex-row items-center gap-[30px] p-[30px];
+}
+
+@media (min-width: 1024px) {
+  .otp-spin-auth-wrapper.signup-active {
+    @apply max-w-[1200px] gap-[50px] p-[50px];
+  }
+}
+
 @media (max-width: 900px) {
   .otp-spin-auth-wrapper.signup-active {
-    @apply flex-col max-w-[480px] gap-[30px] p-[30px];
+    @apply flex-col max-w-[480px] gap-[20px] p-[20px];
   }
 }
+
+.side-image-wrapper {
+  @apply flex-1 w-full max-w-[400px];
+}
+
+.side-image {
+  @apply w-full h-full object-cover;
+}
+
 .spin-wheel-wrapper {
   @apply flex-[1.2] flex flex-col items-center justify-center min-h-[400px] w-full;
 }
+
 .wheel-container {
   @apply relative w-[380px] h-[380px] mx-auto my-0;
 }
+
 @media (max-width: 480px) {
   .wheel-container {
     @apply w-[280px] h-[280px];
   }
 }
+
 .spin-wheel-image {
   @apply w-full h-full object-contain absolute -translate-x-2/4 -translate-y-2/4 z-[1] left-2/4 top-2/4;
 }
+
 .spin-wheel-cta {
   @apply absolute -translate-x-2/4 -translate-y-2/4 w-[85px] h-[85px] z-10 pointer-events-none left-2/4 top-2/4;
 }
+
 .otp-form-wrapper {
-  @apply flex-1 w-full flex flex-col justify-center gap-5;
+  @apply flex-1 w-full flex flex-col justify-center gap-5 p-6;
 }
+
+@media (min-width: 768px) {
+    .otp-spin-auth-wrapper.login-active .otp-form-wrapper {
+        @apply p-10;
+    }
+}
+
 .otp-heading {
   @apply text-center mb-[5px];
 }
+
 .otp-heading img {
   @apply mx-auto my-0;
 }
+
 .heading {
   @apply text-2xl font-extrabold text-black text-center uppercase mb-1;
 }
+
 .subtext {
   @apply text-[15px] text-[#555] text-center mb-[15px];
 }
+
 .mobile-wrap {
   @apply flex items-center border h-[52px] px-4 py-0 rounded-lg border-solid border-[#ddd];
   background: #f9f9f9;
 }
+
 .country-code {
   @apply font-bold text-[#333] mr-3 pr-3 border-r-[#ddd] border-r border-solid;
 }
+
 .mobile-wrap input {
   @apply w-full h-full text-base border-[none];
   background: transparent;
   outline: none;
 }
+
 .otp-inputs {
   @apply flex justify-center gap-3;
 }
+
 .otp-inputs input {
   @apply w-[50px] h-[55px] text-center text-2xl font-bold border rounded-lg border-solid border-[#ddd] focus:shadow-[0_0_0_2px_rgba(0,0,0,0.05)] focus:border-black;
   outline: none;
 }
+
 .consent-wrapper {
   @apply mt-[5px];
 }
+
 .consent-label {
   @apply flex items-start gap-2.5 text-[13px] text-[#666] cursor-pointer;
 }
+
 .btn-primary {
   @apply text-white h-[54px] w-full font-bold text-base cursor-pointer transition-opacity duration-[0.2s] uppercase tracking-[1px] rounded-lg border-[none] disabled:opacity-60;
   background: #000;
 }
+
 .coupon-box {
   @apply flex items-center justify-center gap-[15px] mx-0 my-5 p-5 rounded-[10px] border-2 border-dashed border-black;
   background: #fffbeb;
 }
+
 #couponCode {
   @apply text-[26px] font-extrabold;
 }
+
 .registration-form-inputs {
   @apply flex flex-col gap-[15px];
 }
+
 .registration-form-row-wrapper {
   @apply grid grid-cols-[1fr_1fr] gap-[15px];
 }
+
 .grid-column {
   @apply flex flex-col gap-[5px];
 }
+
 .field-input {
   @apply border h-12 px-[15px] py-0 rounded-lg border-solid border-[#ddd] focus:border-black;
   outline: none;
 }
+
 .signupSection label {
   @apply text-[13px] font-semibold text-[#444];
 }
+
 .safe-secure-text {
   @apply flex items-center justify-center gap-2 text-xs text-[#aaa] mt-2.5;
 }
+
+.success-section {
+    @apply flex flex-col items-center;
+}
+
+/* Override sm:max-w-lg for this specific popup if needed via global classes or higher specificity */
+/* However, we handle width via the wrapper's max-width and DialogContent's max-w-none */

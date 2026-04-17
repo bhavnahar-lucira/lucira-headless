@@ -94,8 +94,6 @@ export function OtpSpinAuth({ onSuccess, onClose, initialMobile = "" }) {
     if (cleanCode.length === 4) {
       const newOtp = cleanCode.split("");
       setOtp(newOtp);
-      // Automatically verify?
-      // verifyOtp(cleanCode);
     }
   };
 
@@ -222,8 +220,6 @@ export function OtpSpinAuth({ onSuccess, onClose, initialMobile = "" }) {
 
         if (data.status === "REGISTER_SUCCESS") {
           setStep("success");
-          // Optionally auto-login after a delay
-          // setTimeout(() => loginSuccess(data), 5000);
         }
       } catch (err) {
         toast.error(err.message || "Registration failed");
@@ -241,14 +237,36 @@ export function OtpSpinAuth({ onSuccess, onClose, initialMobile = "" }) {
   };
 
   return (
-    <div className={`otp-spin-auth-wrapper ${step === "register" ? "signup-active" : ""}`}>
+    <div className={`otp-spin-auth-wrapper ${step === "register" ? "signup-active" : "login-active"}`}>
       <button 
-        className="absolute top-4 right-4 text-gray-400 hover:text-black z-[20]" 
+        className="absolute top-4 right-4 text-gray-400 hover:text-black z-[20] bg-gray-100 rounded-full p-1" 
         onClick={onClose || onSuccess}
         aria-label="Close"
       >
-        
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
       </button>
+
+      {/* Side Image for Login/OTP */}
+      {(step === "login" || step === "otp") && (
+        <div className="side-image-wrapper hidden md:block">
+          <img 
+            src="https://www.lucirajewelry.com/cdn/shop/files/Jan-Popup-Desktop-New_2.jpg?v=1769844544" 
+            alt="Login Banner" 
+            className="side-image" 
+          />
+        </div>
+      )}
+
+      {/* Side Image for Success */}
+       {step === "success" && (
+        <div className="side-image-wrapper hidden md:block">
+          <img 
+            src="https://www.lucirajewelry.com/cdn/shop/files/Jan-Popup-Desktop-New_2.jpg?v=1769844544" 
+            alt="Login Banner" 
+            className="side-image" 
+          />
+        </div>
+      )}
 
       {step === "register" && (
         <div className="spin-wheel-wrapper">
@@ -382,6 +400,19 @@ export function OtpSpinAuth({ onSuccess, onClose, initialMobile = "" }) {
                 <input type="tel" value={mobile} readOnly />
               </div>
 
+              <div className="consent-wrapper mb-2">
+                <label className="consent-label">
+                  <input
+                    type="checkbox"
+                    checked={consent}
+                    onChange={(e) => setConsent(e.target.checked)}
+                  />
+                  <span>
+                    I accept that I have read & understood Privacy Policy and T&Cs.
+                  </span>
+                </label>
+              </div>
+
               <button
                 className="btn-primary"
                 onClick={handleSpinAndRegister}
@@ -395,7 +426,7 @@ export function OtpSpinAuth({ onSuccess, onClose, initialMobile = "" }) {
 
         {step === "success" && (
           <div className="success-section">
-            <div className="text-4xl mb-4">🎉</div>
+            <div className="text-4xl mb-4 text-center">🎉</div>
             <p className="heading">Account Created Successfully!</p>
             <p className="subtext">Your reward is ready. Apply this at checkout.</p>
             <div className="coupon-box">
