@@ -130,7 +130,7 @@ export default function Footer() {
                 <ul className="space-y-2.5 text-sm text-white font-figtree">
                   <li><Link href="/pages/careers">Careers</Link></li>
                   <li><Link href="/pages/franchise-page">Franchise</Link></li>
-                  <li><Link href="#">Bespoke</Link></li>
+                  <li><Link href="/pages/customized-jewelry">Bespoke</Link></li>
                   <li><Link href="store-packaging">Packaging</Link></li>
                 </ul>
               </div>
