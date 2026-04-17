@@ -1,68 +1,47 @@
+@import "tailwindcss";
+
 .otp-spin-auth-wrapper {
-  @apply relative flex flex-col items-center w-[90%] transition-all ease-in-out overflow-hidden mx-auto my-0 rounded-xl h-auto;
+  @apply relative flex flex-col items-center w-full mx-auto rounded-xl overflow-hidden transition-all duration-300;
   background-color: #FFFEFC;
-  max-width: 450px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-  transition-duration: 400ms;
+  max-width: 400px;
 }
 
-/* Desktop Login/OTP State */
+/* Desktop Styles */
 @media (min-width: 768px) {
   .otp-spin-auth-wrapper.login-active {
     @apply flex-row items-stretch;
+    width: 800px;
     max-width: 800px;
     height: 500px;
   }
-}
 
-/* Desktop Registration State */
-@media (min-width: 1024px) {
   .otp-spin-auth-wrapper.signup-active {
     @apply flex-row items-stretch;
+    width: 1200px;
     max-width: 1200px;
-    height: auto;
     min-height: 550px;
   }
 }
 
-/* Side Image for Login/OTP */
+/* Side/Top Image Styles */
 .login-image-side {
-  @apply hidden md:block w-[60%] h-full;
+  @apply w-full h-[175px] md:h-full md:w-[60%];
   background-image: url("https://www.lucirajewelry.com/cdn/shop/files/Jan-Popup-Desktop-New_2.jpg?v=1769844544");
   background-position: center;
   background-size: cover;
   background-repeat: no-repeat;
 }
 
-/* Mobile Image */
 @media (max-width: 767px) {
-  .otp-spin-auth-wrapper::before {
-    content: "";
-    @apply w-full h-[175px] block;
+  .login-image-side {
     background-image: url("https://cdn.shopify.com/s/files/1/0739/8516/3482/files/Jan-Popup-Mobile_jpg.jpg?v=1770010490");
-    background-position: center;
-    background-size: cover;
-    background-repeat: no-repeat;
   }
-  
-  .otp-spin-auth-wrapper.signup-active::before {
-    @apply hidden;
-  }
-  
-  /* Mobile Slide In Animation */
-  .otp-spin-auth-wrapper {
-    animation: slideInBottom 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-  }
-}
-
-@keyframes slideInBottom {
-  from { transform: translateY(110%); }
-  to   { transform: translateY(0); }
 }
 
 /* Spin Wheel Styles */
 .spin-wheel-wrapper {
-  @apply hidden flex-col items-center justify-center relative w-full h-[230px] md:h-full md:w-[58%] overflow-hidden;
+  @apply hidden flex-col items-center justify-center relative w-full h-[220px] md:h-full md:w-[60%] overflow-hidden;
   background-image: url("https://cdn.shopify.com/s/files/1/0739/8516/3482/files/BG_1_1.png?v=1770198650");
   background-position: center;
   background-size: cover;
@@ -74,13 +53,13 @@
 }
 
 .wheel-container {
-  @apply relative w-[90%] h-[220px] md:w-[420px] md:h-[470px];
+  @apply relative w-[90%] h-[240px] md:w-[420px] md:h-[470px];
 }
 
 @media (max-width: 767px) {
-    .wheel-container {
-        @apply absolute top-[-80px];
-    }
+  .wheel-container {
+    @apply absolute top-[-75px];
+  }
 }
 
 .spin-wheel-image {
@@ -92,13 +71,12 @@
 }
 
 .winner-ticker {
-  @apply absolute bottom-[12px] left-1/2 -translate-x-1/2 bg-white px-[28px] py-[8px] rounded-[30px] flex items-center gap-[10px] z-[5] whitespace-nowrap text-[13px] font-semibold;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  @apply absolute bottom-[12px] left-1/2 -translate-x-1/2 bg-white px-7 py-2 rounded-[30px] flex items-center gap-2.5 shadow-[0_2px_10px_rgba(0,0,0,0.08)] z-[5] whitespace-nowrap text-[13px] font-semibold;
 }
 
 @media (max-width: 767px) {
   .winner-ticker {
-      @apply bottom-[-50px] text-[12px] px-[10px] py-[2px];
+    @apply bottom-[-50px] text-[12px] px-2.5 py-0.5;
   }
 }
 
@@ -106,15 +84,18 @@
   @apply w-2 h-2 rounded-full bg-[#B45670];
 }
 
-/* Form Styles */
+/* Form Section Styles */
 .otp-form-wrapper {
-  @apply flex-1 flex flex-col justify-center gap-4 p-5 md:p-8;
+  @apply flex flex-col justify-center w-full p-5 md:p-8;
 }
 
 @media (min-width: 768px) {
-    .otp-spin-auth-wrapper.signup-active .otp-form-wrapper {
-        @apply flex-[0.8] w-[42%] p-10;
-    }
+  .otp-spin-auth-wrapper.login-active .otp-form-wrapper {
+    @apply w-[40%];
+  }
+  .otp-spin-auth-wrapper.signup-active .otp-form-wrapper {
+    @apply w-[40%];
+  }
 }
 
 .otp-heading {
@@ -122,11 +103,11 @@
 }
 
 .heading {
-  @apply text-base font-medium text-black text-center uppercase mb-2;
+  @apply text-base font-medium text-black text-center uppercase mb-2 !important;
 }
 
 .subtext {
-  @apply text-[12px] font-medium text-[#5B5B5B] text-center mb-5 tracking-[1px] leading-[1.5];
+  @apply text-[12px] font-medium text-[#5B5B5B] text-center mb-5 tracking-wider leading-relaxed;
 }
 
 .mobile-wrap {
@@ -134,11 +115,11 @@
 }
 
 .country-code {
-  @apply text-[14px] font-normal mr-3 pr-3 border-r border-[#d0d0d0];
+  @apply text-sm font-normal mr-2.5 pr-3 border-r border-[#d0d0d0];
 }
 
 .mobile-wrap input {
-  @apply w-full h-full text-[14px] border-none outline-none font-normal bg-transparent;
+  @apply w-full h-full text-sm border-none outline-none font-normal bg-transparent;
 }
 
 .otp-inputs {
@@ -152,7 +133,6 @@
 .btn-primary {
   @apply text-white h-[54px] w-full font-normal text-[13px] cursor-pointer transition-opacity uppercase tracking-wider rounded-lg border-none mt-3.5;
   background-color: #a05a64;
-  transition-duration: 200ms;
 }
 
 .signup-active .btn-primary {
@@ -164,7 +144,7 @@
 }
 
 .consent-label {
-  @apply flex items-start gap-2 text-[13px] leading-[1.4] cursor-pointer text-[#666];
+  @apply flex items-start gap-2 text-[13px] leading-tight cursor-pointer text-[#666];
 }
 
 .consent-label input[type="checkbox"] {
@@ -177,7 +157,7 @@
 }
 
 .register-link span {
-  color: #a05a64;
+  @apply text-[#a05a64] font-medium;
 }
 
 #otp-timer {
@@ -185,16 +165,16 @@
 }
 
 #otp-timer span {
-  color: #b77766;
+  @apply text-[#b77766] font-medium;
 }
 
 .close-button {
-  @apply absolute top-5 right-5 z-20 p-1 rounded-full text-white cursor-pointer border-none;
+  @apply absolute top-5 right-5 z-20 p-1 rounded-full text-white cursor-pointer border-none flex items-center justify-center;
   background-color: #a05a64;
 }
 
 .field-input {
-  @apply w-full h-12 px-4 border border-[#e2e2e2] rounded-lg bg-white text-[14px] outline-none mb-3.5;
+  @apply w-full h-12 px-4 border border-[#e2e2e2] rounded-lg bg-white text-sm outline-none mb-3.5;
 }
 
 .registration-form-row-wrapper {
@@ -202,11 +182,11 @@
 }
 
 .red-required {
-  color: #ef4444;
+  @apply text-red-500;
 }
 
 .coupon-box {
-  @apply flex items-center justify-between gap-2.5 mx-auto my-3 p-2 pl-5 rounded-lg border border-dashed border-green-600 bg-[#eeffee] max-w-[205px] font-semibold text-black;
+  @apply flex items-center justify-between gap-2 mx-auto my-3 p-2 pl-5 rounded-lg border border-dashed border-green-600 bg-green-50 max-w-[205px] font-semibold text-black;
 }
 
 #couponCode {
@@ -214,7 +194,7 @@
 }
 
 .copy-btn {
-  @apply border-none bg-transparent cursor-pointer text-lg p-2;
+  @apply border-none bg-transparent cursor-pointer text-lg p-1;
 }
 
 .safe-secure-text {
@@ -230,5 +210,17 @@
 }
 
 #successSection .subtext {
-  @apply max-w-[280px] mx-auto mb-3;
+  @apply max-w-[280px] mx-auto mb-3 !important;
+}
+
+/* Animations */
+@media (max-width: 767px) {
+  .otp-spin-auth-wrapper {
+    animation: slideInBottom 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  }
+}
+
+@keyframes slideInBottom {
+  from { transform: translateY(110%); }
+  to   { transform: translateY(0); }
 }
