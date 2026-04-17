@@ -1,3 +1,4 @@
+@import "tailwindcss";
 .otp-spin-auth-wrapper {
   @apply relative flex flex-col items-center w-full max-w-[450px] transition-all duration-[0.4s] ease-in-out overflow-hidden mx-auto my-0 p-[30px] rounded-xl;
   background: #fff;
