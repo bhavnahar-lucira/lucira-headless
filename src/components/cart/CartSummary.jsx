@@ -33,10 +33,12 @@ export default function CartSummary({ onPlaceOrder }) {
           <span>Subtotal</span>
           <span className="font-medium text-zinc-900">₹ {subtotal.toLocaleString('en-IN')}</span>
         </div>
-        <div className="flex justify-between text-sm text-[#189351]">
-          <span>Cart Discount</span>
-          <span className="font-bold">- ₹ {discount.toLocaleString('en-IN')}</span>
-        </div>
+        {discount > 0 && (
+          <div className="flex justify-between text-sm text-[#189351]">
+            <span>Cart Discount</span>
+            <span className="font-bold">- ₹ {discount.toLocaleString('en-IN')}</span>
+          </div>
+        )}
         <div className="flex justify-between text-sm text-[#189351]">
           <span>Shipping (Standard)</span>
           <span className="font-bold">Free</span>
