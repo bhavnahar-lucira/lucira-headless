@@ -50,6 +50,7 @@ export function OtpSpinAuth({ onSuccess, onClose, initialMobile = "" }) {
   useEffect(() => {
     if (initialMobile) setMobile(initialMobile);
   }, [initialMobile]);
+  
   const [otp, setOtp] = useState(["", "", "", ""]);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -239,33 +240,16 @@ export function OtpSpinAuth({ onSuccess, onClose, initialMobile = "" }) {
   return (
     <div className={`otp-spin-auth-wrapper ${step === "register" ? "signup-active" : "login-active"}`}>
       <button 
-        className="absolute top-4 right-4 text-gray-400 hover:text-black z-[20] bg-gray-100 rounded-full p-1" 
+        className="close-button" 
         onClick={onClose || onSuccess}
         aria-label="Close"
       >
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
       </button>
 
-      {/* Side Image for Login/OTP */}
-      {(step === "login" || step === "otp") && (
-        <div className="side-image-wrapper hidden md:block">
-          <img 
-            src="https://www.lucirajewelry.com/cdn/shop/files/Jan-Popup-Desktop-New_2.jpg?v=1769844544" 
-            alt="Login Banner" 
-            className="side-image" 
-          />
-        </div>
-      )}
-
-      {/* Side Image for Success */}
-       {step === "success" && (
-        <div className="side-image-wrapper hidden md:block">
-          <img 
-            src="https://www.lucirajewelry.com/cdn/shop/files/Jan-Popup-Desktop-New_2.jpg?v=1769844544" 
-            alt="Login Banner" 
-            className="side-image" 
-          />
-        </div>
+      {/* Background/Side Image Container */}
+      {(step === "login" || step === "otp" || step === "success") && (
+        <div className="login-image-side" />
       )}
 
       {step === "register" && (
@@ -283,6 +267,10 @@ export function OtpSpinAuth({ onSuccess, onClose, initialMobile = "" }) {
               alt="Spin CTA"
               className="spin-wheel-cta"
             />
+          </div>
+          <div className="winner-ticker">
+            <div className="dot" />
+            <span>Someone recently won ₹1,500 OFF!</span>
           </div>
         </div>
       )}
@@ -326,6 +314,9 @@ export function OtpSpinAuth({ onSuccess, onClose, initialMobile = "" }) {
             <button className="btn-primary" onClick={handleSendOtp} disabled={loading}>
               {loading ? "SENDING..." : "REQUEST OTP"}
             </button>
+            <p className="register-link">
+              New user? <span className="cursor-pointer font-bold underline" onClick={() => setStep("register")}>Register</span>
+            </p>
           </>
         )}
 
@@ -349,11 +340,11 @@ export function OtpSpinAuth({ onSuccess, onClose, initialMobile = "" }) {
             <button className="btn-primary" onClick={handleVerifyOtp} disabled={loading}>
               {loading ? "VERIFYING..." : "VERIFY OTP"}
             </button>
-            <p className="text-center text-sm mt-4">
+            <p id="otp-timer">
               {timer > 0 ? (
                 `Resend OTP in 00:${timer < 10 ? `0${timer}` : timer}`
               ) : (
-                <span className="cursor-pointer underline" onClick={handleSendOtp}>
+                <span className="cursor-pointer underline font-bold" onClick={handleSendOtp}>
                   Resend OTP
                 </span>
               )}
@@ -395,12 +386,12 @@ export function OtpSpinAuth({ onSuccess, onClose, initialMobile = "" }) {
               />
 
               <label>Phone Number</label>
-              <div className="mobile-wrap" style={{ opacity: 0.7 }}>
+              <div className="mobile-wrap mb-3" style={{ opacity: 0.8, backgroundColor: "#f3f3f3" }}>
                 <span className="country-code">+91</span>
                 <input type="tel" value={mobile} readOnly />
               </div>
 
-              <div className="consent-wrapper mb-2">
+              <div className="consent-wrapper">
                 <label className="consent-label">
                   <input
                     type="checkbox"
@@ -425,7 +416,7 @@ export function OtpSpinAuth({ onSuccess, onClose, initialMobile = "" }) {
         )}
 
         {step === "success" && (
-          <div className="success-section">
+          <div className="success-section" id="successSection">
             <div className="text-4xl mb-4 text-center">🎉</div>
             <p className="heading">Account Created Successfully!</p>
             <p className="subtext">Your reward is ready. Apply this at checkout.</p>
@@ -435,7 +426,7 @@ export function OtpSpinAuth({ onSuccess, onClose, initialMobile = "" }) {
                 📋
               </button>
             </div>
-            <button className="btn-primary" onClick={() => loginSuccess({ user: { id: mobile, first_name: firstName, last_name: lastName } })}>
+            <button className="btn-primary mt-4" onClick={() => loginSuccess({ user: { id: mobile, first_name: firstName, last_name: lastName } })}>
               CONTINUE SHOPPING
             </button>
           </div>
