@@ -1,35 +1,26 @@
 @import "tailwindcss";
+
 .otp-spin-auth-wrapper {
-  @apply relative flex flex-col items-center w-full mx-auto rounded-xl overflow-hidden transition-all duration-300;
-  background-color: #FFFEFC;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-  max-width: 400px;
+  @apply relative flex flex-col items-center w-full mx-auto rounded-xl overflow-hidden transition-all duration-300 bg-[#FFFEFC] shadow-[0_0_10px_rgba(0,0,0,0.3)] max-w-[400px];
 }
 
-/* Desktop Styles */
+.otp-heading img {
+  @apply mx-auto;
+}
+
 @media (min-width: 768px) {
   .otp-spin-auth-wrapper.login-active {
-    @apply flex-row items-stretch;
-    width: 800px;
-    max-width: 800px;
-    height: 500px;
+    @apply flex-row items-stretch w-[800px] max-w-[800px] h-[500px];
   }
 
   .otp-spin-auth-wrapper.signup-active {
-    @apply flex-row items-stretch;
-    width: 1200px;
-    max-width: 1200px;
-    min-height: 550px;
+    @apply flex-row items-stretch w-[1200px] max-w-[1200px] min-h-[550px];
   }
 }
 
-/* Side/Top Image Styles */
 .login-image-side {
-  @apply w-full h-[175px] md:h-full md:w-[60%];
+  @apply w-full h-[175px] md:h-full md:w-[60%] bg-center bg-cover bg-no-repeat;
   background-image: url("https://www.lucirajewelry.com/cdn/shop/files/Jan-Popup-Desktop-New_2.jpg?v=1769844544");
-  background-position: center;
-  background-size: cover;
-  background-repeat: no-repeat;
 }
 
 @media (max-width: 767px) {
@@ -38,13 +29,9 @@
   }
 }
 
-/* Spin Wheel Styles */
 .spin-wheel-wrapper {
-  @apply hidden flex-col items-center justify-center relative w-full h-[220px] md:h-full md:w-[60%] overflow-hidden;
+  @apply hidden flex-col items-center justify-center relative w-full h-[220px] md:h-full md:w-[60%] overflow-hidden bg-center bg-cover bg-no-repeat;
   background-image: url("https://cdn.shopify.com/s/files/1/0739/8516/3482/files/BG_1_1.png?v=1770198650");
-  background-position: center;
-  background-size: cover;
-  background-repeat: no-repeat;
 }
 
 .otp-spin-auth-wrapper.signup-active .spin-wheel-wrapper {
@@ -73,17 +60,14 @@
   @apply absolute bottom-[12px] left-1/2 -translate-x-1/2 bg-white px-7 py-2 rounded-[30px] flex items-center gap-2.5 shadow-[0_2px_10px_rgba(0,0,0,0.08)] z-[5] whitespace-nowrap text-[13px] font-semibold;
 }
 
-@media (max-width: 767px) {
-  .winner-ticker {
-    @apply bottom-[-50px] text-[12px] px-2.5 py-0.5;
-  }
+.registration-form-inputs label {
+  @apply text-sm block mb-1.5 font-normal text-[#666];
 }
 
 .winner-ticker .dot {
   @apply w-2 h-2 rounded-full bg-[#B45670];
 }
 
-/* Form Section Styles */
 .otp-form-wrapper {
   @apply flex flex-col justify-center w-full p-5 md:p-8;
 }
@@ -130,12 +114,11 @@
 }
 
 .btn-primary {
-  @apply text-white h-[54px] w-full font-normal text-[13px] cursor-pointer transition-opacity uppercase tracking-wider rounded-lg border-none mt-3.5;
-  background-color: #a05a64;
+  @apply text-white h-[54px] w-full font-normal text-[13px] cursor-pointer transition-opacity uppercase tracking-wider rounded-lg border-none mt-3.5 bg-[#a05a64];
 }
 
 .signup-active .btn-primary {
-  background-color: #B45670;
+  @apply bg-[#B45670];
 }
 
 .consent-wrapper {
@@ -147,8 +130,7 @@
 }
 
 .consent-label input[type="checkbox"] {
-  @apply mt-0.5;
-  accent-color: #a05a64;
+  @apply mt-0.5 accent-[#a05a64];
 }
 
 .register-link {
@@ -168,8 +150,7 @@
 }
 
 .close-button {
-  @apply absolute top-5 right-5 z-20 p-1 rounded-full text-white cursor-pointer border-none flex items-center justify-center;
-  background-color: #a05a64;
+  @apply absolute top-5 right-5 z-20 p-1 rounded-full text-white cursor-pointer border-none flex items-center justify-center bg-[#a05a64];
 }
 
 .field-input {
@@ -212,7 +193,6 @@
   @apply max-w-[280px] mx-auto mb-3;
 }
 
-/* Animations */
 @media (max-width: 767px) {
   .otp-spin-auth-wrapper {
     animation: slideInBottom 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
