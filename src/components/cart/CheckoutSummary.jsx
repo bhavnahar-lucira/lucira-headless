@@ -8,7 +8,7 @@ const INSURANCE_VARIANT_ID = "gid://shopify/ProductVariant/47709366026458";
 const GOLDCOIN_VARIANT_ID = "gid://shopify/ProductVariant/47661824082138";
 
 export default function CheckoutSummary() {
-  const { items, totalAmount } = useCart();
+  const { items, totalAmount, appliedCoupon, removeCoupon } = useCart();
 
   const insuranceItem = items.find(item => item.variantId === INSURANCE_VARIANT_ID);
   const insuranceValue = insuranceItem ? (insuranceItem.price * (insuranceItem.quantity || 1)) : 0;
@@ -16,9 +16,21 @@ export default function CheckoutSummary() {
   const goldCoinItem = items.find(item => item.variantId === GOLDCOIN_VARIANT_ID);
 
   const subtotalValue = (totalAmount || 0) - insuranceValue;
-  const discountValue = 0; // Logic for discounts can be added later
-  const shippingValue = 0; // Free shipping
-  const grandTotalValue = subtotalValue + insuranceValue - discountValue + shippingValue;
+
+  const couponDetails = typeof appliedCoupon === 'object' ? appliedCoupon : { code: appliedCoupon, summary: "Applied", value: 0, valueType: "FIXED_AMOUNT" };
+
+  // Calculate dynamic discount
+  let couponDiscountAmount = 0;
+  if (appliedCoupon) {
+    if (couponDetails.valueType === "FIXED_AMOUNT") {
+      couponDiscountAmount = couponDetails.value;
+    } else if (couponDetails.valueType === "PERCENTAGE") {
+      couponDiscountAmount = (subtotalValue * couponDetails.value) / 100;
+    }
+  }
+
+  const discountValue = couponDiscountAmount;
+  const grandTotalValue = subtotalValue + insuranceValue - discountValue + 0; // 0 for shipping
 
   // Mock data for fallback
   const mockItems = [
@@ -111,10 +123,18 @@ export default function CheckoutSummary() {
           <span>Subtotal</span>
           <span className="font-medium text-zinc-900">₹{subtotalValue.toLocaleString('en-IN')}</span>
         </div>
-        {discountValue > 0 && (
+        {appliedCoupon && (
           <div className="flex justify-between text-sm text-[#189351]">
-            <span>Cart Discount</span>
-            <span className="font-bold">- ₹{discountValue.toLocaleString('en-IN')}</span>
+            <div className="flex items-center gap-2">
+              <span className="font-bold uppercase tracking-wider">Coupon ({typeof appliedCoupon === 'object' ? appliedCoupon.code : appliedCoupon})</span>
+              <button 
+                onClick={removeCoupon}
+                className="text-[10px] font-bold text-red-500 hover:underline uppercase tracking-tighter"
+              >
+                (Remove)
+              </button>
+            </div>
+            <span className="font-bold">- ₹ {couponDiscountAmount.toLocaleString('en-IN')}</span>
           </div>
         )}
         {goldCoinItem && (
