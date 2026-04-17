@@ -5,7 +5,7 @@ import { Loader2, Check } from "lucide-react";
 import { useState } from "react";
 import Image from "next/image";
 
-const INSURANCE_VARIANT_ID = "gid://shopify/ProductVariant/INSURANCE_001";
+const INSURANCE_VARIANT_ID = "gid://shopify/ProductVariant/47709366026458";
 const INSURANCE_PRICE = 1;
 
 export default function InsuranceOption() {
@@ -17,7 +17,7 @@ export default function InsuranceOption() {
 
   // Calculate total quantity of other items
   const otherItemsQuantity = items
-    .filter(item => item.variantId !== INSURANCE_VARIANT_ID)
+    .filter(item => item.variantId !== INSURANCE_VARIANT_ID && item.variantId !== "gid://shopify/ProductVariant/GOLDCOIN_100MG" && item.variantId !== "gid://shopify/ProductVariant/47661824082138")
     .reduce((acc, item) => acc + (item.quantity || 1), 0);
 
   const handleAdd = async () => {
@@ -25,7 +25,7 @@ export default function InsuranceOption() {
     setIsProcessing(true);
     try {
       const product = {
-        productId: "gid://shopify/Product/INSURANCE_PRODUCT",
+        productId: "gid://shopify/Product/9207163617498",
         variantId: INSURANCE_VARIANT_ID,
         title: "Insurance",
         image: "/images/story-ring.jpg",

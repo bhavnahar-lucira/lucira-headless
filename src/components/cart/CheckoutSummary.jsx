@@ -4,13 +4,16 @@ import Image from "next/image";
 import { Phone, MessageSquare, Truck, MessageCircle } from "lucide-react";
 import { useCart } from "@/hooks/useCart";
 
-const INSURANCE_VARIANT_ID = "gid://shopify/ProductVariant/INSURANCE_001";
+const INSURANCE_VARIANT_ID = "gid://shopify/ProductVariant/47709366026458";
+const GOLDCOIN_VARIANT_ID = "gid://shopify/ProductVariant/47661824082138";
 
 export default function CheckoutSummary() {
   const { items, totalAmount } = useCart();
 
   const insuranceItem = items.find(item => item.variantId === INSURANCE_VARIANT_ID);
   const insuranceValue = insuranceItem ? (insuranceItem.price * (insuranceItem.quantity || 1)) : 0;
+
+  const goldCoinItem = items.find(item => item.variantId === GOLDCOIN_VARIANT_ID);
 
   const subtotalValue = (totalAmount || 0) - insuranceValue;
   const discountValue = 0; // Logic for discounts can be added later
@@ -111,6 +114,12 @@ export default function CheckoutSummary() {
           <div className="flex justify-between text-sm text-[#189351]">
             <span>Cart Discount</span>
             <span className="font-bold">- ₹{discountValue.toLocaleString('en-IN')}</span>
+          </div>
+        )}
+        {goldCoinItem && (
+          <div className="flex justify-between text-sm text-green-600">
+            <span>Free Gold Coin ({goldCoinItem.quantity})</span>
+            <span className="font-bold">₹ 0</span>
           </div>
         )}
         {insuranceValue > 0 && (

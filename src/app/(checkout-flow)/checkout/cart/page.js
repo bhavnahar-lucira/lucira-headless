@@ -10,7 +10,8 @@ import { ShoppingBag, ArrowRight } from "lucide-react";
 import { AuthDialog } from "@/components/auth/AuthDialog";
 import { useRouter } from "next/navigation";
 
-const INSURANCE_VARIANT_ID = "gid://shopify/ProductVariant/INSURANCE_001";
+const INSURANCE_VARIANT_ID = "gid://shopify/ProductVariant/47709366026458";
+const GOLDCOIN_VARIANT_ID = "gid://shopify/ProductVariant/47661824082138";
 
 export default function CartPage() {
   const router = useRouter();
@@ -18,7 +19,11 @@ export default function CartPage() {
   const { isAuthenticated } = useSelector((state) => state.user);
   const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
 
-  const filteredItems = items.filter(item => item.variantId !== INSURANCE_VARIANT_ID);
+  const filteredItems = items.filter(
+    (item) => 
+      item.variantId !== INSURANCE_VARIANT_ID && 
+      item.variantId !== GOLDCOIN_VARIANT_ID
+  );
 
   const handlePlaceOrder = () => {
     if (isAuthenticated) {

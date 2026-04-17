@@ -8,21 +8,57 @@ import { Input } from "@/components/ui/input";
 import Image from "next/image";
 import { useSelector } from "react-redux";
 import InsuranceOption from "./InsuranceOption";
+import GoldCoinOption, { GOLDCOIN_VARIANT_ID } from "./GoldCoinOption";
 import { useCart } from "@/hooks/useCart";
 import { useEffect } from "react";
 
-const INSURANCE_VARIANT_ID = "gid://shopify/ProductVariant/INSURANCE_001";
+const INSURANCE_VARIANT_ID = "gid://shopify/ProductVariant/47709366026458";
 
 export default function CartSummary({ onPlaceOrder }) {
   const [isVoucherOpen, setIsVoucherOpen] = useState(false);
-  const { items, totalAmount, totalQuantity, updateCartItem } = useCart();
+  const { items, totalAmount, totalQuantity, updateCartItem, removeFromCart } = useCart();
 
   const otherItemsQuantity = items
-    .filter(item => item.variantId !== INSURANCE_VARIANT_ID)
+    .filter(item => item.variantId !== INSURANCE_VARIANT_ID && item.variantId !== GOLDCOIN_VARIANT_ID)
     .reduce((acc, item) => acc + (item.quantity || 1), 0);
+
+  const diamondTotal = items
+    .filter(item => item.variantId !== INSURANCE_VARIANT_ID && item.variantId !== GOLDCOIN_VARIANT_ID && (item.diamondCharges > 0))
+    .reduce((acc, item) => acc + (item.price * (item.quantity || 1)), 0);
+
+  const eligibleGoldCoins = Math.floor(diamondTotal / 20000);
 
   const insuranceItem = items.find(item => item.variantId === INSURANCE_VARIANT_ID);
   const insuranceAmount = insuranceItem ? insuranceItem.price * (insuranceItem.quantity || 1) : 0;
+
+  const goldCoinItem = items.find(item => item.variantId === GOLDCOIN_VARIANT_ID);
+
+  // Auto-sync insurance and gold coin quantities
+  useEffect(() => {
+    // Sync Insurance
+    if (insuranceItem) {
+      if (otherItemsQuantity <= 0) {
+        removeFromCart(INSURANCE_VARIANT_ID);
+      } else if (insuranceItem.quantity !== otherItemsQuantity) {
+        updateCartItem({
+          currentVariantId: INSURANCE_VARIANT_ID,
+          quantity: otherItemsQuantity
+        });
+      }
+    }
+
+    // Sync Gold Coin
+    if (goldCoinItem) {
+      if (eligibleGoldCoins <= 0) {
+        removeFromCart(GOLDCOIN_VARIANT_ID);
+      } else if (goldCoinItem.quantity !== eligibleGoldCoins) {
+        updateCartItem({
+          currentVariantId: GOLDCOIN_VARIANT_ID,
+          quantity: eligibleGoldCoins
+        });
+      }
+    }
+  }, [otherItemsQuantity, insuranceItem?.quantity, eligibleGoldCoins, goldCoinItem?.quantity, updateCartItem, removeFromCart]);
 
   // Subtotal is total cart amount MINUS insurance amount
   const subtotal = totalAmount - insuranceAmount;
@@ -56,6 +92,12 @@ export default function CartSummary({ onPlaceOrder }) {
             <span className="font-bold">- ₹ {discount.toLocaleString('en-IN')}</span>
           </div>
         )}
+        {goldCoinItem && (
+          <div className="flex justify-between text-sm text-green-600">
+            <span>Free Gold Coin ({goldCoinItem.quantity})</span>
+            <span className="font-bold">₹ 0</span>
+          </div>
+        )}
         {insuranceItem && (
           <div className="flex justify-between text-sm text-zinc-600">
             <span>Insurance</span>
@@ -81,6 +123,8 @@ export default function CartSummary({ onPlaceOrder }) {
         >
           Place Order
         </Button>
+
+        <GoldCoinOption />
 
         <div className="space-y-3">
           <Sheet open={isVoucherOpen} onOpenChange={setIsVoucherOpen}>

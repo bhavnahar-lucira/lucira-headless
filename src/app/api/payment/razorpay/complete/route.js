@@ -160,37 +160,18 @@ export async function POST(req) {
     const razorpayOrderId = String(body?.razorpayOrderId || "").trim();
     const razorpayPaymentId = String(body?.razorpayPaymentId || "").trim();
     const razorpaySignature = String(body?.razorpaySignature || "").trim();
+    const draftId = body?.draftId;
 
     if (!userId && !sessionId) {
-      return NextResponse.json(
-        { error: "UserId or SessionId is required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "UserId or SessionId is required" }, { status: 400 });
     }
 
-    if (!razorpayOrderId || !razorpayPaymentId || !razorpaySignature) {
-      return NextResponse.json(
-        { error: "Razorpay payment details are incomplete" },
-        { status: 400 }
-      );
+    if (!razorpayOrderId || !razorpayPaymentId || !razorpaySignature || !draftId) {
+      return NextResponse.json({ error: "Payment details are incomplete" }, { status: 400 });
     }
 
     const secret = process.env.RAZORPAY_KEY_SECRET || "";
-    if (!secret) {
-      return NextResponse.json(
-        { error: "Razorpay secret is not configured" },
-        { status: 500 }
-      );
-    }
-
-    if (
-      !verifyRazorpaySignature({
-        razorpayOrderId,
-        razorpayPaymentId,
-        razorpaySignature,
-        secret,
-      })
-    ) {
+    if (!verifyRazorpaySignature({ razorpayOrderId, razorpayPaymentId, razorpaySignature, secret })) {
       return NextResponse.json({ error: "Invalid payment signature" }, { status: 400 });
     }
 
@@ -198,189 +179,73 @@ export async function POST(req) {
     const db = client.db("next_local_db");
     const cartCollection = db.collection("carts");
     const paymentCollection = db.collection("shopify_order_payments");
+    const ordersCollection = db.collection("orders");
 
-    const existingPayment = await paymentCollection.findOne({ razorpayPaymentId });
-    if (existingPayment?.shopifyOrderId) {
-      return NextResponse.json({
-        success: true,
-        alreadyProcessed: true,
-        shopifyOrderId: existingPayment.shopifyOrderId,
-        shopifyOrderName: existingPayment.shopifyOrderName,
-      });
-    }
-
-    const cart = await cartCollection.findOne(buildCartLookup({ userId, sessionId }));
-    if (!cart?.items?.length) {
-      return NextResponse.json({ error: "Your cart is empty" }, { status: 400 });
-    }
-
-    const totalAmount = cart.items.reduce(
-      (sum, item) => sum + Number(item.price || 0) * Number(item.quantity || 1),
-      0
-    );
-
-    const shippingAddress = body?.shippingAddress || null;
-    const billingAddress = body?.billingAddress || null;
-    const customer = body?.customer || {};
-
-    const orderInput = {
-      currency: "INR",
-      email: customer.email || undefined,
-      phone: normalizePhone(customer.phone || shippingAddress?.phone || ""),
-      note: buildOrderNote({
-        razorpayOrderId,
-        razorpayPaymentId,
-        shippingAddress,
-        billingAddress,
-      }),
-      customAttributes: buildOrderCustomAttributes({
-        shippingAddress,
-        billingAddress,
-        razorpayOrderId,
-        razorpayPaymentId,
-      }),
-      financialStatus: "PAID",
-      fulfillmentStatus: "UNFULFILLED",
-      shippingAddress: buildMailingAddress(shippingAddress),
-      billingAddress: buildMailingAddress(billingAddress),
-      shippingLines: buildShippingLines(shippingAddress),
-      lineItems: cart.items.map((item) => ({
-        variantId: normalizeVariantId(item.variantId),
-        quantity: Number(item.quantity || 1),
-        priceSet: {
-          shopMoney: {
-            amount: Number(asMoney(item.price || item.finalPrice || 0)),
-            currencyCode: "INR",
-          },
-        },
-        properties: buildLineItemProperties(item),
-      })),
-      transactions: [
-        {
-          kind: "SALE",
-          status: "SUCCESS",
-          gateway: "Razorpay",
-          amountSet: {
-            shopMoney: {
-              amount: Number(asMoney(totalAmount)),
-              currencyCode: "INR",
-            },
-          },
-          receiptJson: JSON.stringify({
-            razorpay_order_id: razorpayOrderId,
-            razorpay_payment_id: razorpayPaymentId,
-            razorpay_signature: razorpaySignature,
-          }),
-        },
-      ],
-    };
-
-    if (customer?.id) {
-      orderInput.customer = {
-        toAssociate: {
-          id: customer.id,
-        },
-      };
-    }
-
-    const data = await shopifyAdminFetch(
-      `
-        mutation OrderCreate($order: OrderCreateOrderInput!, $options: OrderCreateOptionsInput) {
-          orderCreate(order: $order, options: $options) {
-            userErrors {
-              field
-              message
-            }
+    // STEP 1: Complete Shopify Draft Order
+    const shopifyData = await shopifyAdminFetch(`
+      mutation draftOrderComplete($id: ID!) {
+        draftOrderComplete(id: $id) {
+          draftOrder {
+            id
             order {
               id
               name
-              displayFinancialStatus
-              displayFulfillmentStatus
-              shippingAddress {
-                company
-              }
-              billingAddress {
-                company
-              }
-              lineItems(first: 50) {
-                nodes {
-                  title
-                  quantity
-                  customAttributes {
-                    key
-                    value
-                  }
+              totalPriceSet {
+                shopMoney {
+                  amount
                 }
               }
             }
           }
+          userErrors {
+            field
+            message
+          }
         }
-      `,
-      {
-        order: orderInput,
-        options: {
-          inventoryBehaviour: "DECREMENT_IGNORING_POLICY",
-          sendReceipt: false,
-          sendFulfillmentReceipt: false,
-        },
       }
-    );
+    `, { id: draftId });
 
-    const payload = data.orderCreate;
-    const errors = payload?.userErrors || [];
-
-    if (errors.length) {
-      return NextResponse.json(
-        { error: errors[0]?.message || "Failed to create Shopify order" },
-        { status: 400 }
-      );
+    const payload = shopifyData.draftOrderComplete;
+    if (payload?.userErrors?.length) {
+      return NextResponse.json({ error: payload.userErrors[0].message }, { status: 400 });
     }
 
-    const order = payload?.order;
+    const order = payload.draftOrder.order;
 
-    await paymentCollection.updateOne(
-      { razorpayPaymentId },
-      {
-        $set: {
-          razorpayOrderId,
-          razorpayPaymentId,
-          razorpaySignature,
-          userId: userId || null,
-          sessionId: sessionId || null,
-          shopifyOrderId: order?.id || "",
-          shopifyOrderName: order?.name || "",
-          totalAmount: Number(asMoney(totalAmount)),
-          updatedAt: new Date(),
-        },
-        $setOnInsert: {
-          createdAt: new Date(),
-        },
-      },
-      { upsert: true }
-    );
+    // STEP 2: Save to Local MongoDB
+    const orderRecord = {
+      shopifyOrderId: order.id,
+      shopifyOrderName: order.name,
+      razorpayOrderId,
+      razorpayPaymentId,
+      userId: userId || null,
+      sessionId: sessionId || null,
+      totalAmount: Number(order.totalPriceSet.shopMoney.amount),
+      customer: body?.customer,
+      shippingAddress: body?.shippingAddress,
+      billingAddress: body?.billingAddress,
+      status: "PAID",
+      createdAt: new Date(),
+    };
 
-    await cartCollection.updateOne(
-      { _id: cart._id },
-      {
-        $set: {
-          items: [],
-          updatedAt: new Date(),
-        },
-      }
-    );
+    await ordersCollection.insertOne(orderRecord);
+    await paymentCollection.insertOne({
+      ...orderRecord,
+      razorpaySignature,
+      updatedAt: new Date()
+    });
+
+    // STEP 3: Clear Cart
+    const cartLookup = buildCartLookup({ userId, sessionId });
+    await cartCollection.updateOne(cartLookup, { $set: { items: [], updatedAt: new Date() } });
 
     return NextResponse.json({
       success: true,
-      shopifyOrderId: order?.id || "",
-      shopifyOrderName: order?.name || "",
-      financialStatus: order?.displayFinancialStatus || "",
-      fulfillmentStatus: order?.displayFulfillmentStatus || "",
+      shopifyOrderId: order.id,
+      shopifyOrderName: order.name,
     });
   } catch (error) {
-    console.error("RAZORPAY COMPLETE ERROR:", error);
-    return NextResponse.json(
-      { error: error.message || "Failed to complete payment" },
-      { status: 500 }
-    );
+    console.error("COMPLETE ORDER ERROR:", error);
+    return NextResponse.json({ error: "Failed to complete order" }, { status: 500 });
   }
 }

@@ -23,12 +23,12 @@ export const fetchCart = createAsyncThunk(
 
 export const addToCart = createAsyncThunk(
   "cart/addToCart",
-  async ({ userId, product }) => {
-    const sessionId = getSessionId();
+  async ({ userId, sessionId, product }) => {
+    const finalSessionId = sessionId || getSessionId();
     const response = await fetch(`/api/cart/add`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId, sessionId, product }),
+      body: JSON.stringify({ userId, sessionId: finalSessionId, product }),
     });
     if (!response.ok) throw new Error('Failed to add to cart');
     return await response.json();
@@ -37,12 +37,12 @@ export const addToCart = createAsyncThunk(
 
 export const removeFromCart = createAsyncThunk(
   "cart/removeFromCart",
-  async ({ userId, variantId }) => {
-    const sessionId = getSessionId();
+  async ({ userId, sessionId, variantId }) => {
+    const finalSessionId = sessionId || getSessionId();
     const response = await fetch(`/api/cart/remove`, {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId, sessionId, variantId }),
+      body: JSON.stringify({ userId, sessionId: finalSessionId, variantId }),
     });
     if (!response.ok) throw new Error('Failed to remove from cart');
     return await response.json();
@@ -51,14 +51,14 @@ export const removeFromCart = createAsyncThunk(
 
 export const updateCartItem = createAsyncThunk(
   "cart/updateCartItem",
-  async ({ userId, currentVariantId, nextVariantId, quantity, size, price, variantTitle, inStock }) => {
-    const sessionId = getSessionId();
+  async ({ userId, sessionId, currentVariantId, nextVariantId, quantity, size, price, variantTitle, inStock }) => {
+    const finalSessionId = sessionId || getSessionId();
     const response = await fetch(`/api/cart/update`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         userId,
-        sessionId,
+        sessionId: finalSessionId,
         currentVariantId,
         nextVariantId,
         quantity,
