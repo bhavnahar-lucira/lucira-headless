@@ -14,6 +14,7 @@ import {
   verifyOtpApi,
   registerCustomer,
 } from "@/lib/api";
+import { pushLogin, pushSignup } from "@/lib/gtm";
 
 export function LoginForm({ onSuccess, initialMobile = "" }) {
   const router = useRouter();
@@ -76,6 +77,14 @@ export function LoginForm({ onSuccess, initialMobile = "" }) {
       console.error("Wishlist merge failed:", err);
     }
 
+    pushLogin({
+      id: userId || "",
+      mobile: mobile || "",
+      first_name: data.user?.first_name || "",
+      last_name: data.user?.last_name || "",
+      email: data.user?.email || ""
+    });
+
     toast.success("Login Successful");
     if (onSuccess) onSuccess();
     else router.push("/");
@@ -135,6 +144,13 @@ export function LoginForm({ onSuccess, initialMobile = "" }) {
       });
 
       if (data.status === "REGISTER_SUCCESS") {
+        pushSignup({
+          id: data.user?.id || "",
+          mobile: mobile || "",
+          first_name: firstName || "",
+          last_name: lastName || "",
+          email: email || ""
+        });
         loginSuccess(data);
       }
     } catch (err) {

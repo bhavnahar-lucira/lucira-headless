@@ -20,6 +20,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { pushProductImpression, formatGtmPrice } from "@/lib/gtm";
 
 const SORT_OPTIONS = [
   { value: "best_selling", label: "Best Selling" },
@@ -158,6 +159,34 @@ export default function SearchPage() {
     });
     return Array.from(uniqueMap.values());
   }, [data]);
+
+  const trackedImpressions = useRef(new Set());
+
+  useEffect(() => {
+    if (products.length > 0) {
+      const newProducts = products.filter(p => {
+        const id = p.shopifyId || p.id;
+        if (!trackedImpressions.current.has(id)) {
+          trackedImpressions.current.add(id);
+          return true;
+        }
+        return false;
+      });
+
+      if (newProducts.length > 0) {
+        const impressionData = newProducts.map((prod, idx) => ({
+          id: prod.shopifyId || prod.id,
+          name: prod.title,
+          price: formatGtmPrice(prod.price?.minVariantPrice?.amount || 0),
+          brand: prod.vendor || "Lucira",
+          category: "Search Results", // Specific for search page
+          list_position: trackedImpressions.current.size - newProducts.length + idx + 1,
+          list_name: "Search Results"
+        }));
+        pushProductImpression(impressionData);
+      }
+    }
+  }, [products, query]);
 
   const totalCount = data?.pages[0]?.pagination.total || 0;
   const reachedEnd = products.length >= totalCount && totalCount > 0;

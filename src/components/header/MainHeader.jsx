@@ -16,6 +16,7 @@ import Link from "next/link";
 import SearchPopup from "./SearchPopup";
 import { AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
+import { pushLogout } from "@/lib/gtm";
 
 const getInitials = (name = "") =>
   name
@@ -100,6 +101,13 @@ export default function MainHeader() {
 
   const handleLogout = async () => {
     try {
+      pushLogout({
+        id: user?.id || "",
+        mobile: user?.mobile || "",
+        first_name: user?.first_name || "",
+        last_name: user?.last_name || "",
+        email: user?.email || ""
+      });
       await fetch("/api/auth/logout", { method: "POST" });
     } catch (err) {
       console.error("Logout request failed:", err);

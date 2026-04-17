@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button";
 import { ShoppingBag, ArrowRight } from "lucide-react";
 import { AuthDialog } from "@/components/auth/AuthDialog";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+import { pushViewCart, pushBeginCheckout } from "@/lib/gtm";
 
 export default function CartPage() {
   const router = useRouter();
@@ -16,7 +18,38 @@ export default function CartPage() {
   const { isAuthenticated } = useSelector((state) => state.user);
   const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
 
+  useEffect(() => {
+    if (items && items.length > 0) {
+      pushViewCart({
+        items: items.map(item => ({
+          id: item.shopifyId || item.id,
+          name: item.title,
+          price: item.price,
+          quantity: item.quantity,
+          variant: item.variantId
+        })),
+        totalQuantity,
+        totalAmount
+      });
+    }
+  }, [items, totalQuantity, totalAmount]);
+
   const handlePlaceOrder = () => {
+    // Generate beginCheckout payload
+    const cartData = {
+      items: items.map(item => ({
+        id: item.shopifyId || item.id,
+        name: item.title,
+        price: item.price,
+        quantity: item.quantity,
+        variant: item.variantId
+      })),
+      totalAmount,
+      totalQuantity
+    };
+
+    pushBeginCheckout(cartData);
+
     if (isAuthenticated) {
       router.push("/checkout/shipping");
     } else {

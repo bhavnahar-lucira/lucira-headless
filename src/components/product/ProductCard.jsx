@@ -33,6 +33,7 @@ import {
   DialogPortal,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { pushProductClick, pushAddToWishlist, pushRemoveFromWishlist, formatGtmPrice } from "@/lib/gtm";
 
 const colorMap = {
   yellow: "#E2C07E",
@@ -261,7 +262,19 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice }) => {
       <div className="space-y-4">
         <div className="group block space-y-4">
           <div className="relative aspect-square w-full bg-[#fafafa] overflow-hidden">
-            <Link href={`/products/${product.handle}`} className="block w-full h-full mix-blend-multiply">
+            <Link 
+              href={`/products/${product.handle}`} 
+              className="block w-full h-full mix-blend-multiply"
+              onClick={() => {
+                pushProductClick({
+                  id: product.shopifyId || product.id,
+                  name: product.title,
+                  price: formatGtmPrice(displayPrice),
+                  brand: product.vendor || "Lucira",
+                  category: product.category || "",
+                });
+              }}
+            >
               {galleryImages.length > 0 ? (
                 <Swiper
                   spaceBetween={0}
@@ -332,6 +345,15 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice }) => {
                       } else {
                         dispatch(removeGuestWishlistItem(productId));
                       }
+                      
+                      pushRemoveFromWishlist({
+                        id: product.shopifyId || product.id,
+                        name: product.title,
+                        price: formatGtmPrice(displayPrice),
+                        brand: product.vendor || "Lucira",
+                        category: product.category || ""
+                      });
+                      
                       toast.success("Removed from wishlist");
                     } else {
                       const payload = {
@@ -351,6 +373,14 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice }) => {
                       } else {
                         dispatch(addGuestWishlistItem(payload));
                       }
+
+                      pushAddToWishlist({
+                        id: product.shopifyId || product.id,
+                        name: product.title,
+                        price: formatGtmPrice(displayPrice),
+                        brand: product.vendor || "Lucira",
+                        category: product.category || ""
+                      });
 
                       toast.success("Saved to wishlist");
                     }
@@ -519,7 +549,18 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice }) => {
             )}
 
             {/* Product Title */}
-            <Link href={`/products/${product.handle}`}>
+            <Link 
+              href={`/products/${product.handle}`}
+              onClick={() => {
+                pushProductClick({
+                  id: product.shopifyId || product.id,
+                  name: product.title,
+                  price: formatGtmPrice(displayPrice),
+                  brand: product.vendor || "Lucira",
+                  category: product.category || "",
+                });
+              }}
+            >
               <h3 className="text-xl font-bold hover:underline underline-offset-4 decoration-1 leading-snug hover:text-gray-700 transition-colors line-clamp-2 min-h-7">
                 {product.title}
               </h3>
