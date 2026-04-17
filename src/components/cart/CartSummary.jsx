@@ -7,15 +7,32 @@ import { Tag, Phone, MessageSquare, Gift, Truck, MessageCircle } from "lucide-re
 import { Input } from "@/components/ui/input";
 import Image from "next/image";
 import { useSelector } from "react-redux";
+import InsuranceOption from "./InsuranceOption";
+import { useCart } from "@/hooks/useCart";
+import { useEffect } from "react";
+
+const INSURANCE_VARIANT_ID = "gid://shopify/ProductVariant/INSURANCE_001";
 
 export default function CartSummary({ onPlaceOrder }) {
   const [isVoucherOpen, setIsVoucherOpen] = useState(false);
-  const { totalAmount, totalQuantity } = useSelector((state) => state.cart);
+  const { items, totalAmount, totalQuantity, updateCartItem } = useCart();
 
-  const subtotal = totalAmount; // For now, subtotal is totalAmount
+  const otherItemsQuantity = items
+    .filter(item => item.variantId !== INSURANCE_VARIANT_ID)
+    .reduce((acc, item) => acc + (item.quantity || 1), 0);
+
+  const insuranceItem = items.find(item => item.variantId === INSURANCE_VARIANT_ID);
+  const insuranceAmount = insuranceItem ? insuranceItem.price * (insuranceItem.quantity || 1) : 0;
+
+  // Subtotal is total cart amount MINUS insurance amount
+  const subtotal = totalAmount - insuranceAmount;
   const discount = 0; // Logic for discounts can be added later
   const shipping = 0; // Free shipping
-  const totalCost = subtotal - discount + shipping;
+  const grandTotal = subtotal + insuranceAmount - discount + shipping;
+
+  const handleRemoveInsurance = async () => {
+    await removeFromCart(INSURANCE_VARIANT_ID);
+  };
 
   const coupons = [
     { code: "PRESET10", description: "Flat 10% off on Preset Solitaires" },
@@ -39,14 +56,20 @@ export default function CartSummary({ onPlaceOrder }) {
             <span className="font-bold">- ₹ {discount.toLocaleString('en-IN')}</span>
           </div>
         )}
+        {insuranceItem && (
+          <div className="flex justify-between text-sm text-zinc-600">
+            <span>Insurance</span>
+            <span className="font-medium text-zinc-900">₹ {insuranceAmount.toLocaleString('en-IN')}</span>
+          </div>
+        )}
         <div className="flex justify-between text-sm text-[#189351]">
           <span>Shipping (Standard)</span>
           <span className="font-bold">Free</span>
         </div>
         
         <div className="border-t border-zinc-100 my-4 pt-4 flex justify-between items-center">
-          <span className="text-base font-bold text-[#443360] uppercase tracking-wider">TOTAL COST</span>
-          <span className="text-lg font-bold text-[#443360]">₹ {totalCost.toLocaleString('en-IN')}</span>
+          <span className="text-base font-bold text-[#443360] uppercase tracking-wider">GRAND TOTAL</span>
+          <span className="text-lg font-bold text-[#443360]">₹ {grandTotal.toLocaleString('en-IN')}</span>
         </div>
       </div>
 
@@ -119,6 +142,8 @@ export default function CartSummary({ onPlaceOrder }) {
             Voucher only applicable on sparkle100 jewellery.
           </p>
         </div>
+
+        <InsuranceOption />
       </div>
 
       {/* Contact Section (Same as Shipping/Payment) */}
