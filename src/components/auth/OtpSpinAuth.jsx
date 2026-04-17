@@ -62,6 +62,8 @@ export function OtpSpinAuth({ onSuccess, onClose, initialMobile = "" }) {
   const [consent, setConsent] = useState(true);
 
   const otpRefs = [useRef(), useRef(), useRef(), useRef()];
+  const mobileRef = useRef();
+  const firstNameRef = useRef();
   const timerRef = useRef();
 
   useEffect(() => {
@@ -90,6 +92,17 @@ export function OtpSpinAuth({ onSuccess, onClose, initialMobile = "" }) {
     }
   }, [step]);
 
+  // Focus management for different steps
+  useEffect(() => {
+    if (step === "login") {
+      setTimeout(() => mobileRef.current?.focus(), 100);
+    } else if (step === "otp") {
+      setTimeout(() => otpRefs[0]?.current?.focus(), 100);
+    } else if (step === "register") {
+      setTimeout(() => firstNameRef.current?.focus(), 100);
+    }
+  }, [step]);
+
   const handleAutoFillOtp = (code) => {
     const cleanCode = code.replace(/\D/g, "").slice(0, 4);
     if (cleanCode.length === 4) {
@@ -98,15 +111,17 @@ export function OtpSpinAuth({ onSuccess, onClose, initialMobile = "" }) {
     }
   };
 
-  const loginSuccess = async (data) => {
-    const userId = data.user?.id;
+  const loginSuccess = async (data, skipRedirect = false) => {
+    const user = data.user || data.customer;
+    const userId = user?.id;
+    
     dispatch(
       login({
         id: userId,
         mobile,
         name:
-          data.user?.first_name && data.user?.last_name
-            ? `${data.user.first_name} ${data.user.last_name}`
+          user?.first_name && user?.last_name
+            ? `${user.first_name} ${user.last_name}`
             : "User",
       })
     );
@@ -122,10 +137,12 @@ export function OtpSpinAuth({ onSuccess, onClose, initialMobile = "" }) {
     await dispatch(mergeCart({ userId })).unwrap();
     await dispatch(mergeGuestWishlist()).unwrap();
 
-    toast.success("Login Successful");
-    if (onSuccess) onSuccess();
-    else router.push("/");
-    router.refresh();
+    if (!skipRedirect) {
+      toast.success("Login Successful");
+      if (onSuccess) onSuccess();
+      else router.push("/");
+      router.refresh();
+    }
   };
 
   const handleSendOtp = async () => {
@@ -149,9 +166,9 @@ export function OtpSpinAuth({ onSuccess, onClose, initialMobile = "" }) {
     setLoading(true);
     try {
       const data = await verifyOtpApi(mobile, otpValue);
-      if (data.status === "REGISTER_REQUIRED") {
+      if (data.status === "REGISTER_REQUIRED" || data.type === "register") {
         setStep("register");
-      } else if (data.status === "LOGIN") {
+      } else if (data.status === "LOGIN" || data.type === "success") {
         loginSuccess(data);
       }
     } catch (err) {
@@ -169,6 +186,22 @@ export function OtpSpinAuth({ onSuccess, onClose, initialMobile = "" }) {
 
     if (value && index < 3) {
       otpRefs[index + 1].current.focus();
+    }
+    
+    // Auto-verify if 4 digits are entered
+    if (index === 3 && value) {
+      const finalOtp = [...newOtp];
+      finalOtp[3] = value.slice(-1);
+      if (finalOtp.every(d => d !== "")) {
+        // We call it after a tiny delay so the last digit is visible
+        setTimeout(() => {
+           const otpVal = finalOtp.join("");
+           if (otpVal.length === 4) {
+             // We can optionally auto-verify here
+             // handleVerifyOtp(); 
+           }
+        }, 50);
+      }
     }
   };
 
@@ -219,7 +252,8 @@ export function OtpSpinAuth({ onSuccess, onClose, initialMobile = "" }) {
           prizeLabel: prize.label,
         });
 
-        if (data.status === "REGISTER_SUCCESS") {
+        if (data.status === "REGISTER_SUCCESS" || data.type === "success") {
+          loginSuccess(data, true);
           setStep("success");
         }
       } catch (err) {
@@ -423,7 +457,14 @@ export function OtpSpinAuth({ onSuccess, onClose, initialMobile = "" }) {
                 📋
               </button>
             </div>
-            <button className="btn-primary mt-4" onClick={() => loginSuccess({ user: { id: mobile, first_name: firstName, last_name: lastName } })}>
+            <button 
+              className="btn-primary mt-4" 
+              onClick={() => {
+                if (onSuccess) onSuccess();
+                else router.push("/");
+                router.refresh();
+              }}
+            >
               CONTINUE SHOPPING
             </button>
           </div>

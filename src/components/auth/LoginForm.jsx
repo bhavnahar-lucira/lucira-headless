@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
@@ -27,6 +27,10 @@ export function LoginForm({ onSuccess, initialMobile = "" }) {
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
 
+  const mobileRef = useRef();
+  const otpRef = useRef();
+  const firstNameRef = useRef();
+
   const validMobileNum = (num) => /^[6-9]\d{9}$/.test(String(num || "").trim());
   const validMobile = () => validMobileNum(mobile);
 
@@ -36,17 +40,29 @@ export function LoginForm({ onSuccess, initialMobile = "" }) {
     }
   }, [initialMobile]);
 
+  useEffect(() => {
+    if (step === "login") {
+      setTimeout(() => mobileRef.current?.focus(), 100);
+    } else if (step === "otp-login") {
+      setTimeout(() => otpRef.current?.focus(), 100);
+    } else if (step === "register") {
+      setTimeout(() => firstNameRef.current?.focus(), 100);
+    }
+  }, [step]);
+
   const loginSuccess = async (data) => {
-    const userId = data.user?.id;
+    const user = data.user || data.customer;
+    const userId = user?.id;
+    
     dispatch(
       login({
         id: userId,
         mobile,
-        first_name: data.user?.first_name,
-        last_name: data.user?.last_name,
+        first_name: user?.first_name,
+        last_name: user?.last_name,
         name:
-          data.user?.first_name && data.user?.last_name
-            ? `${data.user.first_name} ${data.user.last_name}`
+          user?.first_name && user?.last_name
+            ? `${user.first_name} ${user.last_name}`
             : "User",
       })
     );
@@ -104,12 +120,12 @@ export function LoginForm({ onSuccess, initialMobile = "" }) {
       setLoading(true);
       const data = await verifyOtpApi(mobile, otp);
 
-      if (data.status === "REGISTER_REQUIRED") {
+      if (data.status === "REGISTER_REQUIRED" || data.type === "register") {
         setStep("register");
         return;
       }
 
-      if (data.status === "LOGIN") {
+      if (data.status === "LOGIN" || data.type === "success") {
         loginSuccess(data);
       }
     } catch (err) {
@@ -134,7 +150,7 @@ export function LoginForm({ onSuccess, initialMobile = "" }) {
         mobile,
       });
 
-      if (data.status === "REGISTER_SUCCESS") {
+      if (data.status === "REGISTER_SUCCESS" || data.type === "success") {
         loginSuccess(data);
       }
     } catch (err) {
@@ -149,6 +165,7 @@ export function LoginForm({ onSuccess, initialMobile = "" }) {
       {step === "login" && (
         <>
           <Input
+            ref={mobileRef}
             placeholder="Mobile"
             value={mobile}
             onChange={(e) => setMobile(e.target.value)}
@@ -173,6 +190,7 @@ export function LoginForm({ onSuccess, initialMobile = "" }) {
       {step === "otp-login" && (
         <>
           <Input
+            ref={otpRef}
             placeholder="Enter OTP"
             value={otp}
             onChange={(e) => setOtp(e.target.value)}
@@ -196,6 +214,7 @@ export function LoginForm({ onSuccess, initialMobile = "" }) {
           </div>
 
           <Input
+            ref={firstNameRef}
             placeholder="First Name"
             value={firstName}
             onChange={(e) => setFirstName(e.target.value)}
