@@ -77,6 +77,7 @@ export default function HeroBanner() {
                       alt="Hero Banner"
                       fill
                       priority
+                      fetchPriority="high"
                       className="object-cover"
                     />
                   ) : (

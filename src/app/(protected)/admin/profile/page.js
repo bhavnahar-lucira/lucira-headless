@@ -1,13 +1,18 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useDispatch } from "react-redux";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { User, Mail, Phone, Bell, ChevronRight, Save, Camera, ShoppingBag, Star, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "react-toastify";
+import { logout } from "@/redux/features/user/userSlice";
 
 export default function MyProfilePage() {
+  const dispatch = useDispatch();
+  const router = useRouter();
   const [profileImage, setProfileImage] = useState("/images/signature.png"); // Fallback
   const [isUploading, setIsUploading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -38,6 +43,11 @@ export default function MyProfilePage() {
               phone: data.customer.phone || ""
             });
           }
+        } else if (res.status === 401 || res.status === 404) {
+          // Session expired or customer not found
+          dispatch(logout());
+          router.push("/login");
+          return;
         }
 
         // Fetch Avatar from MongoDB/Local
@@ -53,7 +63,7 @@ export default function MyProfilePage() {
       }
     }
     loadProfile();
-  }, []);
+  }, [dispatch, router]);
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));

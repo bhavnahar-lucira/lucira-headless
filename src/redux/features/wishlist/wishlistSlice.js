@@ -1,27 +1,49 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { fetchWishlistApi, addWishlistApi, removeWishlistApi } from "@/lib/api";
+import { logout } from "../user/userSlice";
 
 export const fetchWishlist = createAsyncThunk(
   "wishlist/fetchWishlist",
-  async () => {
-    const data = await fetchWishlistApi();
-    return data.items || [];
+  async (_, { dispatch }) => {
+    try {
+      const data = await fetchWishlistApi();
+      return data.items || [];
+    } catch (err) {
+      if (err.message === "Customer not found" || err.message === "Unauthorized") {
+        dispatch(logout());
+      }
+      throw err;
+    }
   }
 );
 
 export const addWishlistItem = createAsyncThunk(
   "wishlist/addWishlistItem",
-  async (payload) => {
-    const data = await addWishlistApi(payload);
-    return data.item;
+  async (payload, { dispatch }) => {
+    try {
+      const data = await addWishlistApi(payload);
+      return data.item;
+    } catch (err) {
+      if (err.message === "Customer not found" || err.message === "Unauthorized") {
+        dispatch(logout());
+      }
+      throw err;
+    }
   }
 );
 
 export const removeWishlistItem = createAsyncThunk(
   "wishlist/removeWishlistItem",
-  async (productId) => {
-    await removeWishlistApi(productId);
-    return productId;
+  async (productId, { dispatch }) => {
+    try {
+      await removeWishlistApi(productId);
+      return productId;
+    } catch (err) {
+      if (err.message === "Customer not found" || err.message === "Unauthorized") {
+        dispatch(logout());
+      }
+      throw err;
+    }
   }
 );
 
