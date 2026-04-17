@@ -75,17 +75,6 @@ export default function CartSummary({ onPlaceOrder }) {
 
       {/* Actions (Voucher, Gift, Place Order) */}
       <div className="space-y-4">
-        <div className="bg-zinc-50 p-3 rounded-lg flex items-center justify-between group cursor-pointer hover:bg-zinc-100 transition-colors border border-zinc-100">
-          <div className="flex flex-col">
-            <span className="text-xs font-bold text-zinc-800">Gift Message</span>
-            <span className="text-[10px] text-zinc-500 uppercase font-bold tracking-widest">(Optional)</span>
-          </div>
-          <div className="flex items-center gap-1.5 text-[#005BD3] text-xs font-bold uppercase tracking-wider">
-            <Gift size={14} />
-            Add
-          </div>
-        </div>
-
         <Button 
           onClick={onPlaceOrder}
           className="w-full bg-primary hover:bg-primary/90 text-white font-bold h-14 uppercase tracking-[0.2em] shadow-lg shadow-zinc-100 transition-all rounded-lg text-base"
@@ -141,6 +130,17 @@ export default function CartSummary({ onPlaceOrder }) {
           <p className="text-[10px] text-red-500 font-medium italic">
             Voucher only applicable on sparkle100 jewellery.
           </p>
+        </div>
+
+        <div className="bg-zinc-50 p-3 rounded-lg flex items-center justify-between group cursor-pointer hover:bg-zinc-100 transition-colors border border-zinc-100">
+          <div className="flex flex-col">
+            <span className="text-xs font-bold text-zinc-800">Gift Message</span>
+            <span className="text-[10px] text-zinc-500 uppercase font-bold tracking-widest">(Optional)</span>
+          </div>
+          <div className="flex items-center gap-1.5 text-[#005BD3] text-xs font-bold uppercase tracking-wider">
+            <Gift size={14} />
+            Add
+          </div>
         </div>
 
         <InsuranceOption />
