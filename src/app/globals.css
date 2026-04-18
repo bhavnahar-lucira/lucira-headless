@@ -51,6 +51,10 @@
   /*font-family*/
   --font-abhaya: var(--font-abhaya);
   --font-figtree: var(--font-figtree);
+  --font-lobster: var(--font-lobster);
+  --font-yellowtail: var(--font-yellowtail);
+  --font-satisfy: var(--font-satisfy);
+  --font-abeezee: var(--font-abeezee);
   --color-success: var(--success);
 }
   :root {
