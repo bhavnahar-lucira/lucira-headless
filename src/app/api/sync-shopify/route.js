@@ -18,10 +18,18 @@ export async function GET() {
   } catch (error) { return NextResponse.json({ error: error.message }, { status: 500 }); }
 }
 
-export async function POST() {
+export async function POST(req) {
   const SHOPIFY_DOMAIN = process.env.SHOPIFY_STORE;
   const ACCESS_TOKEN = process.env.SHOPIFY_ADMIN_TOKEN;
   if (!SHOPIFY_DOMAIN || !ACCESS_TOKEN) return NextResponse.json({ error: "Missing Shopify credentials" }, { status: 500 });
+
+  let startCursor = null;
+  let startProcessed = 0;
+  try {
+    const body = await req.json().catch(() => ({}));
+    startCursor = body.cursor || null;
+    startProcessed = body.totalProcessed || 0;
+  } catch (e) {}
 
   const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -40,7 +48,11 @@ export async function POST() {
         const db = client.db("next_local_db");
         const productsCollection = db.collection("products");
         
-        sendUpdate({ status: "starting", message: "Fetching Products...", progress: 0 });
+        sendUpdate({ 
+          status: "starting", 
+          message: startCursor ? `Resuming Sync from ${startProcessed} products...` : "Fetching Products...", 
+          progress: startProcessed ? Math.min(Math.round((startProcessed / 1000) * 100), 10) : 0 // Rough estimation if total unknown
+        });
 
         let totalToSync = 0;
         try {
@@ -52,8 +64,8 @@ export async function POST() {
         } catch (e) { console.error("Count fetch failed", e); }
 
         let hasNextPage = true;
-        let cursor = null;
-        let totalProcessed = 0;
+        let cursor = startCursor;
+        let totalProcessed = startProcessed;
 
         // REMOVED deleteMany to prevent 404s
 
@@ -201,11 +213,23 @@ export async function POST() {
                 ? JSON.parse(p.complementary_products.value).map(gid => gid.split("/").pop())
                 : [];
 
-              // Extract discounts for flipping offer badge from the first variant's metadata if available
-              // or from existing variant data if it was already calculated by the pricing engine
-              const firstVariant = finalVariants[0];
-              const diamondDiscount = firstVariant?.price_breakup?.diamond?.discount_percent || 0;
-              const makingDiscount = firstVariant?.price_breakup?.making_charges?.discount_percent || 0;
+              // Extract discounts and representative info following stock priority hierarchy
+              const inStockVariants = finalVariants.filter(v => v.inStock === true || v.inStock === "true");
+              const isRing = String(p.productType || "").toLowerCase().includes("ring");
+              
+              let representativeVariant = null;
+              if (inStockVariants.length > 0) {
+                // Prefer Yellow Gold in stock for Rings, otherwise first in-stock
+                if (isRing) {
+                  representativeVariant = inStockVariants.find(v => String(v.color || v.title).includes("Yellow Gold"));
+                }
+                if (!representativeVariant) representativeVariant = inStockVariants[0];
+              } else {
+                representativeVariant = finalVariants[0];
+              }
+
+              const diamondDiscount = representativeVariant?.price_breakup?.diamond?.discount_percent || 0;
+              const makingDiscount = representativeVariant?.price_breakup?.making_charges?.discount_percent || 0;
 
               const mappedProduct = {
                 shopifyId: p.id,
@@ -217,12 +241,12 @@ export async function POST() {
                 status: p.status,
                 tags: p.tags,
                 createdAt: p.createdAt,
-                image: p.featuredImage?.url || (media.find(m => m.type === "IMAGE")?.url || null),
+                image: representativeVariant?.image || p.featuredImage?.url || (media.find(m => m.type === "IMAGE")?.url || null),
                 images: media.filter(m => m.type === "IMAGE").map(m => ({ url: m.url, alt: m.alt })),
                 media: media,
-                price: firstVariant?.price || 0,
-                compare_price: firstVariant?.compare_price || null,
-                selectedColor: firstVariant?.color,
+                price: representativeVariant?.price || 0,
+                compare_price: representativeVariant?.compare_price || null,
+                selectedColor: representativeVariant?.color,
                 colors: [...new Set(finalVariants.map(v => v.color).filter(Boolean))],
                 variants: finalVariants,
                 diamondDiscount,
@@ -261,10 +285,17 @@ export async function POST() {
             }
 
             totalProcessed += products.length;
-            sendUpdate({ status: "progress", message: `Synced ${totalProcessed} products...`, progress: Math.min(Math.round((totalProcessed / totalToSync) * 100), 99) });
+            cursor = result.data?.products?.pageInfo?.endCursor;
+            sendUpdate({ 
+              status: "progress", 
+              message: `Synced ${totalProcessed} products...`, 
+              progress: Math.min(Math.round((totalProcessed / totalToSync) * 100), 99),
+              cursor: cursor,
+              totalProcessed: totalProcessed
+            });
           }
           hasNextPage = result.data?.products?.pageInfo?.hasNextPage;
-          cursor = result.data?.products?.pageInfo?.endCursor;
+          // cursor already updated above from pageInfo.endCursor
 
           if (hasNextPage) {
             await sleep(2000);

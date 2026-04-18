@@ -6,6 +6,12 @@ import { calculatePriceBreakup } from "@/lib/priceEngine";
 export const dynamic = "force-dynamic";
 
 export async function POST(req) {
+  let skip = 0;
+  try {
+    const body = await req.json().catch(() => ({}));
+    skip = body.skip || 0;
+  } catch (e) {}
+
   const { searchParams } = new URL(req.url);
   const shopifyId = searchParams.get("shopifyId");
 
@@ -59,11 +65,20 @@ export async function POST(req) {
           return;
         }
 
-        sendUpdate({ status: "starting", message: `Syncing variants for ${productsToSync.length} products...`, progress: 0 });
+        sendUpdate({ 
+          status: "starting", 
+          message: skip > 0 ? `Resuming variant sync from ${skip}...` : `Syncing variants for ${productsToSync.length} products...`, 
+          progress: skip > 0 ? Math.round((skip / productsToSync.length) * 100) : 0 
+        });
 
-        for (let i = 0; i < productsToSync.length; i++) {
+        for (let i = skip; i < productsToSync.length; i++) {
           const p = productsToSync[i];
-          sendUpdate({ status: "progress", message: `Fetching variants for ${p.title}...`, progress: Math.round((i / productsToSync.length) * 100) });
+          sendUpdate({ 
+            status: "progress", 
+            message: `Fetching variants for ${p.title}...`, 
+            progress: Math.round((i / productsToSync.length) * 100),
+            skip: i
+          });
 
           const variantQuery = `
             query getProductVariants($id: ID!) {

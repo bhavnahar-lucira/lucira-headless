@@ -67,7 +67,7 @@ function getUniqueBaseColors(colors = []) {
 function getVariantForBase(product, selectedBase) {
   // 1. Prefer in-stock variant for the selected base
   const inStockVariant = product?.variants?.find(
-    (v) => v.inStock && getBaseColor(v.color || v.title) === selectedBase
+    (v) => (v.inStock === true || v.inStock === "true") && getBaseColor(v.color || v.title) === selectedBase
   );
   if (inStockVariant) return inStockVariant;
 
@@ -85,12 +85,12 @@ function getImagesForBase(product, selectedBase) {
     ? product.images?.filter((image) => String(image.alt || "").toLowerCase().includes(selectedBase))
     : [];
 
+  // If we have specific matches for this color base, use them exclusively
+  if (baseMatches?.length > 0) return baseMatches;
+
   if (variant?.image) {
     const variantImageMatches = product.images?.filter((image) => image.url === variant.image);
-    if (variantImageMatches?.length > 0) {
-      if (baseMatches?.length > 0) return baseMatches;
-      return variantImageMatches;
-    }
+    if (variantImageMatches?.length > 0) return variantImageMatches;
 
     // Fallback if image URL is not in the list but we have the URL
     return [{ url: variant.image, alt: variant.color || product.title }];
@@ -113,18 +113,67 @@ function getImagesForBase(product, selectedBase) {
   return product.images;
 }
 
-const ProductCard = ({ product, fixedPrice, fixedComparePrice }) => {
+function getPrioritizedVariant(product, collectionHandle) {
+  if (!product?.variants || product.variants.length === 0) return null;
+
+  const variants = product.variants;
+  // Handle both boolean and string stock status + check quantity fields as fallback
+  const inStockVariants = variants.filter(v => 
+    v.inStock === true || 
+    v.inStock === "true" || 
+    (v.inventory_quantity !== undefined && v.inventory_quantity > 0) ||
+    (v.inventoryQuantity !== undefined && v.inventoryQuantity > 0)
+  );
+
+  // 1. Exception Logic (Promote 9KT) - Only for 9kt-collection
+  if (collectionHandle === "9kt-collection") {
+    const nineKT = variants.filter(v => String(v.color || v.title).includes("9KT"));
+    if (nineKT.length > 0) {
+      const inStock9KT = nineKT.find(v => 
+        v.inStock === true || 
+        v.inStock === "true" ||
+        (v.inventory_quantity !== undefined && v.inventory_quantity > 0)
+      );
+      if (inStock9KT) return inStock9KT;
+      return nineKT[0];
+    }
+  }
+
+  // 2. Primary Logic: Find first in-stock variant (Matches Product Page logic)
+  if (inStockVariants.length > 0) {
+    const type = String(product.type || "").toLowerCase();
+    if (type.includes("ring")) {
+      // For Rings, we still try to prioritize Yellow Gold IF it's in stock, 
+      // but otherwise we take the very first in-stock item found (like Rose Gold).
+      const ygInStock = inStockVariants.find(v => String(v.color || v.title).includes("Yellow Gold"));
+      if (ygInStock) return ygInStock;
+    }
+    return inStockVariants[0];
+  }
+
+  // 3. Fallback: First variant
+  return variants[0];
+}
+
+const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle }) => {
   const baseColors = getUniqueBaseColors(product.colors || product.variants?.map((v) => v.color) || []);
   
-  // Find first in-stock variant to set as initial active base
-  const firstInStockVariant = product.variants?.find(v => v.inStock);
-  const initialBase = product.selectedColor
-    ? getBaseColor(product.selectedColor)
-    : firstInStockVariant
-      ? getBaseColor(firstInStockVariant.color || firstInStockVariant.title)
-      : getBaseColor(baseColors[0] || "white");
+  // Apply Global Variant Priority Hierarchy
+  const prioritizedVariant = useMemo(() => getPrioritizedVariant(product, collectionHandle), [product, collectionHandle]);
+  
+  const initialBase = useMemo(() => {
+    if (product.selectedColor) return getBaseColor(product.selectedColor);
+    if (prioritizedVariant) return getBaseColor(prioritizedVariant.color || prioritizedVariant.title);
+    return getBaseColor(baseColors[0] || "white");
+  }, [product.selectedColor, prioritizedVariant, baseColors]);
 
   const [activeBase, setActiveBase] = useState(initialBase);
+
+  // Synchronize activeBase when prioritizedVariant changes
+  useEffect(() => {
+    setActiveBase(initialBase);
+  }, [initialBase]);
+
   const [loadedImages, setLoadedImages] = useState({});
 
   // Reset loaded images when color base changes to show loader for new images
@@ -152,9 +201,10 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice }) => {
 
   const currentVariant = getVariantForBase(product, activeBase);
 
-  // Keep price consistent regardless of color swatch selection
-  const displayPrice = fixedPrice ?? (product.price ?? currentVariant?.price);
-  const displayComparePrice = fixedComparePrice ?? (product.compare_price ?? product.compareAtPrice ?? currentVariant?.compare_price ?? currentVariant?.compareAtPrice);
+  // Requirement: Lock price to the prioritized (in-stock) variant. 
+  // Clicking swatches should only change images, not the price.
+  const displayPrice = fixedPrice ?? (prioritizedVariant?.price ?? product.price);
+  const displayComparePrice = fixedComparePrice ?? (prioritizedVariant?.compare_price ?? prioritizedVariant?.compareAtPrice ?? product.compare_price ?? product.compareAtPrice);
 
    const hasDiscount = displayPrice > 0 && displayPrice < displayComparePrice;
     const discountPercent = hasDiscount

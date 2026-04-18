@@ -60,8 +60,8 @@ export async function POST(req) {
                 items: cart.items,
                 updatedAt: new Date(),
                 userId,
+                sessionId: sessionId || cart.sessionId || null,
               },
-              $unset: { sessionId: "" },
             }
           : {
               $set: {

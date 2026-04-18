@@ -58,7 +58,9 @@ export async function POST(req) {
           customAttributes: [
             { key: "_Gold Weight", value: String(item.goldWeight || "") },
             { key: "_Diamond Charges", value: String(item.diamondCharges || "") },
-            { key: "Variant Title", value: String(item.variantTitle || "") }
+            { key: "Variant Title", value: String(item.variantTitle || "") },
+            { key: "Engraving Text", value: String(item.engravingText || "") },
+            { key: "Engraving Font", value: String(item.engravingFont || "") }
           ].filter(attr => attr.value !== "")
         };
 

@@ -145,6 +145,8 @@ export async function POST(req) {
         httpOnly: true,
         path: "/",
         maxAge,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
       });
       return res;
     }

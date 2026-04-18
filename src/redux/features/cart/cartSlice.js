@@ -40,7 +40,7 @@ export const removeFromCart = createAsyncThunk(
   async ({ userId, sessionId, variantId }) => {
     const finalSessionId = sessionId || getSessionId();
     const response = await fetch(`/api/cart/remove`, {
-      method: 'DELETE',
+      method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ userId, sessionId: finalSessionId, variantId }),
     });

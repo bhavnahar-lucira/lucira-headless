@@ -58,6 +58,15 @@ import {
   fetchWishlist,
 } from "@/redux/features/wishlist/wishlistSlice";
 import { addRecentlyViewed, selectRecentlyViewed } from "@/redux/features/recentlyViewed/recentlyViewedSlice";
+import AtcBar from "@/components/AtcBar";
+
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 
 // Force en-IN formatting to be consistent across environments
 const formatPrice = (num) => {
@@ -100,20 +109,70 @@ export default function ProductPageClient({ product, complementaryProducts = [],
   const wishlistItems = useSelector((state) => state.wishlist.items);
   const [addingToCart, setAddingToCart] = useState(false);
   const [wishlistLoading, setWishlistLoading] = useState(false);
+  const [showStickyAtc, setShowStickyAtc] = useState(false);
+  const mainAtcRef = useRef(null);
 
   const [engraving, setEngraving] = useState("");
-  const [engravingFont, setEngravingFont] = useState("Standard");
+  const [engravingFont, setEngravingFont] = useState("Lobster");
+  const [isEngravingDrawerOpen, setIsEngravingDrawerOpen] = useState(false);
+  const [savedEngraving, setSavedEngraving] = useState({ text: "", font: "" });
+  const engravingInputRef = useRef(null);
+  
   const [giftText, setGiftText] = useState("");
   const [activePromoSlide, setActivePromoSlide] = useState(1);
   const [showSimilar, setShowSimilar] = useState(false);
   const [similarProducts, setSimilarProducts] = useState([]);
   const [loadingSimilar, setLoadingSimilar] = useState(false);
 
+  const hasEngraving = product.tags?.some(tag => tag.toLowerCase() === "engraving available");
+
   const slugify = (text) => text?.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '') || "";
 
   const productId = product.shopifyId || product.id || product.handle;
   const isWishlisted = productId ? wishlistItems.some((item) => item.productId === productId) : false;
   const recentlyViewedState = useSelector(selectRecentlyViewed);
+
+  const handleSaveEngraving = () => {
+    setSavedEngraving({ text: engraving, font: engravingFont });
+    setIsEngravingDrawerOpen(false);
+  };
+
+  const insertSymbol = (symbol) => {
+    if (!engravingInputRef.current) return;
+    
+    const input = engravingInputRef.current;
+    const start = input.selectionStart || 0;
+    const end = input.selectionEnd || 0;
+    const text = engraving;
+    
+    if (text.length >= 8) return;
+
+    const newText = text.substring(0, start) + symbol + text.substring(end);
+    setEngraving(newText.substring(0, 8));
+    
+    // Focus back and set cursor
+    setTimeout(() => {
+      input.focus();
+      const newPos = start + symbol.length;
+      input.setSelectionRange(newPos, newPos);
+    }, 0);
+  };
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        // Show sticky bar when main ATC is NOT visible
+        setShowStickyAtc(!entry.isIntersecting);
+      },
+      { threshold: 0 }
+    );
+
+    if (mainAtcRef.current) {
+      observer.observe(mainAtcRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     if (user?.id) {
@@ -205,10 +264,10 @@ export default function ProductPageClient({ product, complementaryProducts = [],
         size: selectedSize,
         availableSizes: availableSizes,
         variantOptions,
-        engraving: engraving,
+        engraving: savedEngraving.text,
         // Requested technical fields
-        engravingText: engraving,
-        engravingFont: engravingFont,
+        engravingText: savedEngraving.text,
+        engravingFont: savedEngraving.font,
         giftText: giftText,
         shippingDate: "13/04/2026", 
         goldPricePerGram: raw?.metal?.rate_per_gram || 0,
@@ -395,6 +454,16 @@ export default function ProductPageClient({ product, complementaryProducts = [],
 
   return (
     <div className="w-full">
+      <AtcBar 
+        isVisible={showStickyAtc} 
+        product={product} 
+        activeVariant={activeVariant}
+        onAddToCart={handleAddToCart}
+        addingToCart={addingToCart}
+        onToggleWishlist={handleToggleWishlist}
+        isWishlisted={isWishlisted}
+        wishlistLoading={wishlistLoading}
+      />
       <div className="max-w-480 mx-auto px-17 min-[1440px]:px-17">
         {/* Breadcrumb */}
         <Breadcrumb className="py-5">
@@ -620,83 +689,162 @@ export default function ProductPageClient({ product, complementaryProducts = [],
             </div>
 
             {/* Engraving */}
-            <div className="mt-4 mb-6">
-              <div className="space-y-2">
-                <h3 className="font-semibold text-base">Complimentary Engraving (optional)</h3>
-                <p className="text-sm text-black leading-relaxed font-medium">
-                  Personalise your ring with a custom engraving. Your chosen message will
-                  be carefully laser-engraved on the inner band.
-                </p>
+            {hasEngraving && (
+              <div className="mt-4 mb-6">
+                <div className="space-y-2">
+                  <h3 className="font-semibold text-base">Complimentary Engraving (optional)</h3>
+                  <p className="text-sm text-black leading-relaxed font-medium">
+                    Personalise your ring with a custom engraving. Your chosen message will
+                    be carefully laser-engraved on the inner band.
+                  </p>
+                </div>
+
+                <Sheet open={isEngravingDrawerOpen} onOpenChange={setIsEngravingDrawerOpen}>
+                  <SheetTrigger asChild>
+                    <div className="flex gap-4 items-center mt-4 group cursor-pointer">
+                      <div className="relative flex-1">
+                        <div className="h-12 bg-white border border-gray-300 rounded-md px-4 flex items-center text-gray-400 text-sm group-hover:border-primary transition-colors">
+                          {savedEngraving.text ? (
+                            <span style={{ fontFamily: `var(--font-${savedEngraving.font.toLowerCase()})` }} className="text-black text-base">
+                              {savedEngraving.text}
+                            </span>
+                          ) : (
+                            "Type your text here"
+                          )}
+                        </div>
+                        <Button variant="ghost" className="absolute right-2 top-1/2 -translate-y-1/2 text-sm font-bold text-gray-400 group-hover:text-primary">
+                          ENGRAVE
+                        </Button>
+                      </div>                
+                    </div>
+                  </SheetTrigger>
+                  <SheetContent side="right" className="w-full sm:max-w-[450px] p-0 flex flex-col">
+                    <SheetHeader className="p-6 border-b border-gray-100 flex flex-row items-center justify-between">
+                      <SheetTitle className="text-lg font-bold">Engraving</SheetTitle>
+                    </SheetHeader>
+                    
+                    <div className="flex-1 overflow-y-auto">
+                      {/* Ring Preview */}
+                      <div className="relative w-full aspect-[16/9] bg-[#F9F9F9] flex items-center justify-center overflow-hidden">
+                        <Image 
+                          src="/images/engraving_bg.jpg" 
+                          alt="Ring band preview" 
+                          fill 
+                          className="object-cover"
+                        />
+                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                          {engraving && (
+                            <div 
+                              style={{ 
+                                fontFamily: `var(--font-${engravingFont.toLowerCase()})`,
+                                textShadow: "0.5px 0.5px 1px rgba(255,255,255,0.8), -0.5px -0.5px 1px rgba(0,0,0,0.1)"
+                              }} 
+                              className="text-gray-700 text-lg sm:text-xl tracking-wider opacity-70 italic mt-[-15%]"
+                            >
+                              {engraving}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="p-6 space-y-8">
+                        <div className="space-y-3">
+                          <p className="text-sm font-medium text-black leading-relaxed">
+                            <span className="font-bold">Note:</span> Text can only contain up to 8 English/alphanumeric characters (A-Z, a-z, 0-9) and special characters (heart and infinity).
+                          </p>
+                        </div>
+
+                        <div className="space-y-4">
+                          <h4 className="text-base font-bold">Choose a Font <span className="text-rose-500">*</span></h4>
+                          <div className="grid grid-cols-2 gap-3">
+                            {["Lobster", "Yellowtail", "Satisfy", "ABeeZee"].map((font) => (
+                              <button
+                                key={font}
+                                onClick={() => setEngravingFont(font)}
+                                className={`px-4 py-2.5 rounded-lg border text-sm transition-all ${
+                                  engravingFont === font 
+                                    ? "border-primary bg-primary/5 text-primary font-bold shadow-sm" 
+                                    : "border-gray-200 text-gray-600 hover:border-gray-300"
+                                }`}
+                              >
+                                <span style={{ fontFamily: `var(--font-${font.toLowerCase()})` }} className="text-base">Aa - {font}</span>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div className="space-y-4">
+                          <h4 className="text-base font-bold">Inner Engraving <span className="text-rose-500">*</span></h4>
+                          <div className="flex gap-3 items-center">
+                            <div className="relative flex-1">
+                              <Input
+                                ref={engravingInputRef}
+                                value={engraving}
+                                maxLength={8}
+                                onChange={(e) => setEngraving(e.target.value)}
+                                placeholder="Type your text here"
+                                className="h-12 border-gray-300 pr-4 text-base"
+                                style={{ fontFamily: `var(--font-${engravingFont.toLowerCase()})` }}
+                              />
+                            </div>
+                            <div className="flex gap-2">
+                              <button 
+                                onClick={() => insertSymbol("♥")}
+                                className="w-10 h-10 flex items-center justify-center border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                              >
+                                <span className="text-xl text-black">♥</span>
+                              </button>
+                              <button 
+                                onClick={() => insertSymbol("∞")}
+                                className="w-10 h-10 flex items-center justify-center border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                              >
+                                <span className="text-xl">∞</span>
+                              </button>
+                            </div>
+                          </div>
+                          <div className="text-right text-xs text-gray-400">
+                            {engraving.length}/8 characters
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="p-6 border-t border-gray-100">
+                      <Button 
+                        onClick={handleSaveEngraving}
+                        className="w-full h-12 font-bold rounded-full uppercase tracking-wider disabled:opacity-50"
+                        disabled={!engraving}
+                      >
+                        SAVE
+                      </Button>
+                    </div>
+                  </SheetContent>
+                </Sheet>
+
+                {savedEngraving.text && (
+                  <div className="mt-3 flex items-center gap-2 text-primary font-semibold text-sm bg-primary/5 w-fit px-3 py-1.5 rounded-full border border-primary/10">
+                    <Check size={14} />
+                    Engraving Saved: 
+                    <span style={{ fontFamily: `var(--font-${savedEngraving.font.toLowerCase()})` }} className="ml-1 text-base underline decoration-dotted">
+                      {savedEngraving.text}
+                    </span>
+                    <button 
+                      onClick={() => {
+                        setSavedEngraving({ text: "", font: "" });
+                        setEngraving("");
+                      }}
+                      className="ml-2 p-1 hover:bg-primary/10 rounded-full transition-colors"
+                    >
+                      <X size={12} />
+                    </button>
+                  </div>
+                )}
               </div>
-              <div className="flex gap-4 items-center mt-4">
-                <div className="relative flex-1">
-                  <Input
-                    value={engraving}
-                    maxLength={20}
-                    onChange={(e)=>setEngraving(e.target.value)}
-                    placeholder="Enter name, date, initials"
-                    className="h-12 bg-white border-gray-300 pr-16 text-sm"
-                  />
-                  <Button variant="ghost" className="absolute right-2 top-1/2 -translate-y-1/2 text-sm font-bold text-gray-400 hover:cursor-pointer">
-                    DONE
-                  </Button>
-                </div>                
-              </div>
-              <div className="text-right text-base text-black mt-1 leading-6">
-                {engraving.length}/20
-              </div>
-            </div>
+            )}
             
             {/* Action Buttons */}
             <div className="space-y-2 mb-4">
-              <div className="flex gap-2">
-                <Button 
-                  onClick={handleAddToCart}
-                  disabled={addingToCart}
-                  className="flex-1 h-12 text-lg font-bold  rounded-md hover:cursor-pointer"
-                >
-                  {addingToCart ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      ADDING...
-                    </>
-                  ) : "ADD TO CART"}
-                </Button>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={handleToggleWishlist}
-                  disabled={wishlistLoading}
-                  className={`h-12 w-12 rounded-md bg-gray-50 hover:cursor-pointer ${isWishlisted ? "text-rose-500" : "text-black"}`}
-                >
-                  <Heart
-                    size={24}
-                    fill={isWishlisted ? "currentColor" : "none"}
-                    className={`${isWishlisted ? "text-rose-500" : "text-black"}`}
-                  />
-                </Button>
-              </div>
-              <div className="grid grid-cols-3 gap-2">
-                <Button variant="outline" className="h-12 font-medium text-lg flex items-center justify-center gap-2 bg-gray-50 hover:cursor-pointer">
-                  <Image src="/images/icons/engrave.svg" alt="Whatsapp icon" width={18} height={18} />
-                  <span className="hidden lg:inline text-sm">Whatsapp Us</span>
-                </Button>
-                <Button variant="outline" className="h-12 font-medium text-lg flex items-center justify-center gap-2 bg-gray-50 hover:cursor-pointer">
-                  <Video size={18} className="text-black" />
-                  <span className="hidden lg:inline text-sm">Shop Live</span>
-                </Button>
-                
-                <Drawer open={showSimilar} onOpenChange={setShowSimilar}>
-                  <DrawerTrigger asChild>
-                    <Button 
-                      variant="outline" 
-                      onClick={fetchSimilar}
-                      className="h-12 font-medium text-lg flex items-center justify-center gap-2 bg-gray-50 hover:cursor-pointer"
-                    >
-                      <Copy size={18} className="text-black" />
-                      <span className="hidden lg:inline text-sm">View Similar</span>
-                    </Button>
-                  </DrawerTrigger>
+                <Drawer open={showSimilar} onOpenChange={setShowSimilar}>                  
                   <DrawerContent className="max-h-[90vh] h-[90vh] bg-white rounded-t-[20px] flex flex-col">
                     <div className="mx-auto w-full max-w-7xl flex flex-col h-full overflow-hidden">
                       <DrawerHeader className="px-10 pt-10 flex flex-row items-center justify-between border-b border-zinc-100 pb-6 !text-left !flex-row shrink-0">
@@ -759,8 +907,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                       </div>
                     </div>
                   </DrawerContent>
-                </Drawer>
-              </div>
+                </Drawer>              
             </div>
            
             {/* Features */}
@@ -1079,6 +1226,46 @@ export default function ProductPageClient({ product, complementaryProducts = [],
             <ProductAccordion/>
             {/* Wear This With Slider */}
             {complementaryProducts.length > 0 && <WearThisWith products={complementaryProducts} />}
+                <div ref={mainAtcRef} className="py-2 bg-white sticky bottom-0 z-[90] mt-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] lg:shadow-none">
+                  <div className="flex gap-2">
+                      <Button 
+                      onClick={handleAddToCart}
+                      disabled={addingToCart}
+                      className="flex-1 h-12 text-lg font-bold  rounded-md hover:cursor-pointer"
+                      >
+                      {addingToCart ? (
+                          <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          ADDING...
+                          </>
+                      ) : "ADD TO CART"}
+                      </Button>
+                      <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={handleToggleWishlist}
+                      disabled={wishlistLoading}
+                      className={`h-12 w-12 rounded-md bg-gray-50 hover:cursor-pointer ${isWishlisted ? "text-rose-500" : "text-black"}`}
+                      >
+                      <Heart
+                          size={24}
+                          fill={isWishlisted ? "currentColor" : "none"}
+                          className={`${isWishlisted ? "text-rose-500" : "text-black"}`}
+                      />
+                      </Button>
+                  </div>
+                </div>
+
+                 <div className="grid grid-cols-2 gap-4 mt-2">
+                    <Button variant="outline" className="h-auto py-3 font-medium text-lg flex items-center justify-center gap-2 bg-gray-50 hover:cursor-pointer hover:bg-primary hover:text-white transition-all group">
+                      <Image src="/images/icons/whatsapp.png" alt="Whatsapp icon" width={24} height={24} />
+                      <span className="hidden lg:inline text-base uppercase">Whatsapp Us</span>
+                    </Button>
+                    <Button variant="outline" className="h-auto py-3 font-medium text-lg flex items-center justify-center gap-2 bg-gray-50 hover:cursor-pointer group hover:bg-primary hover:text-white transition-all">
+                      <Video size={30} className="text-black group-hover:text-white transition-all" />
+                      <span className="hidden lg:inline text-base uppercase">Shop Live</span>
+                    </Button>
+                </div>
 
           </div>
         </div>

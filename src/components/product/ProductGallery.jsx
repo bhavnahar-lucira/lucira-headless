@@ -57,7 +57,8 @@ export default function ProductGallery({ media = [], title = "", activeColor = "
     const colorOthers = others.filter(isMatch);
     const colorPool = pool.filter(isMatch);
     const colorVideos = videos.filter(isMatch);
-    const colorCerts = certificates.filter(isMatch);
+    // Certificates are universal, don't filter them by color
+    const colorCerts = groups.cert;
 
     const result = [];
     

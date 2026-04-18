@@ -259,6 +259,7 @@ export default function CollectionPage({ params: paramsPromise }) {
           <ProductCard
             key={prod.shopifyId || prod.id || `prod-${pageIdx}-${prodIdx}`}
             product={prod}
+            collectionHandle={handle}
           />
         );
       });
