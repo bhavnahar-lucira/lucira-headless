@@ -175,11 +175,11 @@ export default function CartItem({ item, onAuthRequired }) {
             </div>
             <div className="flex flex-col items-end whitespace-nowrap">
               <div className="text-xl font-bold text-zinc-900">
-                ₹ {lineAmount.toLocaleString("en-IN")}
+                ₹ {lineAmount.toLocaleString("en-IN", { maximumFractionDigits: 0 })}
               </div>
               {hasDiscount && (
                 <div className="text-sm text-zinc-400 line-through">
-                  ₹ {lineCompareAmount.toLocaleString("en-IN")}
+                  ₹ {lineCompareAmount.toLocaleString("en-IN", { maximumFractionDigits: 0 })}
                 </div>
               )}
             </div>

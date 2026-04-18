@@ -173,7 +173,7 @@ export default function CartSummary({ onPlaceOrder }) {
       <div className="space-y-3 px-1 pt-2">
         <div className="flex justify-between text-sm text-zinc-600">
           <span>Subtotal</span>
-          <span className="font-medium text-zinc-900">₹ {subtotal.toLocaleString('en-IN')}</span>
+          <span className="font-medium text-zinc-900">₹ {subtotal.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
         </div>
         {appliedCoupon && (
           <div className="flex justify-between text-sm text-[#189351]">
@@ -186,7 +186,7 @@ export default function CartSummary({ onPlaceOrder }) {
                 (Remove)
               </button>
             </div>
-            <span className="font-bold whitespace-nowrap">- ₹ {couponDiscountAmount.toLocaleString('en-IN')}</span>
+            <span className="font-bold whitespace-nowrap">- ₹ {couponDiscountAmount.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
           </div>
         )}
         {goldCoinItem && (
@@ -198,7 +198,7 @@ export default function CartSummary({ onPlaceOrder }) {
         {insuranceItem && (
           <div className="flex justify-between text-sm text-zinc-600">
             <span>Insurance</span>
-            <span className="font-medium text-zinc-900">₹ {insuranceAmount.toLocaleString('en-IN')}</span>
+            <span className="font-medium text-zinc-900">₹ {insuranceAmount.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
           </div>
         )}
         <div className="flex justify-between text-sm text-[#189351]">
@@ -208,7 +208,7 @@ export default function CartSummary({ onPlaceOrder }) {
         
         <div className="border-t border-zinc-100 my-4 pt-4 flex justify-between items-center">
           <span className="text-base font-bold text-[#443360] uppercase tracking-wider">GRAND TOTAL</span>
-          <span className="text-lg font-bold text-[#443360]">₹ {grandTotal.toLocaleString('en-IN')}</span>
+          <span className="text-lg font-bold text-[#443360]">₹ {grandTotal.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
         </div>
       </div>
 

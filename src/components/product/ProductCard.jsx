@@ -43,7 +43,11 @@ const colorMap = {
 // Force en-IN formatting to be consistent across environments
 const formatPrice = (num) => {
   if (num === null || num === undefined) return "0";
-  return new Intl.NumberFormat("en-IN").format(num);
+  const val = Math.round(Number(num));
+  return new Intl.NumberFormat("en-IN", { 
+    maximumFractionDigits: 0,
+    minimumFractionDigits: 0
+  }).format(val);
 };
 
 function getBaseColor(color = "") {
@@ -624,10 +628,10 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle 
             {/* Price Section */}
             <div className="flex items-center gap-3 mt-2">
               <p className="text-xl font-black">₹ {formatPrice(displayPrice)}</p>
-              {displayComparePrice && (
+              {displayComparePrice > displayPrice && (
                 <p className="text-base text-gray-400 line-through">₹ {formatPrice(displayComparePrice)}</p>
               )}
-              {discountPercent > 0 && (
+              {displayComparePrice > displayPrice && discountPercent > 0 && (
                 <span className="bg-[#E5E7EB] text-black px-2 py-0.5 rounded-full text-xs font-bold">
                   {discountPercent}% OFF
                 </span>

@@ -32,7 +32,7 @@ const getValidSrc = (src, fallback = "/images/product/1.jpg") => {
 
 const formatPrice = (num) => {
   if (num === null || num === undefined) return "0";
-  return new Intl.NumberFormat("en-IN").format(num);
+  return new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(num);
 };
 
 export default function WishlistPage() {

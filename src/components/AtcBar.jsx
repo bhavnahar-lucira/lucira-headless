@@ -17,7 +17,7 @@ export default function AtcBar({
 }) {
   const formatPrice = (num) => {
     if (num === null || num === undefined) return "0";
-    return new Intl.NumberFormat("en-IN").format(num);
+    return new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(num);
   };
 
   const currentPrice = activeVariant?.price || product?.price || 0;

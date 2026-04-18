@@ -11,12 +11,11 @@ import Link from "next/link";
 import Image from "next/image";
 
 const CATEGORIES = [
-  { id: 1, name: "Earrings", handle: "earrings", image: "/images/product/1.jpg" },
-  { id: 2, name: "Bracelets", handle: "bracelets", image: "/images/product/2.jpg" },
-  { id: 3, name: "Necklaces", handle: "necklaces", image: "/images/product/3.jpg" },
-  { id: 4, name: "Pendants", handle: "pendants", image: "/images/product/4.jpg" },
-  { id: 5, name: "Rings", handle: "rings", image: "/images/product/5.jpg" },
-  { id: 6, name: "Bangles", handle: "bangles", image: "/images/product/6.jpg" },
+  { id: 1, name: "Earrings", handle: "all-earrings", image: "/images/product/category/earrings.jpg" },
+  { id: 2, name: "Bracelets", handle: "all-bracelets", image: "/images/product/category/bracelets.jpg" },
+  { id: 3, name: "Necklaces", handle: "all-necklaces", image: "/images/product/category/necklaces.jpg" },
+  { id: 4, name: "Mangalsutra", handle: "mangalsutra", image: "/images/product/category/mangalsutra.jpg" },
+  { id: 5, name: "Nosepins", handle: "all-nosepins", image: "/images/product/category/nosepins.jpg" },
 ];
 
 export default function CategorySlider() {
@@ -27,9 +26,12 @@ export default function CategorySlider() {
   const paginationElClass = `pagination-${id}`;
 
   return (
-    <section className="w-full py-15 bg-[#FAFAFA] overflow-hidden mt-15">
+    <section className="w-full py-16 bg-linear-to-b from-[#FEF5F1] to-white overflow-hidden mt-15">
       <div className="max-w-480 mx-auto px-17 min-[1440px]:px-17">
-        <h2 className="text-28px font-bold mb-6 text-black">Explore Our Categories</h2>
+        <div className="text-center mb-10">
+          <h2 className="main-title font-extrabold font-abhaya mb-2">Explore Our Categories</h2>
+          <p className="text-black text-base italic">Jewelry for life&apos;s most cherished moments.</p>
+        </div>
 
         <div className="relative">
           <Swiper
@@ -56,7 +58,10 @@ export default function CategorySlider() {
           >
             {CATEGORIES.map((category) => (
               <SwiperSlide key={category.id}>
-                <Link href={`/collections/${category.handle}`} className="group block relative aspect-4/5 bg-[#EFEFEF] overflow-hidden rounded-sm">
+                <Link
+                  href={`/collections/${category.handle}`}
+                  className="group block relative aspect-4/5 bg-[#EFEFEF] overflow-hidden rounded-sm"
+                >
                   {/* Category Image */}
                   <div className="w-full h-full transition-transform duration-700 group-hover:scale-110">
                     <Image
@@ -69,9 +74,15 @@ export default function CategorySlider() {
 
                   {/* Category Info Overlay */}
                   <div className="absolute bottom-0 left-0 right-0 px-4 pb-5 flex justify-between items-center bg-linear-to-t from-black/5 to-transparent">
-                    <span className="text-[22px] font-semibold text-black">{category.name}</span>
-                    <div className="w-8 h-8 rounded-full border border-black flex items-center justify-center transition-all duration-300 group-hover:bg-black group-hover:text-white">
-                      <ArrowRight size={18} />
+                    <span className="text-[22px] font-semibold text-white">
+                      {category.name}
+                    </span>
+
+                    <div className="w-8 h-8 rounded-full border border-white flex items-center justify-center transition-all duration-300 group-hover:bg-white">
+                      <ArrowRight
+                        size={18}
+                        className="text-white group-hover:text-black transition-colors duration-300"
+                      />
                     </div>
                   </div>
                 </Link>
