@@ -174,15 +174,31 @@ export default function SearchPage() {
       });
 
       if (newProducts.length > 0) {
-        const impressionData = newProducts.map((prod, idx) => ({
-          id: prod.shopifyId || prod.id,
-          name: prod.title,
-          price: formatGtmPrice(prod.price?.minVariantPrice?.amount || 0),
-          brand: prod.vendor || "Lucira",
-          category: "Search Results", // Specific for search page
-          list_position: trackedImpressions.current.size - newProducts.length + idx + 1,
-          list_name: "Search Results"
-        }));
+        // Helper to extract numeric ID from Shopify GID
+        const getNumericId = (gid) => {
+          if (!gid) return 0;
+          if (typeof gid === 'number') return gid;
+          const match = String(gid).match(/\d+$/);
+          return match ? Number(match[0]) : 0;
+        };
+
+        const currentOrigin = typeof window !== 'undefined' ? window.location.origin : "";
+
+        const impressionData = newProducts.map((prod, idx) => {
+          const sellingPrice = Number(prod.price || 0);
+          const originalPrice = Number(prod.compare_price || sellingPrice);
+
+          return {
+            item_id: String(getNumericId(prod.shopifyId || prod.id)),
+            item_name: prod.title,
+            item_sku: prod.variants?.[0]?.sku || "",
+            category: "Search Results",
+            item_url: `${currentOrigin}/products/${prod.handle}`,
+            price: originalPrice,
+            offer_price: sellingPrice,
+            index: trackedImpressions.current.size - newProducts.length + idx + 1
+          };
+        });
         pushProductImpression(impressionData);
       }
     }

@@ -3,21 +3,21 @@
 import { useEffect } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useSelector } from "react-redux";
-import { pushPageType, pushCustomerData, pushMarketingData } from "@/lib/gtm";
+import { pushCustomerData, pushMarketingData, pushPageView } from "@/lib/gtm";
 
-// Helper to determine the page type
+// Helper to determine the page type following Shopify conventions
 const getPageType = (pathname) => {
-  if (pathname === "/") return "Homepage";
-  if (pathname.startsWith("/collections")) return "ListingPage";
-  if (pathname.startsWith("/products")) return "ProductPage";
-  if (pathname === "/checkout/cart") return "CartPage";
-  if (pathname === "/checkout/shipping") return "CheckoutAddressPage";
-  if (pathname === "/checkout/payment") return "CheckoutPaymentPage";
-  if (pathname.startsWith("/search")) return "SearchPage";
-  if (pathname.startsWith("/pages/")) return "FooterContentPage";
-  if (pathname.startsWith("/admin")) return "MyAccountPage";
-  if (pathname === "/login") return "LoginPage";
-  return "Other";
+  if (pathname === "/") return "index";
+  if (pathname.startsWith("/collections")) return "collection";
+  if (pathname.startsWith("/products")) return "product";
+  if (pathname === "/checkout/cart") return "cart";
+  if (pathname === "/checkout/shipping") return "checkout";
+  if (pathname === "/checkout/payment") return "checkout";
+  if (pathname.startsWith("/search")) return "search";
+  if (pathname.startsWith("/pages/")) return "page";
+  if (pathname.startsWith("/admin") || pathname.startsWith("/account")) return "account";
+  if (pathname === "/login") return "login";
+  return "other";
 };
 
 export default function GtmPageView() {
@@ -26,29 +26,21 @@ export default function GtmPageView() {
   const { user, isAuthenticated } = useSelector((state) => state.user);
 
   useEffect(() => {
-    // 1. Push Page Type
+    // 1. Determine Page Info
     const pageType = getPageType(pathname);
-    pushPageType(pageType);
+    const pageUrl = typeof window !== 'undefined' ? window.location.href : "";
 
-    // 2. Push Marketing Data if UTM params exist
-    const utmSource = searchParams.get("utm_source");
-    const utmMedium = searchParams.get("utm_medium");
-    const utmCampaign = searchParams.get("utm_campaign");
-    const utmTerm = searchParams.get("utm_term");
-    const utmContent = searchParams.get("utm_content");
-    
-    // Only push if there's at least one UTM param, or we can just push empty string fallbacks
-    // Usually, we only push if they visited with UTMs, or we can read from session if persisted
-    if (utmSource || utmMedium || utmCampaign) {
-      pushMarketingData({
-        utm_source: utmSource || "",
-        utm_medium: utmMedium || "",
-        utm_campaign: utmCampaign || "",
-        utm_term: utmTerm || "",
-        utm_content: utmContent || "",
-        referrer: document.referrer || ""
-      });
-    }
+    // 2. Push the specific pageView event as requested
+    pushPageView({
+      pageType: pageType,
+      pageUrl: pageUrl,
+      utmSource: searchParams.get("utm_source") || "",
+      utmMedium: searchParams.get("utm_medium") || "",
+      utmCampaign: searchParams.get("utm_campaign") || "",
+      utmTerm: searchParams.get("utm_term") || "",
+      utmContent: searchParams.get("utm_content") || "",
+      utmId: searchParams.get("utm_id") || ""
+    });
 
     // 3. Push Customer Data if authenticated
     if (isAuthenticated && user) {
@@ -57,7 +49,6 @@ export default function GtmPageView() {
         mobile: user.mobile || "",
         email: user.email || "",
         device_type: window.innerWidth < 768 ? 'mobile' : window.innerWidth < 1024 ? 'tablet' : 'desktop'
-        // Other fields omitted as requested: gender, dob, doa, billing, shipping address
       });
     }
 

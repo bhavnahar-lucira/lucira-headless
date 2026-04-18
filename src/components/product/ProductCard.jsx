@@ -266,12 +266,28 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice }) => {
               href={`/products/${product.handle}`} 
               className="block w-full h-full mix-blend-multiply"
               onClick={() => {
+                const getNumericId = (gid) => {
+                  if (!gid) return 0;
+                  if (typeof gid === 'number') return gid;
+                  const match = String(gid).match(/\d+$/);
+                  return match ? Number(match[0]) : 0;
+                };
+                const currentOrigin = typeof window !== 'undefined' ? window.location.origin : "";
                 pushProductClick({
-                  id: product.shopifyId || product.id,
-                  name: product.title,
-                  price: formatGtmPrice(displayPrice),
-                  brand: product.vendor || "Lucira",
-                  category: product.category || "",
+                  productId: String(getNumericId(product.shopifyId || product.id)),
+                  variantId: String(getNumericId(currentVariant?.id || currentVariant?.shopifyId)),
+                  sku: currentVariant?.sku || "",
+                  productName: product.title,
+                  productType: product.type || "",
+                  productCategory: product.category || product.type || "",
+                  category: product.category || product.type || "",
+                  subCategory: product.type || "",
+                  productUrl: `${currentOrigin}/products/${product.handle}`,
+                  thumbnailImage: galleryImages?.[0]?.url || product.image?.url || "",
+                  purity: currentVariant?.metafields?.metal_purity || "",
+                  price: String(Number(displayComparePrice || displayPrice || 0)),
+                  offerPrice: String(Number(displayPrice || 0)),
+                  indexPosition: ""
                 });
               }}
             >
@@ -345,15 +361,16 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice }) => {
                       } else {
                         dispatch(removeGuestWishlistItem(productId));
                       }
-                      
+                      const currentOrigin = typeof window !== 'undefined' ? window.location.origin : "";
                       pushRemoveFromWishlist({
-                        id: product.shopifyId || product.id,
-                        name: product.title,
-                        price: formatGtmPrice(displayPrice),
-                        brand: product.vendor || "Lucira",
-                        category: product.category || ""
+                        productName: product.title,
+                        product_url: `${currentOrigin}/products/${product.handle}?variant=${currentVariant?.id || currentVariant?.shopifyId}`,
+                        price: Number(displayComparePrice || displayPrice || 0),
+                        offer_price: Number(displayPrice || 0),
+                        thumbnail_image: galleryImages?.[0]?.url || product.image?.url || "",
+                        currency: "INR"
                       });
-                      
+
                       toast.success("Removed from wishlist");
                     } else {
                       const payload = {
@@ -374,12 +391,14 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice }) => {
                         dispatch(addGuestWishlistItem(payload));
                       }
 
+                      const currentOrigin = typeof window !== 'undefined' ? window.location.origin : "";
                       pushAddToWishlist({
-                        id: product.shopifyId || product.id,
-                        name: product.title,
-                        price: formatGtmPrice(displayPrice),
-                        brand: product.vendor || "Lucira",
-                        category: product.category || ""
+                        productName: product.title,
+                        product_url: `${currentOrigin}/products/${product.handle}?variant=${currentVariant?.id || currentVariant?.shopifyId}`,
+                        price: Number(displayComparePrice || displayPrice || 0),
+                        offer_price: Number(displayPrice || 0),
+                        thumbnail_image: galleryImages?.[0]?.url || product.image?.url || "",
+                        currency: "INR"
                       });
 
                       toast.success("Saved to wishlist");
@@ -552,12 +571,28 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice }) => {
             <Link 
               href={`/products/${product.handle}`}
               onClick={() => {
+                const getNumericId = (gid) => {
+                  if (!gid) return 0;
+                  if (typeof gid === 'number') return gid;
+                  const match = String(gid).match(/\d+$/);
+                  return match ? Number(match[0]) : 0;
+                };
+                const currentOrigin = typeof window !== 'undefined' ? window.location.origin : "";
                 pushProductClick({
-                  id: product.shopifyId || product.id,
-                  name: product.title,
-                  price: formatGtmPrice(displayPrice),
-                  brand: product.vendor || "Lucira",
-                  category: product.category || "",
+                  productId: String(getNumericId(product.shopifyId || product.id)),
+                  variantId: String(getNumericId(currentVariant?.id || currentVariant?.shopifyId)),
+                  sku: currentVariant?.sku || "",
+                  productName: product.title,
+                  productType: product.type || "",
+                  productCategory: product.category || product.type || "",
+                  category: product.category || product.type || "",
+                  subCategory: product.type || "",
+                  productUrl: `${currentOrigin}/products/${product.handle}`,
+                  thumbnailImage: galleryImages?.[0]?.url || product.image?.url || "",
+                  purity: currentVariant?.metafields?.metal_purity || "",
+                  price: String(Number(displayComparePrice || displayPrice || 0)),
+                  offerPrice: String(Number(displayPrice || 0)),
+                  indexPosition: ""
                 });
               }}
             >

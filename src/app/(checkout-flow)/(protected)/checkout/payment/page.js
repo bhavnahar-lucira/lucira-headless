@@ -32,6 +32,10 @@ import {
 import { selectUser } from "@/redux/features/user/userSlice";
 import { useCart } from "@/hooks/useCart";
 import { toast } from "react-toastify";
+import { pushAddPaymentInfo } from "@/lib/gtm";
+
+const INSURANCE_VARIANT_ID = "gid://shopify/ProductVariant/47709366026458";
+const GOLDCOIN_VARIANT_ID = "gid://shopify/ProductVariant/47661824082138";
 
 const BILLING_SELECTION_STORAGE_KEY = "checkoutBillingAddressSelection";
 
@@ -164,7 +168,7 @@ export default function PaymentPage() {
   const [checkoutSelection, setCheckoutSelection] = useState(null);
 
   const user = useSelector(selectUser);
-  const { totalAmount, appliedCoupon } = useCart();
+  const { items, totalAmount, appliedCoupon } = useCart();
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -351,6 +355,100 @@ export default function PaymentPage() {
     try {
       setPaymentLoading(true);
 
+      // Trigger GTM add_payment_info
+      const getNumericId = (gid) => {
+        if (!gid) return 0;
+        if (typeof gid === 'number') return gid;
+        const match = String(gid).match(/\d+$/);
+        return match ? Number(match[0]) : 0;
+      };
+
+      const insuranceItem = (items || []).find(item => item.variantId === INSURANCE_VARIANT_ID);
+      const insuranceValue = insuranceItem ? (insuranceItem.price * (insuranceItem.quantity || 1)) : 0;
+      const subtotalValue = (totalAmount || 0) - insuranceValue;
+
+      const couponDetails = typeof appliedCoupon === 'object' ? appliedCoupon : { code: appliedCoupon, value: 0, valueType: "FIXED_AMOUNT" };
+      let couponDiscountAmount = 0;
+      if (appliedCoupon) {
+        if (couponDetails.valueType === "FIXED_AMOUNT") {
+          couponDiscountAmount = couponDetails.value;
+        } else if (couponDetails.valueType === "PERCENTAGE") {
+          couponDiscountAmount = (subtotalValue * couponDetails.value) / 100;
+        }
+      }
+
+      // Final Grand Total calculation consistent with Summary
+      const grandTotalValue = subtotalValue + insuranceValue - couponDiscountAmount;
+
+      const loyaltyPoints = appliedCoupon?.loyaltyPoints || ""; 
+
+      const purchaseDataForLater = {
+        currency: "INR",
+        value: grandTotalValue,
+        tax: Number((grandTotalValue * 0.03).toFixed(2)),
+        shipping: 0,
+        affiliation: "Lucira Jewelry",
+        transaction_id: `temp_${Date.now()}`, // Will be updated on success
+        coupon: couponDetails?.code || "NA",
+        items: (items || []).map((item, idx) => {
+          const lowerTitle = (item.title || "").toLowerCase();
+          let category = item.type || item.productType || "";
+          if (!category) {
+            if (lowerTitle.includes("ring")) category = "Rings";
+            else if (lowerTitle.includes("earring") || lowerTitle.includes("bali")) category = "Earrings";
+            else if (lowerTitle.includes("pendant")) category = "Pendants";
+            else if (lowerTitle.includes("bracelet")) category = "Bracelets";
+            else if (item.variantId === GOLDCOIN_VARIANT_ID) category = "Gold Coin";
+            else if (item.variantId === INSURANCE_VARIANT_ID) category = "Insurance";
+          }
+
+          return {
+            item_id: String(getNumericId(item.productId || item.shopifyId || item.id)),
+            item_name: item.title,
+            price: Number(item.price || 0),
+            item_brand: "Lucira Jewelry",
+            item_category: category,
+            item_variant: item.variantTitle || "",
+            quantity: item.quantity,
+            index: idx
+          };
+        })
+      };
+      window.localStorage.setItem("gtm_purchase_data", JSON.stringify(purchaseDataForLater));
+
+      pushAddPaymentInfo({
+        payment_type: selectedPaymentGateway === "razorpay" ? "Razorpay" : "PhonePe",
+        value: grandTotalValue,
+        currency: "INR",
+        coupon: couponDetails?.code || "NA",
+        loyalty_points: loyaltyPoints,
+        items: (items || []).map((item, idx) => {
+          const lowerTitle = (item.title || "").toLowerCase();
+          let category = item.type || item.productType || "";
+          if (!category) {
+            if (lowerTitle.includes("ring")) category = "Rings";
+            else if (lowerTitle.includes("earring") || lowerTitle.includes("bali")) category = "Earrings";
+            else if (lowerTitle.includes("pendant")) category = "Pendants";
+            else if (lowerTitle.includes("bracelet")) category = "Bracelets";
+            else if (item.variantId === GOLDCOIN_VARIANT_ID) category = "Gold Coin";
+            else if (item.variantId === INSURANCE_VARIANT_ID) category = "Insurance";
+          }
+
+          return {
+            item_id: String(getNumericId(item.productId || item.shopifyId || item.id)),
+            sku: item.sku || "",
+            variant_id: String(getNumericId(item.variantId)),
+            item_name: item.title,
+            item_variant: item.variantTitle || "",
+            item_brand: "Lucira Jewelry",
+            price: Number(item.price || 0),
+            quantity: item.quantity,
+            category: category,
+            index: idx
+          };
+        })
+      });
+
       const scriptLoaded = await loadRazorpayScript();
       if (!scriptLoaded || !window.Razorpay) {
         throw new Error("Unable to load Razorpay checkout");
@@ -382,6 +480,66 @@ export default function PaymentPage() {
         handler: async function handleSuccess(response) {
           try {
             setPaymentLoading(true);
+
+            // Prepare purchase data for Success Page
+            const getNumericId = (gid) => {
+              if (!gid) return 0;
+              if (typeof gid === 'number') return gid;
+              const match = String(gid).match(/\d+$/);
+              return match ? Number(match[0]) : 0;
+            };
+
+            const insuranceItem = (items || []).find(item => item.variantId === INSURANCE_VARIANT_ID);
+            const insuranceValue = insuranceItem ? (insuranceItem.price * (insuranceItem.quantity || 1)) : 0;
+            const subtotalValue = (totalAmount || 0) - insuranceValue;
+
+            const couponDetails = typeof appliedCoupon === 'object' ? appliedCoupon : { code: appliedCoupon, value: 0, valueType: "FIXED_AMOUNT" };
+            let couponDiscountAmount = 0;
+            if (appliedCoupon) {
+              if (couponDetails.valueType === "FIXED_AMOUNT") {
+                couponDiscountAmount = couponDetails.value;
+              } else if (couponDetails.valueType === "PERCENTAGE") {
+                couponDiscountAmount = (subtotalValue * couponDetails.value) / 100;
+              }
+            }
+
+            const grandTotalValue = subtotalValue + insuranceValue - couponDiscountAmount;
+
+            const purchaseData = {
+              currency: "INR",
+              value: grandTotalValue,
+              tax: Number((grandTotalValue * 0.03).toFixed(2)), // Assuming 3% GST for jewelry
+              shipping: 0,
+              affiliation: "Lucira Jewelry",
+              transaction_id: response.razorpay_payment_id,
+              coupon: couponDetails?.code || "NA",
+              items: (items || []).map((item, idx) => {
+                const lowerTitle = (item.title || "").toLowerCase();
+                let category = item.type || item.productType || "";
+                if (!category) {
+                  if (lowerTitle.includes("ring")) category = "Rings";
+                  else if (lowerTitle.includes("earring") || lowerTitle.includes("bali")) category = "Earrings";
+                  else if (lowerTitle.includes("pendant")) category = "Pendants";
+                  else if (lowerTitle.includes("bracelet")) category = "Bracelets";
+                  else if (item.variantId === GOLDCOIN_VARIANT_ID) category = "Gold Coin";
+                  else if (item.variantId === INSURANCE_VARIANT_ID) category = "Insurance";
+                }
+
+                return {
+                  item_id: String(getNumericId(item.productId || item.shopifyId || item.id)),
+                  item_name: item.title,
+                  price: Number(item.price || 0),
+                  item_brand: "Lucira Jewelry",
+                  item_category: category,
+                  item_variant: item.variantTitle || "",
+                  quantity: item.quantity,
+                  index: idx
+                };
+              })
+            };
+
+            // Store for Success Page to pick up
+            window.localStorage.setItem("gtm_purchase_data", JSON.stringify(purchaseData));
 
             const completion = await completeRazorpayPayment({
               userId: user?.id || "",
@@ -458,7 +616,62 @@ export default function PaymentPage() {
           response?.error?.description ||
           response?.error?.reason ||
           "Payment failed. Please try again.";
-        toast.error(reason);
+        
+        // Prepare failure data
+        const getNumericId = (gid) => {
+          if (!gid) return 0;
+          if (typeof gid === 'number') return gid;
+          const match = String(gid).match(/\d+$/);
+          return match ? Number(match[0]) : 0;
+        };
+
+        const insuranceItem = (items || []).find(item => item.variantId === INSURANCE_VARIANT_ID);
+        const insuranceValue = insuranceItem ? (insuranceItem.price * (insuranceItem.quantity || 1)) : 0;
+        const subtotalValue = (totalAmount || 0) - insuranceValue;
+
+        const couponDetails = typeof appliedCoupon === 'object' ? appliedCoupon : { code: appliedCoupon, value: 0, valueType: "FIXED_AMOUNT" };
+        let couponDiscountAmount = 0;
+        if (appliedCoupon) {
+          if (couponDetails.valueType === "FIXED_AMOUNT") {
+            couponDiscountAmount = couponDetails.value;
+          } else if (couponDetails.valueType === "PERCENTAGE") {
+            couponDiscountAmount = (subtotalValue * couponDetails.value) / 100;
+          }
+        }
+
+        const grandTotalValue = subtotalValue + insuranceValue - couponDiscountAmount;
+
+        const failureData = {
+          currency: "INR",
+          value: grandTotalValue,
+          error_message: reason,
+          coupon: couponDetails?.code || "NA",
+          items: (items || []).map((item, idx) => {
+            const lowerTitle = (item.title || "").toLowerCase();
+            let category = item.type || item.productType || "";
+            if (!category) {
+              if (lowerTitle.includes("ring")) category = "Rings";
+              else if (lowerTitle.includes("earring") || lowerTitle.includes("bali")) category = "Earrings";
+              else if (lowerTitle.includes("pendant")) category = "Pendants";
+              else if (lowerTitle.includes("bracelet")) category = "Bracelets";
+              else if (item.variantId === GOLDCOIN_VARIANT_ID) category = "Gold Coin";
+              else if (item.variantId === INSURANCE_VARIANT_ID) category = "Insurance";
+            }
+
+            return {
+              item_id: String(getNumericId(item.productId || item.shopifyId || item.id)),
+              item_name: item.title,
+              price: Number(item.price || 0),
+              item_brand: "Lucira Jewelry",
+              item_category: category,
+              quantity: item.quantity,
+              index: idx
+            };
+          })
+        };
+
+        window.localStorage.setItem("gtm_payment_failure_data", JSON.stringify(failureData));
+        router.push("/failure");
       });
 
       razorpay.open();

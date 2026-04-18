@@ -7,8 +7,11 @@ export const pushToDataLayer = (data) => {
   }
 };
 
-export const pushPageType = (pageType) => {
-  pushToDataLayer({ Pagetype: pageType }); // Note the capital P in Pagetype as per spec
+export const pushPageView = (pageData) => {
+  pushToDataLayer({
+    event: 'pageView',
+    pageData: pageData
+  });
 };
 
 export const pushPromoClick = (promoClickData) => {
@@ -32,31 +35,32 @@ export const pushProductImpression = (products) => {
   });
 };
 
-export const pushProductClick = (products) => {
+export const pushProductClick = (data) => {
   pushToDataLayer({
     event: "productClick",
-    products: products
+    products: data
   });
 };
 
-export const pushProductView = (products) => {
+export const pushProductView = (productData) => {
   pushToDataLayer({
     event: "productView",
-    products: products
+    products: productData
   });
 };
 
-export const pushAddToCart = (products) => {
+export const pushAddToCart = (data) => {
   pushToDataLayer({
     event: "addToCart",
-    products: products
+    eventId: data.eventId,
+    products: data.products
   });
 };
 
-export const pushAddToWishlist = (products) => {
+export const pushAddToWishlist = (data) => {
   pushToDataLayer({
     event: "addToWishlist",
-    products: products
+    products: data
   });
 };
 
@@ -67,24 +71,52 @@ export const pushViewCart = (cartData) => {
   });
 };
 
-export const pushBeginCheckout = (cartData) => {
+export const pushBeginCheckout = (checkoutData) => {
   pushToDataLayer({
-    event: "beginCheckout",
-    cart: cartData
+    event: "begin_checkout",
+    eventModel: checkoutData
   });
 };
 
-export const pushRemoveFromCart = (cartItem) => {
+export const pushAddShippingInfo = (shippingData) => {
+  pushToDataLayer({
+    event: "add_shipping_info",
+    eventModel: shippingData
+  });
+};
+
+export const pushAddPaymentInfo = (paymentData) => {
+  pushToDataLayer({
+    event: "add_payment_info",
+    eventModel: paymentData
+  });
+};
+
+export const pushPurchase = (purchaseData) => {
+  pushToDataLayer({
+    event: 'purchase',
+    ecommerce: purchaseData
+  });
+};
+
+export const pushPaymentFailure = (failureData) => {
+  pushToDataLayer({
+    event: 'Payment failure',
+    ecommerce: failureData
+  });
+};
+
+export const pushRemoveFromCart = (data) => {
   pushToDataLayer({
     event: "removeFromCart",
-    cart: cartItem
+    cart: data
   });
 };
 
-export const pushRemoveFromWishlist = (productItem) => {
+export const pushRemoveFromWishlist = (data) => {
   pushToDataLayer({
     event: "removeFromWishlist",
-    removed_product: productItem
+    products: data
   });
 };
 

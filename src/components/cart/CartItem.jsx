@@ -59,17 +59,38 @@ export default function CartItem({ item, onAuthRequired }) {
   const handleRemove = async () => {
     setRemoving(true);
     try {
-      await dispatch(removeFromCart({ userId: user?.id, variantId: item.variantId })).unwrap();
-      
+      // 1. Prepare GTM Data
+      const getNumericId = (gid) => {
+        if (!gid) return 0;
+        if (typeof gid === 'number') return gid;
+        const match = String(gid).match(/\d+$/);
+        return match ? Number(match[0]) : 0;
+      };
+
+      const lowerTitle = (item.title || "").toLowerCase();
+      let categoryFallback = item.type || (
+        lowerTitle.includes("ring") ? "Rings" : 
+        (lowerTitle.includes("earring") || lowerTitle.includes("bali")) ? "Earrings" : 
+        lowerTitle.includes("pendant") ? "Pendants" : 
+        lowerTitle.includes("bracelet") ? "Bracelets" : ""
+      );
+
       pushRemoveFromCart({
-        id: item.shopifyId || item.id,
-        name: item.title,
-        price: item.price,
-        brand: "Lucira",
-        category: "",
-        variant: item.variantId,
-        quantity: item.quantity
+        productId: String(getNumericId(item.productId || item.shopifyId || item.id)),
+        sku: item.sku || "",
+        variantId: String(getNumericId(item.variantId)),
+        productName: item.title,
+        productType: categoryFallback,
+        category: categoryFallback,
+        sub_category: item.variantTitle || "",
+        price: Number(item.comparePrice || item.price || 0),
+        offerPrice: Number(item.price || 0),
+        quantity: item.quantity,
+        thumbnail_image: item.image
       });
+
+      // 2. Perform Removal
+      await dispatch(removeFromCart({ userId: user?.id, variantId: item.variantId })).unwrap();
       
       toast.success("Removed from cart");
     } catch (err) {
@@ -106,7 +127,18 @@ export default function CartItem({ item, onAuthRequired }) {
         await dispatch(addWishlistItem(payload)).unwrap();
       }
       
-      // 2. Remove from cart (updates MongoDB/Session)
+      // 2. Push to GTM
+      const currentOrigin = typeof window !== 'undefined' ? window.location.origin : "";
+      pushAddToWishlist({
+        productName: item.title,
+        product_url: `${currentOrigin}/products/${item.handle}?variant=${item.variantId}`,
+        price: Number(item.comparePrice || item.price || 0),
+        offer_price: Number(item.price || 0),
+        thumbnail_image: item.image || "",
+        currency: "INR"
+      });
+      
+      // 3. Remove from cart (updates MongoDB/Session)
       await dispatch(removeFromCart({ userId: user?.id, variantId: item.variantId })).unwrap();
       
       toast.success("Moved to wishlist");
@@ -140,6 +172,7 @@ export default function CartItem({ item, onAuthRequired }) {
         payload.price = selectedVariant.price;
         payload.variantTitle = selectedVariant.variantTitle;
         payload.inStock = selectedVariant.inStock;
+        payload.sku = selectedVariant.sku || "";
       } else {
         payload.quantity = parseInt(value, 10);
       }
