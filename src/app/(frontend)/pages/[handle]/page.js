@@ -19,7 +19,7 @@ export default async function page({params}) {
     try {
         const CustomPage = (await import(`../_custom/${handle}.js`)).default;
         return (
-            <div className="container mx-auto py-7">
+            <div className="w-full mx-auto py-7">
                 <CustomPage />
             </div>
         )
