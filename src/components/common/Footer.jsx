@@ -95,12 +95,12 @@ export default function Footer() {
               <ul className="space-y-2.5 text-sm text-white font-figtree">
                 <li><Link href="/pages/contact-us">Contact Us</Link></li>
                 <li><Link href="/pages/faqs">FAQ's</Link></li>
-                <li><Link href="/pages/reviews">Reviews</Link></li>
+                <li><Link href="/reviews">Reviews</Link></li>
                 <li><Link href="/pages/15-days-return">15-Days Return</Link></li>
                 <li><Link href="/pages/cancel-refund">Cancel & Refund</Link></li>
                 <li><Link href="/pages/lifetime-exchange-buyback-policy">Lifetime Exchange & Buyback</Link></li>
                 <li><Link href="/pages/old-gold-exchange">Old Gold Exchange</Link></li>
-                <li><Link href="/pages/shipping-policy-1">Shipping Policy</Link></li>
+                <li><Link href="/pages/shipping-policy">Shipping Policy</Link></li>
                 <li><Link href="/pages/privacy-policy">Privacy Policy</Link></li>
                 <li><Link href="#">Offers T&C</Link></li>
                 <li><Link href="/pages/terms-condition">Terms & Conditions</Link></li>
