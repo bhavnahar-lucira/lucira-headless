@@ -5,6 +5,9 @@ import QueryProvider from "@/providers/QueryProvider";
 import BackToTop from "@/components/common/BackToTop";
 import ToastProvider from "@/components/common/ToastProvider";
 import Script from "next/script";
+import { Suspense } from "react";
+import GtmPageView from "@/components/common/GtmPageView";
+import GlobalGtmListener from "@/components/common/GlobalGtmListener";
 
 const figtree = Figtree({
   subsets: ["latin"],
@@ -53,6 +56,10 @@ export default function RootLayout({ children }) {
           </noscript>
         )}
         <ReduxProvider>
+          <Suspense fallback={null}>
+            <GtmPageView />
+            <GlobalGtmListener />
+          </Suspense>
           <QueryProvider> 
             {children}
             <BackToTop />

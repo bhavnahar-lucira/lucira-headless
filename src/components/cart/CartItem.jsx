@@ -12,6 +12,7 @@ import {
 } from "@/redux/features/wishlist/wishlistSlice";
 import { useState, useMemo } from "react";
 import { toast } from "react-toastify";
+import { pushRemoveFromCart, pushAddToWishlist } from "@/lib/gtm";
 import {
   Select,
   SelectContent,
@@ -59,6 +60,17 @@ export default function CartItem({ item, onAuthRequired }) {
     setRemoving(true);
     try {
       await dispatch(removeFromCart({ userId: user?.id, variantId: item.variantId })).unwrap();
+      
+      pushRemoveFromCart({
+        id: item.shopifyId || item.id,
+        name: item.title,
+        price: item.price,
+        brand: "Lucira",
+        category: "",
+        variant: item.variantId,
+        quantity: item.quantity
+      });
+      
       toast.success("Removed from cart");
     } catch (err) {
       console.error("Remove failed:", err);

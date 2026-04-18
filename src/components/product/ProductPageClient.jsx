@@ -58,6 +58,7 @@ import {
   fetchWishlist,
 } from "@/redux/features/wishlist/wishlistSlice";
 import { addRecentlyViewed, selectRecentlyViewed } from "@/redux/features/recentlyViewed/recentlyViewedSlice";
+import { pushProductView, pushAddToCart, pushAddToWishlist, pushRemoveFromWishlist, formatGtmPrice } from "@/lib/gtm";
 
 // Force en-IN formatting to be consistent across environments
 const formatPrice = (num) => {
@@ -226,6 +227,17 @@ export default function ProductPageClient({ product, complementaryProducts = [],
       };
 
       await dispatch(addToCart({ userId: user?.id, product: productData })).unwrap();
+      
+      pushAddToCart({
+        id: product.shopifyId || product.id,
+        name: product.title,
+        price: formatGtmPrice(activeVariant.price),
+        brand: product.vendor || "Lucira",
+        category: product.type || "",
+        variant: activeVariant.id,
+        quantity: 1
+      });
+
       toast.success("Added to cart!");
       router.push("/checkout/cart");
     } catch (err) {
@@ -250,6 +262,15 @@ export default function ProductPageClient({ product, complementaryProducts = [],
         } else {
           dispatch(removeGuestWishlistItem(productId));
         }
+
+        pushRemoveFromWishlist({
+          id: product.shopifyId || product.id,
+          name: product.title,
+          price: formatGtmPrice(activeVariant?.price || product.price),
+          brand: product.vendor || "Lucira",
+          category: product.type || ""
+        });
+
         toast.success("Removed from wishlist");
       } else {
         const payload = {
@@ -269,6 +290,14 @@ export default function ProductPageClient({ product, complementaryProducts = [],
         } else {
           dispatch(addGuestWishlistItem(payload));
         }
+
+        pushAddToWishlist({
+          id: product.shopifyId || product.id,
+          name: product.title,
+          price: formatGtmPrice(activeVariant?.price || product.price),
+          brand: product.vendor || "Lucira",
+          category: product.type || ""
+        });
 
         toast.success("Saved to wishlist");
       }
@@ -296,6 +325,20 @@ export default function ProductPageClient({ product, complementaryProducts = [],
     );
     if (variant) setActiveVariant(variant);
   }, [activeColor, activeKarat, selectedSize, product.variants]);
+
+  // Product View GTM Trigger, runs when variant changes or page loads
+  useEffect(() => {
+    if (activeVariant || product) {
+      pushProductView({
+        id: product.shopifyId || product.id,
+        name: product.title,
+        price: formatGtmPrice(activeVariant?.price || product.price),
+        brand: product.vendor || "Lucira",
+        category: product.type || "",
+        variant: activeVariant?.id || ""
+      });
+    }
+  }, [activeVariant, product]);
 
   // Fetch variant pricing when active variant changes
   useEffect(() => {
