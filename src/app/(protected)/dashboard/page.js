@@ -13,6 +13,12 @@ export default function Dashboard() {
   const [error, setError] = useState(null);
   const [shopifyTotal, setShopifyTotal] = useState(0);
   
+  // Progress tracking for resume
+  const [lastSyncData, setLastSyncData] = useState({
+    products: { cursor: null, totalProcessed: 0 },
+    reviews: { skip: 0 }
+  });
+
   const [products, setProducts] = useState([]);
   const [menus, setMenus] = useState([]);
   const [selectedMenu, setSelectedMenu] = useState(null);
@@ -66,11 +72,11 @@ export default function Dashboard() {
     fetchMenus();
   }, [fetchLocalProducts]);
 
-  const startSync = async (type = "products") => {
+  const startSync = async (type = "products", isRetry = false) => {
     setSyncing(true);
     setSyncType(type);
-    setStatus(`Initiating ${type} sync...`);
-    setProgress(0);
+    setStatus(isRetry ? `Resuming ${type} sync...` : `Initiating ${type} sync...`);
+    if (!isRetry) setProgress(0);
     setError(null);
 
     if (type === "menu") {
@@ -93,9 +99,22 @@ export default function Dashboard() {
     }
 
     const apiPath = type === "products" ? "/api/sync-shopify" : "/api/sync-reviews";
+    const body = {};
+    if (isRetry) {
+      if (type === "products") {
+        body.cursor = lastSyncData.products.cursor;
+        body.totalProcessed = lastSyncData.products.totalProcessed;
+      } else if (type === "reviews") {
+        body.skip = lastSyncData.reviews.skip;
+      }
+    }
 
     try {
-      const response = await fetch(apiPath, { method: "POST" });
+      const response = await fetch(apiPath, { 
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body)
+      });
       if (!response.ok) throw new Error("Failed to start sync");
 
       const reader = response.body.getReader();
@@ -113,6 +132,22 @@ export default function Dashboard() {
             const data = JSON.parse(line);
             setStatus(data.message);
             if (data.progress !== undefined) setProgress(data.progress);
+            
+            // Save progress for retries
+            if (data.status === "progress") {
+              if (type === "products" && data.cursor) {
+                setLastSyncData(prev => ({
+                  ...prev,
+                  products: { cursor: data.cursor, totalProcessed: data.totalProcessed }
+                }));
+              } else if (type === "reviews" && data.skip !== undefined) {
+                setLastSyncData(prev => ({
+                  ...prev,
+                  reviews: { skip: data.skip }
+                }));
+              }
+            }
+
             if (data.status === "error") {
               setError(data.message);
               setSyncing(false);
@@ -120,6 +155,10 @@ export default function Dashboard() {
             }
             if (data.status === "complete") {
               setSyncing(false);
+              setLastSyncData(prev => ({
+                ...prev,
+                [type]: type === "products" ? { cursor: null, totalProcessed: 0 } : { skip: 0 }
+              }));
               fetchLocalProducts(1); // Refresh list after complete
             }
           } catch (e) {
@@ -210,7 +249,18 @@ export default function Dashboard() {
               />
             </div>
             
-            {error && <p className="text-sm text-red-500">{error}</p>}
+            {error && (
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-red-500">{error}</p>
+                <button 
+                  onClick={() => startSync(syncType, true)}
+                  className="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded-lg font-bold text-xs uppercase tracking-widest hover:bg-red-600 transition-colors shadow-sm"
+                >
+                  <RefreshCw size={14} />
+                  Retry from failure
+                </button>
+              </div>
+            )}
           </div>
         )}
 

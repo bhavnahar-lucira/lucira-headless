@@ -4,7 +4,13 @@ import { fetchNectorReviews } from "@/lib/nector";
 
 export const dynamic = "force-dynamic";
 
-export async function POST() {
+export async function POST(req) {
+  let skip = 0;
+  try {
+    const body = await req.json().catch(() => ({}));
+    skip = body.skip || 0;
+  } catch (e) {}
+
   const encoder = new TextEncoder();
   const stream = new ReadableStream({
     async start(controller) {
@@ -31,9 +37,14 @@ export async function POST() {
           return;
         }
 
-        let processed = 0;
+        sendUpdate({ 
+          status: "starting", 
+          message: skip > 0 ? `Resuming review sync from ${skip}/${total}...` : "Starting review sync...", 
+          progress: skip > 0 ? Math.round((skip / total) * 100) : 0 
+        });
 
-        for (const product of products) {
+        for (let i = skip; i < products.length; i++) {
+          const product = products[i];
           try {
             const reviewsData = await fetchNectorReviews(product.shopifyId);
             
@@ -73,12 +84,13 @@ export async function POST() {
               }
             );
 
-            processed++;
+            const processed = i + 1;
             if (processed % 5 === 0 || processed === total) {
               sendUpdate({ 
                 status: "progress", 
                 message: `Synced reviews for ${processed}/${total} products...`, 
-                progress: Math.round((processed / total) * 100) 
+                progress: Math.round((processed / total) * 100),
+                skip: i
               });
             }
 

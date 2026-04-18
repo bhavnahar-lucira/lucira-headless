@@ -18,10 +18,18 @@ export async function GET() {
   } catch (error) { return NextResponse.json({ error: error.message }, { status: 500 }); }
 }
 
-export async function POST() {
+export async function POST(req) {
   const SHOPIFY_DOMAIN = process.env.SHOPIFY_STORE;
   const ACCESS_TOKEN = process.env.SHOPIFY_ADMIN_TOKEN;
   if (!SHOPIFY_DOMAIN || !ACCESS_TOKEN) return NextResponse.json({ error: "Missing Shopify credentials" }, { status: 500 });
+
+  let startCursor = null;
+  let startProcessed = 0;
+  try {
+    const body = await req.json().catch(() => ({}));
+    startCursor = body.cursor || null;
+    startProcessed = body.totalProcessed || 0;
+  } catch (e) {}
 
   const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -40,7 +48,11 @@ export async function POST() {
         const db = client.db("next_local_db");
         const productsCollection = db.collection("products");
         
-        sendUpdate({ status: "starting", message: "Fetching Products...", progress: 0 });
+        sendUpdate({ 
+          status: "starting", 
+          message: startCursor ? `Resuming Sync from ${startProcessed} products...` : "Fetching Products...", 
+          progress: startProcessed ? Math.min(Math.round((startProcessed / 1000) * 100), 10) : 0 // Rough estimation if total unknown
+        });
 
         let totalToSync = 0;
         try {
@@ -52,8 +64,8 @@ export async function POST() {
         } catch (e) { console.error("Count fetch failed", e); }
 
         let hasNextPage = true;
-        let cursor = null;
-        let totalProcessed = 0;
+        let cursor = startCursor;
+        let totalProcessed = startProcessed;
 
         // REMOVED deleteMany to prevent 404s
 
@@ -261,10 +273,17 @@ export async function POST() {
             }
 
             totalProcessed += products.length;
-            sendUpdate({ status: "progress", message: `Synced ${totalProcessed} products...`, progress: Math.min(Math.round((totalProcessed / totalToSync) * 100), 99) });
+            cursor = result.data?.products?.pageInfo?.endCursor;
+            sendUpdate({ 
+              status: "progress", 
+              message: `Synced ${totalProcessed} products...`, 
+              progress: Math.min(Math.round((totalProcessed / totalToSync) * 100), 99),
+              cursor: cursor,
+              totalProcessed: totalProcessed
+            });
           }
           hasNextPage = result.data?.products?.pageInfo?.hasNextPage;
-          cursor = result.data?.products?.pageInfo?.endCursor;
+          // cursor already updated above from pageInfo.endCursor
 
           if (hasNextPage) {
             await sleep(2000);

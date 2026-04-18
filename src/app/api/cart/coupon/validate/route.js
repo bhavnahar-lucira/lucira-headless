@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { shopifyAdminFetch } from "@/lib/shopify";
+import clientPromise from "@/lib/mongodb";
 
 export async function POST(req) {
   try {
@@ -42,12 +43,19 @@ export async function POST(req) {
               customerGets {
                 value {
                   ... on DiscountAmount {
-                    amount {
-                      amount
-                    }
+                    amount { amount }
                   }
                   ... on DiscountPercentage {
                     percentage
+                  }
+                }
+                items {
+                  ... on AllDiscountItems { allItems }
+                  ... on DiscountProducts {
+                    products(first: 100) { nodes { id } }
+                  }
+                  ... on DiscountCollections {
+                    collections(first: 100) { nodes { id } }
                   }
                 }
               }
@@ -73,6 +81,85 @@ export async function POST(req) {
     } else if (discountInfo.customerGets?.value?.percentage) {
       value = Number(discountInfo.customerGets.value.percentage) * 100; // Shopify returns 0.1 for 10%
       valueType = "PERCENTAGE";
+    }
+
+    // --- Validation against Cart Items ---
+    const entitledItems = discountInfo.customerGets?.items;
+    
+    // If it's not "all items", we need to validate
+    if (entitledItems && !entitledItems.allItems) {
+      const client = await clientPromise;
+      const db = client.db("next_local_db");
+      const productsCollection = db.collection("products");
+
+      const entitledProductIds = entitledItems.products?.nodes?.map(p => p.id) || [];
+      const entitledCollectionIds = entitledItems.collections?.nodes?.map(c => c.id) || [];
+
+      console.log("DEBUG: Entitled Products:", entitledProductIds);
+      console.log("DEBUG: Entitled Collection IDs:", entitledCollectionIds);
+
+      // Get product details for items in cart to check their IDs and collections
+      const cartProductIds = items.map(item => {
+        const id = item.shopifyId || item.productId || item.id;
+        return (id && id.toString().includes("gid://")) ? id : `gid://shopify/Product/${id}`;
+      }).filter(Boolean);
+      
+      console.log("DEBUG: Cart Product GIDs:", cartProductIds);
+
+      const dbProducts = await productsCollection.find({ 
+        shopifyId: { $in: cartProductIds } 
+      }).project({ shopifyId: 1, collectionHandles: 1 }).toArray();
+
+      console.log("DEBUG: DB Products found:", dbProducts.map(p => ({ id: p.shopifyId, collections: p.collectionHandles })));
+
+      let entitledCollectionHandles = [];
+      if (entitledCollectionIds.length > 0) {
+        // Fetch handles for the entitled collection IDs
+        const collectionsData = await shopifyAdminFetch(`
+          query getCollections($ids: [ID!]!) {
+            nodes(ids: $ids) {
+              ... on Collection {
+                id
+                handle
+              }
+            }
+          }
+        `, { ids: entitledCollectionIds });
+        entitledCollectionHandles = collectionsData?.nodes?.map(n => n.handle).filter(Boolean) || [];
+        console.log("DEBUG: Entitled Collection Handles:", entitledCollectionHandles);
+      }
+
+      const applicableItems = items.filter(item => {
+        // Normalize Product GID for comparison
+        const rawId = item.shopifyId || item.productId || item.id;
+        let productGid = (rawId && rawId.toString().includes("gid://")) ? rawId : `gid://shopify/Product/${rawId}`;
+        
+        const dbProduct = dbProducts.find(p => p.shopifyId === productGid);
+        
+        // 1. Check if product is explicitly entitled
+        const isProductEntitled = entitledProductIds.includes(productGid);
+        
+        // 2. Check if any of product's collections are entitled
+        // Use handles for comparison as they are stored in our DB
+        const isCollectionEntitled = dbProduct && dbProduct.collectionHandles && entitledCollectionHandles.length > 0 
+          ? dbProduct.collectionHandles.some(h => entitledCollectionHandles.includes(h))
+          : false;
+
+        console.log(`DEBUG: Item ${rawId} (${productGid}) - Product Entitled: ${isProductEntitled}, Collection Entitled: ${isCollectionEntitled}`);
+        return isProductEntitled || isCollectionEntitled;
+      });
+
+      console.log("DEBUG: Applicable items count:", applicableItems.length);
+
+      if (applicableItems.length === 0) {
+        return NextResponse.json({ 
+          error: "This coupon is not applicable to the items in your cart." 
+        }, { status: 400 });
+      }
+
+      // If we're here, some items are applicable. 
+      // Note: In a real checkout, Shopify would only apply the discount to the applicable line items.
+      // For this validation, we've confirmed it's at least partially applicable.
     }
     
     return NextResponse.json({ 

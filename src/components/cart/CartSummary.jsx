@@ -66,7 +66,42 @@ export default function CartSummary({ onPlaceOrder }) {
     }
   }, [otherItemsQuantity, insuranceItem?.quantity, eligibleGoldCoins, goldCoinItem?.quantity, updateCartItem, removeFromCart]);
 
-  const couponDetails = typeof appliedCoupon === 'object' ? appliedCoupon : { code: appliedCoupon, summary: "Applied", value: 0, valueType: "FIXED_AMOUNT" };
+  const couponDetails = (appliedCoupon && typeof appliedCoupon === 'object') 
+    ? appliedCoupon 
+    : { code: appliedCoupon || "", summary: "Applied", value: 0, valueType: "FIXED_AMOUNT" };
+
+  // Re-validate coupon when items change
+  useEffect(() => {
+    if (appliedCoupon && items.length > 0 && couponDetails?.code) {
+      const validateCurrentCoupon = async () => {
+        try {
+          const res = await fetch("/api/cart/coupon/validate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ 
+              items, 
+              couponCode: couponDetails.code,
+              customerEmail: user?.email 
+            })
+          });
+
+          if (!res.ok) {
+            // Coupon no longer valid for these items
+            dispatch(removeCoupon());
+            toast.warn("Coupon removed: items in cart are no longer eligible.");
+          }
+        } catch (err) {
+          console.error("Auto-validation failed:", err);
+        }
+      };
+
+      // Small delay to prevent too many requests during rapid quantity changes
+      const timer = setTimeout(validateCurrentCoupon, 1000);
+      return () => clearTimeout(timer);
+    } else if (appliedCoupon && items.length === 0) {
+      dispatch(removeCoupon());
+    }
+  }, [items, appliedCoupon, couponDetails.code, user?.email, dispatch]);
 
   // Subtotal is total cart amount MINUS insurance amount
   const subtotal = totalAmount - insuranceAmount;
@@ -193,7 +228,7 @@ export default function CartSummary({ onPlaceOrder }) {
                     <Tag size={16} />
                   </div>
                   <span className="text-sm font-bold text-zinc-700 uppercase tracking-wider">
-                    {appliedCoupon ? `Applied: ${appliedCoupon}` : "Apply Coupon"}
+                    {appliedCoupon ? `Applied: ${couponDetails.code}` : "Apply Coupon"}
                   </span>
                 </div>
                 <ChevronRight size={18} className="text-zinc-400 group-hover:text-primary transition-colors" />

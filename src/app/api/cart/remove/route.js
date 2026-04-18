@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import clientPromise from "@/lib/mongodb";
 import { buildCartLookup, normalizeUserId } from "@/lib/cartIdentity";
 
-export async function DELETE(req) {
+export async function POST(req) {
   try {
     const { userId: rawUserId, sessionId, variantId } = await req.json();
     const userId = normalizeUserId(rawUserId);
