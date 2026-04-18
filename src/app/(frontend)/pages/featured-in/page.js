@@ -100,7 +100,7 @@ export default function FeaturedInPage() {
   return (
     <section className="w-full bg-white font-figtree py-10 md:py-16">
       <div className="container mx-auto px-5 md:px-[60px]">
-        
+
         {/* Header Section */}
         <div className="text-center mb-10 md:mb-14">
           <h2 className="font-abhaya text-3xl md:text-[40px] leading-tight mb-2 uppercase">AS SEEN ON</h2>
@@ -113,14 +113,14 @@ export default function FeaturedInPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8">
           {articles.map((article, index) => (
             <div key={index} className="flex flex-col border border-border p-5 rounded-md hover:shadow-md transition-shadow duration-300">
-              
+
               {/* Logo Wrapper */}
               <div className="h-14 md:h-16 mb-6 flex items-center justify-start">
-                <img 
-                  src={article.logo} 
-                  alt={article.heading} 
-                  className="max-h-full max-w-[120px] md:max-w-[150px] object-contain" 
-                  loading="lazy" 
+                <img
+                  src={article.logo}
+                  alt={article.heading}
+                  className="max-h-full max-w-[120px] md:max-w-[150px] object-contain"
+                  loading="lazy"
                 />
               </div>
 
@@ -128,20 +128,20 @@ export default function FeaturedInPage() {
               <p className="text-muted-foreground text-[10px] tracking-widest uppercase mb-2">
                 {article.date}
               </p>
-              
+
               <h3 className="font-abhaya text-lg md:text-[22px] font-semibold leading-tight uppercase mb-3 text-foreground">
                 {article.heading}
               </h3>
-              
+
               <p className="text-[14px] md:text-[15px] leading-relaxed text-muted-foreground flex-grow mb-6">
                 {article.text}
               </p>
 
               {/* Read More Link */}
-              <a 
-                href={article.link} 
-                target="_blank" 
-                rel="noopener noreferrer" 
+              <a
+                href={article.link}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="text-[12px] md:text-[14px] text-primary underline underline-offset-4 tracking-wider uppercase font-semibold mt-auto inline-block w-fit hover:text-accent transition-colors"
               >
                 READ MORE.
