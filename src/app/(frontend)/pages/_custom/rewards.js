@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import Image from "next/image";
 import FAQ from "@/components/common/FAQ";
 
 export default function RewardsPage() {
@@ -94,7 +95,7 @@ export default function RewardsPage() {
                     "url(https://cdn.shopify.com/s/files/1/0739/8516/3482/files/Loyalty-Desktop-Banner_1.jpg?v=1750941750)",
                 }}
             >
-                <div className="absolute top-1/2 left-[20%] -translate-x-1/2 -translate-y-1/2">
+                <div className="absolute top-1/2 left-[10%] -translate-y-1/2">
                     <h1 className="text-white text-3xl md:text-5xl font-medium uppercase mb-10">
                         Lucira Rewards
                     </h1>
@@ -129,7 +130,7 @@ export default function RewardsPage() {
                             key={i}
                             className="border border-gray-800 rounded-xl p-6 flex flex-col"
                         >
-                            <img src={item.img} className="w-14 h-14 mb-4" />
+                            <Image src={item.img} className="w-14 h-14 mb-4" width={14} height={14} alt={item.title} />
                             <h3 className="text-lg uppercase font-bold mb-4">{item.title}</h3>
                             <p className="text-sm text-gray-800">{item.desc}</p>
                         </div>
@@ -150,10 +151,10 @@ export default function RewardsPage() {
 
                     <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
                         {waysToEarn.map((item, i) => (
-                        <div key={i}>
-                            <img
+                        <div key={i} className="relative">
+                            <Image width={400} height={400} alt={item.title}
                             src={item.img}
-                            className="w-full h-auto rounded-md"
+                            className="w-full h-auto rounded-md object-cover"
                             />
                             <h3 className="mt-4 mb-2 uppercase font-medium text-md">
                             {item.title}
@@ -199,7 +200,7 @@ export default function RewardsPage() {
 
                         {/* THEY GET */}
                         <div className="relative bg-[#F3E0CF] p-6 rounded-md text-right h-[180px] flex flex-col justify-center">
-                            <img
+                            <Image alt="They Get" width={300} height={300}
                                 src="https://cdn.shopify.com/s/files/1/0739/8516/3482/files/They_Get_img_2.png?v=1751354604"
                                 className="absolute bottom-0 left-0 w-auto h-full object-contain"
                             />
@@ -212,7 +213,7 @@ export default function RewardsPage() {
 
                         {/* YOU GET */}
                         <div className="relative bg-[#F3E0CF] p-6 rounded-md text-left h-[180px] flex flex-col justify-center">
-                            <img
+                            <Image alt="You Get" width={300} height={300}
                                 src="https://cdn.shopify.com/s/files/1/0739/8516/3482/files/7d93784d-d99f-4716-8c45-779b911938f6_2.png?v=1751352893"
                                 className="absolute bottom-0 right-0 w-auto h-full object-contain"
                             />
