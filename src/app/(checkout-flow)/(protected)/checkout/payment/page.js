@@ -164,7 +164,7 @@ export default function PaymentPage() {
   const [checkoutSelection, setCheckoutSelection] = useState(null);
 
   const user = useSelector(selectUser);
-  const { totalAmount } = useCart();
+  const { totalAmount, appliedCoupon } = useCart();
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -371,6 +371,7 @@ export default function PaymentPage() {
         },
         shippingAddress: isPickup ? checkoutSelection.selectedStore : selectedAddress,
         billingAddress: selectedBillingAddress,
+        appliedCoupon: appliedCoupon,
       });
 
       const razorpay = new window.Razorpay({

@@ -108,6 +108,7 @@ const initialState = {
   items: [],
   totalQuantity: 0,
   totalAmount: 0,
+  appliedCoupon: null,
   isCartOpen: false,
   loading: false,
   error: null,
@@ -121,6 +122,13 @@ const cartSlice = createSlice({
       state.items = [];
       state.totalQuantity = 0;
       state.totalAmount = 0;
+      state.appliedCoupon = null;
+    },
+    applyCoupon: (state, action) => {
+      state.appliedCoupon = action.payload;
+    },
+    removeCoupon: (state) => {
+      state.appliedCoupon = null;
     },
     openCart: (state) => {
       state.isCartOpen = true;
@@ -171,5 +179,12 @@ const cartSlice = createSlice({
   },
 });
 
-export const { clearCart, openCart, closeCart, toggleCart } = cartSlice.actions;
+export const { 
+  clearCart, 
+  applyCoupon, 
+  removeCoupon, 
+  openCart, 
+  closeCart, 
+  toggleCart 
+} = cartSlice.actions;
 export default cartSlice.reducer;

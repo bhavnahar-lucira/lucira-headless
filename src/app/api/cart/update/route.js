@@ -50,14 +50,21 @@ export async function POST(req) {
       return item;
     });
 
-    await cartCollection.updateOne(
-      { _id: cart._id },
-      { $set: { items: updatedItems, updatedAt: new Date() } }
-    );
-
     // Recalculate totals
     const totalQuantity = updatedItems.reduce((acc, item) => acc + (item.quantity || 0), 0);
     const totalAmount = updatedItems.reduce((acc, item) => acc + (item.price * (item.quantity || 1)), 0);
+
+    await cartCollection.updateOne(
+      { _id: cart._id },
+      { 
+        $set: { 
+          items: updatedItems, 
+          totalQuantity,
+          totalAmount,
+          updatedAt: new Date() 
+        } 
+      }
+    );
 
     return NextResponse.json({ items: updatedItems, totalQuantity, totalAmount });
   } catch (err) {

@@ -44,6 +44,7 @@ export async function POST(req) {
     const shippingAddress = body?.shippingAddress;
     const billingAddress = body?.billingAddress;
     const customer = body?.customer;
+    const appliedCoupon = body?.appliedCoupon;
 
     // STEP 1: Create Shopify Draft Order
     const draftOrderInput = {
@@ -72,31 +73,18 @@ export async function POST(req) {
 
         return lineItem;
       }),
-      shippingAddress: shippingAddress ? {
-        firstName: shippingAddress.firstName,
-        lastName: shippingAddress.lastName,
-        address1: shippingAddress.address1,
-        address2: shippingAddress.address2,
-        city: shippingAddress.city,
-        province: shippingAddress.province,
-        zip: shippingAddress.zip,
-        country: shippingAddress.country,
-        phone: shippingAddress.phone
-      } : undefined,
-      billingAddress: billingAddress ? {
-        firstName: billingAddress.firstName,
-        lastName: billingAddress.lastName,
-        address1: billingAddress.address1,
-        address2: billingAddress.address2,
-        city: billingAddress.city,
-        province: billingAddress.province,
-        zip: billingAddress.zip,
-        country: billingAddress.country,
-        phone: billingAddress.phone
+      appliedDiscount: (appliedCoupon && typeof appliedCoupon === 'object') ? {
+        title: appliedCoupon.code,
+        value: Number(appliedCoupon.value || 0),
+        valueType: appliedCoupon.valueType === "PERCENTAGE" ? "PERCENTAGE" : "FIXED_AMOUNT"
       } : undefined,
       useCustomerDefaultAddress: false,
       taxExempt: true // Ensure Shopify doesn't add extra GST on top of tax-inclusive prices
     };
+
+    // If we have a real discount code, Shopify Draft Orders usually require 
+    // applying it AFTER creation or via 'appliedDiscount'.
+    // Let's try applying it as a manual discount with the code name.
 
     if (customer?.email) {
       draftOrderInput.email = customer.email;
