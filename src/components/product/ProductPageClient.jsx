@@ -649,54 +649,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
             
             {/* Action Buttons */}
             <div className="space-y-2 mb-4">
-              <div className="flex gap-2">
-                <Button 
-                  onClick={handleAddToCart}
-                  disabled={addingToCart}
-                  className="flex-1 h-12 text-lg font-bold  rounded-md hover:cursor-pointer"
-                >
-                  {addingToCart ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      ADDING...
-                    </>
-                  ) : "ADD TO CART"}
-                </Button>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={handleToggleWishlist}
-                  disabled={wishlistLoading}
-                  className={`h-12 w-12 rounded-md bg-gray-50 hover:cursor-pointer ${isWishlisted ? "text-rose-500" : "text-black"}`}
-                >
-                  <Heart
-                    size={24}
-                    fill={isWishlisted ? "currentColor" : "none"}
-                    className={`${isWishlisted ? "text-rose-500" : "text-black"}`}
-                  />
-                </Button>
-              </div>
-              <div className="grid grid-cols-3 gap-2">
-                <Button variant="outline" className="h-12 font-medium text-lg flex items-center justify-center gap-2 bg-gray-50 hover:cursor-pointer">
-                  <Image src="/images/icons/engrave.svg" alt="Whatsapp icon" width={18} height={18} />
-                  <span className="hidden lg:inline text-sm">Whatsapp Us</span>
-                </Button>
-                <Button variant="outline" className="h-12 font-medium text-lg flex items-center justify-center gap-2 bg-gray-50 hover:cursor-pointer">
-                  <Video size={18} className="text-black" />
-                  <span className="hidden lg:inline text-sm">Shop Live</span>
-                </Button>
-                
-                <Drawer open={showSimilar} onOpenChange={setShowSimilar}>
-                  <DrawerTrigger asChild>
-                    <Button 
-                      variant="outline" 
-                      onClick={fetchSimilar}
-                      className="h-12 font-medium text-lg flex items-center justify-center gap-2 bg-gray-50 hover:cursor-pointer"
-                    >
-                      <Copy size={18} className="text-black" />
-                      <span className="hidden lg:inline text-sm">View Similar</span>
-                    </Button>
-                  </DrawerTrigger>
+                <Drawer open={showSimilar} onOpenChange={setShowSimilar}>                  
                   <DrawerContent className="max-h-[90vh] h-[90vh] bg-white rounded-t-[20px] flex flex-col">
                     <div className="mx-auto w-full max-w-7xl flex flex-col h-full overflow-hidden">
                       <DrawerHeader className="px-10 pt-10 flex flex-row items-center justify-between border-b border-zinc-100 pb-6 !text-left !flex-row shrink-0">
@@ -759,8 +712,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                       </div>
                     </div>
                   </DrawerContent>
-                </Drawer>
-              </div>
+                </Drawer>              
             </div>
            
             {/* Features */}
@@ -1079,6 +1031,46 @@ export default function ProductPageClient({ product, complementaryProducts = [],
             <ProductAccordion/>
             {/* Wear This With Slider */}
             {complementaryProducts.length > 0 && <WearThisWith products={complementaryProducts} />}
+                <div className="py-2 bg-white sticky bottom-0 z-99 mt-4">
+                  <div className="flex gap-2">
+                      <Button 
+                      onClick={handleAddToCart}
+                      disabled={addingToCart}
+                      className="flex-1 h-12 text-lg font-bold  rounded-md hover:cursor-pointer"
+                      >
+                      {addingToCart ? (
+                          <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          ADDING...
+                          </>
+                      ) : "ADD TO CART"}
+                      </Button>
+                      <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={handleToggleWishlist}
+                      disabled={wishlistLoading}
+                      className={`h-12 w-12 rounded-md bg-gray-50 hover:cursor-pointer ${isWishlisted ? "text-rose-500" : "text-black"}`}
+                      >
+                      <Heart
+                          size={24}
+                          fill={isWishlisted ? "currentColor" : "none"}
+                          className={`${isWishlisted ? "text-rose-500" : "text-black"}`}
+                      />
+                      </Button>
+                  </div>
+                </div>
+
+                 <div className="grid grid-cols-2 gap-4 mt-2">
+                    <Button variant="outline" className="h-auto py-3 font-medium text-lg flex items-center justify-center gap-2 bg-gray-50 hover:cursor-pointer hover:bg-primary hover:text-white transition-all group">
+                      <Image src="/images/icons/whatsapp.png" alt="Whatsapp icon" width={24} height={24} />
+                      <span className="hidden lg:inline text-base uppercase">Whatsapp Us</span>
+                    </Button>
+                    <Button variant="outline" className="h-auto py-3 font-medium text-lg flex items-center justify-center gap-2 bg-gray-50 hover:cursor-pointer group hover:bg-primary hover:text-white transition-all">
+                      <Video size={30} className="text-black group-hover:text-white transition-all" />
+                      <span className="hidden lg:inline text-base uppercase">Shop Live</span>
+                    </Button>
+                </div>
 
           </div>
         </div>
