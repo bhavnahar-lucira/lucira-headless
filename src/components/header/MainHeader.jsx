@@ -112,6 +112,31 @@ export default function MainHeader() {
     }
   };
 
+  useEffect(() => {
+    const SHOW_DELAY = 11000;
+    const path = window.location.pathname.toLowerCase();
+
+    // Skip for account pages or if already seen or if user is logged in
+    if (path.startsWith("/account") || path.startsWith("/admin")) return;
+    if (sessionStorage.getItem("lucira_login_popup_seen") === "true") return;
+    if (user) return;
+
+    const timer = setTimeout(() => {
+      if (sessionStorage.getItem("lucira_login_manually_opened") === "true") return;
+      if (user) return;
+
+      setOpen(true);
+      sessionStorage.setItem("lucira_login_popup_seen", "true");
+    }, SHOW_DELAY);
+
+    return () => clearTimeout(timer);
+  }, [user]);
+
+  const handleOpenLogin = () => {
+    sessionStorage.setItem("lucira_login_manually_opened", "true");
+    setOpen(true);
+  };
+
   const showSearch = isSearchOpen || isFocused;
 
   return (
@@ -203,7 +228,7 @@ export default function MainHeader() {
               </div>
             </div>
           ) : (
-            <UserIcon size={19} className="cursor-pointer" onClick={() => setOpen(true)} />
+            <UserIcon size={19} className="cursor-pointer" onClick={handleOpenLogin} />
           )}
 
           {user ? (
@@ -216,7 +241,7 @@ export default function MainHeader() {
               )}
             </Link>
           ) : (
-            <button type="button" onClick={() => setOpen(true)} className="relative group p-1">
+            <button type="button" onClick={handleOpenLogin} className="relative group p-1">
               <Heart size={19} className={`cursor-pointer ${wishlistItems.length > 0 ? "text-rose-500" : "text-zinc-900"}`} />
               {wishlistItems.length > 0 && (
                 <span className="absolute -top-1 -right-1 bg-rose-500 text-white text-[10px] font-bold w-4.5 h-4.5 rounded-full flex items-center justify-center border-2 border-white shadow-sm">

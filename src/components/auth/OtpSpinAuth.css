@@ -1,0 +1,228 @@
+@import "tailwindcss";
+
+.otp-spin-auth-wrapper {
+  @apply relative flex flex-col items-center w-full mx-auto overflow-hidden transition-all duration-300 bg-[#FFFEFC] shadow-[0_0_10px_rgba(0,0,0,0.3)] max-w-[400px]; border-radius: 4px;
+}
+
+.otp-heading img {
+  @apply mx-auto;
+}
+
+.consent-label {display: flex;}
+
+@media (min-width: 768px) {
+  .otp-spin-auth-wrapper.login-active {
+    @apply flex-row items-stretch w-[800px] max-w-[800px] h-[500px];
+  }
+
+  .otp-spin-auth-wrapper.signup-active {
+    @apply flex-row items-stretch w-[800px] max-w-[800px] min-h-[500px];
+  }
+}
+
+.login-image-side {
+  @apply w-full h-[175px] md:h-full md:w-[55%] bg-center bg-cover bg-no-repeat;
+  background-image: url("https://www.lucirajewelry.com/cdn/shop/files/Jan-Popup-Desktop-New_2.jpg?v=1769844544");
+}
+
+@media (max-width: 767px) {
+  .login-image-side {
+    background-image: url("https://cdn.shopify.com/s/files/1/0739/8516/3482/files/Jan-Popup-Mobile_jpg.jpg?v=1770010490");
+  }
+}
+
+.spin-wheel-wrapper {
+  @apply hidden flex-col items-center justify-center relative w-full h-[220px] md:h-full md:w-[60%] overflow-hidden bg-center bg-cover bg-no-repeat;
+  background-image: url("https://cdn.shopify.com/s/files/1/0739/8516/3482/files/BG_1_1.png?v=1770198650");
+}
+
+.otp-spin-auth-wrapper.signup-active .spin-wheel-wrapper {
+  @apply flex;
+}
+
+.wheel-container {
+  @apply relative w-[90%] h-[290px] md:w-[380px] md:h-[380px];
+}
+
+@media (max-width: 767px) {
+  .wheel-container {
+    @apply absolute top-[-75px];
+  }
+}
+
+.spin-wheel-image {
+  @apply w-full h-full object-contain absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[1];
+}
+
+.spin-wheel-cta {
+  @apply absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 pointer-events-none w-full max-w-[440px] h-auto;
+}
+
+.winner-ticker {
+  @apply absolute bottom-[12px] left-1/2 -translate-x-1/2 bg-white px-7 py-2 rounded-[30px] flex items-center gap-2.5 shadow-[0_2px_10px_rgba(0,0,0,0.08)] z-[5] whitespace-nowrap text-[13px] font-semibold;
+}
+
+.registration-form-inputs label {
+  @apply text-sm flex mb-1.5 font-normal text-[#666];
+}
+
+.winner-ticker .dot {
+  @apply w-2 h-2 rounded-full bg-[#B45670];
+}
+
+.otp-form-wrapper {
+  @apply flex flex-col justify-center w-full p-5 md:p-8;
+}
+
+@media (min-width: 768px) {
+  .otp-spin-auth-wrapper.login-active .otp-form-wrapper {
+    @apply w-[50%];
+  }
+  .otp-spin-auth-wrapper.signup-active .otp-form-wrapper {
+    @apply w-[50%];
+  }
+}
+
+.otp-heading {
+  @apply text-center mb-4;
+}
+
+
+element.style {
+}
+.heading {
+    margin-bottom: calc(var(--spacing) * 1);
+    text-align: center;
+    font-size: var(--text-base);
+    line-height: var(--tw-leading, var(--text-base--line-height));
+    --tw-font-weight: var(--font-weight-medium);
+    font-weight: 600;
+    color: var(--color-black);
+    text-transform: uppercase;
+}
+
+.subtext {
+  @apply text-[12px] font-medium text-[#5B5B5B] text-center mb-3 tracking-wider leading-relaxed;  font-weight: 500; letter-spacing: 0.2px; color: #000000;}
+
+.mobile-wrap {
+  @apply flex items-center border border-[#e2e2e2] h-[45px] px-4 rounded-lg bg-white;
+}
+
+.country-code {
+  @apply text-sm font-normal mr-2.5 pr-3 border-r border-[#d0d0d0];
+}
+
+.mobile-wrap input {
+  @apply w-full h-full text-sm border-none outline-none font-normal bg-transparent;
+}
+
+.otp-inputs {
+  @apply flex justify-center gap-2 mt-4 mb-4;
+}
+
+.otp-inputs input {
+  @apply w-[25%] h-[50px] text-center text-lg border rounded-md border-[#ddd] focus:border-black outline-none; font-weight: 800;
+}
+
+.btn-primary {
+  @apply text-white h-[45px] w-full font-normal text-[13px] cursor-pointer transition-opacity uppercase tracking-wider border-none mt-0 bg-[#5f4745]; border-radius: 4px; font-weight: 600;
+}
+
+.signup-active .btn-primary {
+  @apply bg-[#5f4745];
+}
+
+.consent-wrapper {
+  @apply my-3 max-w-full md:max-w-[100%];
+}
+
+.consent-label {
+  @apply flex items-start gap-2 text-[12px] leading-tight cursor-pointer text-[#000];
+}
+
+.consent-label input[type="checkbox"] {
+  @apply mt-0.5 accent-[#5a413f];
+}
+
+.register-link {
+  @apply text-center text-[13px] mt-2.5 text-[#5B5B5B];
+}
+
+.register-link span {
+  @apply text-[#5a413f] font-medium;
+}
+
+#otp-timer {
+  @apply text-center mt-2.5 text-[13px] text-[#5B5B5B];
+}
+
+#otp-timer span {
+  @apply text-[#b77766] font-medium;
+}
+
+.close-button {
+  @apply absolute top-5 right-5 z-20 p-1 rounded-full text-white cursor-pointer border-none flex items-center justify-center bg-[#5f4745];
+}
+
+.field-input {
+  margin-bottom: calc(var(--spacing) * 1.5);
+    height: calc(var(--spacing) * 10);
+    border-radius: 4px;
+    border-style: var(--tw-border-style);
+    background-color: var(--color-white);
+    width: 100%;
+    padding-inline: calc(var(--spacing) * 4);
+    font-size: var(--text-sm);
+    line-height: var(--tw-leading, var(--text-sm--line-height));
+    --tw-outline-style: none;
+    border-width: 1px;
+    border-color: #e2e2e2;
+    outline-style: none;
+}
+
+.registration-form-row-wrapper {
+  @apply grid grid-cols-2 gap-3.5;
+}
+
+.red-required {
+  @apply text-red-500;
+}
+
+.coupon-box {
+  @apply flex items-center justify-between gap-2 mx-auto my-3 p-2 pl-5 rounded-lg border border-dashed border-green-600 bg-green-50 max-w-[205px] font-semibold text-black;
+}
+
+#couponCode {
+  @apply text-sm;
+}
+
+.copy-btn {
+  @apply border-none bg-transparent cursor-pointer text-lg p-1;
+}
+
+.safe-secure-text {
+  @apply flex items-center justify-center gap-1 text-[12px] text-black mt-3;
+}
+
+.signupSection {
+  @apply overflow-hidden;
+}
+
+#successSection .heading {
+  @apply max-w-[245px] mx-auto mb-5;
+}
+
+#successSection .subtext {
+  @apply max-w-[280px] mx-auto mb-3;
+}
+
+@media (max-width: 767px) {
+  .otp-spin-auth-wrapper {
+    animation: slideInBottom 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  }
+}
+
+@keyframes slideInBottom {
+  from { transform: translateY(110%); }
+  to   { transform: translateY(0); }
+}

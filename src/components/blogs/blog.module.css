@@ -1,0 +1,9 @@
+.blogGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+.blog-image{
+    height: 300px;
+    width: 300px;
+}
