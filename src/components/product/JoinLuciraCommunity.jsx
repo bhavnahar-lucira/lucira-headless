@@ -1,10 +1,31 @@
 "use client";
 
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import LazyImage from "../common/LazyImage";
+import { setCookie } from "@/lib/utils";
+import { toast } from "react-toastify";
 
 export function JoinLuciraCommunity() {
+  const [email, setEmail] = useState("");
+
+  const handleSubscribe = () => {
+    if (!email.trim()) return toast.error("Enter email");
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return toast.error("Enter a valid email address");
+
+    console.log("Subscribing email:", email);
+    setCookie("subscriberEmail", email, 30);
+    
+    // Construct WhatsApp message
+    const message = `Hi Lucira, I'd like to join the community. My email is: ${email}`;
+    const encodedMessage = encodeURIComponent(message);
+    const whatsappUrl = `https://api.whatsapp.com/send?phone=+91XXXXXXXXXX&text=${encodedMessage}`;
+
+    window.open(whatsappUrl, "_blank");
+    toast.success("Subscribed successfully!");
+  };
+
   return (
     <section className="w-full bg-[#F9F9F9] overflow-hidden mt-15">
       <div className="max-w-480 mx-auto pe-17 min-[1440px]:pe-17 grid md:grid-cols-2 gap-16 items-stretch">
@@ -44,11 +65,16 @@ export function JoinLuciraCommunity() {
                 <div className="relative grow">
                   <Input 
                     placeholder="Enter your email" 
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     className="h-13 bg-white border-[#A1A1A1] rounded-md px-6 text-base placeholder:text-[#8E8E8E] focus-visible:ring-1 focus-visible:ring-black"
                   />
                 </div>
 
-                <Button className="h-13 px-10 text-lg tracking-wide hover:cursor-pointer">
+                <Button 
+                  onClick={handleSubscribe}
+                  className="h-13 px-10 text-lg tracking-wide hover:cursor-pointer"
+                >
                   Subscribe
                 </Button>
               </div>
