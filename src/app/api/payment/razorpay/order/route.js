@@ -1,33 +1,19 @@
 import { NextResponse } from "next/server";
 import clientPromise from "@/lib/mongodb";
 import { buildCartLookup, normalizeUserId } from "@/lib/cartIdentity";
+import { shopifyAdminFetch } from "@/lib/shopify";
 
 function toSubunits(amount) {
   const numericAmount = Number(amount || 0);
-  if (!Number.isFinite(numericAmount) || numericAmount <= 0) {
-    return 0;
-  }
-
   return Math.round(numericAmount * 100);
 }
 
-function buildAddressPayload(address = null) {
-  if (!address) return null;
-
-  return {
-    id: address.id || "",
-    firstName: address.firstName || "",
-    lastName: address.lastName || "",
-    company: address.company || "",
-    address1: address.address1 || "",
-    address2: address.address2 || "",
-    city: address.city || "",
-    province: address.province || "",
-    zip: address.zip || "",
-    country: address.country || "",
-    phone: address.phone || "",
-    gstin: address.gstin || "",
-  };
+function normalizeVariantId(variantId = "") {
+  const value = String(variantId || "").trim();
+  if (!value) return "";
+  return value.includes("gid://shopify/ProductVariant/")
+    ? value
+    : `gid://shopify/ProductVariant/${value}`;
 }
 
 export async function POST(req) {
@@ -37,46 +23,97 @@ export async function POST(req) {
     const sessionId = body?.sessionId || null;
 
     if (!userId && !sessionId) {
-      return NextResponse.json(
-        { error: "UserId or SessionId is required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "UserId or SessionId is required" }, { status: 400 });
     }
 
-    const keyId =
-      process.env.RAZORPAY_KEY_ID || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "";
+    const keyId = process.env.RAZORPAY_KEY_ID || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "";
     const keySecret = process.env.RAZORPAY_KEY_SECRET || "";
 
     if (!keyId || !keySecret) {
-      return NextResponse.json(
-        { error: "Razorpay credentials are not configured" },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: "Razorpay credentials not configured" }, { status: 500 });
     }
 
     const client = await clientPromise;
     const db = client.db("next_local_db");
-    const cartCollection = db.collection("carts");
-    const cart = await cartCollection.findOne(buildCartLookup({ userId, sessionId }));
+    const cart = await db.collection("carts").findOne(buildCartLookup({ userId, sessionId }));
 
     if (!cart?.items?.length) {
       return NextResponse.json({ error: "Your cart is empty" }, { status: 400 });
     }
 
-    const totalAmount = cart.items.reduce(
-      (sum, item) => sum + Number(item.price || 0) * Number(item.quantity || 1),
-      0
-    );
-    const amountInSubunits = toSubunits(totalAmount);
+    const shippingAddress = body?.shippingAddress;
+    const billingAddress = body?.billingAddress;
+    const customer = body?.customer;
+    const appliedCoupon = body?.appliedCoupon;
 
-    if (!amountInSubunits) {
-      return NextResponse.json(
-        { error: "Unable to calculate payable amount" },
-        { status: 400 }
-      );
+    // STEP 1: Create Shopify Draft Order
+    const draftOrderInput = {
+      lineItems: cart.items.map(item => {
+        const price = Number(item.price || 0);
+        const lineItem = {
+          variantId: normalizeVariantId(item.variantId),
+          quantity: Number(item.quantity || 1),
+          originalUnitPrice: price,
+          // Pass custom properties for the technical details
+          customAttributes: [
+            { key: "_Gold Weight", value: String(item.goldWeight || "") },
+            { key: "_Diamond Charges", value: String(item.diamondCharges || "") },
+            { key: "Variant Title", value: String(item.variantTitle || "") }
+          ].filter(attr => attr.value !== "")
+        };
+
+        // If it's a free gift, apply a 100% discount to ensure Shopify respects the ₹0 price
+        if (price === 0) {
+          lineItem.appliedDiscount = {
+            title: "Free Gift",
+            value: 100,
+            valueType: "PERCENTAGE"
+          };
+        }
+
+        return lineItem;
+      }),
+      appliedDiscount: (appliedCoupon && typeof appliedCoupon === 'object') ? {
+        title: appliedCoupon.code,
+        value: Number(appliedCoupon.value || 0),
+        valueType: appliedCoupon.valueType === "PERCENTAGE" ? "PERCENTAGE" : "FIXED_AMOUNT"
+      } : undefined,
+      useCustomerDefaultAddress: false,
+      taxExempt: true // Ensure Shopify doesn't add extra GST on top of tax-inclusive prices
+    };
+
+    // If we have a real discount code, Shopify Draft Orders usually require 
+    // applying it AFTER creation or via 'appliedDiscount'.
+    // Let's try applying it as a manual discount with the code name.
+
+    if (customer?.email) {
+      draftOrderInput.email = customer.email;
     }
 
-    const receipt = `lucira_${Date.now()}`;
+    const shopifyDraftData = await shopifyAdminFetch(`
+      mutation draftOrderCreate($input: DraftOrderInput!) {
+        draftOrderCreate(input: $input) {
+          draftOrder {
+            id
+            totalPrice
+          }
+          userErrors {
+            field
+            message
+          }
+        }
+      }
+    `, { input: draftOrderInput });
+
+    const draftOrder = shopifyDraftData.draftOrderCreate.draftOrder;
+    const userErrors = shopifyDraftData.draftOrderCreate.userErrors;
+
+    if (userErrors?.length) {
+      return NextResponse.json({ error: userErrors[0].message }, { status: 400 });
+    }
+
+    // STEP 2: Create Razorpay Order using Draft Order Total
+    const amountInSubunits = toSubunits(draftOrder.totalPrice);
     const razorpayResponse = await fetch("https://api.razorpay.com/v1/orders", {
       method: "POST",
       headers: {
@@ -86,44 +123,24 @@ export async function POST(req) {
       body: JSON.stringify({
         amount: amountInSubunits,
         currency: "INR",
-        receipt,
-        notes: {
-          userId: userId || "",
-          sessionId: sessionId || "",
-          shippingAddressId: body?.shippingAddress?.id || "",
-          billingAddressId: body?.billingAddress?.id || "",
-        },
+        receipt: draftOrder.id,
       }),
     });
 
     const razorpayOrder = await razorpayResponse.json();
 
-    if (!razorpayResponse.ok) {
-      return NextResponse.json(
-        { error: razorpayOrder?.error?.description || "Failed to create Razorpay order" },
-        { status: razorpayResponse.status }
-      );
-    }
-
     return NextResponse.json({
       key: keyId,
       amount: amountInSubunits,
-      currency: razorpayOrder.currency || "INR",
+      currency: "INR",
       orderId: razorpayOrder.id,
-      receipt,
-      customer: {
-        name: body?.customer?.name || "",
-        email: body?.customer?.email || "",
-        contact: body?.customer?.phone || "",
-      },
-      shippingAddress: buildAddressPayload(body?.shippingAddress),
-      billingAddress: buildAddressPayload(body?.billingAddress),
+      draftId: draftOrder.id,
+      customer: body?.customer,
+      shippingAddress: body?.shippingAddress,
+      billingAddress: body?.billingAddress,
     });
   } catch (error) {
-    console.error("RAZORPAY ORDER CREATE ERROR:", error);
-    return NextResponse.json(
-      { error: error.message || "Failed to initialize payment" },
-      { status: 500 }
-    );
+    console.error("DRAFT ORDER FLOW ERROR:", error);
+    return NextResponse.json({ error: "Failed to initialize checkout" }, { status: 500 });
   }
 }

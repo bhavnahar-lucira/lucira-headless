@@ -164,7 +164,7 @@ export default function PaymentPage() {
   const [checkoutSelection, setCheckoutSelection] = useState(null);
 
   const user = useSelector(selectUser);
-  const { totalAmount } = useCart();
+  const { totalAmount, appliedCoupon } = useCart();
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -371,12 +371,11 @@ export default function PaymentPage() {
         },
         shippingAddress: isPickup ? checkoutSelection.selectedStore : selectedAddress,
         billingAddress: selectedBillingAddress,
+        appliedCoupon: appliedCoupon,
       });
 
       const razorpay = new window.Razorpay({
         key: order.key,
-        amount: order.amount,
-        currency: order.currency,
         name: "Lucira",
         description: "Complete your order securely",
         order_id: order.orderId,
@@ -390,6 +389,7 @@ export default function PaymentPage() {
               razorpayOrderId: response.razorpay_order_id,
               razorpayPaymentId: response.razorpay_payment_id,
               razorpaySignature: response.razorpay_signature,
+              draftId: order.draftId,
               customer: {
                 id: customer?.id || "",
                 name: customerName,
@@ -406,7 +406,7 @@ export default function PaymentPage() {
                 ? `Order placed successfully: ${completion.shopifyOrderName}`
                 : "Order placed successfully"
             );
-            router.refresh();
+            router.replace("/success");
           } catch (completionError) {
             toast.error(completionError.message || "Payment succeeded but order creation failed");
           } finally {
@@ -417,11 +417,13 @@ export default function PaymentPage() {
           ondismiss: () => {
             toast.info("Payment window closed.");
           },
+          confirm_close: true,
         },
         prefill: {
           name: order.customer?.name || customerName,
           email: order.customer?.email || checkoutSelection?.customerEmail || "",
           contact: order.customer?.contact || "",
+          method: "upi",
         },
         notes: {
           shipping_address: isPickup ? checkoutSelection.selectedStore?.address : formatAddressPreview(selectedAddress),
@@ -429,8 +431,25 @@ export default function PaymentPage() {
           shipping_gstin: selectedAddress?.gstin || "",
           billing_gstin: selectedBillingAddress?.gstin || "",
         },
+        config: {
+          display: {
+            blocks: {
+              upi: {
+                name: "Pay via UPI",
+                methods: ["vpa", "qr"],
+              },
+            },
+            sequence: ["block.upi", "block.cards", "block.netbanking"],
+            preferences: {
+              show_default_blocks: true,
+            },
+          },
+        },
         theme: {
           color: "#111111",
+        },
+        retry: {
+          enabled: false,
         },
       });
 

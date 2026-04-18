@@ -1,29 +1,132 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { useState } from "react";
-import { Tag, Phone, MessageSquare, Gift, Truck, MessageCircle } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { useState, useEffect } from "react";
+import { Tag, Phone, MessageSquare, Gift, Truck, MessageCircle, ChevronRight, X, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import Image from "next/image";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import InsuranceOption from "./InsuranceOption";
+import GoldCoinOption, { GOLDCOIN_VARIANT_ID } from "./GoldCoinOption";
+import { useCart } from "@/hooks/useCart";
+import { applyCoupon, removeCoupon } from "@/redux/features/cart/cartSlice";
+import { toast } from "react-toastify";
+
+const INSURANCE_VARIANT_ID = "gid://shopify/ProductVariant/47709366026458";
 
 export default function CartSummary({ onPlaceOrder }) {
-  const [isVoucherOpen, setIsVoucherOpen] = useState(false);
-  const { totalAmount, totalQuantity } = useSelector((state) => state.cart);
+  const dispatch = useDispatch();
+  const [isCouponDialogOpen, setIsCouponDialogOpen] = useState(false);
+  const [couponCode, setCouponCode] = useState("");
+  const [isApplying, setIsApplying] = useState(false);
+  
+  const { items, totalAmount, totalQuantity, appliedCoupon, updateCartItem, removeFromCart } = useCart();
+  const user = useSelector((state) => state.user.user);
 
-  const subtotal = totalAmount; // For now, subtotal is totalAmount
-  const discount = 0; // Logic for discounts can be added later
+  const otherItemsQuantity = items
+    .filter(item => item.variantId !== INSURANCE_VARIANT_ID && item.variantId !== GOLDCOIN_VARIANT_ID)
+    .reduce((acc, item) => acc + (item.quantity || 1), 0);
+
+  const diamondTotal = items
+    .filter(item => item.variantId !== INSURANCE_VARIANT_ID && item.variantId !== GOLDCOIN_VARIANT_ID && (item.diamondCharges > 0))
+    .reduce((acc, item) => acc + (item.price * (item.quantity || 1)), 0);
+
+  const eligibleGoldCoins = Math.floor(diamondTotal / 20000);
+
+  const insuranceItem = items.find(item => item.variantId === INSURANCE_VARIANT_ID);
+  const insuranceAmount = insuranceItem ? insuranceItem.price * (insuranceItem.quantity || 1) : 0;
+
+  const goldCoinItem = items.find(item => item.variantId === GOLDCOIN_VARIANT_ID);
+
+  // Auto-sync insurance and gold coin quantities
+  useEffect(() => {
+    // Sync Insurance
+    if (insuranceItem) {
+      if (otherItemsQuantity <= 0) {
+        removeFromCart(INSURANCE_VARIANT_ID);
+      } else if (insuranceItem.quantity !== otherItemsQuantity) {
+        updateCartItem({
+          currentVariantId: INSURANCE_VARIANT_ID,
+          quantity: otherItemsQuantity
+        });
+      }
+    }
+
+    // Sync Gold Coin
+    if (goldCoinItem) {
+      if (eligibleGoldCoins <= 0) {
+        removeFromCart(GOLDCOIN_VARIANT_ID);
+      } else if (goldCoinItem.quantity !== eligibleGoldCoins) {
+        updateCartItem({
+          currentVariantId: GOLDCOIN_VARIANT_ID,
+          quantity: eligibleGoldCoins
+        });
+      }
+    }
+  }, [otherItemsQuantity, insuranceItem?.quantity, eligibleGoldCoins, goldCoinItem?.quantity, updateCartItem, removeFromCart]);
+
+  const couponDetails = typeof appliedCoupon === 'object' ? appliedCoupon : { code: appliedCoupon, summary: "Applied", value: 0, valueType: "FIXED_AMOUNT" };
+
+  // Subtotal is total cart amount MINUS insurance amount
+  const subtotal = totalAmount - insuranceAmount;
+
+  // Calculate dynamic discount
+  let couponDiscountAmount = 0;
+  if (appliedCoupon) {
+    if (couponDetails.valueType === "FIXED_AMOUNT") {
+      couponDiscountAmount = couponDetails.value;
+    } else if (couponDetails.valueType === "PERCENTAGE") {
+      couponDiscountAmount = (subtotal * couponDetails.value) / 100;
+    }
+  }
+
+  const discount = couponDiscountAmount; 
   const shipping = 0; // Free shipping
-  const totalCost = subtotal - discount + shipping;
+  const grandTotal = subtotal + insuranceAmount - discount + shipping;
 
-  const coupons = [
-    { code: "PRESET10", description: "Flat 10% off on Preset Solitaires" },
-    { code: "SPARKLE10", description: "10% off on Making Charges" },
-    { code: "SPARKLE100", description: "100% off on Making Charges" },
-    { code: "SPARKLE20", description: "20% off on Making Charges" },
-    { code: "SPARKLE5", description: "5% off on Making Charges" },
-  ];
+  const handleApplyCoupon = async () => {
+    if (!couponCode.trim()) return;
+    setIsApplying(true);
+    try {
+      const res = await fetch("/api/cart/coupon/validate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          items, 
+          couponCode: couponCode.trim(),
+          customerEmail: user?.email 
+        })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Invalid coupon");
+      }
+
+      // Store coupon details in Redux
+      dispatch(applyCoupon({ 
+        code: data.code, 
+        summary: data.summary,
+        value: data.value,
+        valueType: data.valueType
+      }));
+
+      toast.success(`Coupon "${data.code}" applied!`);
+      setIsCouponDialogOpen(false);
+      setCouponCode("");
+    } catch (err) {
+      toast.error(err.message);
+    } finally {
+      setIsApplying(false);
+    }
+  };
+
+  const handleRemoveCoupon = () => {
+    dispatch(removeCoupon());
+    toast.info("Coupon removed");
+  };
 
   return (
     <div className="space-y-6">
@@ -33,34 +136,45 @@ export default function CartSummary({ onPlaceOrder }) {
           <span>Subtotal</span>
           <span className="font-medium text-zinc-900">₹ {subtotal.toLocaleString('en-IN')}</span>
         </div>
-        <div className="flex justify-between text-sm text-[#189351]">
-          <span>Cart Discount</span>
-          <span className="font-bold">- ₹ {discount.toLocaleString('en-IN')}</span>
-        </div>
+        {appliedCoupon && (
+          <div className="flex justify-between text-sm text-[#189351]">
+            <div className="flex items-center gap-2">
+              <span className="font-bold uppercase tracking-wider">Coupon ({couponDetails.code})</span>
+              <button 
+                onClick={handleRemoveCoupon}
+                className="text-[10px] font-bold text-red-500 hover:underline uppercase tracking-tighter"
+              >
+                (Remove)
+              </button>
+            </div>
+            <span className="font-bold whitespace-nowrap">- ₹ {couponDiscountAmount.toLocaleString('en-IN')}</span>
+          </div>
+        )}
+        {goldCoinItem && (
+          <div className="flex justify-between text-sm text-green-600">
+            <span>Free Gold Coin ({goldCoinItem.quantity})</span>
+            <span className="font-bold">₹ 0</span>
+          </div>
+        )}
+        {insuranceItem && (
+          <div className="flex justify-between text-sm text-zinc-600">
+            <span>Insurance</span>
+            <span className="font-medium text-zinc-900">₹ {insuranceAmount.toLocaleString('en-IN')}</span>
+          </div>
+        )}
         <div className="flex justify-between text-sm text-[#189351]">
           <span>Shipping (Standard)</span>
           <span className="font-bold">Free</span>
         </div>
         
         <div className="border-t border-zinc-100 my-4 pt-4 flex justify-between items-center">
-          <span className="text-base font-bold text-[#443360] uppercase tracking-wider">TOTAL COST</span>
-          <span className="text-lg font-bold text-[#443360]">₹ {totalCost.toLocaleString('en-IN')}</span>
+          <span className="text-base font-bold text-[#443360] uppercase tracking-wider">GRAND TOTAL</span>
+          <span className="text-lg font-bold text-[#443360]">₹ {grandTotal.toLocaleString('en-IN')}</span>
         </div>
       </div>
 
       {/* Actions (Voucher, Gift, Place Order) */}
       <div className="space-y-4">
-        <div className="bg-zinc-50 p-3 rounded-lg flex items-center justify-between group cursor-pointer hover:bg-zinc-100 transition-colors border border-zinc-100">
-          <div className="flex flex-col">
-            <span className="text-xs font-bold text-zinc-800">Gift Message</span>
-            <span className="text-[10px] text-zinc-500 uppercase font-bold tracking-widest">(Optional)</span>
-          </div>
-          <div className="flex items-center gap-1.5 text-[#005BD3] text-xs font-bold uppercase tracking-wider">
-            <Gift size={14} />
-            Add
-          </div>
-        </div>
-
         <Button 
           onClick={onPlaceOrder}
           className="w-full bg-primary hover:bg-primary/90 text-white font-bold h-14 uppercase tracking-[0.2em] shadow-lg shadow-zinc-100 transition-all rounded-lg text-base"
@@ -68,55 +182,64 @@ export default function CartSummary({ onPlaceOrder }) {
           Place Order
         </Button>
 
-        <div className="space-y-3">
-          <Sheet open={isVoucherOpen} onOpenChange={setIsVoucherOpen}>
-            <SheetTrigger asChild>
-              <button className="flex items-center gap-2 text-zinc-600 hover:text-primary transition-colors group w-full pt-1">
-                <Tag size={16} className="text-zinc-400 group-hover:text-primary" />
-                <span className="text-xs font-bold uppercase tracking-widest underline underline-offset-4 decoration-zinc-300 group-hover:decoration-primary">Apply Voucher / Gift Card</span>
-              </button>
-            </SheetTrigger>
-            <SheetContent side="right" className="w-full sm:max-w-md p-0 overflow-y-auto">
-              <div className="p-6 space-y-8">
-                <div className="text-center space-y-2">
-                  <SheetTitle className="text-2xl font-light text-zinc-800 font-abhaya">Apply Voucher / Gift Card</SheetTitle>
-                  <SheetDescription className="text-sm text-zinc-500">Enter your code below to get a discount.</SheetDescription>
-                </div>
+        <GoldCoinOption />
 
-                <div className="flex gap-0 border border-zinc-200 rounded-sm overflow-hidden focus-within:ring-1 focus-within:ring-primary/20 transition-all">
+        <div className="space-y-3">
+          <Dialog open={isCouponDialogOpen} onOpenChange={setIsCouponDialogOpen}>
+            <DialogTrigger asChild>
+              <button className="flex items-center justify-between w-full p-4 bg-white border border-zinc-200 rounded-xl hover:border-primary/30 hover:bg-primary/5 transition-all group shadow-sm">
+                <div className="flex items-center gap-3">
+                  <div className="size-8 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors">
+                    <Tag size={16} />
+                  </div>
+                  <span className="text-sm font-bold text-zinc-700 uppercase tracking-wider">
+                    {appliedCoupon ? `Applied: ${appliedCoupon}` : "Apply Coupon"}
+                  </span>
+                </div>
+                <ChevronRight size={18} className="text-zinc-400 group-hover:text-primary transition-colors" />
+              </button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader className="space-y-3">
+                <div className="size-12 rounded-full bg-primary/10 flex items-center justify-center text-primary mx-auto mb-2">
+                  <Tag size={24} />
+                </div>
+                <DialogTitle className="text-2xl font-light text-center text-zinc-800 font-abhaya">Apply Coupon</DialogTitle>
+                <DialogDescription className="text-sm text-center text-zinc-500">
+                  Enter your coupon code below to unlock special discounts.
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="space-y-4 py-4">
+                <div className="flex flex-col gap-2">
                   <Input 
-                    placeholder="Enter Voucher Code" 
-                    className="border-0 rounded-none h-12 focus-visible:ring-0 shadow-none text-zinc-600 placeholder:text-zinc-300"
+                    value={couponCode}
+                    onChange={(e) => setCouponCode(e.target.value)}
+                    placeholder="Enter Coupon Code" 
+                    className="h-12 text-center text-lg font-bold tracking-widest uppercase placeholder:font-normal placeholder:tracking-normal"
                   />
-                  <Button className="rounded-none h-12 px-8 bg-primary hover:bg-primary/90 uppercase font-bold tracking-widest text-white border-0">
-                    Check
+                  <Button 
+                    onClick={handleApplyCoupon}
+                    disabled={isApplying || !couponCode.trim()}
+                    className="w-full h-12 bg-primary hover:bg-primary/90 uppercase font-bold tracking-widest text-white transition-all shadow-md"
+                  >
+                    {isApplying ? <Loader2 className="animate-spin" /> : "Apply Coupon"}
                   </Button>
                 </div>
-
-                <div className="space-y-6">
-                  <h3 className="text-lg font-bold text-[#443360] font-abhaya">Other Offers at Lucira</h3>
-                  <div className="space-y-4">
-                    {coupons.map((coupon) => (
-                      <div key={coupon.code} className="bg-zinc-50/50 border border-zinc-100 p-4 rounded-sm flex items-center justify-between hover:border-primary/20 hover:bg-white transition-all group">
-                        <div className="space-y-1">
-                          <span className="block text-sm font-bold text-zinc-800 uppercase tracking-wider">{coupon.code}</span>
-                          <span className="block text-xs text-zinc-500">{coupon.description}</span>
-                        </div>
-                        <button className="text-[#005BD3] text-sm font-bold uppercase tracking-widest hover:text-[#004bb1] transition-colors">
-                          Apply
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                {appliedCoupon && (
+                  <button 
+                    onClick={handleRemoveCoupon}
+                    className="w-full text-center text-xs font-bold text-red-500 uppercase tracking-widest hover:underline pt-2"
+                  >
+                    Remove Current Coupon
+                  </button>
+                )}
               </div>
-            </SheetContent>
-          </Sheet>
-          
-          <p className="text-[10px] text-red-500 font-medium italic">
-            Voucher only applicable on sparkle100 jewellery.
-          </p>
+            </DialogContent>
+          </Dialog>
         </div>
+
+        <InsuranceOption />
       </div>
 
       {/* Contact Section (Same as Shipping/Payment) */}

@@ -10,11 +10,20 @@ import { ShoppingBag, ArrowRight } from "lucide-react";
 import { AuthDialog } from "@/components/auth/AuthDialog";
 import { useRouter } from "next/navigation";
 
+const INSURANCE_VARIANT_ID = "gid://shopify/ProductVariant/47709366026458";
+const GOLDCOIN_VARIANT_ID = "gid://shopify/ProductVariant/47661824082138";
+
 export default function CartPage() {
   const router = useRouter();
   const { items, totalQuantity, totalAmount } = useSelector((state) => state.cart);
   const { isAuthenticated } = useSelector((state) => state.user);
   const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
+
+  const filteredItems = items.filter(
+    (item) => 
+      item.variantId !== INSURANCE_VARIANT_ID && 
+      item.variantId !== GOLDCOIN_VARIANT_ID
+  );
 
   const handlePlaceOrder = () => {
     if (isAuthenticated) {
@@ -51,19 +60,21 @@ export default function CartPage() {
           
           {/* Left Column: Cart Items (60%) */}
           <div className="grow lg:basis-[60%] lg:shrink-0 py-10 px-4 lg:pr-12 bg-white">
-            <div className="flex items-baseline gap-2 mb-5">
-              <h1 className="text-xl font-bold text-zinc-800 font-abhaya">My Shopping Cart</h1>
-              <span className="text-sm text-zinc-500 font-medium">({totalQuantity} Item{totalQuantity !== 1 ? 's' : ''})</span>
-            </div>
+            <div className="lg:sticky lg:top-10">
+              <div className="flex items-baseline gap-2 mb-5">
+                <h1 className="text-xl font-bold text-zinc-800 font-abhaya">My Shopping Cart</h1>
+                <span className="text-sm text-zinc-500 font-medium">({totalQuantity} Item{totalQuantity !== 1 ? 's' : ''})</span>
+              </div>
 
-            <div className="space-y-4">
-              {items.map((item, index) => (
-                <CartItem 
-                  key={item.variantId || index} 
-                  item={item} 
-                  onAuthRequired={() => setIsAuthDialogOpen(true)}
-                />
-              ))}
+              <div className="space-y-4">
+                {filteredItems.map((item, index) => (
+                  <CartItem 
+                    key={item.variantId || index} 
+                    item={item} 
+                    onAuthRequired={() => setIsAuthDialogOpen(true)}
+                  />
+                ))}
+              </div>
             </div>
           </div>
 
