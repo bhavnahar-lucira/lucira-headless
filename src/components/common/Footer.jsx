@@ -13,7 +13,7 @@ import {
 
 export default function Footer() {
   return (
-    <footer className="w-full bg-primary text-white mt-15">
+    <footer className="w-full bg-primary text-white mt-0">
       <div className="container-main py-12">
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-[220px_1fr]">
           
@@ -102,7 +102,7 @@ export default function Footer() {
                 <li><Link href="/pages/old-gold-exchange">Old Gold Exchange</Link></li>
                 <li><Link href="/pages/shipping-policy-1">Shipping Policy</Link></li>
                 <li><Link href="/pages/privacy-policy">Privacy Policy</Link></li>
-                <li><Link href="#">Offers T&C</Link></li>
+                <li><Link href="/pages/exclusive-promotions-page">Offers T&C</Link></li>
                 <li><Link href="/pages/terms-condition">Terms & Conditions</Link></li>
               </ul>
             </div>
