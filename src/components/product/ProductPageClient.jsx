@@ -58,6 +58,7 @@ import {
   fetchWishlist,
 } from "@/redux/features/wishlist/wishlistSlice";
 import { addRecentlyViewed, selectRecentlyViewed } from "@/redux/features/recentlyViewed/recentlyViewedSlice";
+import AtcBar from "@/components/AtcBar";
 
 // Force en-IN formatting to be consistent across environments
 const formatPrice = (num) => {
@@ -100,6 +101,8 @@ export default function ProductPageClient({ product, complementaryProducts = [],
   const wishlistItems = useSelector((state) => state.wishlist.items);
   const [addingToCart, setAddingToCart] = useState(false);
   const [wishlistLoading, setWishlistLoading] = useState(false);
+  const [showStickyAtc, setShowStickyAtc] = useState(false);
+  const mainAtcRef = useRef(null);
 
   const [engraving, setEngraving] = useState("");
   const [engravingFont, setEngravingFont] = useState("Standard");
@@ -114,6 +117,22 @@ export default function ProductPageClient({ product, complementaryProducts = [],
   const productId = product.shopifyId || product.id || product.handle;
   const isWishlisted = productId ? wishlistItems.some((item) => item.productId === productId) : false;
   const recentlyViewedState = useSelector(selectRecentlyViewed);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        // Show sticky bar when main ATC is NOT visible
+        setShowStickyAtc(!entry.isIntersecting);
+      },
+      { threshold: 0 }
+    );
+
+    if (mainAtcRef.current) {
+      observer.observe(mainAtcRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     if (user?.id) {
@@ -395,6 +414,16 @@ export default function ProductPageClient({ product, complementaryProducts = [],
 
   return (
     <div className="w-full">
+      <AtcBar 
+        isVisible={showStickyAtc} 
+        product={product} 
+        activeVariant={activeVariant}
+        onAddToCart={handleAddToCart}
+        addingToCart={addingToCart}
+        onToggleWishlist={handleToggleWishlist}
+        isWishlisted={isWishlisted}
+        wishlistLoading={wishlistLoading}
+      />
       <div className="max-w-480 mx-auto px-17 min-[1440px]:px-17">
         {/* Breadcrumb */}
         <Breadcrumb className="py-5">
@@ -1031,7 +1060,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
             <ProductAccordion/>
             {/* Wear This With Slider */}
             {complementaryProducts.length > 0 && <WearThisWith products={complementaryProducts} />}
-                <div className="py-2 bg-white sticky bottom-0 z-99 mt-4">
+                <div ref={mainAtcRef} className="py-2 bg-white sticky bottom-0 z-[90] mt-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] lg:shadow-none">
                   <div className="flex gap-2">
                       <Button 
                       onClick={handleAddToCart}
