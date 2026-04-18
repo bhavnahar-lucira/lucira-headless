@@ -7,7 +7,10 @@ export async function POST(req) {
     const { userId: rawUserId, sessionId, variantId } = await req.json();
     const userId = normalizeUserId(rawUserId);
 
+    console.log("REMOVE_DEBUG: Request received", { userId, sessionId, variantId });
+
     if (!userId && !sessionId) {
+      console.error("REMOVE_DEBUG: Missing identity");
       return NextResponse.json(
         { error: "UserId or SessionId is required" },
         { status: 400 }
@@ -20,9 +23,12 @@ export async function POST(req) {
 
     // Search for cart by userId first, then sessionId
     let query = buildCartLookup({ userId, sessionId });
+    console.log("REMOVE_DEBUG: DB Query", JSON.stringify(query));
+    
     let cart = await cartCollection.findOne(query);
 
     if (!cart) {
+      console.warn("REMOVE_DEBUG: Cart not found in DB with query", query);
       return NextResponse.json({ error: "Cart not found" }, { status: 404 });
     }
 

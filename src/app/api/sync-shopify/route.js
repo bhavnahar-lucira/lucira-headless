@@ -213,11 +213,23 @@ export async function POST(req) {
                 ? JSON.parse(p.complementary_products.value).map(gid => gid.split("/").pop())
                 : [];
 
-              // Extract discounts for flipping offer badge from the first variant's metadata if available
-              // or from existing variant data if it was already calculated by the pricing engine
-              const firstVariant = finalVariants[0];
-              const diamondDiscount = firstVariant?.price_breakup?.diamond?.discount_percent || 0;
-              const makingDiscount = firstVariant?.price_breakup?.making_charges?.discount_percent || 0;
+              // Extract discounts and representative info following stock priority hierarchy
+              const inStockVariants = finalVariants.filter(v => v.inStock === true || v.inStock === "true");
+              const isRing = String(p.productType || "").toLowerCase().includes("ring");
+              
+              let representativeVariant = null;
+              if (inStockVariants.length > 0) {
+                // Prefer Yellow Gold in stock for Rings, otherwise first in-stock
+                if (isRing) {
+                  representativeVariant = inStockVariants.find(v => String(v.color || v.title).includes("Yellow Gold"));
+                }
+                if (!representativeVariant) representativeVariant = inStockVariants[0];
+              } else {
+                representativeVariant = finalVariants[0];
+              }
+
+              const diamondDiscount = representativeVariant?.price_breakup?.diamond?.discount_percent || 0;
+              const makingDiscount = representativeVariant?.price_breakup?.making_charges?.discount_percent || 0;
 
               const mappedProduct = {
                 shopifyId: p.id,
@@ -229,12 +241,12 @@ export async function POST(req) {
                 status: p.status,
                 tags: p.tags,
                 createdAt: p.createdAt,
-                image: p.featuredImage?.url || (media.find(m => m.type === "IMAGE")?.url || null),
+                image: representativeVariant?.image || p.featuredImage?.url || (media.find(m => m.type === "IMAGE")?.url || null),
                 images: media.filter(m => m.type === "IMAGE").map(m => ({ url: m.url, alt: m.alt })),
                 media: media,
-                price: firstVariant?.price || 0,
-                compare_price: firstVariant?.compare_price || null,
-                selectedColor: firstVariant?.color,
+                price: representativeVariant?.price || 0,
+                compare_price: representativeVariant?.compare_price || null,
+                selectedColor: representativeVariant?.color,
                 colors: [...new Set(finalVariants.map(v => v.color).filter(Boolean))],
                 variants: finalVariants,
                 diamondDiscount,

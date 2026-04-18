@@ -72,6 +72,12 @@ export default function CartSummary({ onPlaceOrder }) {
 
   // Re-validate coupon when items change
   useEffect(() => {
+    // If no items, coupon definitely shouldn't be there
+    if (appliedCoupon && items.length === 0) {
+      dispatch(removeCoupon());
+      return;
+    }
+
     if (appliedCoupon && items.length > 0 && couponDetails?.code) {
       const validateCurrentCoupon = async () => {
         try {
@@ -95,13 +101,11 @@ export default function CartSummary({ onPlaceOrder }) {
         }
       };
 
-      // Small delay to prevent too many requests during rapid quantity changes
-      const timer = setTimeout(validateCurrentCoupon, 1000);
+      // 500ms delay to prevent too many requests during rapid quantity changes
+      const timer = setTimeout(validateCurrentCoupon, 500);
       return () => clearTimeout(timer);
-    } else if (appliedCoupon && items.length === 0) {
-      dispatch(removeCoupon());
     }
-  }, [items, appliedCoupon, couponDetails.code, user?.email, dispatch]);
+  }, [items, appliedCoupon, couponDetails?.code, user?.email, dispatch]);
 
   // Subtotal is total cart amount MINUS insurance amount
   const subtotal = totalAmount - insuranceAmount;
