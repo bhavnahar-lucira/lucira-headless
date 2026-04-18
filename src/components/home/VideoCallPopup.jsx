@@ -11,6 +11,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { setCookie } from "@/lib/utils";
 
 export default function VideoCallPopup({ isOpen, onClose }) {
   const [formData, setFormData] = useState({
@@ -45,7 +46,7 @@ export default function VideoCallPopup({ isOpen, onClose }) {
     }
     if (!formData.email.trim()) {
       newErrors.email = "E-mail is required";
-    } else if (!/\S+@\S+\.\S+/.test(formData.email.trim())) {
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
       newErrors.email = "Enter a valid email address";
     }
     setErrors(newErrors);
@@ -54,7 +55,15 @@ export default function VideoCallPopup({ isOpen, onClose }) {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    
+    // Restrict phone to 10 digits and numbers only
+    if (name === "phone") {
+      const numericValue = value.replace(/\D/g, "").slice(0, 10);
+      setFormData((prev) => ({ ...prev, [name]: numericValue }));
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
+
     // Clear error when typing
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: "" }));
@@ -65,6 +74,16 @@ export default function VideoCallPopup({ isOpen, onClose }) {
     e.preventDefault();
     if (validate()) {
       console.log("Video Call Request Submitted:", formData);
+      
+      // Store in cookies
+      setCookie("videoCallData", formData, 7);
+
+      // Construct WhatsApp message
+      const message = `Hi Lucira, I'd like to schedule a Video Call.\nName: ${formData.firstName}\nPhone: ${formData.phone}\nEmail: ${formData.email}`;
+      const encodedMessage = encodeURIComponent(message);
+      const whatsappUrl = `https://api.whatsapp.com/send?phone=+91XXXXXXXXXX&text=${encodedMessage}`;
+
+      window.open(whatsappUrl, "_blank");
       onClose();
     }
   };
@@ -83,8 +102,8 @@ export default function VideoCallPopup({ isOpen, onClose }) {
             <X size={24} />
           </button>
 
-          <DialogHeader className="text-left p-0 mb-8">
-            <DialogTitle className="text-2xl md:text-3xl font-bold font-abhaya text-gray-900 mb-4 tracking-tight">
+          <DialogHeader className="text-left p-0 mb-4">
+            <DialogTitle className="text-2xl md:text-3xl font-extrabold font-abhaya text-gray-900 mb-0 tracking-tight">
               Schedule a Video Call
             </DialogTitle>
             <p className="text-gray-600 text-sm md:text-base leading-relaxed">
@@ -93,8 +112,8 @@ export default function VideoCallPopup({ isOpen, onClose }) {
           </DialogHeader>
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="firstName" className="text-sm font-bold text-gray-900 block">
+            <div className="space-y-2 mb-2">
+              <Label htmlFor="firstName" className="text-sm font-medium text-gray-900 block">
                 First Name
               </Label>
               <Input
@@ -112,8 +131,8 @@ export default function VideoCallPopup({ isOpen, onClose }) {
               )}
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="phone" className="text-sm font-bold text-gray-900 block">
+            <div className="space-y-2 mb-2">
+              <Label htmlFor="phone" className="text-sm font-medium text-gray-900 block">
                 Phone Number
               </Label>
               <Input
@@ -132,8 +151,8 @@ export default function VideoCallPopup({ isOpen, onClose }) {
               )}
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-sm font-bold text-gray-900 block">
+            <div className="space-y-2 mb-2">
+              <Label htmlFor="email" className="text-sm font-medium text-gray-900 block">
                 E-mail
               </Label>
               <Input
@@ -153,12 +172,12 @@ export default function VideoCallPopup({ isOpen, onClose }) {
             </div>
 
             <div className="pt-2">
-              <p className="text-gray-500 text-xs md:text-sm mb-6 leading-relaxed">
+              <p className="text-gray-500 text-xs md:text-sm mb-4 leading-relaxed">
                 Our team will contact you within the next 24 hours.
               </p>
               <Button
                 type="submit"
-                className="w-full h-14 bg-[#5A413F] hover:bg-[#4a3533] text-white font-bold text-base tracking-[0.15em] uppercase rounded-sm transition-all shadow-none"
+                className="w-full h-12 bg-[#5A413F] hover:bg-[#4a3533] text-white font-bold text-base tracking-[0.15em] uppercase rounded-sm transition-all shadow-none"
               >
                 SUBMIT
               </Button>

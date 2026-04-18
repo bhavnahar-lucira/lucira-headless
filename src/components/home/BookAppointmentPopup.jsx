@@ -11,6 +11,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { setCookie } from "@/lib/utils";
 import {
   Select,
   SelectContent,
@@ -74,7 +75,15 @@ export default function BookAppointmentPopup({ isOpen, onClose }) {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value || "" }));
+    
+    // Restrict phone to 10 digits and numbers only
+    if (name === "phone") {
+      const numericValue = value.replace(/\D/g, "").slice(0, 10);
+      setFormData((prev) => ({ ...prev, [name]: numericValue || "" }));
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value || "" }));
+    }
+
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: "" }));
     }
@@ -91,6 +100,16 @@ export default function BookAppointmentPopup({ isOpen, onClose }) {
     e.preventDefault();
     if (validate()) {
       console.log("Book Appointment Request Submitted:", formData);
+      
+      // Store in cookies
+      setCookie("bookAppointmentData", formData, 7);
+
+      // Construct WhatsApp message
+      const message = `Hi Lucira, I'd like to book an appointment.\nName: ${formData.firstName}\nPhone: ${formData.phone}\nStore: ${formData.store}\nDate: ${formData.date}\nTime: ${formData.time}`;
+      const encodedMessage = encodeURIComponent(message);
+      const whatsappUrl = `https://api.whatsapp.com/send?phone=+91XXXXXXXXXX&text=${encodedMessage}`;
+
+      window.open(whatsappUrl, "_blank");
       onClose();
     }
   };
@@ -109,8 +128,8 @@ export default function BookAppointmentPopup({ isOpen, onClose }) {
             <X size={24} />
           </button>
 
-          <DialogHeader className="text-left p-0 mb-8">
-            <DialogTitle className="text-2xl md:text-3xl font-bold font-abhaya text-gray-900 mb-4 tracking-tight">
+          <DialogHeader className="text-left p-0 mb-4">
+            <DialogTitle className="text-2xl md:text-3xl font-bold font-abhaya text-gray-900 mb-0 tracking-tight text-[1.63rem]">
               Visit Our Store
             </DialogTitle>
             <p className="text-gray-600 text-sm md:text-base leading-relaxed">
@@ -119,7 +138,7 @@ export default function BookAppointmentPopup({ isOpen, onClose }) {
           </DialogHeader>
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-2">
+            <div className="space-y-2 mb-2">
               <Label htmlFor="firstName" className="text-sm font-bold text-gray-900 block">
                 First Name
               </Label>
@@ -134,11 +153,11 @@ export default function BookAppointmentPopup({ isOpen, onClose }) {
                 }`}
               />
               {errors.firstName && (
-                <p className="text-red-500 text-xs mt-1">{errors.firstName}</p>
+                <p className="text-red-500 text-xs mt-0">{errors.firstName}</p>
               )}
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2 mb-2">
               <Label htmlFor="phone" className="text-sm font-bold text-gray-900 block">
                 Phone Number
               </Label>
@@ -154,11 +173,11 @@ export default function BookAppointmentPopup({ isOpen, onClose }) {
                 }`}
               />
               {errors.phone && (
-                <p className="text-red-500 text-xs mt-1">{errors.phone}</p>
+                <p className="text-red-500 text-xs mt-0">{errors.phone}</p>
               )}
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2 mb-2">
               <Label htmlFor="store" className="text-sm font-bold text-gray-900 block">
                 Store
               </Label>
@@ -173,13 +192,13 @@ export default function BookAppointmentPopup({ isOpen, onClose }) {
                 </SelectContent>
               </Select>
               {errors.store && (
-                <p className="text-red-500 text-xs mt-1">{errors.store}</p>
+                <p className="text-red-500 text-xs mt-0">{errors.store}</p>
               )}
             </div>
 
             {/* Date and Time Fields */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
+            <div className="grid grid-cols-2 gap-4 mb-2">
+              <div className="space-y-2 mb-2">
                 <Label htmlFor="date" className="text-sm font-bold text-gray-900 block">
                   Date
                 </Label>
@@ -198,7 +217,7 @@ export default function BookAppointmentPopup({ isOpen, onClose }) {
                   <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={20} />
                 </div>
                 {errors.date && (
-                  <p className="text-red-500 text-xs mt-1">{errors.date}</p>
+                  <p className="text-red-500 text-xs mt-0">{errors.date}</p>
                 )}
               </div>
 
@@ -220,7 +239,7 @@ export default function BookAppointmentPopup({ isOpen, onClose }) {
                   <Clock className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={20} />
                 </div>
                 {errors.time && (
-                  <p className="text-red-500 text-xs mt-1">{errors.time}</p>
+                  <p className="text-red-500 text-xs mt-0">{errors.time}</p>
                 )}
               </div>
             </div>

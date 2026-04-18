@@ -11,6 +11,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { setCookie } from "@/lib/utils";
 
 export default function TryAtHomePopup({ isOpen, onClose }) {
   const [formData, setFormData] = useState({
@@ -54,7 +55,15 @@ export default function TryAtHomePopup({ isOpen, onClose }) {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    
+    // Restrict phone to 10 digits and numbers only
+    if (name === "phone") {
+      const numericValue = value.replace(/\D/g, "").slice(0, 10);
+      setFormData((prev) => ({ ...prev, [name]: numericValue }));
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
+
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: "" }));
     }
@@ -63,6 +72,18 @@ export default function TryAtHomePopup({ isOpen, onClose }) {
   const handleWhatsAppAction = (type) => {
     if (validate()) {
       console.log(`Try At Home Request (${type}):`, formData);
+      
+      // Store in cookies
+      setCookie("tryAtHomeData", formData, 7);
+
+      // Construct WhatsApp message
+      const message = `Hi Lucira, I'm interested in 'Try At Home'.\nName: ${formData.firstName}\nPhone: ${formData.phone}\nPin Code: ${formData.pinCode}`;
+      const encodedMessage = encodeURIComponent(message);
+      const whatsappUrl = type === "App" 
+        ? `https://api.whatsapp.com/send?phone=+91XXXXXXXXXX&text=${encodedMessage}`
+        : `https://web.whatsapp.com/send?phone=+91XXXXXXXXXX&text=${encodedMessage}`;
+
+      window.open(whatsappUrl, "_blank");
       onClose();
     }
   };
@@ -81,8 +102,8 @@ export default function TryAtHomePopup({ isOpen, onClose }) {
             <X size={24} />
           </button>
 
-          <DialogHeader className="text-left p-0 mb-8">
-            <DialogTitle className="text-2xl md:text-3xl font-bold font-abhaya text-gray-900 mb-4 tracking-tight">
+          <DialogHeader className="text-left p-0 mb-4">
+            <DialogTitle className="text-2xl md:text-3xl font-bold font-abhaya text-gray-900 mb-0 tracking-tight">
               Try At Home
             </DialogTitle>
             <p className="text-gray-600 text-sm md:text-base leading-relaxed">
@@ -91,7 +112,7 @@ export default function TryAtHomePopup({ isOpen, onClose }) {
           </DialogHeader>
 
           <div className="space-y-6">
-            <div className="space-y-2">
+            <div className="space-y-2 mb-2">
               <Label htmlFor="firstName" className="text-sm font-bold text-gray-900 block">
                 First Name
               </Label>
@@ -106,11 +127,11 @@ export default function TryAtHomePopup({ isOpen, onClose }) {
                 }`}
               />
               {errors.firstName && (
-                <p className="text-red-500 text-xs mt-1">{errors.firstName}</p>
+                <p className="text-red-500 text-xs mt-0">{errors.firstName}</p>
               )}
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2 mb-2">
               <Label htmlFor="phone" className="text-sm font-bold text-gray-900 block">
                 Phone Number
               </Label>
@@ -126,11 +147,11 @@ export default function TryAtHomePopup({ isOpen, onClose }) {
                 }`}
               />
               {errors.phone && (
-                <p className="text-red-500 text-xs mt-1">{errors.phone}</p>
+                <p className="text-red-500 text-xs mt-0">{errors.phone}</p>
               )}
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2 mb-2">
               <Label htmlFor="pinCode" className="text-sm font-bold text-gray-900 block">
                 Pin Code
               </Label>
@@ -145,11 +166,11 @@ export default function TryAtHomePopup({ isOpen, onClose }) {
                 }`}
               />
               {errors.pinCode && (
-                <p className="text-red-500 text-xs mt-1">{errors.pinCode}</p>
+                <p className="text-red-500 text-xs mt-0">{errors.pinCode}</p>
               )}
             </div>
 
-            <div className="pt-4 space-y-3">
+            <div className="pt-4 space-y-3 mb-1">
               <Button
                 onClick={() => handleWhatsAppAction("App")}
                 className="w-full h-12 bg-[#25D366] hover:bg-[#1eb956] text-white font-bold text-sm tracking-wide rounded-sm transition-all shadow-none border-none"
