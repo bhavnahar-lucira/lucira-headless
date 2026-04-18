@@ -107,7 +107,7 @@ export default function BookAppointmentPopup({ isOpen, onClose }) {
       // Construct WhatsApp message
       const message = `Hi Lucira, I'd like to book an appointment.\nName: ${formData.firstName}\nPhone: ${formData.phone}\nStore: ${formData.store}\nDate: ${formData.date}\nTime: ${formData.time}`;
       const encodedMessage = encodeURIComponent(message);
-      const whatsappUrl = `https://api.whatsapp.com/send?phone=+91XXXXXXXXXX&text=${encodedMessage}`;
+      const whatsappUrl = `https://api.whatsapp.com/send?phone=+919004435760&text=${encodedMessage}`;
 
       window.open(whatsappUrl, "_blank");
       onClose();

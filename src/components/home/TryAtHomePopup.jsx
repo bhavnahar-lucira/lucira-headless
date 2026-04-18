@@ -80,8 +80,8 @@ export default function TryAtHomePopup({ isOpen, onClose }) {
       const message = `Hi Lucira, I'm interested in 'Try At Home'.\nName: ${formData.firstName}\nPhone: ${formData.phone}\nPin Code: ${formData.pinCode}`;
       const encodedMessage = encodeURIComponent(message);
       const whatsappUrl = type === "App" 
-        ? `https://api.whatsapp.com/send?phone=+91XXXXXXXXXX&text=${encodedMessage}`
-        : `https://web.whatsapp.com/send?phone=+91XXXXXXXXXX&text=${encodedMessage}`;
+        ? `https://api.whatsapp.com/send?phone=+919004435760&text=${encodedMessage}`
+        : `https://web.whatsapp.com/send?phone=+919004435760&text=${encodedMessage}`;
 
       window.open(whatsappUrl, "_blank");
       onClose();

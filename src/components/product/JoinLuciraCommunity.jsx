@@ -20,7 +20,7 @@ export function JoinLuciraCommunity() {
     // Construct WhatsApp message
     const message = `Hi Lucira, I'd like to join the community. My email is: ${email}`;
     const encodedMessage = encodeURIComponent(message);
-    const whatsappUrl = `https://api.whatsapp.com/send?phone=+91XXXXXXXXXX&text=${encodedMessage}`;
+    const whatsappUrl = `https://api.whatsapp.com/send?phone=+919004435760&text=${encodedMessage}`;
 
     window.open(whatsappUrl, "_blank");
     toast.success("Subscribed successfully!");
