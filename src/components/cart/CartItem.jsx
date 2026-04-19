@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { Trash2, Heart, BadgePercent, Loader2 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { removeFromCart, updateCartItem } from "@/redux/features/cart/cartSlice";
@@ -12,6 +13,7 @@ import {
 } from "@/redux/features/wishlist/wishlistSlice";
 import { useState, useMemo } from "react";
 import { toast } from "react-toastify";
+import { pushRemoveFromCart, pushAddToWishlist } from "@/lib/gtm";
 import {
   Select,
   SelectContent,
@@ -28,12 +30,12 @@ export default function CartItem({ item, onAuthRequired }) {
   const [updating, setUpdating] = useState(false);
   const [movingToWishlist, setMovingToWishlist] = useState(false);
 
-  if (!item) return null;
-
   const wishlistIds = useMemo(
     () => wishlistItems.map((i) => i.productId),
     [wishlistItems]
   );
+
+  if (!item) return null;
 
   const productId = item.id || item.productId || item.handle;
   const isWishlisted = productId ? wishlistIds.includes(productId) : false;
@@ -58,6 +60,38 @@ export default function CartItem({ item, onAuthRequired }) {
   const handleRemove = async () => {
     setRemoving(true);
     try {
+      // 1. Prepare GTM Data
+      const getNumericId = (gid) => {
+        if (!gid) return 0;
+        if (typeof gid === 'number') return gid;
+        const match = String(gid).match(/\d+$/);
+        return match ? Number(match[0]) : 0;
+      };
+
+      const lowerTitle = (item.title || "").toLowerCase();
+      let categoryFallback = item.type || (
+        lowerTitle.includes("ring") ? "Rings" : 
+        (lowerTitle.includes("earring") || lowerTitle.includes("bali")) ? "Earrings" : 
+        lowerTitle.includes("pendant") ? "Pendants" : 
+        lowerTitle.includes("bracelet") ? "Bracelets" : ""
+      );
+
+      pushRemoveFromCart({
+        productId: String(getNumericId(item.productId || item.shopifyId || item.id)),
+        sku: item.sku || "",
+        variantId: String(getNumericId(item.variantId)),
+        productName: item.title,
+        productType: categoryFallback,
+        category: categoryFallback,
+        sub_category: item.variantTitle || "",
+        price: Number(item.comparePrice || item.price || 0),
+        offerPrice: Number(item.price || 0),
+        quantity: item.quantity,
+        thumbnail_image: item.image
+      });
+
+      // 2. Perform Removal
+
       await dispatch(removeFromCart({ userId: user?.id, variantId: item.variantId })).unwrap();
       toast.success("Removed from cart");
     } catch (err) {
@@ -93,6 +127,18 @@ export default function CartItem({ item, onAuthRequired }) {
 
         await dispatch(addWishlistItem(payload)).unwrap();
       }
+
+      // 2. Push to GTM
+      const currentOrigin = typeof window !== 'undefined' ? window.location.origin : "";
+      pushAddToWishlist({
+        productName: item.title,
+        product_url: `${currentOrigin}/products/${item.handle}?variant=${item.variantId}`,
+        price: Number(item.comparePrice || item.price || 0),
+        offer_price: Number(item.price || 0),
+        thumbnail_image: item.image || "",
+        currency: "INR"
+      });
+
       
       // 2. Remove from cart (updates MongoDB/Session)
       await dispatch(removeFromCart({ userId: user?.id, variantId: item.variantId })).unwrap();
@@ -128,6 +174,7 @@ export default function CartItem({ item, onAuthRequired }) {
         payload.price = selectedVariant.price;
         payload.variantTitle = selectedVariant.variantTitle;
         payload.inStock = selectedVariant.inStock;
+        payload.sku = selectedVariant.sku || "";
       } else {
         payload.quantity = parseInt(value, 10);
       }
@@ -141,6 +188,8 @@ export default function CartItem({ item, onAuthRequired }) {
     }
   };
 
+  const productLink = item.handle ? `/products/${item.handle}${item.variantId ? `?variant=${item.variantId}` : ""}` : "#";
+
   return (
     <div className="mb-6 overflow-hidden rounded-sm border border-zinc-100 bg-white shadow-sm">
       <div className="relative flex flex-col gap-6 p-4 md:flex-row md:p-6">
@@ -150,7 +199,10 @@ export default function CartItem({ item, onAuthRequired }) {
           </div>
         )}
 
-        <div className="aspect-square w-full shrink-0 overflow-hidden rounded-sm border border-zinc-100/50 bg-zinc-50 md:w-48">
+        <Link 
+          href={productLink}
+          className="aspect-square w-full shrink-0 overflow-hidden rounded-sm border border-zinc-100/50 bg-zinc-50 md:w-48 block transition-opacity hover:opacity-90"
+        >
           <Image
             src={item.image || "/images/product/1.jpg"}
             alt={item.title}
@@ -158,12 +210,16 @@ export default function CartItem({ item, onAuthRequired }) {
             height={200}
             className="h-full w-full object-contain mix-blend-multiply"
           />
-        </div>
+        </Link>
 
         <div className="grow space-y-4">
           <div className="flex items-start justify-between">
             <div className="space-y-1">
-              <h3 className="font-abhaya text-lg font-bold text-zinc-800">{item.title}</h3>
+              <Link href={productLink}>
+                <h3 className="font-abhaya text-lg font-bold text-zinc-800 hover:text-primary transition-colors">
+                  {item.title}
+                </h3>
+              </Link>
               <p className="text-[10px] font-medium uppercase tracking-wider text-zinc-400">
                 Variant: {item.variantTitle}
               </p>
@@ -175,11 +231,11 @@ export default function CartItem({ item, onAuthRequired }) {
             </div>
             <div className="flex flex-col items-end whitespace-nowrap">
               <div className="text-xl font-bold text-zinc-900">
-                ₹ {lineAmount.toLocaleString("en-IN")}
+                ₹ {lineAmount.toLocaleString("en-IN", { maximumFractionDigits: 0 })}
               </div>
               {hasDiscount && (
                 <div className="text-sm text-zinc-400 line-through">
-                  ₹ {lineCompareAmount.toLocaleString("en-IN")}
+                  ₹ {lineCompareAmount.toLocaleString("en-IN", { maximumFractionDigits: 0 })}
                 </div>
               )}
             </div>

@@ -3,27 +3,25 @@
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
-import { LoginForm } from "./LoginForm";
+import { OtpSpinAuth } from "./OtpSpinAuth";
 
-export function AuthDialog({ open, onOpenChange, initialMobile = "" }) {
+export function AuthDialog({ open, onOpenChange }) {
   return (
     <Dialog
       open={open}
       onOpenChange={onOpenChange}
     >
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Account</DialogTitle>
-        </DialogHeader>
-        <div className="mt-4">
-          <LoginForm 
-            initialMobile={initialMobile} 
-            onSuccess={() => onOpenChange(false)} 
-          />
+      <DialogContent className="w-full max-w-[95vw] sm:max-w-[1200px] p-0 border-none bg-transparent shadow-none overflow-visible" showCloseButton={false}>
+        <div className="sr-only">
+          <DialogTitle>Authentication</DialogTitle>
+          <DialogDescription>
+            Login or register to access your account and win prizes.
+          </DialogDescription>
         </div>
+        <OtpSpinAuth onSuccess={() => onOpenChange(false)} onClose={() => onOpenChange(false)} />
       </DialogContent>
     </Dialog>
   );

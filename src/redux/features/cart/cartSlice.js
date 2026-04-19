@@ -51,7 +51,7 @@ export const removeFromCart = createAsyncThunk(
 
 export const updateCartItem = createAsyncThunk(
   "cart/updateCartItem",
-  async ({ userId, sessionId, currentVariantId, nextVariantId, quantity, size, price, variantTitle, inStock }) => {
+  async ({ userId, sessionId, currentVariantId, nextVariantId, quantity, size, price, variantTitle, inStock, sku }) => {
     const finalSessionId = sessionId || getSessionId();
     const response = await fetch(`/api/cart/update`, {
       method: 'POST',
@@ -66,6 +66,7 @@ export const updateCartItem = createAsyncThunk(
         price,
         variantTitle,
         inStock,
+        sku,
       }),
     });
     if (!response.ok) throw new Error('Failed to update cart');

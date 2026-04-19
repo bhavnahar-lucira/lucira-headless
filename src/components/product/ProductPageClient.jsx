@@ -59,6 +59,7 @@ import {
 } from "@/redux/features/wishlist/wishlistSlice";
 import { addRecentlyViewed, selectRecentlyViewed } from "@/redux/features/recentlyViewed/recentlyViewedSlice";
 import AtcBar from "@/components/AtcBar";
+import { pushProductView, pushAddToCart, pushAddToWishlist, pushRemoveFromWishlist, formatGtmPrice } from "@/lib/gtm";
 
 import {
   Sheet,
@@ -71,7 +72,12 @@ import {
 // Force en-IN formatting to be consistent across environments
 const formatPrice = (num) => {
   if (num === null || num === undefined) return "0";
-  return new Intl.NumberFormat("en-IN").format(num);
+  // Convert to absolute integer to avoid any .00 trailing
+  const val = Math.round(Number(num));
+  return new Intl.NumberFormat("en-IN", { 
+    maximumFractionDigits: 0,
+    minimumFractionDigits: 0
+  }).format(val);
 };
 
 // Helper to ensure image src is a valid string URL
@@ -125,6 +131,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
   const [loadingSimilar, setLoadingSimilar] = useState(false);
 
   const hasEngraving = product.tags?.some(tag => tag.toLowerCase() === "engraving available");
+  const isGoldCoin = product.tags?.some(tag => tag.toLowerCase() === "gold coin");
 
   const slugify = (text) => text?.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '') || "";
 
@@ -245,6 +252,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
           size: variant.size,
           price: variant.price,
           inStock: Boolean(variant.inStock),
+          sku: variant.sku || "",
         }))
         .sort((a, b) => Number(a.size) - Number(b.size));
 
@@ -285,6 +293,42 @@ export default function ProductPageClient({ product, complementaryProducts = [],
       };
 
       await dispatch(addToCart({ userId: user?.id, product: productData })).unwrap();
+
+      //gtm            
+      // Helper to extract numeric ID from Shopify GID
+      const getNumericId = (gid) => {
+        if (!gid) return 0;
+        if (typeof gid === 'number') return gid;
+        const match = String(gid).match(/\d+$/);
+        return match ? Number(match[0]) : 0;
+      };
+
+      const productImageUrl = getValidSrc(activeVariant?.image || product.images?.[0]);
+      const currentUrl = typeof window !== 'undefined' ? window.location.origin + `/products/${product.handle}` : "";
+
+      const sellingPrice = Number(activeVariant?.price || product.price || 0);
+      const originalPrice = Number(activeVariant?.compare_price || activeVariant?.compareAtPrice || product.compare_price || product.compareAtPrice || sellingPrice);
+
+      pushAddToCart({
+        eventId: `atc_${Date.now()}`,
+        products: {
+          productId: String(getNumericId(product.shopifyId || product.id)),
+          variantId: getNumericId(activeVariant?.id || activeVariant?.shopifyId),
+          sku: activeVariant?.sku || "",
+          productName: product.title,
+          productType: product.type || "",
+          vendor: product.vendor || "Lucira Jewelry",
+          price: String(originalPrice.toFixed(2)),
+          productUrl: currentUrl,
+          image: productImageUrl,
+          offerPrice: Number(sellingPrice),
+          category: "",
+          subCategory: "",
+          productPersona: ""
+        }
+      });
+      //gtm
+
       toast.success("Added to cart!");
       router.push("/checkout/cart");
     } catch (err) {
@@ -329,6 +373,15 @@ export default function ProductPageClient({ product, complementaryProducts = [],
           dispatch(addGuestWishlistItem(payload));
         }
 
+        const currentOrigin = typeof window !== 'undefined' ? window.location.origin : "";
+        pushAddToWishlist({
+          productName: product.title,
+          product_url: `${currentOrigin}/products/${product.handle}?variant=${activeVariant?.id || activeVariant?.shopifyId}`,
+          price: Number(activeVariant?.compare_price || activeVariant?.compareAtPrice || product.compare_price || product.compareAtPrice || activeVariant?.price || product.price || 0),
+          offer_price: Number(activeVariant?.price || product.price || 0),
+          thumbnail_image: getValidSrc(product.images?.[0]?.url || product.featuredImage || (product.media && product.media[0]?.url)),
+          currency: "INR"
+        });
         toast.success("Saved to wishlist");
       }
     } catch (err) {
@@ -355,6 +408,47 @@ export default function ProductPageClient({ product, complementaryProducts = [],
     );
     if (variant) setActiveVariant(variant);
   }, [activeColor, activeKarat, selectedSize, product.variants]);
+
+    //gtm
+    // Product View GTM Trigger, runs when variant changes or page loads
+    useEffect(() => {
+      if (activeVariant || product) {
+        // Helper to extract numeric ID from Shopify GID
+        const getNumericId = (gid) => {
+          if (!gid) return 0;
+          if (typeof gid === 'number') return gid;
+          const match = String(gid).match(/\d+$/);
+          return match ? Number(match[0]) : 0;
+        };
+
+        const productImageUrl = getValidSrc(activeVariant?.image || product.images?.[0]);
+        const currentUrl = typeof window !== 'undefined' ? window.location.origin + `/products/${product.handle}` : "";
+
+        // Correctly identify the Selling Price and the Original/Regular Price
+        const sellingPrice = Number(activeVariant?.price || product.price || 0);
+        const originalPrice = Number(activeVariant?.compare_price || activeVariant?.compareAtPrice || product.compare_price || product.compareAtPrice || sellingPrice);
+
+        pushProductView({
+          productId: getNumericId(product.shopifyId || product.id),
+          sku: activeVariant?.sku || "",
+          variantId: getNumericId(activeVariant?.id || activeVariant?.shopifyId),
+          vendorCode: product.vendor || "Lucira Jewelry",
+          productName: product.title,
+          productType: product.type || "",
+          category: product.type || "",
+          subCategory: "0",
+          productUrl: currentUrl,
+          productUrlw: `/products/${product.handle}`,
+          thumbnailImage: productImageUrl,
+          image: productImageUrl,
+          price: originalPrice,
+          offerPrice: sellingPrice,
+          productPersona: null
+        });
+      }
+    }, [activeVariant, product]);
+
+
 
   // Fetch variant pricing when active variant changes
   useEffect(() => {
@@ -532,10 +626,10 @@ export default function ProductPageClient({ product, complementaryProducts = [],
               <div className="w-full">
                 <div className="flex items-center gap-3 pt-1">
                   <span className="text-xl font-bold">₹{formatPrice(currentPrice)}</span>
-                  {currentComparePrice && (
+                  {currentComparePrice > currentPrice && (
                     <span className="text-lg text-gray-500 line-through font-medium">₹{formatPrice(currentComparePrice)}</span>
                   )}
-                  {currentComparePrice && currentPrice < currentComparePrice && (
+                  {currentComparePrice > currentPrice && (
                     <span className="bg-gray-100 text-black text-base font-semibold px-3 py-1 rounded-full">
                       {Math.round((1 - currentPrice / currentComparePrice) * 100)}% OFF
                     </span>
@@ -737,9 +831,9 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                             <div 
                               style={{ 
                                 fontFamily: `var(--font-${engravingFont.toLowerCase()})`,
-                                textShadow: "0.5px 0.5px 1px rgba(255,255,255,0.8), -0.5px -0.5px 1px rgba(0,0,0,0.1)"
+                                textShadow: "1px 1px 1.5px rgba(255,255,255,0.8), -0.5px -0.5px 1px rgba(0,0,0,0.15)"
                               }} 
-                              className="text-gray-700 text-lg sm:text-xl tracking-wider opacity-70 italic mt-[-15%]"
+                              className="text-gray-800 text-xl sm:text-2xl tracking-[0.15em] opacity-80 italic -translate-y-9 sm:-translate-y-9"
                             >
                               {engraving}
                             </div>
@@ -750,31 +844,37 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                       <div className="p-6 space-y-8">
                         <div className="space-y-3">
                           <p className="text-sm font-medium text-black leading-relaxed">
-                            <span className="font-bold">Note:</span> Text can only contain up to 8 English/alphanumeric characters (A-Z, a-z, 0-9) and special characters (heart and infinity).
+                            <span className="font-bold text-gray-900">Note:</span> Text can only contain up to 8 English/alphanumeric characters (A-Z, a-z, 0-9) and special characters (heart and infinity).
                           </p>
                         </div>
 
                         <div className="space-y-4">
-                          <h4 className="text-base font-bold">Choose a Font <span className="text-rose-500">*</span></h4>
+                          <h4 className="text-base font-bold text-gray-900">Choose a Font <span className="text-rose-500">*</span></h4>
                           <div className="grid grid-cols-2 gap-3">
                             {["Lobster", "Yellowtail", "Satisfy", "ABeeZee"].map((font) => (
                               <button
                                 key={font}
                                 onClick={() => setEngravingFont(font)}
-                                className={`px-4 py-2.5 rounded-lg border text-sm transition-all ${
+                                className={`px-4 py-3 rounded-xl border text-sm transition-all duration-300 ${
                                   engravingFont === font 
-                                    ? "border-primary bg-primary/5 text-primary font-bold shadow-sm" 
-                                    : "border-gray-200 text-gray-600 hover:border-gray-300"
+                                    ? "border-black bg-zinc-900 text-white shadow-md scale-[1.02]" 
+                                    : "border-gray-200 text-gray-600 hover:border-gray-400 bg-white"
                                 }`}
                               >
-                                <span style={{ fontFamily: `var(--font-${font.toLowerCase()})` }} className="text-base">Aa - {font}</span>
+                                <span style={{ fontFamily: `var(--font-${font.toLowerCase()})` }} className="text-lg">Aa - {font}</span>
                               </button>
                             ))}
                           </div>
                         </div>
 
                         <div className="space-y-4">
-                          <h4 className="text-base font-bold">Inner Engraving <span className="text-rose-500">*</span></h4>
+                          <div className="flex justify-between items-center">
+                            <h4 className="text-base font-bold text-gray-900">Inner Engraving <span className="text-rose-500">*</span></h4>
+                            <div className="text-[11px] font-bold uppercase tracking-widest text-zinc-400">
+                              {engraving.length}/8 Characters
+                            </div>
+                          </div>
+                          
                           <div className="flex gap-3 items-center">
                             <div className="relative flex-1">
                               <Input
@@ -783,27 +883,26 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                                 maxLength={8}
                                 onChange={(e) => setEngraving(e.target.value)}
                                 placeholder="Type your text here"
-                                className="h-12 border-gray-300 pr-4 text-base"
+                                className="h-14 border-gray-300 pr-4 text-lg focus-visible:ring-black rounded-xl"
                                 style={{ fontFamily: `var(--font-${engravingFont.toLowerCase()})` }}
                               />
                             </div>
-                            <div className="flex gap-2">
+                            <div className="flex gap-2 shrink-0">
                               <button 
                                 onClick={() => insertSymbol("♥")}
-                                className="w-10 h-10 flex items-center justify-center border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                                className="w-12 h-12 flex items-center justify-center border-2 border-zinc-100 rounded-xl hover:border-black hover:bg-zinc-50 transition-all active:scale-95"
+                                title="Insert Heart"
                               >
-                                <span className="text-xl text-black">♥</span>
+                                <span className="text-2xl text-black">♥</span>
                               </button>
                               <button 
                                 onClick={() => insertSymbol("∞")}
-                                className="w-10 h-10 flex items-center justify-center border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                                className="w-12 h-12 flex items-center justify-center border-2 border-zinc-100 rounded-xl hover:border-black hover:bg-zinc-50 transition-all active:scale-95"
+                                title="Insert Infinity"
                               >
-                                <span className="text-xl">∞</span>
+                                <span className="text-2xl text-black">∞</span>
                               </button>
                             </div>
-                          </div>
-                          <div className="text-right text-xs text-gray-400">
-                            {engraving.length}/8 characters
                           </div>
                         </div>
                       </div>
@@ -1112,51 +1211,54 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                   </div>
                 </div>
                 
-                <Separator className="bg-gray-200" />
-                
                 {/* Diamond Section */}
-                <div className="space-y-4">
-                  <div className="flex items-center gap-2 font-semibold text-sm uppercase tracking-wide">
-                    <Image src="/images/icons/diamond.svg" alt="Diamond details icon" width={18} height={18} />
-                    Diamond
-                  </div>
-                  
-                  {activeVariant?.metafields?.diamonds ? (
-                    <div className="flex divide-x divide-gray-200">
-                      {activeVariant.metafields.diamonds.map((d, i) => (
-                        <div key={`diamond-${i}`} className="flex-1 ps-6 pe-6 first:ps-0 last:pe-0 flex flex-col items-start">
-                          <div className="flex justify-start w-full mb-4">
-                            <div className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center overflow-hidden bg-white shadow-sm p-1">
-                              <Image src={`/images/product/${(i % 3) + 1}.jpg`} alt={`${d.shape} diamond shape`} width={24} height={24} className="object-cover" />
+                {!isGoldCoin && ((activeVariant?.metafields?.diamonds && activeVariant.metafields.diamonds.length > 0) || (!activeVariant?.metafields?.diamonds && String(product.type || "").toLowerCase().includes("ring"))) && (
+                  <>
+                    <Separator className="bg-gray-200" />
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-2 font-semibold text-sm uppercase tracking-wide">
+                        <Image src="/images/icons/diamond.svg" alt="Diamond details icon" width={18} height={18} />
+                        Diamond
+                      </div>
+                      
+                      {activeVariant?.metafields?.diamonds ? (
+                        <div className="flex divide-x divide-gray-200">
+                          {activeVariant.metafields.diamonds.map((d, i) => (
+                            <div key={`diamond-${i}`} className="flex-1 ps-6 pe-6 first:ps-0 last:pe-0 flex flex-col items-start">
+                              <div className="flex justify-start w-full mb-4">
+                                <div className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center overflow-hidden bg-white shadow-sm p-1">
+                                  <Image src={`/images/product/${(i % 3) + 1}.jpg`} alt={`${d.shape} diamond shape`} width={24} height={24} className="object-cover" />
+                                </div>
+                              </div>
+                              <div className="space-y-1.5 text-xs w-full">
+                                <div className="flex justify-between gap-2"><span className="text-gray-400">Quality:</span><span className="font-semibold text-gray-900">{d.quality || "VVS-VS, EF"}</span></div>
+                                <div className="flex justify-between gap-2"><span className="text-gray-400">Shape:</span><span className="font-semibold text-gray-900">{d.shape}</span></div>
+                                <div className="flex justify-between gap-2"><span className="text-gray-400">Pcs:</span><span className="font-semibold text-gray-900">{d.pieces}</span></div>
+                                <div className="flex justify-between gap-2"><span className="text-gray-400">Carat:</span><span className="font-semibold text-gray-900">{d.weight}ct</span></div>
+                              </div>
                             </div>
-                          </div>
-                          <div className="space-y-1.5 text-xs w-full">
-                            <div className="flex justify-between gap-2"><span className="text-gray-400">Quality:</span><span className="font-semibold text-gray-900">{d.quality || "VVS-VS, EF"}</span></div>
-                            <div className="flex justify-between gap-2"><span className="text-gray-400">Shape:</span><span className="font-semibold text-gray-900">{d.shape}</span></div>
-                            <div className="flex justify-between gap-2"><span className="text-gray-400">Pcs:</span><span className="font-semibold text-gray-900">{d.pieces}</span></div>
-                            <div className="flex justify-between gap-2"><span className="text-gray-400">Carat:</span><span className="font-semibold text-gray-900">{d.weight}ct</span></div>
-                          </div>
+                          ))}
                         </div>
-                      ))}
+                      ) : (
+                        <>
+                          <div className="bg-[#EDEDED] rounded-md px-4 py-2 flex items-center gap-2.5 w-fit">
+                            <div className="w-5 h-5 rounded-full bg-gray-500 flex items-center justify-center text-[10px] text-white font-semibold">i</div>
+                            <span className="text-[11px] font-medium">Clarity & Color: <span className="font-bold">VVS-VS, EF</span></span>
+                          </div>
+                          <div className="flex divide-x divide-gray-200">
+                            {[ 
+                              { img: "/images/product/1.jpg", shape: "Round", pcs: "1", carat: "2.00ct" },
+                              { img: "/images/product/2.jpg", shape: "Round", pcs: "4", carat: "0.048ct" },
+                              { img: "/images/product/3.jpg", shape: "Marquise", pcs: "4", carat: "0.48ct" }
+                            ].map((d, i) => (
+                              <DiamondDetail key={`diamond-fallback-${i}`} {...d} index={i} />
+                            ))}
+                          </div>
+                        </>
+                      )}
                     </div>
-                  ) : (
-                    <>
-                      <div className="bg-[#EDEDED] rounded-md px-4 py-2 flex items-center gap-2.5 w-fit">
-                        <div className="w-5 h-5 rounded-full bg-gray-500 flex items-center justify-center text-[10px] text-white font-semibold">i</div>
-                        <span className="text-[11px] font-medium">Clarity & Color: <span className="font-bold">VVS-VS, EF</span></span>
-                      </div>
-                      <div className="flex divide-x divide-gray-200">
-                        {[ 
-                          { img: "/images/product/1.jpg", shape: "Round", pcs: "1", carat: "2.00ct" },
-                          { img: "/images/product/2.jpg", shape: "Round", pcs: "4", carat: "0.048ct" },
-                          { img: "/images/product/3.jpg", shape: "Marquise", pcs: "4", carat: "0.48ct" }
-                        ].map((d, i) => (
-                          <DiamondDetail key={`diamond-fallback-${i}`} {...d} index={i} />
-                        ))}
-                      </div>
-                    </>
-                  )}
-                </div>
+                  </>
+                )}
 
                 {activeVariant?.metafields?.gemstones && (
                   <>
@@ -1199,29 +1301,31 @@ export default function ProductPageClient({ product, complementaryProducts = [],
             )}
 
             {/* Certification */}
-            <div className="pt-6">
-              <div className="bg-gray-50 border border-gray-100 rounded-xl ps-4 pe-16 py-4">
-                <div className="flex items-center gap-2 text-base font-semibold text-black mb-4">
-                   Certified Quality Guaranteed.
-                </div>
-                <div className="flex items-start justify-between gap-4">
-                  <button className="text-sm font-semibold underline underline-offset-[6px] decoration-black mt-1 whitespace-nowrap">
-                    See Sample Certificate
-                  </button>
-                  <div className="flex items-center gap-7">
-                    <div className="w-14 h-14 relative">
-                      <Image src="/images/product/IGI.png" alt="IGI" fill className="object-contain" />
-                    </div>
-                    <div className="w-14 h-14 relative">
-                      <Image src="/images/product/SGL.png" alt="SGL" fill className="object-contain" />
-                    </div>
-                    <div className="w-14 h-14 relative">
-                      <Image src="/images/product/BIS.png" alt="BIS Hallmark" fill className="object-contain" />
+            {!isGoldCoin && (
+              <div className="pt-6">
+                <div className="bg-gray-50 border border-gray-100 rounded-xl ps-4 pe-16 py-4">
+                  <div className="flex items-center gap-2 text-base font-semibold text-black mb-4">
+                     Certified Quality Guaranteed.
+                  </div>
+                  <div className="flex items-start justify-between gap-4">
+                    <button className="text-sm font-semibold underline underline-offset-[6px] decoration-black mt-1 whitespace-nowrap">
+                      See Sample Certificate
+                    </button>
+                    <div className="flex items-center gap-7">
+                      <div className="w-14 h-14 relative">
+                        <Image src="/images/product/IGI.png" alt="IGI" fill className="object-contain" />
+                      </div>
+                      <div className="w-14 h-14 relative">
+                        <Image src="/images/product/SGL.png" alt="SGL" fill className="object-contain" />
+                      </div>
+                      <div className="w-14 h-14 relative">
+                        <Image src="/images/product/BIS.png" alt="BIS Hallmark" fill className="object-contain" />
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
+            )}
             
             <ProductAccordion/>
             {/* Wear This With Slider */}
@@ -1282,7 +1386,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
         productHandle={product.handle}
       />
       <FAQSection/>
-      <DiamondComparison/>
+      {!isGoldCoin && <DiamondComparison/>}
       {matchingProducts.length > 0 && (
         <ProductSlider 
           title="From the Same Collection" 
@@ -1294,7 +1398,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
       <CategorySlider />
       <ProductSlider
         title={recentlyViewedState?.title || "Recently Viewed"}
-        products={Array.isArray(recentlyViewedState?.products) && recentlyViewedState.products.length > 0 ? recentlyViewedState.products : undefined}
+        products={Array.isArray(recentlyViewedState?.products) && recentlyViewedState.products.length > 0 ? recentlyViewedState.products.slice(0, 12) : undefined}
         preservePriceOnColorChange={true}
       />
       <FindLuciraStore />

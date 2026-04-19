@@ -1,6 +1,29 @@
+"use client";
+
+import { useEffect } from "react";
 import Link from "next/link";
+import { pushPaymentFailure } from "@/lib/gtm";
 
 export default function FailurePage() {
+  useEffect(() => {
+    // 1. Read failure data stored from Payment Page
+    const storedData = window.localStorage.getItem("gtm_payment_failure_data");
+    
+    if (storedData) {
+      try {
+        const failureData = JSON.parse(storedData);
+        
+        // 2. Fire the Payment Failure Event
+        pushPaymentFailure(failureData);
+        
+        // 3. Clear storage to prevent duplicate firing on refresh
+        window.localStorage.removeItem("gtm_payment_failure_data");
+      } catch (err) {
+        console.error("GTM Failure tracking failed:", err);
+      }
+    }
+  }, []);
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center">
       <div className="bg-red-100 p-6 rounded-full mb-6 text-red-600">

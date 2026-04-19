@@ -13,7 +13,7 @@ function formatMobile(raw) {
 
 export async function POST(req) {
   try {
-    const { firstName, lastName, email, mobile } =
+    const { firstName, lastName, email, mobile, prizeLabel } =
       await req.json();
 
     if (!firstName || !email || !mobile) {
@@ -27,6 +27,16 @@ export async function POST(req) {
     const password = crypto.randomBytes(16).toString("hex");
 
     /* ===== CREATE CUSTOMER ===== */
+
+    const metafields = [];
+    if (prizeLabel) {
+      metafields.push({
+        namespace: "custom",
+        key: "win_prize_spin_the_sheel",
+        value: prizeLabel,
+        type: "single_line_text_field"
+      });
+    }
 
     const createRes = await fetch(
       `https://${SHOP}.myshopify.com/admin/api/2024-10/customers.json`,
@@ -46,12 +56,23 @@ export async function POST(req) {
             password,
             password_confirmation: password,
             verified_email: true,
+            metafields,
+            email_marketing_consent: {
+              state: "subscribed",
+              opt_in_level: "single_opt_in"
+            }
           },
         }),
       }
     );
 
     const created = await createRes.json();
+    if (!createRes.ok) {
+        return NextResponse.json(
+            { error: created.errors ? JSON.stringify(created.errors) : "Failed to create customer" },
+            { status: createRes.status }
+        );
+    }
     const customer = created.customer;
 
     /* ===== LOGIN ===== */

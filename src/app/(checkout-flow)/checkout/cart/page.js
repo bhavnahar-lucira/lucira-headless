@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import Link from "next/link";
 import CartItem from "@/components/cart/CartItem";
@@ -9,13 +9,14 @@ import { Button } from "@/components/ui/button";
 import { ShoppingBag, ArrowRight } from "lucide-react";
 import { AuthDialog } from "@/components/auth/AuthDialog";
 import { useRouter } from "next/navigation";
+import { pushViewCart, pushBeginCheckout } from "@/lib/gtm";
 
 const INSURANCE_VARIANT_ID = "gid://shopify/ProductVariant/47709366026458";
 const GOLDCOIN_VARIANT_ID = "gid://shopify/ProductVariant/47661824082138";
 
 export default function CartPage() {
   const router = useRouter();
-  const { items, totalQuantity, totalAmount } = useSelector((state) => state.cart);
+  const { items, totalQuantity, totalAmount, appliedCoupon } = useSelector((state) => state.cart);  
   const { isAuthenticated } = useSelector((state) => state.user);
   const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
 
@@ -26,6 +27,53 @@ export default function CartPage() {
   );
 
   const handlePlaceOrder = () => {
+
+    // Helper to extract numeric ID from Shopify GID
+    const getNumericId = (gid) => {
+      if (!gid) return 0;
+      if (typeof gid === 'number') return gid;
+      const match = String(gid).match(/\d+$/);
+      return match ? Number(match[0]) : 0;
+    };
+
+    // Generate begin_checkout payload as requested
+    const checkoutData = {
+      payment_type: "Pay Via UPI / COD",
+      send_to: "G-K6H0NZ4YJ8",
+      value: Number(totalAmount),
+      currency: "INR",
+      items: items.map((item, idx) => {
+        const lowerTitle = (item.title || "").toLowerCase();
+        
+        let category = item.type || item.productType || "";
+        if (!category) {
+          if (lowerTitle.includes("ring")) category = "Rings";
+          else if (lowerTitle.includes("earring") || lowerTitle.includes("bali")) category = "Earrings";
+          else if (lowerTitle.includes("pendant")) category = "Pendants";
+          else if (lowerTitle.includes("bracelet")) category = "Bracelets";
+          else if (item.variantId === GOLDCOIN_VARIANT_ID) category = "Gold Coin";
+          else if (item.variantId === INSURANCE_VARIANT_ID) category = "Insurance";
+        }
+
+        return {
+          item_id: String(getNumericId(item.productId || item.shopifyId || item.id)),
+          sku: item.sku || "",
+          variant_id: String(getNumericId(item.variantId)),
+          item_name: item.title,
+          item_variant: item.variantTitle || `${item.karat || ""} ${item.color || ""}`.trim(),
+          item_brand: "Lucira Jewelry",
+          item_category: "",
+          price: Number(item.price || 0),
+          quantity: item.quantity,
+          category: category,
+          index: idx
+        };
+      }),
+      coupon: appliedCoupon?.code || "NA"
+    };
+
+    pushBeginCheckout(checkoutData);
+
     if (isAuthenticated) {
       router.push("/checkout/shipping");
     } else {
