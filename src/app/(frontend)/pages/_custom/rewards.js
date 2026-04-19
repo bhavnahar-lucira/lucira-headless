@@ -1,5 +1,9 @@
-import { Suspense } from "react";
+'use client'
 import Image from "next/image";
+import { Suspense, useState } from "react";
+import { useSelector } from "react-redux";
+import { AuthDialog } from "@/components/auth/AuthDialog";
+import { toast } from "react-toastify";
 import FAQ from "@/components/common/FAQ";
 
 export default function RewardsPage() {
@@ -86,6 +90,37 @@ export default function RewardsPage() {
             "Log in to your Lucira account and go to the 'Rewards' section. Your current balance and earning history will be displayed there.",
         },
     ];
+
+    const [open, setOpen] = useState();
+    const {user} = useSelector((state) => state.user);
+    const isLoggedIn = user?.isAuthenticated;
+    const referralLink = user?.referralLink || "";
+
+    const handleScroll = () => {
+        const element = document.getElementById("refer-and-earn");
+        if (!element) return;
+
+        const offset = 60;
+        const top = element.getBoundingClientRect().top + window.scrollY - offset;
+
+        window.scrollTo({
+            top,
+            behavior: "smooth",
+        });
+    };
+
+    const handleClick = () => {
+        if(!isLoggedIn) {
+            setOpen(true)
+            return
+        }
+
+        if (referralLink) {
+            navigator.clipboard.writeText(referralLink);
+            toast.success("Referral link copied!");
+        }
+    }
+    
     return (
         <>
             <section
@@ -105,15 +140,15 @@ export default function RewardsPage() {
                         Lucira Coins and unlock exclusive rewards, special offers, and
                         little luxuries designed to celebrate your journey.
                     </p>
-                    <a
-                        href="#refer-and-earn"
-                        className="bg-white text-[#A68380] px-8 py-4 rounded-full uppercase text-sm font-medium inline-block w-full max-w-xs text-center"
+                    <button
+                        onClick={handleScroll}
+                        className="bg-white text-[#A68380] px-8 py-4 rounded-full uppercase text-sm font-medium inline-block w-full max-w-xs text-center cursor-pointer"
                     >
                         Join now to Earn
-                    </a>
+                    </button>
                 </div>
             </section>
-            <section className="py-16">
+            <section className="py-16" id="refer-and-earn">
                 <div className="w-full mx-auto px-12">
                     <div className="text-center mb-10">
                         <h2 className="text-2xl md:text-3xl font-medium uppercase mb-4">
@@ -178,27 +213,28 @@ export default function RewardsPage() {
                         </p>
                     </div>
                     <div className="grid md:grid-cols-3 gap-6 items-center">
-                        {/* INPUT */}
                         <div>
                             <p className="mb-4 text-gray-800">
                                 Your Referral Link is Ready to Share with your friends
                             </p>
                             <div className="flex">
                                 <input
-                                placeholder="Please Login to Share your Referral Link"
-                                value=""
                                 className="flex-1 border px-4 py-3 rounded-l-md text-sm"
+                                value={
+                                    isLoggedIn
+                                    ? referralLink || "Generating your referral link..."
+                                    : "Please Login to Share your Referral Link"
+                                }
+                                readOnly
                                 />
-                                <a
-                                href="/account/login"
-                                className="bg-[#A68380] text-white px-6 py-3 text-sm uppercase rounded-r-md"
+                                <button
+                                onClick={handleClick}
+                                className="bg-[#A68380] text-white px-6 py-3 text-sm uppercase rounded-r-md cursor-pointer"
                                 >
-                                Login
-                                </a>
+                                {isLoggedIn ? "Copy" : "Login"}
+                                </button>
                             </div>
                         </div>
-
-                        {/* THEY GET */}
                         <div className="relative bg-[#F3E0CF] p-6 rounded-md text-right h-[180px] flex flex-col justify-center">
                             <Image alt="They Get" width={300} height={300}
                                 src="https://cdn.shopify.com/s/files/1/0739/8516/3482/files/They_Get_img_2.png?v=1751354604"
@@ -210,8 +246,6 @@ export default function RewardsPage() {
                                 <span className="text-xl font-bold">on their 1st Order</span>
                             </p>
                         </div>
-
-                        {/* YOU GET */}
                         <div className="relative bg-[#F3E0CF] p-6 rounded-md text-left h-[180px] flex flex-col justify-center">
                             <Image alt="You Get" width={300} height={300}
                                 src="https://cdn.shopify.com/s/files/1/0739/8516/3482/files/7d93784d-d99f-4716-8c45-779b911938f6_2.png?v=1751352893"
@@ -229,6 +263,8 @@ export default function RewardsPage() {
             <Suspense fallback={<div className="h-20 bg-gray-100 animate-pulse"></div>}>
                 <FAQ title="FAQ'S" description="Curious about Lucira Rewards? We’ve got you covered! Here’s everything you need to know about earning, redeeming, and making the most of your Lucira Rewards. What is Lucira Rewards?" faqs={faqData} />
             </Suspense>
+
+            <AuthDialog open={open} onOpenChange={setOpen} />
         </>
     )
 }
