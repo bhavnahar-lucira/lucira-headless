@@ -1,6 +1,7 @@
 import { getPageByHandle, getPageByHandleStorefront } from "@/lib/pages";
 import { notFound } from "next/navigation";
 import ContactSection from "@/components/common/ContactSection";
+import "@/assets/style.css";
 
 export default async function page({ params }) {
   const { handle } = await params;
@@ -45,7 +46,7 @@ export default async function page({ params }) {
           {/* Overlay */}
           <div
             className="absolute inset-0 pointer-events-none"
-            style={{ backgroundColor: "rgba(0,0,0,0.3)", opacity: 0.7 }}
+            style={{ backgroundColor: "rgba(0,0,0,0.8)", opacity: 0.7 }}
           />
 
           {/* Content */}
