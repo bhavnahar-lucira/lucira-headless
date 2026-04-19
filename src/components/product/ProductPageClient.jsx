@@ -59,6 +59,7 @@ import {
 } from "@/redux/features/wishlist/wishlistSlice";
 import { addRecentlyViewed, selectRecentlyViewed } from "@/redux/features/recentlyViewed/recentlyViewedSlice";
 import AtcBar from "@/components/AtcBar";
+import { pushProductView, pushAddToCart, pushAddToWishlist, pushRemoveFromWishlist, formatGtmPrice } from "@/lib/gtm";
 
 import {
   Sheet,
@@ -251,6 +252,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
           size: variant.size,
           price: variant.price,
           inStock: Boolean(variant.inStock),
+          sku: variant.sku || "",
         }))
         .sort((a, b) => Number(a.size) - Number(b.size));
 
@@ -291,6 +293,42 @@ export default function ProductPageClient({ product, complementaryProducts = [],
       };
 
       await dispatch(addToCart({ userId: user?.id, product: productData })).unwrap();
+
+      //gtm            
+      // Helper to extract numeric ID from Shopify GID
+      const getNumericId = (gid) => {
+        if (!gid) return 0;
+        if (typeof gid === 'number') return gid;
+        const match = String(gid).match(/\d+$/);
+        return match ? Number(match[0]) : 0;
+      };
+
+      const productImageUrl = getValidSrc(activeVariant?.image || product.images?.[0]);
+      const currentUrl = typeof window !== 'undefined' ? window.location.origin + `/products/${product.handle}` : "";
+
+      const sellingPrice = Number(activeVariant?.price || product.price || 0);
+      const originalPrice = Number(activeVariant?.compare_price || activeVariant?.compareAtPrice || product.compare_price || product.compareAtPrice || sellingPrice);
+
+      pushAddToCart({
+        eventId: `atc_${Date.now()}`,
+        products: {
+          productId: String(getNumericId(product.shopifyId || product.id)),
+          variantId: getNumericId(activeVariant?.id || activeVariant?.shopifyId),
+          sku: activeVariant?.sku || "",
+          productName: product.title,
+          productType: product.type || "",
+          vendor: product.vendor || "Lucira Jewelry",
+          price: String(originalPrice.toFixed(2)),
+          productUrl: currentUrl,
+          image: productImageUrl,
+          offerPrice: Number(sellingPrice),
+          category: "",
+          subCategory: "",
+          productPersona: ""
+        }
+      });
+      //gtm
+
       toast.success("Added to cart!");
       router.push("/checkout/cart");
     } catch (err) {
@@ -335,6 +373,15 @@ export default function ProductPageClient({ product, complementaryProducts = [],
           dispatch(addGuestWishlistItem(payload));
         }
 
+        const currentOrigin = typeof window !== 'undefined' ? window.location.origin : "";
+        pushAddToWishlist({
+          productName: product.title,
+          product_url: `${currentOrigin}/products/${product.handle}?variant=${activeVariant?.id || activeVariant?.shopifyId}`,
+          price: Number(activeVariant?.compare_price || activeVariant?.compareAtPrice || product.compare_price || product.compareAtPrice || activeVariant?.price || product.price || 0),
+          offer_price: Number(activeVariant?.price || product.price || 0),
+          thumbnail_image: getValidSrc(product.images?.[0]?.url || product.featuredImage || (product.media && product.media[0]?.url)),
+          currency: "INR"
+        });
         toast.success("Saved to wishlist");
       }
     } catch (err) {
@@ -361,6 +408,47 @@ export default function ProductPageClient({ product, complementaryProducts = [],
     );
     if (variant) setActiveVariant(variant);
   }, [activeColor, activeKarat, selectedSize, product.variants]);
+
+    //gtm
+    // Product View GTM Trigger, runs when variant changes or page loads
+    useEffect(() => {
+      if (activeVariant || product) {
+        // Helper to extract numeric ID from Shopify GID
+        const getNumericId = (gid) => {
+          if (!gid) return 0;
+          if (typeof gid === 'number') return gid;
+          const match = String(gid).match(/\d+$/);
+          return match ? Number(match[0]) : 0;
+        };
+
+        const productImageUrl = getValidSrc(activeVariant?.image || product.images?.[0]);
+        const currentUrl = typeof window !== 'undefined' ? window.location.origin + `/products/${product.handle}` : "";
+
+        // Correctly identify the Selling Price and the Original/Regular Price
+        const sellingPrice = Number(activeVariant?.price || product.price || 0);
+        const originalPrice = Number(activeVariant?.compare_price || activeVariant?.compareAtPrice || product.compare_price || product.compareAtPrice || sellingPrice);
+
+        pushProductView({
+          productId: getNumericId(product.shopifyId || product.id),
+          sku: activeVariant?.sku || "",
+          variantId: getNumericId(activeVariant?.id || activeVariant?.shopifyId),
+          vendorCode: product.vendor || "Lucira Jewelry",
+          productName: product.title,
+          productType: product.type || "",
+          category: product.type || "",
+          subCategory: "0",
+          productUrl: currentUrl,
+          productUrlw: `/products/${product.handle}`,
+          thumbnailImage: productImageUrl,
+          image: productImageUrl,
+          price: originalPrice,
+          offerPrice: sellingPrice,
+          productPersona: null
+        });
+      }
+    }, [activeVariant, product]);
+
+
 
   // Fetch variant pricing when active variant changes
   useEffect(() => {

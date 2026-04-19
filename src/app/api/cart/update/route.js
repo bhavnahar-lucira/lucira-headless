@@ -14,6 +14,7 @@ export async function POST(req) {
       price,
       variantTitle,
       inStock,
+      sku,
     } = await req.json();
     const userId = normalizeUserId(rawUserId);
 
@@ -45,6 +46,7 @@ export async function POST(req) {
           size: size !== undefined ? size : item.size,
           price: price !== undefined ? price : item.price,
           inStock: inStock !== undefined ? inStock : item.inStock,
+          sku: sku !== undefined ? sku : item.sku,
         };
       }
       return item;

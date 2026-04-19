@@ -33,6 +33,7 @@ import {
   DialogPortal,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { pushProductClick, pushAddToWishlist, pushRemoveFromWishlist, formatGtmPrice } from "@/lib/gtm";
 
 const colorMap = {
   yellow: "#E2C07E",
@@ -315,7 +316,36 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle 
       <div className="space-y-4">
         <div className="group block space-y-4">
           <div className="relative aspect-square w-full bg-[#fafafa] overflow-hidden">
-            <Link href={`/products/${product.handle}`} className="block w-full h-full mix-blend-multiply">
+              <Link 
+                href={`/products/${product.handle}`} 
+                className="block w-full h-full mix-blend-multiply"
+                onClick={() => {
+                  const getNumericId = (gid) => {
+                    if (!gid) return 0;
+                    if (typeof gid === 'number') return gid;
+                    const match = String(gid).match(/\d+$/);
+                    return match ? Number(match[0]) : 0;
+                  };
+                  const currentOrigin = typeof window !== 'undefined' ? window.location.origin : "";
+                  pushProductClick({
+                    productId: String(getNumericId(product.shopifyId || product.id)),
+                    variantId: String(getNumericId(currentVariant?.id || currentVariant?.shopifyId)),
+                    sku: currentVariant?.sku || "",
+                    productName: product.title,
+                    productType: product.type || "",
+                    productCategory: product.category || product.type || "",
+                    category: product.category || product.type || "",
+                    subCategory: product.type || "",
+                    productUrl: `${currentOrigin}/products/${product.handle}`,
+                    thumbnailImage: galleryImages?.[0]?.url || product.image?.url || "",
+                    purity: currentVariant?.metafields?.metal_purity || "",
+                    price: String(Number(displayComparePrice || displayPrice || 0)),
+                    offerPrice: String(Number(displayPrice || 0)),
+                    indexPosition: ""
+                  });
+                }}
+              >
+
               {galleryImages.length > 0 ? (
                 <Swiper
                   spaceBetween={0}
@@ -386,6 +416,15 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle 
                       } else {
                         dispatch(removeGuestWishlistItem(productId));
                       }
+                      const currentOrigin = typeof window !== 'undefined' ? window.location.origin : "";
+                      pushRemoveFromWishlist({
+                        productName: product.title,
+                        product_url: `${currentOrigin}/products/${product.handle}?variant=${currentVariant?.id || currentVariant?.shopifyId}`,
+                        price: Number(displayComparePrice || displayPrice || 0),
+                        offer_price: Number(displayPrice || 0),
+                        thumbnail_image: galleryImages?.[0]?.url || product.image?.url || "",
+                        currency: "INR"
+                      });
                       toast.success("Removed from wishlist");
                     } else {
                       const payload = {
@@ -405,7 +444,15 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle 
                       } else {
                         dispatch(addGuestWishlistItem(payload));
                       }
-
+                      const currentOrigin = typeof window !== 'undefined' ? window.location.origin : "";
+                      pushAddToWishlist({
+                        productName: product.title,
+                        product_url: `${currentOrigin}/products/${product.handle}?variant=${currentVariant?.id || currentVariant?.shopifyId}`,
+                        price: Number(displayComparePrice || displayPrice || 0),
+                        offer_price: Number(displayPrice || 0),
+                        thumbnail_image: galleryImages?.[0]?.url || product.image?.url || "",
+                        currency: "INR"
+                      });
                       toast.success("Saved to wishlist");
                     }
                   } catch (err) {
@@ -573,7 +620,35 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle 
             )}
 
             {/* Product Title */}
-            <Link href={`/products/${product.handle}`}>
+            <Link 
+              href={`/products/${product.handle}`}
+              onClick={() => {
+                const getNumericId = (gid) => {
+                  if (!gid) return 0;
+                  if (typeof gid === 'number') return gid;
+                  const match = String(gid).match(/\d+$/);
+                  return match ? Number(match[0]) : 0;
+                };
+                const currentOrigin = typeof window !== 'undefined' ? window.location.origin : "";
+                pushProductClick({
+                  productId: String(getNumericId(product.shopifyId || product.id)),
+                  variantId: String(getNumericId(currentVariant?.id || currentVariant?.shopifyId)),
+                  sku: currentVariant?.sku || "",
+                  productName: product.title,
+                  productType: product.type || "",
+                  productCategory: product.category || product.type || "",
+                  category: product.category || product.type || "",
+                  subCategory: product.type || "",
+                  productUrl: `${currentOrigin}/products/${product.handle}`,
+                  thumbnailImage: galleryImages?.[0]?.url || product.image?.url || "",
+                  purity: currentVariant?.metafields?.metal_purity || "",
+                  price: String(Number(displayComparePrice || displayPrice || 0)),
+                  offerPrice: String(Number(displayPrice || 0)),
+                  indexPosition: ""
+                });
+              }}
+            >
+
               <h3 className="text-xl font-bold hover:underline underline-offset-4 decoration-1 leading-snug hover:text-gray-700 transition-colors line-clamp-2 min-h-7">
                 {product.title}
               </h3>

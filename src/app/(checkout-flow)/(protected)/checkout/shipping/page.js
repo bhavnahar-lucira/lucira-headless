@@ -40,6 +40,10 @@ import {
   updateCustomerAddress,
 } from "@/lib/api";
 import { useCart } from "@/hooks/useCart";
+import { pushAddShippingInfo } from "@/lib/gtm";
+
+const INSURANCE_VARIANT_ID = "gid://shopify/ProductVariant/47709366026458";
+const GOLDCOIN_VARIANT_ID = "gid://shopify/ProductVariant/47661824082138";
 
 const emptyAddressForm = {
   firstName: "",
@@ -217,7 +221,7 @@ function AddressFields({ form, onChange, makeDefault, onDefaultChange, submitLab
 }
 
 export default function ShippingPage() {
-  const { items: cartItems } = useCart();
+  const { items: cartItems, totalAmount, appliedCoupon } = useCart();
   const searchParams = useSearchParams();
   const [deliveryMethod, setDeliveryMethod] = useState(searchParams.get("method") || "ship");
 
@@ -539,6 +543,79 @@ export default function ShippingPage() {
 
   const selectedStore = STORES.find(s => s.id === selectedStoreId) || sortedStores[0];
 
+  
+  const handleContinueToPayment = () => {
+    // Helper to extract numeric ID from Shopify GID
+    const getNumericId = (gid) => {
+      if (!gid) return 0;
+      if (typeof gid === 'number') return gid;
+      const match = String(gid).match(/\d+$/);
+      return match ? Number(match[0]) : 0;
+    };
+
+    // Calculate grand total consistently with CheckoutSummary.jsx
+    const insuranceItem = (cartItems || []).find(item => item.variantId === INSURANCE_VARIANT_ID);
+    const insuranceValue = insuranceItem ? (insuranceItem.price * (insuranceItem.quantity || 1)) : 0;
+    const subtotalValue = (totalAmount || 0) - insuranceValue;
+
+    const couponDetails = typeof appliedCoupon === 'object' ? appliedCoupon : { code: appliedCoupon, value: 0, valueType: "FIXED_AMOUNT" };
+    let couponDiscountAmount = 0;
+    if (appliedCoupon) {
+      if (couponDetails.valueType === "FIXED_AMOUNT") {
+        couponDiscountAmount = couponDetails.value;
+      } else if (couponDetails.valueType === "PERCENTAGE") {
+        couponDiscountAmount = (subtotalValue * couponDetails.value) / 100;
+      }
+    }
+
+    const grandTotalValue = subtotalValue + insuranceValue - couponDiscountAmount;
+
+    const shippingData = {
+      shipping_tier: deliveryMethod === "ship" ? "Standard Shipping" : "Store Pickup",
+      value: grandTotalValue,
+      currency: "INR",
+      coupon: couponDetails?.code || "NA",
+      address: deliveryMethod === "ship" ? {
+        first_name: selectedAddress?.firstName || "",
+        last_name: selectedAddress?.lastName || "",
+        address1: selectedAddress?.address1 || "",
+        city: selectedAddress?.city || "",
+        zip: selectedAddress?.zip || "",
+        country: selectedAddress?.country || "India"
+      } : {
+        store_name: selectedStore?.name || "",
+        store_code: selectedStore?.code || ""
+      },
+      items: (cartItems || []).map((item, idx) => {
+        const lowerTitle = (item.title || "").toLowerCase();
+        let category = item.type || item.productType || "";
+        if (!category) {
+          if (lowerTitle.includes("ring")) category = "Rings";
+          else if (lowerTitle.includes("earring") || lowerTitle.includes("bali")) category = "Earrings";
+          else if (lowerTitle.includes("pendant")) category = "Pendants";
+          else if (lowerTitle.includes("bracelet")) category = "Bracelets";
+          else if (item.variantId === GOLDCOIN_VARIANT_ID) category = "Gold Coin";
+          else if (item.variantId === INSURANCE_VARIANT_ID) category = "Insurance";
+        }
+
+        return {
+          item_id: String(getNumericId(item.productId || item.shopifyId || item.id)),
+          sku: item.sku || "",
+          variant_id: String(getNumericId(item.variantId)),
+          item_name: item.title,
+          item_variant: item.variantTitle || "",
+          item_brand: "Lucira Jewelry",
+          price: Number(item.price || 0),
+          quantity: item.quantity,
+          category: category,
+          index: idx
+        };
+      })
+    };
+
+    pushAddShippingInfo(shippingData);
+  };
+
   return (
     <div className="bg-white min-h-screen overflow-x-hidden">
       <div className="max-w-7xl w-full mx-auto relative z-10 px-4">
@@ -691,7 +768,7 @@ export default function ShippingPage() {
                     <ChevronLeft size={16} />
                     Return to cart
                   </Link>
-                  <Link href="/checkout/payment" className={`w-full md:w-auto ${deliveryMethod === "ship" && !selectedAddress ? "pointer-events-none opacity-50" : ""}`}>
+                  <Link href="/checkout/payment" className={`w-full md:w-auto ${deliveryMethod === "ship" && !selectedAddress ? "pointer-events-none opacity-50" : ""}`} onClick={handleContinueToPayment}>
                     <Button disabled={deliveryMethod === "ship" && !selectedAddress} className="w-full md:px-10 h-14 bg-primary hover:bg-primary/90 text-white font-bold rounded-lg transition-all text-base uppercase tracking-widest">
                       Continue to payment
                     </Button>
@@ -749,7 +826,7 @@ export default function ShippingPage() {
                     <ChevronLeft size={16} />
                     Return to cart
                   </Link>
-                  <Link href="/checkout/payment" className={`w-full md:w-auto ${!selectedStoreId ? "pointer-events-none opacity-50" : ""}`}>
+                  <Link href="/checkout/payment" className={`w-full md:w-auto ${!selectedStoreId ? "pointer-events-none opacity-50" : ""}`} onClick={handleContinueToPayment}>
                     <Button disabled={!selectedStoreId} className="w-full md:px-10 h-14 bg-primary hover:bg-primary/90 text-white font-bold rounded-lg transition-all text-base uppercase tracking-widest">
                       Continue to payment
                     </Button>
