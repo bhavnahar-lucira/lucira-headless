@@ -57,7 +57,7 @@ export default async function page({ params }) {
         </section>
 
         {/* Body Content */}
-        <section className="container-main py-16 md:py-24">
+        <section className="container-main py-10 md:py-10">
           <div
             className="footer-pages max-w-none font-figtree text-zinc-700 leading-relaxed"
             dangerouslySetInnerHTML={{ __html: page.body }}
