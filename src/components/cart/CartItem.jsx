@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { Trash2, Heart, BadgePercent, Loader2 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { removeFromCart, updateCartItem } from "@/redux/features/cart/cartSlice";
@@ -29,12 +30,12 @@ export default function CartItem({ item, onAuthRequired }) {
   const [updating, setUpdating] = useState(false);
   const [movingToWishlist, setMovingToWishlist] = useState(false);
 
-  if (!item) return null;
-
   const wishlistIds = useMemo(
     () => wishlistItems.map((i) => i.productId),
     [wishlistItems]
   );
+
+  if (!item) return null;
 
   const productId = item.id || item.productId || item.handle;
   const isWishlisted = productId ? wishlistIds.includes(productId) : false;
@@ -187,6 +188,8 @@ export default function CartItem({ item, onAuthRequired }) {
     }
   };
 
+  const productLink = item.handle ? `/products/${item.handle}${item.variantId ? `?variant=${item.variantId}` : ""}` : "#";
+
   return (
     <div className="mb-6 overflow-hidden rounded-sm border border-zinc-100 bg-white shadow-sm">
       <div className="relative flex flex-col gap-6 p-4 md:flex-row md:p-6">
@@ -196,7 +199,10 @@ export default function CartItem({ item, onAuthRequired }) {
           </div>
         )}
 
-        <div className="aspect-square w-full shrink-0 overflow-hidden rounded-sm border border-zinc-100/50 bg-zinc-50 md:w-48">
+        <Link 
+          href={productLink}
+          className="aspect-square w-full shrink-0 overflow-hidden rounded-sm border border-zinc-100/50 bg-zinc-50 md:w-48 block transition-opacity hover:opacity-90"
+        >
           <Image
             src={item.image || "/images/product/1.jpg"}
             alt={item.title}
@@ -204,12 +210,16 @@ export default function CartItem({ item, onAuthRequired }) {
             height={200}
             className="h-full w-full object-contain mix-blend-multiply"
           />
-        </div>
+        </Link>
 
         <div className="grow space-y-4">
           <div className="flex items-start justify-between">
             <div className="space-y-1">
-              <h3 className="font-abhaya text-lg font-bold text-zinc-800">{item.title}</h3>
+              <Link href={productLink}>
+                <h3 className="font-abhaya text-lg font-bold text-zinc-800 hover:text-primary transition-colors">
+                  {item.title}
+                </h3>
+              </Link>
               <p className="text-[10px] font-medium uppercase tracking-wider text-zinc-400">
                 Variant: {item.variantTitle}
               </p>

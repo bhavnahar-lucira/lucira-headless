@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { Phone, MessageSquare, Truck, MessageCircle } from "lucide-react";
 import { useCart } from "@/hooks/useCart";
 
@@ -73,11 +74,15 @@ export default function CheckoutSummary() {
         <div className="bg-white border border-zinc-100 rounded-lg p-4 space-y-4 shadow-sm">
           {displayItems.map((item, index) => {
             const isInsurance = item.variantId === INSURANCE_VARIANT_ID;
+            const itemLink = item.handle ? `/products/${item.handle}${item.variantId ? `?variant=${item.variantId}` : ""}` : "#";
             
             return (
               <div key={index} className="space-y-3">
                 <div className="flex gap-4">
-                  <div className="w-20 h-20 bg-zinc-50 rounded-md border border-zinc-100 p-1 flex-shrink-0">
+                  <Link 
+                    href={itemLink}
+                    className="w-20 h-20 bg-zinc-50 rounded-md border border-zinc-100 p-1 flex-shrink-0 block transition-opacity hover:opacity-90"
+                  >
                     <Image 
                       src={item.image || "/images/product/1.jpg"} 
                       alt={item.title} 
@@ -85,9 +90,11 @@ export default function CheckoutSummary() {
                       height={80} 
                       className="w-full h-full object-contain mix-blend-multiply"
                     />
-                  </div>
+                  </Link>
                   <div className="flex-grow space-y-1">
-                    <h3 className="text-sm font-medium text-zinc-800 leading-tight">{item.title}</h3>
+                    <Link href={itemLink}>
+                      <h3 className="text-sm font-medium text-zinc-800 leading-tight hover:text-primary transition-colors">{item.title}</h3>
+                    </Link>
                     <p className="text-xs text-zinc-500">Quantity:: {item.quantity}</p>
                     <div className="flex items-center gap-2 pt-1">
                       <span className="text-sm font-bold text-zinc-900">₹{(item.price || 0).toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>

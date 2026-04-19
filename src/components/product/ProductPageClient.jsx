@@ -833,7 +833,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                                 fontFamily: `var(--font-${engravingFont.toLowerCase()})`,
                                 textShadow: "1px 1px 1.5px rgba(255,255,255,0.8), -0.5px -0.5px 1px rgba(0,0,0,0.15)"
                               }} 
-                              className="text-gray-800 text-xl sm:text-2xl tracking-[0.15em] opacity-80 italic translate-y-[-10px] sm:translate-y-[-15px]"
+                              className="text-gray-800 text-xl sm:text-2xl tracking-[0.15em] opacity-80 italic -translate-y-9 sm:-translate-y-9"
                             >
                               {engraving}
                             </div>

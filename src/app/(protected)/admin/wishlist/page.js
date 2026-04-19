@@ -139,6 +139,7 @@ export default function WishlistPage() {
       // 3. Add to cart
       const cartProduct = {
         id: product.id || product.shopifyId,
+        shopifyId: product.id || product.shopifyId,
         variantId: selectedVariant.id || selectedVariant.shopifyId,
         title: product.title,
         handle: product.handle,
@@ -146,8 +147,33 @@ export default function WishlistPage() {
         price: selectedVariant.price || product.price,
         image: getValidSrc(selectedVariant.image || product.image || item.image),
         variantTitle: selectedVariant.title,
-        color: selectedVariant.color,
+        color: selectedVariant.color || product.color,
+        karat: selectedVariant.karat || selectedVariant.purity || product.karat || product.purity || "",
         size: selectedVariant.size,
+        inStock: Boolean(selectedVariant.inStock),
+        
+        // Technical pricing fields required for CartSummary and GTM
+        goldPricePerGram: selectedVariant.price_breakup?.metal?.rate_per_gram || 0,
+        goldWeight: selectedVariant.price_breakup?.metal?.weight || 0,
+        goldPrice: selectedVariant.price_breakup?.metal?.cost || 0,
+        makingCharges: selectedVariant.price_breakup?.making_charges?.final || 0,
+        diamondCharges: selectedVariant.price_breakup?.diamond?.final || 0,
+        gst: selectedVariant.price_breakup?.gst?.amount || 0,
+        finalPrice: selectedVariant.price_breakup?.total || selectedVariant.price,
+        diamondTotalPcs: selectedVariant.price_breakup?.diamond?.pcs || 0,
+        shippingDate: "13/04/2026", // Mock or dynamic if available
+
+        hasVideo: Boolean(product.media?.some((m) => m.type === "VIDEO" || m.type === "EXTERNAL_VIDEO")),
+        hasSimilar: Boolean(product.handle),
+        reviews: product.reviews || null,
+        comparePrice: selectedVariant?.compare_price || product.compare_price || "",
+        variantOptions: product.variants.map(v => ({
+          variantId: v.id || v.shopifyId,
+          size: v.size,
+          price: v.price,
+          inStock: v.inStock,
+          variantTitle: v.title
+        }))
       };
 
       await dispatch(addToCart({ userId: user?.id, product: cartProduct })).unwrap();
