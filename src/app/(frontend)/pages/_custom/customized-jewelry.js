@@ -154,6 +154,19 @@ export default function BespokePage() {
         });
     };
 
+    const handleScroll = () => {
+        const element = document.getElementById("gallery");
+        if (!element) return;
+
+        const offset = 100;
+        const top = element.getBoundingClientRect().top + window.scrollY - offset;
+
+        window.scrollTo({
+            top,
+            behavior: "smooth",
+        });
+    };
+
     return (
         <>
             <section className="relative w-full">
@@ -209,9 +222,9 @@ export default function BespokePage() {
                         From your first sketch to detailed 3D renders, from choosing the right stone to finally setting it by hand, every bespoke Lucira piece blends traditional craft with modern techniques. Inspired by India’s rich heritage of karigars who turned jewelry into heirlooms and refined with today’s design innovation, we create pieces that feel personal, meaningful and truly one-of-a-kind.
                     </p>
 
-                    <Link href="#gallery" className="underline text-sm font-medium">
+                    <button onClick={handleScroll} className="underline text-sm font-medium">
                         View our Full Creations
-                    </Link>
+                    </button>
                 </div>
             </section>
             <section className="w-full">
