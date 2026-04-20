@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Menu, Search, Heart, ShoppingBag, Home, X, ChevronRight, ChevronLeft, User as UserIcon, LogOut } from "lucide-react";
+import { Menu, Search, Heart, ShoppingBag, Home, X, ChevronRight, ChevronLeft, User as UserIcon, LogOut, MessageCircle, Package, Video, Store, ChevronDown } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -15,9 +15,54 @@ import { useMenu } from "@/hooks/useMenu";
 import { MEGA_MENU as STATIC_MENU } from "@/data/megaMenu";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { pushLogout, pushViewCart } from "@/lib/gtm";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
-const INSURANCE_VARIANT_ID = "gid://shopify/ProductVariant/47709366026458";
-const GOLDCOIN_VARIANT_ID = "gid://shopify/ProductVariant/47661824082138";
+const CATEGORY_IMAGES = {
+  "BEST SELLERS": "/images/menu/engagement-ring.jpg",
+  "ENGAGEMENT RINGS": "/images/menu/engagement-ring.jpg",
+  "RINGS": "/images/menu/wedding-ring.jpg",
+  "EARRINGS": "/images/menu/earring.jpg",
+  "MORE JEWELRY": "/images/menu/more-jewellery.jpg",
+  "solitaire": "/images/menu/earring.jpg",
+  "COLLECTIONS": "/images/menu/hexa.jpg",
+  "GIFTING": "/images/menu/gifting.jpg",
+  "9KT COLLECTION": "/images/menu/candy.jpg",
+};
+
+const METAL_COLORS = {
+  "Yellow Gold": "#E5C161",
+  "White Gold": "#E5E5E5",
+  "Rose Gold": "#EAB0A2",
+  "Platinum": "#D9D9D9",
+  "Silver": "#C0C0C0",
+};
+
+const STYLE_ICON_FALLBACK = (label) => `/images/styles/${label.toLowerCase().replace(/ /g, "")}.png`;
+const SHAPE_ICON_FALLBACK = (label) => `/images/shapes/${label.toLowerCase()}.png`;
+
+function SafeImage({ src, alt, fallback = "/images/icons/diamond.svg", ...props }) {
+  const [imgSrc, setImgSrc] = useState(src);
+  const [hasError, setHasError] = useState(false);
+
+  useEffect(() => {
+    setImgSrc(src);
+    setHasError(false);
+  }, [src]);
+
+  return (
+    <img
+      {...props}
+      src={imgSrc}
+      alt={alt}
+      onError={() => {
+        if (!hasError) {
+          setHasError(true);
+          setImgSrc(fallback);
+        }
+      }}
+    />
+  );
+}
 
 export default function MobileHeader() {
   const router = useRouter();
@@ -33,6 +78,12 @@ export default function MobileHeader() {
   const wishlistItems = useSelector((state) => state.wishlist.items);
 
   const [activeMenuPath, setActiveMenuPath] = useState([]);
+
+  useEffect(() => {
+    if (!isMenuOpen) {
+      setActiveMenuPath([]);
+    }
+  }, [isMenuOpen]);
 
   const handleLogout = async () => {
     try {
@@ -70,27 +121,30 @@ export default function MobileHeader() {
       } else if (item.items) {
         current = item.items;
       } else if (item.featured) {
-        // Special case for featured
         current = item.featured;
       }
     }
     return current;
   };
 
-  const getMenuTitle = () => {
-    if (activeMenuPath.length === 0) return "MENU";
+  const getActiveItem = () => {
+    if (activeMenuPath.length === 0) return null;
     let current = MEGA_MENU;
-    let title = "";
+    let item = null;
     for (let i = 0; i < activeMenuPath.length; i++) {
-      const item = current[activeMenuPath[i]];
-      title = item.label || item.title;
+      item = current[activeMenuPath[i]];
       if (i < activeMenuPath.length - 1) {
         if (item.columns) current = item.columns;
         else if (item.items) current = item.items;
         else if (item.featured) current = item.featured;
       }
     }
-    return title;
+    return item;
+  };
+
+  const getMenuTitle = () => {
+    const activeItem = getActiveItem();
+    return activeItem ? (activeItem.label || activeItem.title) : "MENU";
   };
 
   const handleBack = () => {
@@ -106,6 +160,216 @@ export default function MobileHeader() {
     }
   };
 
+  const renderSubMenu = (activeItem) => {
+    return (
+      <div className="flex flex-col px-4 py-2">
+        <Accordion type="multiple" className="w-full" defaultValue={activeItem.columns?.map((_, i) => `item-${i}`)}>
+          {activeItem.columns?.map((col, idx) => (
+            <AccordionItem key={idx} value={`item-${idx}`} className="border-none">
+              <AccordionTrigger className="text-sm font-bold uppercase tracking-widest hover:no-underline py-4">
+                {col.title}
+              </AccordionTrigger>
+              <AccordionContent>
+                {(col.type === "icon" || col.type === "metal") && (
+                  <div className="grid grid-cols-3 gap-y-6 gap-x-2 pt-2">
+                    {col.items.map((item, i) => {
+                      const titleLower = col.title.toLowerCase();
+                      const isShape = titleLower.includes("shape");
+                      const isMetal = titleLower.includes("metal") || titleLower.includes("material") || col.type === "metal";
+                      
+                      if (isMetal) {
+                        return (
+                          <Link 
+                            key={i} 
+                            href={item.href || "#"} 
+                            onClick={() => setIsMenuOpen(false)}
+                            className="flex flex-col items-center gap-2"
+                          >
+                            <div 
+                              className="w-12 h-12 rounded-full border border-gray-100 shadow-sm"
+                              style={{ backgroundColor: METAL_COLORS[item.label] || "#eee" }}
+                            />
+                            <span className="text-[10px] text-center font-medium leading-tight">{item.label}</span>
+                          </Link>
+                        );
+                      }
+
+                      const iconPath = isShape ? SHAPE_ICON_FALLBACK(item.label) : STYLE_ICON_FALLBACK(item.label);
+                      return (
+                        <Link 
+                          key={i} 
+                          href={item.href || "#"} 
+                          onClick={() => setIsMenuOpen(false)}
+                          className="flex flex-col items-center gap-2"
+                        >
+                          <div className="w-12 h-12 relative flex items-center justify-center bg-gray-50 rounded-full overflow-hidden">
+                            <SafeImage 
+                              src={iconPath} 
+                              alt={item.label} 
+                              className="w-10 h-10 object-contain"
+                            />
+                          </div>
+                          <span className="text-[10px] text-center font-medium leading-tight">{item.label}</span>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                )}
+                {col.type === "text" && (
+                   <div className="grid grid-cols-2 gap-2 pt-2">
+                    {col.items.map((item, i) => (
+                      <Link 
+                        key={i} 
+                        href={item.href || "#"} 
+                        onClick={() => setIsMenuOpen(false)}
+                        className="bg-gray-50 px-3 py-2 text-[11px] font-medium text-center rounded-sm"
+                      >
+                        {item.label}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </AccordionContent>
+            </AccordionItem>
+          ))}
+
+          {activeItem.featured && activeItem.featured.length > 0 && (
+            <AccordionItem value="featured" className="border-none">
+               <AccordionTrigger className="text-sm font-bold uppercase tracking-widest hover:no-underline py-4">
+                Featured
+              </AccordionTrigger>
+              <AccordionContent>
+                <div className="flex flex-col space-y-3 pt-2">
+                  {activeItem.featured.map((f, i) => (
+                    <Link key={i} href={f.href || "#"} onClick={() => setIsMenuOpen(false)} className="text-sm font-medium text-gray-700">
+                      {f.label}
+                    </Link>
+                  ))}
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          )}
+        </Accordion>
+      </div>
+    );
+  };
+
+  const renderMainMenu = () => {
+    return (
+      <div className="flex flex-col pb-8">
+        <div className="grid grid-cols-2 gap-3 px-4 py-4">
+          {MEGA_MENU.map((item, index) => {
+            const label = item.label || item.title;
+            const image = CATEGORY_IMAGES[label] || "/images/menu/engagement-ring.jpg";
+            return (
+              <button
+                key={index}
+                onClick={() => handleItemClick(item, index)}
+                className="relative aspect-[4/5] overflow-hidden rounded-lg group"
+              >
+                <Image
+                  src={image}
+                  alt={label}
+                  fill
+                  className="object-cover transition-transform group-active:scale-105"
+                />
+                <div className="absolute inset-0 bg-black/10 group-active:bg-black/20 transition-colors" />
+                <div className="absolute bottom-4 left-4 right-4">
+                  <span className="text-white text-xs font-bold uppercase tracking-wider drop-shadow-md">
+                    {label}
+                  </span>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Bottom Section */}
+        <div className="mt-4 space-y-6">
+          <div className="bg-[#FAF6F3] mx-4 p-4 space-y-4 rounded-lg">
+            <Link href="/account/orders" onClick={() => setIsMenuOpen(false)} className="block text-sm font-bold uppercase tracking-wider text-gray-800 border-b border-gray-200 pb-3">
+              Track Your Order
+            </Link>
+            <Link href="/pages/contact-us" onClick={() => setIsMenuOpen(false)} className="block text-sm font-bold uppercase tracking-wider text-gray-800 border-b border-gray-200 pb-3">
+              Contact Us
+            </Link>
+            <Link href="/pages/faqs" onClick={() => setIsMenuOpen(false)} className="block text-sm font-bold uppercase tracking-wider text-gray-800">
+              FAQs
+            </Link>
+          </div>
+
+          <div className="px-4 space-y-1">
+            <a href="https://wa.me/yournumber" className="flex items-center justify-between p-4 bg-white border border-gray-100 rounded-lg group active:bg-gray-50">
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 bg-green-50 rounded-full flex items-center justify-center text-green-600">
+                  <MessageCircle size={24} />
+                </div>
+                <div>
+                  <h4 className="text-sm font-bold text-gray-800">WhatsApp Us</h4>
+                  <p className="text-[10px] text-gray-500 leading-tight">Chat with us instantly for product details, styling tips, or quick assistance.</p>
+                </div>
+              </div>
+              <ChevronRight size={18} className="text-gray-400" />
+            </a>
+
+            <Link href="/pages/vault-of-dreams" onClick={() => setIsMenuOpen(false)} className="flex items-center justify-between p-4 bg-white border border-gray-100 rounded-lg group active:bg-gray-50">
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 bg-blue-50 rounded-full flex items-center justify-center text-blue-600">
+                  <Package size={24} />
+                </div>
+                <div>
+                  <h4 className="text-sm font-bold text-gray-800">Vault Of Dreams</h4>
+                  <p className="text-[10px] text-gray-500 leading-tight">Pay for 9 months, and get the 10th month free, your smart jewellery savings plan.</p>
+                </div>
+              </div>
+              <ChevronRight size={18} className="text-gray-400" />
+            </Link>
+
+            <Link href="/pages/video-call" onClick={() => setIsMenuOpen(false)} className="flex items-center justify-between p-4 bg-white border border-gray-100 rounded-lg group active:bg-gray-50">
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 bg-purple-50 rounded-full flex items-center justify-center text-purple-600">
+                  <Video size={24} />
+                </div>
+                <div>
+                  <h4 className="text-sm font-bold text-gray-800">Video Call</h4>
+                  <p className="text-[10px] text-gray-500 leading-tight">Explore and shop jewellery live with our experts over a video call.</p>
+                </div>
+              </div>
+              <ChevronRight size={18} className="text-gray-400" />
+            </Link>
+
+            <Link href="/pages/visit-store" onClick={() => setIsMenuOpen(false)} className="flex items-center justify-between p-4 bg-white border border-gray-100 rounded-lg group active:bg-gray-50">
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 bg-amber-50 rounded-full flex items-center justify-center text-amber-600">
+                  <Store size={24} />
+                </div>
+                <div>
+                  <h4 className="text-sm font-bold text-gray-800">Visit Store</h4>
+                  <p className="text-[10px] text-gray-500 leading-tight">Visit our stores to explore and try your favorite designs in person.</p>
+                </div>
+              </div>
+              <ChevronRight size={18} className="text-gray-400" />
+            </Link>
+          </div>
+
+          <div className="px-4 pb-8">
+            {user ? (
+               <button onClick={handleLogout} className="w-full bg-[#4E3E3E] text-white py-4 rounded font-bold uppercase tracking-widest text-sm flex items-center justify-center gap-2">
+                <LogOut size={20} /> Logout
+              </button>
+            ) : (
+              <button onClick={() => { setIsMenuOpen(false); setIsAuthOpen(true); }} className="w-full bg-[#4E3E3E] text-white py-4 rounded font-bold uppercase tracking-widest text-sm flex items-center justify-center gap-2">
+                <UserIcon size={20} /> Log In / Sign Up
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const activeItem = getActiveItem();
+
   return (
     <div className="bg-white border-b border-gray-100 lg:hidden">
       <div className="flex items-center justify-between px-4 py-3">
@@ -116,9 +380,9 @@ export default function MobileHeader() {
               <Menu size={24} strokeWidth={1.5} />
             </button>
           </SheetTrigger>
-          <SheetContent side="left" className="w-[85%] p-0 border-none" showCloseButton={false}>
-            <div className="flex flex-col h-full bg-white">
-              <SheetHeader className="px-4 py-4 border-b flex flex-row items-center justify-between">
+          <SheetContent side="left" className="w-full p-0 border-none" showCloseButton={false}>
+            <div className="flex flex-col h-screen bg-white overflow-hidden">
+              <SheetHeader className="px-4 py-4 border-b flex flex-row items-center justify-between sticky top-0 bg-white z-10 shrink-0">
                 <div className="flex items-center gap-2">
                   {activeMenuPath.length > 0 && (
                     <button onClick={handleBack} className="p-1 mr-1">
@@ -136,41 +400,8 @@ export default function MobileHeader() {
                 </SheetClose>
               </SheetHeader>
 
-              <ScrollArea className="flex-1">
-                <div className="flex flex-col py-2">
-                  {getCurrentMenu().map((item, index) => {
-                    const hasSub = item.columns || item.items || (item.featured && Array.isArray(item.featured));
-                    return (
-                      <button
-                        key={index}
-                        onClick={() => handleItemClick(item, index)}
-                        className="flex items-center justify-between px-5 py-4 text-sm font-medium text-gray-800 border-b border-gray-50 last:border-none active:bg-gray-50"
-                      >
-                        <span className="uppercase tracking-wide">{item.label || item.title}</span>
-                        {hasSub && <ChevronRight size={18} className="text-gray-400" />}
-                      </button>
-                    );
-                  })}
-
-                  {activeMenuPath.length === 0 && (
-                    <div className="mt-4 px-5 space-y-4">
-                      {user ? (
-                        <>
-                          <Link href="/admin" onClick={() => setIsMenuOpen(false)} className="flex items-center gap-3 py-3 text-sm font-medium">
-                            <UserIcon size={20} /> My Account
-                          </Link>
-                          <button onClick={handleLogout} className="flex items-center gap-3 py-3 text-sm font-medium text-red-500">
-                            <LogOut size={20} /> Logout
-                          </button>
-                        </>
-                      ) : (
-                        <button onClick={() => { setIsMenuOpen(false); setIsAuthOpen(true); }} className="flex items-center gap-3 py-3 text-sm font-medium">
-                          <UserIcon size={20} /> Login / Sign Up
-                        </button>
-                      )}
-                    </div>
-                  )}
-                </div>
+              <ScrollArea className="flex-grow h-full overflow-y-auto">
+                {activeMenuPath.length === 0 ? renderMainMenu() : renderSubMenu(activeItem)}
               </ScrollArea>
             </div>
           </SheetContent>
