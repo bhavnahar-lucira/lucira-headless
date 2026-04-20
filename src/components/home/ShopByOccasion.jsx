@@ -35,9 +35,9 @@ export default function ShopByOccasion() {
                 className="object-cover transition-transform duration-700 group-hover:scale-105"
               />
               <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/5 to-transparent pointer-events-none" />
-              <div className="absolute bottom-6 left-6 right-6 flex justify-between items-center text-white">
-                <span className="text-xl md:text-2xl font-semibold">{occ.name}</span>
-                <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center transition-all group-hover:bg-white group-hover:text-black">
+              <div className="absolute bottom-6 xl:left-6 xl:right-6 lg:left-4 lg:right-4 flex justify-between items-center text-white">
+                <span className="text-xl xl:text-2xl lg:text-lg font-semibold">{occ.name}</span>
+                <div className="xl:w-10 xl:h-10 lg:w-8 lg:h-8 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center transition-all group-hover:bg-white group-hover:text-black">
                   <ArrowRight size={20} />
                 </div>
               </div>

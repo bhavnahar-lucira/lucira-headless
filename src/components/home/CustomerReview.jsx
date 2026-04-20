@@ -217,15 +217,6 @@ export default function CustomerReview({
             </div>
           </div>
         </div>
-
-        <div className="mt-12 text-center">
-            <Link 
-                href="/reviews"
-                className="inline-flex items-center justify-center border-b-2 border-black pb-1 font-black text-xs tracking-[0.3em] uppercase hover:text-primary hover:border-primary transition-all duration-300"
-            >
-                View All Reviews
-            </Link>
-        </div>
       </div>
 
       <ReviewDetailedPopup 

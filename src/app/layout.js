@@ -54,11 +54,11 @@ export const metadata = {
 };
 
 export default function RootLayout({ children }) {
-  const isProd = process.env.NODE_ENV === "production";
+  // const isProd = process.env.NODE_ENV === "production";
 
   return (
     <html lang="en">
-      <head>
+      {/* <head>
         {isProd && (
           <Script id="google-tag-manager" strategy="afterInteractive">
             {`(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
@@ -68,9 +68,9 @@ export default function RootLayout({ children }) {
               })(window,document,'script','dataLayer','GTM-MKZBJB8M');`}
           </Script>
         )}
-      </head>
+      </head> */}
       <body className={`${figtree.variable} ${abhaya.variable} ${lobster.variable} ${yellowtail.variable} ${satisfy.variable} ${abeezee.variable} font-sans antialiased`}>
-        {isProd && (
+        {/* {isProd && (
           <noscript>
             <iframe 
               src="https://www.googletagmanager.com/ns.html?id=GTM-MKZBJB8M"
@@ -79,7 +79,7 @@ export default function RootLayout({ children }) {
               style={{ display: 'none', visibility: 'hidden' }}
             />
           </noscript>
-        )}
+        )} */}
         <ReduxProvider>
           <QueryProvider> 
             {children}

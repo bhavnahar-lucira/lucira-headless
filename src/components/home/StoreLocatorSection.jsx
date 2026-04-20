@@ -139,9 +139,9 @@ export default function StoreLocatorSection() {
           ))}
         </div>
 
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,42fr)_minmax(0,58fr)]">
+        <div className="grid grid-cols-1 xl:gap-6 lg:gap-4 lg:grid-cols-[minmax(0,42fr)_minmax(0,58fr)]">
           <div className="relative overflow-hidden rounded-sm">
-            <div className="relative aspect-[4/4.3] w-full">
+            <div className="relative aspect-[4/4.3] w-full h-full">
               <LazyImage
                 src={activeStore.image}
                 alt={activeStore.name}
@@ -169,8 +169,8 @@ export default function StoreLocatorSection() {
               </div>
             </div>
 
-            <div className="absolute bottom-6 left-3 right-3 flex flex-wrap items-center justify-between gap-3 rounded-full bg-[#f7efec] px-4 py-3 shadow-sm">
-              <div className="flex items-center gap-2 text-base">
+            <div className="absolute bottom-6 left-3 right-3 flex flex-wrap items-center xl:justify-between gap-2 lg:justify-center rounded-full bg-[#f7efec] px-4 py-3 shadow-sm">
+              <div className="flex items-center gap-2 xl:text-sm lg:text-xs">
                 <Clock3 size={16} />
                 <span className="font-medium">
                   <span className="font-semibold">Timings:</span>{" "}
@@ -178,7 +178,7 @@ export default function StoreLocatorSection() {
                 </span>
               </div>
 
-              <div className="inline-flex items-center gap-2 rounded-full border border-[#86c49b] bg-white px-3 py-1 text-base font-semibold">
+              <div className="inline-flex items-center gap-2 rounded-full border border-[#86c49b] bg-white px-3 py-1 xl:text-sm lg:text-xs font-semibold">
                 <Circle
                   size={8}
                   className={

@@ -354,7 +354,7 @@ export default function SearchPage() {
                               options.map((option) => {
                                 const isSelected = searchParams.getAll(option.urlKey).includes(option.value);
                                 return (
-                                  <div key={option.value} className="flex items-center gap-3 text-sm">
+                                  <div key={option.value} className="flex items-start gap-3 text-sm">
                                     <input
                                       type="checkbox"
                                       id={`${groupKey}-${option.value}`}
