@@ -272,10 +272,10 @@ export default function MainHeader() {
         {/* Right Icons */}
         <div className="flex items-center justify-end gap-6 text-sm">
 
-          <div className="hidden lg:flex items-center gap-2 cursor-pointer">
+          <Link href="/pages/store-locator" className="hidden lg:flex items-center gap-2 cursor-pointer hover:text-primary transition-colors">
             <Store size={18} />
             <span>Find a Store</span>
-          </div>
+          </Link>
 
           {user ? (
             <div className="relative group flex items-center">

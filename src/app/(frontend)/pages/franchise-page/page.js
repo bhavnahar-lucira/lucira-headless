@@ -580,7 +580,7 @@ export default function FranchisePage() {
                 className="bg-white border border-gray-100 rounded-lg overflow-hidden px-6"
               >
                 <AccordionTrigger className="hover:no-underline py-5 text-left group">
-                  <span className="text-[16px] md:text-[18px] font-bold text-primary font-abhaya pr-4">
+                  <span className="text-[16px] md:text-[18px] font-bold text-primary font-figtree pr-4">
                     {item.question}
                   </span>
                 </AccordionTrigger>
