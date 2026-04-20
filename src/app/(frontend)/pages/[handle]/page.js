@@ -30,18 +30,5 @@ export default async function Page({ params }) {
         );
     }
     
-    try {
-        const CustomPage =
-            (await import(`../_custom/${handle}.js`)).default;
-
-        return (
-            <div className="w-full mx-auto py-7">
-                <CustomPage />
-            </div>
-        );
-    } catch (error) {
-        console.log("No custom page found for:", handle);
-
-        return notFound();
-    }
+    return notFound();
 }
