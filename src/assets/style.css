@@ -2,6 +2,11 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
+.container {
+    padding-right: 4.2rem;
+    padding-left: 4.2rem;
+}
+
 .footer-pages {
     @apply text-zinc-700 leading-[1.75] text-[0.9375rem];
     font-family: 'Figtree', sans-serif;
@@ -46,6 +51,10 @@
     @apply font-medium text-zinc-700 mt-8;
 }
 @media (max-width: 640px) {
+    .container {
+        padding-right: 1.5rem;
+        padding-left: 1.5rem;
+    }
     .footer-pages h2 {
         @apply text-lg;
     }

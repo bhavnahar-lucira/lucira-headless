@@ -86,6 +86,7 @@ export default function Footer() {
                 <li><Link href="/pages/craftmanship">Craftsmanship</Link></li>
                 <li><Link href="/pages/mordern-slavery-policy">Modern Slavery Policy</Link></li>
                 <li><Link href="/pages/supplier-code-of-conduct">Supplier Code of Conduct</Link></li>
+                <li><Link href="/pages/accessibility-statement">Accessibility Statement</Link></li>
               </ul>
             </div>
 
