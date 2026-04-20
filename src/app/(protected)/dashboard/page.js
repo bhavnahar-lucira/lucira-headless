@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import ProductTable from "./ProductTable";
-import { RefreshCw, LayoutDashboard, Store, MessageSquare, Menu } from "lucide-react";
+import { RefreshCw, LayoutDashboard, Store, MessageSquare, Menu, Search } from "lucide-react";
 
 export default function Dashboard() {
   const [syncing, setSyncing] = useState(false);
@@ -25,6 +25,7 @@ export default function Dashboard() {
   const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0, totalPages: 0 });
   const [loadingProducts, setLoadingProducts] = useState(true);
   const [loadingMenus, setLoadingMenus] = useState(true);
+  const [productQuery, setProductQuery] = useState("");
 
   // Fetch count of products available on Shopify
   const fetchShopifyCount = async () => {
@@ -52,10 +53,10 @@ export default function Dashboard() {
   };
 
   // Fetch products from our MongoDB
-  const fetchLocalProducts = useCallback(async (page = 1) => {
+  const fetchLocalProducts = useCallback(async (page = 1, q = "") => {
     setLoadingProducts(true);
     try {
-      const res = await fetch(`/api/products/search?page=${page}&limit=10`);
+      const res = await fetch(`/api/products/search?page=${page}&limit=10${q ? `&q=${encodeURIComponent(q)}` : ""}`);
       const data = await res.json();
       setProducts(data.products || []);
       setPagination(data.pagination);
@@ -68,9 +69,15 @@ export default function Dashboard() {
 
   useEffect(() => {
     fetchShopifyCount();
-    fetchLocalProducts();
     fetchMenus();
-  }, [fetchLocalProducts]);
+  }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fetchLocalProducts(1, productQuery);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [productQuery, fetchLocalProducts]);
 
   const startSync = async (type = "products", isRetry = false) => {
     setSyncing(true);
@@ -266,9 +273,22 @@ export default function Dashboard() {
 
         {/* Product Table Section */}
         <div className="bg-white dark:bg-zinc-950 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm overflow-hidden">
-          <div className="p-6 border-b border-zinc-100 dark:border-zinc-800 flex items-center justify-between">
+          <div className="p-6 border-b border-zinc-100 dark:border-zinc-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <h2 className="text-xl font-bold">Imported Inventory</h2>
-            {loadingProducts && <span className="text-xs text-zinc-500 animate-pulse">Updating list...</span>}
+            
+            <div className="flex items-center gap-4">
+              <div className="relative flex-1 sm:min-w-[300px]">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" size={18} />
+                <input
+                  type="text"
+                  placeholder="Search products..."
+                  value={productQuery}
+                  onChange={(e) => setProductQuery(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-zinc-200 dark:focus:ring-zinc-800 transition-all"
+                />
+              </div>
+              {loadingProducts && <span className="text-xs text-zinc-500 animate-pulse whitespace-nowrap">Updating...</span>}
+            </div>
           </div>
           
           <div className="p-2">

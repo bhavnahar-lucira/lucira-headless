@@ -12,10 +12,10 @@ export default function DashboardHeader() {
           </Link>
           <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-zinc-400">
             <Link href="/dashboard" className="hover:text-white transition-colors">Overview</Link>
-            <Link href="/dashboard/products" className="hover:text-white transition-colors">Products</Link>
             <Link href="/dashboard/variants" className="hover:text-white transition-colors">Variants</Link>
             <Link href="/dashboard/pages" className="hover:text-white transition-colors">Pages</Link>
             <Link href="/dashboard/blogs" className="hover:text-white transition-colors">Blogs</Link>
+            <Link href="/dashboard/reviews" className="hover:text-white transition-colors">Reviews</Link>
             <Link href="/dashboard/sync" className="hover:text-white transition-colors">Sync</Link>
           </nav>
         </div>
