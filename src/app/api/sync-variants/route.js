@@ -220,9 +220,33 @@ export async function POST(req) {
             };
           });
 
+          // Extract top-level discounts for the product document
+          const inStockVariants = variants.filter(v => v.inStock);
+          const isRing = String(p.type || p.title || "").toLowerCase().includes("ring");
+          
+          let representativeVariant = null;
+          if (inStockVariants.length > 0) {
+            if (isRing) {
+              representativeVariant = inStockVariants.find(v => String(v.color || v.title).includes("Yellow Gold"));
+            }
+            if (!representativeVariant) representativeVariant = inStockVariants[0];
+          } else {
+            representativeVariant = variants[0];
+          }
+
+          const diamondDiscount = representativeVariant?.price_breakup?.diamond?.discount_percent || 0;
+          const makingDiscount = representativeVariant?.price_breakup?.making_charges?.discount_percent || 0;
+
           await productsCollection.updateOne(
             { shopifyId: p.shopifyId },
-            { $set: { variants: variants, lastUpdated: new Date() } }
+            { 
+              $set: { 
+                variants: variants, 
+                diamondDiscount,
+                makingDiscount,
+                lastUpdated: new Date() 
+              } 
+            }
           );
 
           // Small delay to prevent rate limiting

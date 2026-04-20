@@ -1,142 +1,34 @@
 import { getPageByHandle, getPageByHandleStorefront } from "@/lib/pages";
 import { notFound } from "next/navigation";
-import ContactSection from "@/components/common/ContactSection";
-import SitemapPage from "@/components/sitemap/SitemapPage";
-import "@/assets/style.css";
+import FooterPageContent from "@/components/FooterPageContent";
 
-export default async function page({ params }) {
-  const { handle } = await params;
+export default async function Page({ params }) {
+    const { handle } = await params;
 
-  if (handle === "contact-us") {
-    return <ContactSection />;
-  }
+    const page = await getPageByHandle(handle);
 
-  if (handle === "sitemap") {
-    return <SitemapPage />;
-  }
+    if (!page) return notFound();
 
-  let page = await getPageByHandle(handle);
+    const hasBody =
+        typeof page.body === "string" && page.body.trim() !== "";
 
-  // Fallback to direct Shopify Storefront API if not found in DB
-  if (!page) {
-    page = await getPageByHandleStorefront(handle);
-  }
+    const isAccordionPage = hasBody && page.body.includes("data-toggle");
 
-  if (!page) return notFound();
-
-  if (handle === "exclusive-promotions-page") {
-    return (
-      <div className="w-full bg-white min-h-screen">
-        {/* Banner Section */}
-        <section
-          className="relative flex items-center justify-center w-full"
-          style={{
-            backgroundImage: `url('https://www.lucirajewelry.com/cdn/shop/files/Offer-T-_-C-Desktop.jpg?v=1754045882&width=2000')`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            backgroundRepeat: "no-repeat",
-            minHeight: "400px",
-          }}
-        >
-          {/* Mobile image override via a hidden img trick */}
-          <style>{`
-                    @media (max-width: 749px) {
-                        #promo-banner {
-                            background-image: url('https://www.lucirajewelry.com/cdn/shop/files/Offer-T-_-C-Mobile.jpg?v=1754045881&width=1000') !important;
-                            min-height: 400px !important;
-                        }
-                    }
-                `}</style>
-
-          {/* Overlay */}
-          <div
-            className="absolute inset-0 pointer-events-none"
-            style={{ backgroundColor: "rgba(0,0,0,0.8)", opacity: 0.7 }}
-          />
-
-          {/* Content */}
-          <div className="relative z-10 text-center max-w-5xl mx-auto px-8 py-8">
-            <h1 className="font-figtree font-medium text-[42px] text-white tracking-tight leading-tight mb-3">
-                OFFERS T&C
-            </h1>
-          </div>
-        </section>
-
-        {/* Body Content */}
-        <section className="container-main py-10 md:py-10">
-          <div
-            className="footer-pages max-w-none font-figtree text-zinc-700 leading-relaxed"
-            dangerouslySetInnerHTML={{ __html: page.body }}
-          />
-        </section>
-      </div>
-    );
-  }
-
-  if (handle === "accessibility-statement") {
-    return (
-      <div className="w-full bg-white min-h-screen">
-        {/* Banner Section */}
-        <section
-          id="accessibility-banner"
-          className="relative flex items-center justify-center w-full"
-          style={{
-            backgroundImage: `url('https://www.lucirajewelry.com/cdn/shop/files/Accesiblity_20Page_20Banner_201920_20600.png?v=1768908054&width=2000')`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            backgroundRepeat: "no-repeat",
-            minHeight: "400px",
-          }}
-        >
-          {/* Optional mobile override */}
-          <style>{`
-            @media (max-width: 749px) {
-              #accessibility-banner {
-                background-image: url('https://www.lucirajewelry.com/cdn/shop/files/Accesiblity_20Page_20Banner_201920_20600.png?v=1768908054&width=1000') !important;
-                min-height: 400px !important;
-              }
-            }
-          `}</style>
-
-          {/* Overlay */}
-          <div
-            className="absolute inset-0 pointer-events-none"
-            style={{ backgroundColor: "rgba(0,0,0,0.8)", opacity: 0.6 }}
-          />
-
-          {/* Content */}
-          <div className="relative z-10 text-center max-w-5xl mx-auto px-8 py-8">
-            <h1 className="font-figtree font-medium text-[42px] text-white tracking-tight leading-tight mb-3">
-              ACCESSIBILITY STATEMENT
-            </h1>
-          </div>
-        </section>
-
-        {/* Body Content */}
-        <section className="container-main py-10 md:py-10">
-          <div
-            className="footer-pages max-w-none font-figtree text-zinc-700 leading-relaxed"
-            dangerouslySetInnerHTML={{ __html: page.body }}
-          />
-        </section>
-      </div>
-    );
-  }
-
-  return (
-    <>
-      <h1 className="hidden">{page.title}</h1>
-
-      <div className="container mx-auto py-7 px-4">
-        {page.body ? (
-          <div
-            className="footer-pages"
-            dangerouslySetInnerHTML={{ __html: page.body }}
-          />
-        ) : (
-          <p>No Content Available</p>
-        )}
-      </div>
-    </>
-  );
+    if (hasBody) {
+        return (
+            <div className="container mx-auto py-7">
+                {isAccordionPage ? (
+                    <FooterPageContent html={page.body} />
+                ) : (
+                    <div
+                        className="footer-pages"
+                        suppressHydrationWarning
+                        dangerouslySetInnerHTML={{ __html: page.body }}
+                    />
+                )}
+            </div>
+        );
+    }
+    
+    return notFound();
 }

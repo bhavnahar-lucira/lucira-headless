@@ -1,5 +1,7 @@
+"use client";
+
 import LazyImage from "../common/LazyImage";
-import { Truck, RefreshCcw, Gem } from "lucide-react";
+import { Truck, RefreshCcw, Gem, RotateCcw } from "lucide-react";
 
 const moneyBack = "/images/icons/money-back.svg";
 
@@ -10,51 +12,52 @@ export default function FeatureBar() {
       text: "Free and secure shipping",
     },
     {
-      icon: RefreshCcw,
-      text: "Lifetime return or exchange",
-    },
-    {
       icon: Gem,
       text: "100% diamond value guarantee",
     },
     {
+      icon: RotateCcw,
+      text: "Lifetime buy back or exchange",
+    },
+    {
       image: moneyBack,
-      text: "15-day money back guarantee",
+      text: "15-day free returns",
     },
   ];
 
   return (
-    <div className="w-full pt-7">
+    <div className="w-full py-10 bg-white">
       <div className="container-main">
-
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 items-center text-sm">
-
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-y-10 gap-x-4 items-start">
           {features.map((item, index) => {
             const Icon = item.icon;
 
             return (
               <div
                 key={index}
-                className="flex items-center justify-center md:justify-start gap-2.5"
+                className="flex flex-col md:flex-row items-center md:items-start gap-3 md:gap-4 text-center md:text-left"
               >
-                {Icon && <Icon size={26} strokeWidth={1.5} />}
+                <div className="shrink-0 text-zinc-700">
+                  {Icon && <Icon size={28} strokeWidth={1.2} />}
 
-                {item.image && (
-                  <LazyImage
-                    src={item.image}
-                    alt={item.text}
-                    width={26}
-                    height={26}
-                  />
-                )}
+                  {item.image && (
+                    <LazyImage
+                      src={item.image}
+                      alt={item.text}
+                      width={28}
+                      height={28}
+                      className="object-contain"
+                    />
+                  )}
+                </div>
 
-                <span className="text-base font-semibold">{item.text}</span>
+                <span className="text-sm md:text-base font-medium text-zinc-800 leading-tight md:leading-snug max-w-[140px] md:max-w-none">
+                  {item.text}
+                </span>
               </div>
             );
           })}
-
         </div>
-
       </div>
     </div>
   );

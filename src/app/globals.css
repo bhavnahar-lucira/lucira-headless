@@ -456,6 +456,13 @@
   .footer-pages p {
     @apply text-base my-4
   }
-
-  
+  .footer-pages .section .section-content ol li {
+    @apply mb-2 text-[#444444]
+  }
+  .footer-pages .section .section-content table {
+    @apply w-full table-fixed border border-[#ddd]
+  }
+  .footer-pages .section .section-content table td {
+    @apply py-3.5 px-3 border border-[#ddd]
+  }
 }

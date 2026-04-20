@@ -44,22 +44,20 @@ export default function CollectionSlider ({ products = [], loading = false }) {
       <div className="relative group">
         <Swiper
           modules={[Navigation, Pagination]}
-          spaceBetween={20}
+          spaceBetween={16}
           slidesPerView={1.2}
+          onSlideChange={(swiper) => {
+            const progress = (swiper.activeIndex / (swiper.slides.length - swiper.params.slidesPerView)) * 100;
+            const bar = document.getElementById(`progress-bar-${id}`);
+            if (bar) bar.style.width = `${Math.min(100, Math.max(0, progress + (100 / swiper.slides.length)))}%`;
+          }}
           navigation={{
             nextEl: `.${nextElClass}`,
             prevEl: `.${prevElClass}`,
           }}
-          pagination={{
-            el: `.${paginationElClass}`,
-            clickable: true,
-            renderBullet: (index, className) => {
-              return `<span class="${className} !w-8 !h-1 !rounded-full !bg-gray-200 transition-all duration-300 [&.swiper-pagination-bullet-active]:!bg-black"></span>`;
-            },
-          }}
           breakpoints={{
-            640: { slidesPerView: 2, spaceBetween: 24 },
-            1024: { slidesPerView: 3, spaceBetween: 30 },
+            640: { slidesPerView: 2, spaceBetween: 20 },
+            1024: { slidesPerView: 3, spaceBetween: 24 },
             1280: { slidesPerView: 4, spaceBetween: 30 },
           }}
           className="w-full overflow-visible!"
@@ -71,29 +69,27 @@ export default function CollectionSlider ({ products = [], loading = false }) {
           ))}
         </Swiper>
 
-        {/* Navigation & Pagination Controls */}
-        <div className="flex justify-between items-center mt-12 px-2">
-          <div className={`${paginationElClass} flex items-center gap-2`}></div>
+        {/* Navigation & Progress Controls (Updated for design) */}
+        <div className="flex justify-between items-center mt-8 md:mt-12 px-1">
+          {/* Progress Bar (Global) */}
+          <div className="flex-1 max-w-[120px] md:max-w-[200px] h-[2px] bg-zinc-100 relative overflow-hidden">
+            <div 
+              id={`progress-bar-${id}`}
+              className="absolute top-0 left-0 h-full bg-[#5B4740] transition-all duration-300"
+              style={{ width: `${100 / displayProducts.length}%` }}
+            />
+          </div>
           
-          <div className="flex items-center gap-4">
-            <button className={`${prevElClass} w-12 h-12 rounded-full border border-black flex items-center justify-center hover:bg-black hover:text-white transition-all`}>
-              <ChevronLeft size={24} />
+          <div className="flex items-center gap-3">
+            <button className={`${prevElClass} w-10 h-10 md:w-12 md:h-12 rounded-full border border-zinc-200 flex items-center justify-center hover:bg-black hover:text-white transition-all text-zinc-400 hover:border-black hover:text-white`}>
+              <ChevronLeft size={20} className="md:w-6 md:h-6" />
             </button>
-            <button className={`${nextElClass} w-12 h-12 rounded-full border border-black flex items-center justify-center hover:bg-black hover:text-white transition-all`}>
-              <ChevronRight size={24} />
+            <button className={`${nextElClass} w-10 h-10 md:w-12 md:h-12 rounded-full border border-zinc-200 flex items-center justify-center hover:bg-black hover:text-white transition-all text-zinc-400 hover:border-black hover:text-white`}>
+              <ChevronRight size={20} className="md:w-6 md:h-6" />
             </button>
           </div>
         </div>
       </div>  
-      <style jsx global>{`
-        .${paginationElClass} {
-          position: static !important;
-          width: auto !important;
-        }
-        .${paginationElClass} .swiper-pagination-bullet {
-          margin: 0 !important;
-        }
-      `}</style>
     </>
   );
 }

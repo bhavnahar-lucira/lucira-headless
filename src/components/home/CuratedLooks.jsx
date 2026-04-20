@@ -1,11 +1,20 @@
 "use client";
 
+import React, { useState, useRef } from "react";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import LazyImage from "../common/LazyImage";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Pagination } from "swiper/modules";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { Button } from "@/components/ui/button";
 
-const OCCASIONS = [
+import "swiper/css";
+import "swiper/css/pagination";
+
+const LOOKS = [
   {
+    id: "look-1",
     name: "Engagement",
     image: "/images/curated/1.jpg",
     href: "/collections/engagement",
@@ -49,6 +58,7 @@ const OCCASIONS = [
     ],
   },
   {
+    id: "look-2",
     name: "Wedding",
     image: "/images/curated/2.jpg",
     href: "/collections/wedding",
@@ -92,6 +102,7 @@ const OCCASIONS = [
     ],
   },
   {
+    id: "look-3",
     name: "Anniversary",
     image: "/images/curated/3.jpg",
     href: "/collections/anniversary",
@@ -135,6 +146,7 @@ const OCCASIONS = [
     ],
   },
   {
+    id: "look-4",
     name: "Valentine's",
     image: "/images/curated/4.jpg",
     href: "/collections/valentines",
@@ -168,6 +180,129 @@ const OCCASIONS = [
 ];
 
 export default function CuratedLooks() {
+  const isMobile = useMediaQuery("(max-width: 768px)");
+  const swiperRef = useRef(null);
+  const [activeHotspot, setActiveHotspot] = useState({ slideIndex: null, hotspotId: null });
+
+  // Group looks for mobile: 2 items per slide (vertical stack)
+  const groupedLooks = [];
+  for (let i = 0; i < LOOKS.length; i += 2) {
+    groupedLooks.push(LOOKS.slice(i, i + 2));
+  }
+
+  if (isMobile) {
+    return (
+      <section className="w-full mt-12 bg-[#FEF5F1] py-12 overflow-hidden">
+        <div className="container-main px-4">
+          <div className="text-center mb-8">
+            <h2 className="text-3xl font-black font-abhaya mb-3 text-zinc-900 tracking-tight">Curated Looks For You</h2>
+            <p className="text-zinc-600 text-sm">Explore the jewelry pieces that defines the look</p>
+          </div>
+
+          <div className="relative group">
+            <Swiper
+              modules={[Pagination]}
+              onSwiper={(swiper) => {
+                swiperRef.current = swiper;
+              }}
+              pagination={{
+                clickable: true,
+                el: ".curated-pagination",
+              }}
+              slidesPerView={1.12}
+              spaceBetween={12}
+              centeredSlides={false}
+              loop={false}
+              onSlideChange={() => setActiveHotspot({ slideIndex: null, hotspotId: null })}
+              className="curated-swiper overflow-visible!"
+            >
+              {groupedLooks.map((group, groupIdx) => (
+                <SwiperSlide key={groupIdx}>
+                  <div className="flex flex-col gap-3">
+                    {group.map((look, lookIdxInGroup) => {
+                      const globalLookIdx = groupIdx * 2 + lookIdxInGroup;
+                      return (
+                        <div 
+                          key={look.id}
+                          className="relative aspect-[4/4.3] overflow-hidden rounded-xl bg-gray-100 shadow-md"
+                          onClick={() => setActiveHotspot({ slideIndex: null, hotspotId: null })}
+                        >
+                          <LazyImage src={look.image} alt={look.name} fill className="object-cover" />
+
+                          {look.hotspots.map((spot) => (
+                            <div key={spot.id} className="absolute z-10" style={{ left: spot.x, top: spot.y }}>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setActiveHotspot({ slideIndex: globalLookIdx, hotspotId: spot.id });
+                                }}
+                                className="relative flex h-7 w-7 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-white/80 bg-white/20 backdrop-blur-sm"
+                              >
+                                <span className="absolute h-7 w-7 animate-ping rounded-full bg-white/30" />
+                                <span className="absolute h-4 w-0.5 bg-white" />
+                                <span className="absolute h-0.5 w-4 bg-white" />
+                                <span className="relative z-10 h-3 w-3 rounded-full bg-white" />
+                              </button>
+                            </div>
+                          ))}
+
+                          {activeHotspot.slideIndex === globalLookIdx && (
+                            <div className="absolute bottom-3 left-3 right-3 z-20 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                              {look.hotspots.find(h => h.id === activeHotspot.hotspotId) && (
+                                <Link 
+                                  href={look.hotspots.find(h => h.id === activeHotspot.hotspotId).product.href}
+                                  onClick={(e) => e.stopPropagation()}
+                                  className="flex items-center gap-3 bg-black/70 backdrop-blur-md rounded-[20px] p-2.5 border border-white/10 shadow-2xl"
+                                >
+                                  <div className="relative w-12 h-12 rounded-lg bg-white overflow-hidden shrink-0">
+                                    <LazyImage src={look.hotspots.find(h => h.id === activeHotspot.hotspotId).product.image} alt="Product" fill className="object-cover" />
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <h4 className="text-white text-[11px] font-bold leading-tight line-clamp-1 mb-0.5">{look.hotspots.find(h => h.id === activeHotspot.hotspotId).product.name}</h4>
+                                    <div className="flex items-center gap-2">
+                                      <span className="text-white font-black text-xs">{look.hotspots.find(h => h.id === activeHotspot.hotspotId).product.price}</span>
+                                      <span className="text-white/50 text-[9px] line-through">{look.hotspots.find(h => h.id === activeHotspot.hotspotId).product.oldPrice}</span>
+                                    </div>
+                                  </div>
+                                  <div className="w-7 h-7 rounded-full bg-white flex items-center justify-center text-black shrink-0">
+                                    <ArrowRight size={14} />
+                                  </div>
+                                </Link>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </SwiperSlide>
+              ))}
+            </Swiper>
+
+            <div className="flex items-center justify-between mt-8">
+               <div className="curated-pagination flex gap-2" />
+               <div className="flex gap-3">
+                  <button onClick={() => swiperRef.current?.slidePrev()} className="w-11 h-11 rounded-full border border-zinc-200 flex items-center justify-center text-zinc-900 bg-white shadow-sm active:scale-90 transition-all"><ChevronLeft size={22} /></button>
+                  <button onClick={() => swiperRef.current?.slideNext()} className="w-11 h-11 rounded-full border border-zinc-200 flex items-center justify-center text-zinc-900 bg-white shadow-sm active:scale-90 transition-all"><ChevronRight size={22} /></button>
+               </div>
+            </div>
+          </div>
+
+          <div className="mt-10 flex justify-center">
+            <Button className="h-14 px-10 bg-[#5A413F] hover:bg-[#4a3533] text-white font-bold text-sm tracking-[0.15em] uppercase rounded-xl transition-all shadow-md">
+              VIEW ALL INSPIRATION
+            </Button>
+          </div>
+        </div>
+
+        <style jsx global>{`
+          .curated-pagination .swiper-pagination-bullet { width: 8px; height: 8px; background: #D1D1D1; opacity: 1; border-radius: 4px; transition: all 0.3s ease; }
+          .curated-pagination .swiper-pagination-bullet-active { width: 32px; background: #000; }
+        `}</style>
+      </section>
+    );
+  }
+
   return (
     <section className="mt-16 w-full bg-[#FEF5F1] py-10">
       <div className="container-main">
@@ -181,7 +316,7 @@ export default function CuratedLooks() {
         </div>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4">
-          {OCCASIONS.map((occ, index) => (
+          {LOOKS.map((occ, index) => (
             <div
               key={index}
               className="relative aspect-3/4 overflow-visible rounded-sm bg-gray-100"
