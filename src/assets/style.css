@@ -52,6 +52,17 @@
 }
 
 .franchise-hero-enhanced__image img { @apply rounded;}
+
+@keyframes scaleIn {
+  from { transform: scale(0); }
+  to   { transform: scale(1); }
+}
+
+@keyframes shrink {
+  from { width: 100%; }
+  to   { width: 0%; }
+}
+
 @media (max-width: 640px) {
     .container {
         padding-right: 1.5rem;
