@@ -39,33 +39,60 @@ export const GET_BLOGS_QUERY = `
 `;
 
 export const GET_ARTICLES_QUERY = `
-  query GetArticles($first: Int!, $after: String) {
-    articles(first: $first, after: $after) {
+  query GetArticles($first: Int!, $after: String, $blogHandle: String) {
+    blog(handle: $blogHandle) {
+      articles(first: $first, after: $after) {
+        edges {
+          node {
+            id
+            title
+            handle
+            publishedAt
+          }
+          cursor
+        }
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
+      }
+    }
+  }
+`;
+
+export const GET_COLLECTIONS_QUERY = `
+  query GetCollections($first: Int!, $after: String) {
+    collections(first: $first, after: $after) {
       edges {
         node {
           id
           title
           handle
-          content
-          contentHtml
-          excerpt
-          excerptHtml
-          authorV2 {
-            name
-          }
-          image {
-            url
-          }
-          publishedAt
-          blog {
-            id
-            handle
-          }
         }
         cursor
       }
       pageInfo {
         hasNextPage
+        endCursor
+      }
+    }
+  }
+`;
+
+export const GET_ALL_PRODUCTS_QUERY = `
+  query GetAllProducts($first: Int!, $after: String) {
+    products(first: $first, after: $after) {
+      edges {
+        node {
+          id
+          title
+          handle
+        }
+        cursor
+      }
+      pageInfo {
+        hasNextPage
+        endCursor
       }
     }
   }

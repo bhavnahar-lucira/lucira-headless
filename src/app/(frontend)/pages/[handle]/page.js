@@ -1,6 +1,7 @@
 import { getPageByHandle, getPageByHandleStorefront } from "@/lib/pages";
 import { notFound } from "next/navigation";
 import ContactSection from "@/components/common/ContactSection";
+import SitemapPage from "@/components/sitemap/SitemapPage";
 import "@/assets/style.css";
 
 export default async function page({ params }) {
@@ -8,6 +9,11 @@ export default async function page({ params }) {
 
   if (handle === "contact-us") {
     return <ContactSection />;
+  }
+
+  // ── Sitemap ───────────────────────────────────────────────────────────────
+  if (handle === "sitemap") {
+    return <SitemapPage />;
   }
 
   let page = await getPageByHandle(handle);
