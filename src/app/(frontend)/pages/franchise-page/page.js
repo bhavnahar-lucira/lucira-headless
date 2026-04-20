@@ -3,8 +3,89 @@ import { useState } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2, Phone, User, Download, Send } from "lucide-react";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 // ─── DATA ────────────────────────────────────────────────────────────────────
+
+const faqData = [
+  {
+    question: "What is the lock in?",
+    answer: "The franchise has a lock-in period of 4.5 years in alignment with the payback timelines to ensure stable operations.",
+  },
+  {
+    question: "How much is the tenure of the agreement?",
+    answer: "The franchise agreement runs for 9 years.",
+  },
+  {
+    question: "What is the security of the franchise?",
+    answer: "The franchise operates under a formal agreement, brand standards, and clearly defined commercial terms, ensuring complete transparency and operational clarity.",
+  },
+  {
+    question: "Is there any fee?",
+    answer: "Yes. The franchise requires a one time franchise fee which is included within the total investment.",
+  },
+  {
+    question: "Will I get the store of my choice?",
+    answer: "You may propose your preferred location, and our team will evaluate it based on brand standards, market potential, visibility, and sales viability. If it meets the criteria, we will approve it.",
+  },
+  {
+    question: "What is the process to start?",
+    answer: "Submit your application → Location approval → Agreement signing → Store design and setup → Training and inventory → Grand launch.",
+  },
+  {
+    question: "How fast can a franchise start?",
+    answer: "Once the agreement is signed, a store can be ready to open within 90 to 120 days, depending on site readiness and local permissions.",
+  },
+  {
+    question: "Who will run the store?",
+    answer: "The store will be operated by your hired team, while Lucira provides training, audits, and ongoing support to ensure smooth performance.",
+  },
+  {
+    question: "Will I get support with reconciliation and bookkeeping?",
+    answer: "Yes. Lucira provides complete operational guidance, including daily reconciliation formats, reporting systems, and support with financial tracking.",
+  },
+  {
+    question: "How will I get initial stock?",
+    answer: "Initial inventory is supplied directly by Lucira based on your store size and assortment plan.",
+  },
+  {
+    question: "Will I get GST input outstanding on the initial billing? How will I manage this?",
+    answer: "Yes. All GST input on initial billing will appear in your books. You can utilize the input credit against future GST liabilities from your revenue.",
+  },
+  {
+    question: "What happens if I want to exit before 4.5 years?",
+    answer: "Early exit is possible but subject to terms mentioned in the agreement, including notice period requirements and settlement of outstanding obligations.",
+  },
+  {
+    question: "How will collections happen at the store?",
+    answer: "Customer payments flow directly into the designated franchise bank accounts, ensuring complete transparency. Lucira audits collections regularly for accuracy.",
+  },
+  {
+    question: "How will I know the sales for the store?",
+    answer: "You will receive real time access to sales data through the POS system, along with daily, weekly, and monthly reports.",
+  },
+  {
+    question: "What expenses do I have to cover?",
+    answer: "You will be responsible for rent, salaries, utilities, local marketing, and operational expenses as outlined in the franchise agreement.",
+  },
+  {
+    question: "How will I get the MG?",
+    answer: "The Minimum Guarantee (MG) is credited as per the defined cycle in your agreement, based on actuals and reconciled sales data.",
+  },
+  {
+    question: "How can I offset the extra GST input in my books?",
+    answer: "You can offset GST input against your monthly output GST liability generated through store sales.",
+  },
+  {
+    question: "Is there any timeline for GST input credits to be utilized? Do they lapse?",
+    answer: "GST input credits do not lapse as long as they remain valid under GST regulations. They continue to carry forward until fully utilized.",
+  },
+];
 
 const heroImages = [
   {
@@ -470,6 +551,47 @@ export default function FranchisePage() {
               </Button>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════
+          5. FAQ SECTION
+      ═══════════════════════════════════════════ */}
+      <section className="py-[80px] bg-[#FAF9F6]">
+        <div className="container-main max-w-[900px]">
+          <div className="text-center mb-[60px]">
+            <h2
+              className="
+                text-[26px] md:text-[32px] lg:text-[40px]
+                font-bold uppercase tracking-[2px] text-primary
+                leading-[1.2] mb-4 font-abhaya
+              "
+            >
+              FAQ&apos;S
+            </h2>
+            <div className="w-[80px] h-[3px] bg-accent mx-auto mb-6"></div>
+          </div>
+
+          <Accordion type="single" collapsible className="w-full space-y-4">
+            {faqData.map((item, i) => (
+              <AccordionItem
+                key={i}
+                value={`item-${i}`}
+                className="bg-white border border-gray-100 rounded-lg overflow-hidden px-6"
+              >
+                <AccordionTrigger className="hover:no-underline py-5 text-left group">
+                  <span className="text-[16px] md:text-[18px] font-bold text-primary font-abhaya pr-4">
+                    {item.question}
+                  </span>
+                </AccordionTrigger>
+                <AccordionContent className="pb-6 pt-0">
+                  <div className="text-[14px] md:text-[16px] leading-[1.7] text-zinc-600 font-figtree">
+                    {item.answer}
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
         </div>
       </section>
 
