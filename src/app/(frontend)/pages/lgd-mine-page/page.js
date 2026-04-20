@@ -299,7 +299,7 @@ const ImageStep = ({ step, lastStepIconRef }) => {
         )}
         <div className="lgd-desc bg-white text-left w-full" style={{ minHeight: "268px", maxWidth: "300px" }}>
           {step.leftSubheading && (
-            <h2 className="text-[20px] font-semibold text-[#333] mt-4 mb-0">{step.leftSubheading}</h2>
+            <h2 className="lgd-sub-title text-[20px] font-semibold text-[#333] mt-4 mb-0">{step.leftSubheading}</h2>
           )}
           <div
             className="lgd-points-left mt-3"
@@ -380,7 +380,7 @@ const ImageStep = ({ step, lastStepIconRef }) => {
         )}
         <div className="lgd-desc bg-white text-left w-full" style={{ minHeight: "268px", maxWidth: "300px" }}>
           {step.rightSubheading && (
-            <h2 className="text-right text-[20px] font-semibold text-[#333] mt-4 mb-0">{step.rightSubheading}</h2>
+            <h2 className="lgd-sub-title text-right text-[20px] font-semibold text-[#333] mt-4 mb-0">{step.rightSubheading}</h2>
           )}
           <div
             className="lgd-points-right mt-3"
@@ -587,6 +587,14 @@ export default function LgdMinePage() {
           }
           .lgd-points-right li {
             text-align: right;
+            padding-right: 15px !important;
+            padding-left: 0 !important;
+          }
+          .lgd-desc .lgd-sub-title {
+            text-align: left !important;
+          }
+          .lgd-col:last-child .lgd-sub-title {
+            text-align: right !important;
           }
           .lgd-points-right li::before {
             left: unset;
