@@ -11,7 +11,6 @@ export default async function page({ params }) {
     return <ContactSection />;
   }
 
-  // ── Sitemap ───────────────────────────────────────────────────────────────
   if (handle === "sitemap") {
     return <SitemapPage />;
   }
