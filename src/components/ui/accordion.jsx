@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Plus, Minus } from "lucide-react"
+import { ChevronDown } from "lucide-react"
 import { Accordion as AccordionPrimitive } from "radix-ui"
 
 import { cn } from "@/lib/utils"
@@ -39,12 +39,8 @@ function AccordionTrigger({
         )}
         {...props}>
         {children}
-        <div className="relative size-4 shrink-0 translate-y-0.5">
-          <Plus
-            className="absolute inset-0 size-4 text-black transition-opacity duration-200 group-data-[state=open]:opacity-0" />
-          <Minus
-            className="absolute inset-0 size-4 text-black transition-opacity duration-200 opacity-0 group-data-[state=open]:opacity-100" />
-        </div>
+        <ChevronDown
+          className="size-4 shrink-0 text-black transition-transform duration-200 group-data-[state=open]:rotate-180" />
       </AccordionPrimitive.Trigger>
     </AccordionPrimitive.Header>
   );

@@ -1,22 +1,138 @@
 "use client";
 
-import { X, ChevronLeft, ChevronRight, Play } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, Play, Send, MessageCircle, Headset } from "lucide-react";
 import LazyImage from "../common/LazyImage";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Navigation } from "swiper/modules";
+import { Navigation, Pagination } from "swiper/modules";
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from "@/components/ui/drawer";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import "swiper/css";
 import "swiper/css/navigation";
+import "swiper/css/pagination";
 
 export default function VideoPopup({ isOpen, onClose, videoData, initialIndex }) {
+  const isMobile = useMediaQuery("(max-width: 768px)");
+
   if (!isOpen) return null;
 
+  if (isMobile) {
+    return (
+      <div className="fixed inset-0 z-[500] bg-black flex flex-col outline-none overflow-hidden">
+          <Swiper
+            direction="vertical"
+            modules={[Pagination]}
+            pagination={{
+              type: 'fraction',
+              el: '.custom-pagination',
+            }}
+            initialSlide={initialIndex}
+            loop={true}
+            slidesPerView={1}
+            className="w-full h-full"
+            onSlideChange={(swiper) => {
+                const allVideos = swiper.el.querySelectorAll("video");
+                allVideos.forEach((v) => v.pause());
+                const activeSlide = swiper.slides[swiper.activeIndex];
+                const activeVideo = activeSlide.querySelector("video");
+                if (activeVideo) {
+                    activeVideo.currentTime = 0;
+                    activeVideo.play().catch(() => {});
+                }
+            }}
+          >
+            {videoData.map((item, idx) => (
+              <SwiperSlide key={`popup-mob-${idx}`}>
+                <div className="relative w-full h-full bg-black">
+                   {/* Full Screen Video */}
+                   <video
+                     src={item.video}
+                     autoPlay
+                     muted
+                     loop
+                     playsInline
+                     className="w-full h-full object-cover"
+                   />
+
+                   {/* UI OVERLAYS */}
+                   
+                   {/* 1. Close Button */}
+                   <button 
+                     onClick={onClose}
+                     className="absolute top-12 right-6 z-[520] w-10 h-10 bg-black/20 backdrop-blur-md text-white rounded-full flex items-center justify-center border border-white/20 active:scale-90 transition-all shadow-lg"
+                   >
+                     <X size={24} strokeWidth={2} />
+                   </button>
+
+                   {/* 2. Swipe Up Indicator (Left Side) */}
+                   <div className="absolute left-6 top-1/2 -translate-y-1/2 z-[510] flex flex-col items-center gap-3 pointer-events-none">
+                      <div className="h-28 w-[1.5px] bg-white/20 relative overflow-hidden rounded-full">
+                         <div className="absolute top-0 left-0 w-full h-8 bg-white rounded-full animate-swipe-up" />
+                      </div>
+                      <span className="text-[9px] font-bold text-white/50 uppercase tracking-[0.4em] vertical-text">
+                         Swipe Up
+                      </span>
+                   </div>
+
+                   {/* 4. Bottom Product Scroll */}
+                   <div className="absolute bottom-14 left-0 w-full z-[510]">
+                      <div className="flex gap-4 overflow-x-auto no-scrollbar px-6 pb-4">
+                         {item.products.map((product, pIdx) => (
+                           <div key={pIdx} className="min-w-[85vw] bg-white rounded-[20px] p-4 flex gap-4 shadow-2xl relative items-center">
+                              <div className="w-18 h-18 bg-zinc-50 rounded-xl overflow-hidden shrink-0 relative border border-zinc-100">
+                                 <LazyImage src={product.image} alt={product.title} fill className="object-cover" />
+                              </div>
+                              <div className="flex-1 min-w-0 flex flex-col justify-center">
+                                 <h4 className="text-[13px] font-bold text-zinc-800 leading-tight mb-1 line-clamp-1">{product.title}</h4>
+                                 <div className="flex items-center gap-2 mb-2">
+                                    <span className="text-[15px] font-black text-zinc-900">{product.price}</span>
+                                    <span className="text-[11px] text-zinc-400 line-through">{product.originalPrice}</span>
+                                 </div>
+                                 <div>
+                                    <span className="text-[10px] font-bold bg-[#F5F5F5] text-zinc-600 px-3 py-1 rounded-full uppercase">
+                                       {product.discount}
+                                    </span>
+                                 </div>
+                              </div>
+                              <button className="bg-[#5B4740] text-white px-5 py-2 rounded-lg text-[11px] font-bold uppercase tracking-wider active:scale-95 transition-transform">
+                                 ADD
+                              </button>
+                           </div>
+                         ))}
+                      </div>
+                      
+                      {/* Pagination indicator */}
+                      <div className="custom-pagination text-center text-[11px] font-medium text-white/30 tracking-widest mt-2" />
+                   </div>
+
+                   {/* Dark Gradient Overlay */}
+                   <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/60 to-transparent pointer-events-none" />
+                </div>
+              </SwiperSlide>
+            ))}
+          </Swiper>
+
+          <style jsx>{`
+            .vertical-text {
+               writing-mode: vertical-lr;
+               transform: rotate(180deg);
+            }
+            @keyframes swipe-up {
+               0% { transform: translateY(100%); }
+               100% { transform: translateY(-100%); }
+            }
+            .animate-swipe-up {
+               animation: swipe-up 2s infinite linear;
+            }
+          `}</style>
+      </div>
+    );
+  }
+
+
+  // Desktop remains the same
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 md:p-10">
-      
-      {/* Main Container */}
       <div className="relative w-full max-w-5xl">
-        
-        {/* Navigation Arrows - Placed relative to this container */}
         <button className="popup-prev absolute -left-12 md:-left-20 top-1/2 -translate-y-1/2 z-[110] text-white hover:text-gray-300 transition-colors cursor-pointer outline-none">
           <ChevronLeft size={56} strokeWidth={1} />
         </button>
@@ -24,7 +140,6 @@ export default function VideoPopup({ isOpen, onClose, videoData, initialIndex })
           <ChevronRight size={56} strokeWidth={1} />
         </button>
 
-        {/* Swiper */}
         <Swiper
           modules={[Navigation]}
           navigation={{
@@ -50,8 +165,6 @@ export default function VideoPopup({ isOpen, onClose, videoData, initialIndex })
           {videoData.map((item, idx) => (
             <SwiperSlide key={`popup-${idx}`}>
               <div className="flex flex-col md:flex-row min-h-[500px] md:h-[600px]">
-                
-                {/* Left Side: Video */}
                 <div className="w-full md:w-[42%] relative bg-black flex items-center justify-center group">
                   <video
                     src={item.video}
@@ -63,8 +176,6 @@ export default function VideoPopup({ isOpen, onClose, videoData, initialIndex })
                         else e.target.pause();
                     }}
                   />
-                  
-                  {/* Play Button Overlay */}
                   <div className="absolute inset-0 flex items-center justify-center pointer-events-none transition-opacity duration-300">
                      <div className="w-16 h-16 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center border border-white/30 shadow-lg">
                         <Play size={28} fill="white" className="text-white ml-1" />
@@ -72,10 +183,7 @@ export default function VideoPopup({ isOpen, onClose, videoData, initialIndex })
                   </div>
                 </div>
 
-                {/* Right Side: Product List */}
                 <div className="w-full md:w-[58%] p-6 md:p-12 bg-white relative flex flex-col h-full">
-                  
-                  {/* Close Button Inside Content Box (Top Right) */}
                   <button
                       onClick={onClose}
                       className="absolute top-6 right-6 z-[120] text-gray-400 hover:text-black transition-colors cursor-pointer p-1"
@@ -88,12 +196,7 @@ export default function VideoPopup({ isOpen, onClose, videoData, initialIndex })
                         {item.products && item.products.map((product, pIdx) => (
                         <div key={pIdx} className="flex items-center gap-6 pb-6 border-b border-gray-100 last:border-0 last:pb-0">
                             <div className="w-24 h-24 bg-gray-50 rounded-lg overflow-hidden flex-shrink-0 border border-gray-100 relative">
-                            <LazyImage 
-                                src={product.image} 
-                                alt={product.title} 
-                                fill
-                                className="object-cover"
-                            />
+                            <LazyImage src={product.image} alt={product.title} fill className="object-cover" />
                             </div>
                             <div className="flex-grow min-w-0">
                             <h3 className="text-sm md:text-base font-bold text-gray-800 leading-snug mb-2 pr-4">
@@ -101,14 +204,8 @@ export default function VideoPopup({ isOpen, onClose, videoData, initialIndex })
                             </h3>
                             <div className="flex items-center gap-3">
                                 <span className="text-base md:text-lg font-extrabold text-gray-900">{product.price}</span>
-                                {product.originalPrice && (
-                                    <span className="text-sm text-gray-400 line-through font-medium">{product.originalPrice}</span>
-                                )}
-                                {product.discount && (
-                                    <span className="text-[10px] md:text-xs font-bold bg-[#F5E6E4] text-[#8B4513] px-2 py-1 rounded tracking-wide uppercase">
-                                        {product.discount}
-                                    </span>
-                                )}
+                                {product.originalPrice && <span className="text-sm text-gray-400 line-through font-medium">{product.originalPrice}</span>}
+                                {product.discount && <span className="text-[10px] md:text-xs font-bold bg-[#F5E6E4] text-[#8B4513] px-2 py-1 rounded tracking-wide uppercase">{product.discount}</span>}
                             </div>
                             </div>
                             <button className="flex-shrink-0 bg-[#5A413F] text-white px-6 py-2.5 rounded text-xs font-black hover:bg-[#4a3533] transition-all uppercase tracking-widest shadow-sm">
@@ -119,7 +216,6 @@ export default function VideoPopup({ isOpen, onClose, videoData, initialIndex })
                     </div>
                   </div>
 
-                  {/* Add All Button */}
                   <div className="mt-10">
                     <button className="w-full border-2 border-[#5A413F] text-[#5A413F] py-4 px-6 rounded text-sm font-black hover:bg-[#5A413F] hover:text-white transition-all uppercase tracking-[0.1em] flex items-center justify-center">
                         Add All Products To Cart - {item.totalPrice}
