@@ -1,11 +1,20 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import LazyImage from "../common/LazyImage";
 import { Button } from "@/components/ui/button";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Navigation, Pagination } from "swiper/modules";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import ExploreBottomSheet from "./ExploreBottomSheet";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import VideoCallPopup from "./VideoCallPopup";
 import TryAtHomePopup from "./TryAtHomePopup";
 import BookAppointmentPopup from "./BookAppointmentPopup";
+
+import "swiper/css";
+import "swiper/css/navigation";
+import "swiper/css/pagination";
 
 const WAYS = [
   {
@@ -29,77 +38,176 @@ const WAYS = [
 ];
 
 export default function WaysToExplore() { 
+  const isMobile = useMediaQuery("(max-width: 768px)");
+  const [activeSheet, setActiveSheet] = useState(null); // mobile bottom sheet
+  
+  // Desktop Popup States
   const [isVideoCallPopupOpen, setIsVideoCallPopupOpen] = useState(false);
   const [isTryAtHomePopupOpen, setIsTryAtHomePopupOpen] = useState(false);
   const [isBookAppointmentPopupOpen, setIsBookAppointmentPopupOpen] = useState(false);
+  
+  const swiperRef = useRef(null);
 
-  const handleButtonClick = (buttonText) => {
-    if (buttonText === "SCHEDULE VIDEO CALL") {
-      setIsVideoCallPopupOpen(true);
-    } else if (buttonText === "BOOK HOME TRIAL") {
-      setIsTryAtHomePopupOpen(true);
-    } else if (buttonText === "BOOK APPOINTMENT") {
-      setIsBookAppointmentPopupOpen(true);
+  const handleAction = (buttonText) => {
+    if (isMobile) {
+      if (buttonText === "SCHEDULE VIDEO CALL") setActiveSheet('video');
+      else if (buttonText === "BOOK HOME TRIAL") setActiveSheet('home');
+      else if (buttonText === "BOOK APPOINTMENT") setActiveSheet('appointment');
+    } else {
+      if (buttonText === "SCHEDULE VIDEO CALL") setIsVideoCallPopupOpen(true);
+      else if (buttonText === "BOOK HOME TRIAL") setIsTryAtHomePopupOpen(true);
+      else if (buttonText === "BOOK APPOINTMENT") setIsBookAppointmentPopupOpen(true);
     }
   };
 
   return (
-    <section className="w-full mt-16 bg-[#FEF5F1] py-16">
+    <section className={`w-full ${isMobile ? "mt-12 bg-[#FEF5F1] py-12" : "mt-16 bg-[#FEF5F1] py-16"} overflow-hidden`}>
       <div className="container-main">
-        <div className="text-center mb-10">
-          <h2 className="main-title font-extrabold font-abhaya mb-3">More Ways To Explore</h2>
-          <p className="text-gray-600 text-base md:text-lg">Experience Lucira your way, online or at our showrooms.</p>
-        </div>
-        <div className="w-full">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-6 lg:gap-8">
-            {WAYS.map((way, index) => (
-              <div key={index} className="flex flex-col h-full bg-white rounded-sm overflow-hidden group p-5 md:p-4 lg:p-5 shadow-sm">
-                <div className="relative aspect-[395/295] overflow-hidden rounded-sm mb-5">
-                  <LazyImage 
-                    src={way.image} 
-                    alt={way.title} 
-                    fill 
-                    className="object-cover transition-transform duration-700 group-hover:scale-105"
-                  />
-                </div>
-                <div className="flex flex-col items-start gap-4 flex-grow">
-                  <h3 className="text-xl lg:text-2xl font-bold text-gray-900">{way.title}</h3>
-                  <p className="text-gray-600 text-sm lg:text-base leading-relaxed mb-4">
-                    {way.desc}
-                  </p>
-                  <div className="mt-auto w-full">
-                    <Button 
-                      variant="outline" 
-                      onClick={() => handleButtonClick(way.buttonText)}
-                      className="h-12 px-8 text-xs font-bold tracking-widest uppercase transition-colors hover:cursor-pointer"
+        {isMobile ? (
+          <>
+            <div className="text-center mb-8">
+              <h2 className="text-3xl font-black font-abhaya mb-3 text-zinc-900 tracking-tight">More Ways To Explore</h2>
+              <p className="text-zinc-600 text-sm">Experience Lucira your way; online, at home or in-store</p>
+            </div>
+
+            <div className="relative group px-4">
+              <Swiper
+                modules={[Pagination]}
+                onSwiper={(swiper) => {
+                  swiperRef.current = swiper;
+                }}
+                pagination={{
+                  clickable: true,
+                  el: ".explore-pagination",
+                }}
+                slidesPerView={1.1}
+                spaceBetween={12}
+                centeredSlides={false}
+                loop={false}
+                className="explore-swiper overflow-visible!"
+              >
+                {WAYS.map((way, index) => (
+                  <SwiperSlide key={index} className="h-auto">
+                    <div className="flex flex-col h-full bg-white rounded-2xl overflow-hidden group p-5 shadow-sm border border-zinc-100">
+                      <div className="relative aspect-[395/295] overflow-hidden rounded-xl mb-6">
+                        <LazyImage 
+                          src={way.image} 
+                          alt={way.title} 
+                          fill 
+                          className="object-cover transition-transform duration-700 group-hover:scale-105"
+                        />
+                      </div>
+                      <div className="flex flex-col items-start gap-3 flex-grow">
+                        <h3 className="text-xl font-bold text-gray-900 tracking-tight">{way.title}</h3>
+                        <p className="text-zinc-600 text-sm leading-relaxed mb-6">
+                          {way.desc}
+                        </p>
+                        <div className="mt-auto w-full">
+                          <Button 
+                            onClick={() => handleAction(way.buttonText)}
+                            className="w-full h-12 bg-[#5A413F] hover:bg-[#4a3533] text-white font-bold text-xs tracking-widest uppercase transition-all rounded-lg"
+                          >
+                            {way.buttonText}
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </SwiperSlide>
+                ))}
+              </Swiper>
+
+              <div className="flex items-center justify-between mt-8">
+                 <div className="explore-pagination flex gap-2" />
+                 <div className="flex gap-3">
+                    <button 
+                      onClick={() => swiperRef.current?.slidePrev()}
+                      className="w-11 h-11 rounded-full border border-zinc-200 flex items-center justify-center text-zinc-900 bg-white shadow-sm active:scale-90 transition-all"
                     >
-                      {way.buttonText}
-                    </Button>
+                      <ChevronLeft size={22} />
+                    </button>
+                    <button 
+                      onClick={() => swiperRef.current?.slideNext()}
+                      className="w-11 h-11 rounded-full border border-zinc-200 flex items-center justify-center text-zinc-900 bg-white shadow-sm active:scale-90 transition-all"
+                    >
+                      <ChevronRight size={22} />
+                    </button>
+                 </div>
+              </div>
+            </div>
+
+            <ExploreBottomSheet 
+              activeType={activeSheet}
+              onClose={() => setActiveSheet(null)}
+            />
+          </>
+        ) : (
+          <>
+            <div className="text-center mb-10">
+              <h2 className="main-title font-extrabold font-abhaya mb-3">More Ways To Explore</h2>
+              <p className="text-gray-600 text-base md:text-lg">Experience Lucira your way, online or at our showrooms.</p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-6 lg:gap-8">
+              {WAYS.map((way, index) => (
+                <div key={index} className="flex flex-col h-full bg-white rounded-sm overflow-hidden group p-5 md:p-4 lg:p-5 shadow-sm">
+                  <div className="relative aspect-[395/295] overflow-hidden rounded-sm mb-5">
+                    <LazyImage 
+                      src={way.image} 
+                      alt={way.title} 
+                      fill 
+                      className="object-cover transition-transform duration-700 group-hover:scale-105"
+                    />
+                  </div>
+                  <div className="flex flex-col items-start gap-4 flex-grow">
+                    <h3 className="text-xl lg:text-2xl font-bold text-gray-900">{way.title}</h3>
+                    <p className="text-gray-600 text-sm lg:text-base leading-relaxed mb-4">
+                      {way.desc}
+                    </p>
+                    <div className="mt-auto w-full">
+                      <Button 
+                        variant="outline" 
+                        onClick={() => handleAction(way.buttonText)}
+                        className="h-12 px-8 text-xs font-bold tracking-widest uppercase transition-colors hover:cursor-pointer"
+                      >
+                        {way.buttonText}
+                      </Button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        </div>
+              ))}
+            </div>
+
+            <VideoCallPopup 
+              isOpen={isVideoCallPopupOpen} 
+              onClose={() => setIsVideoCallPopupOpen(false)} 
+            />
+            <TryAtHomePopup 
+              isOpen={isTryAtHomePopupOpen}
+              onClose={() => setIsTryAtHomePopupOpen(false)}
+            />
+            <BookAppointmentPopup
+              isOpen={isBookAppointmentPopupOpen}
+              onClose={() => setIsBookAppointmentPopupOpen(false)}
+            />
+          </>
+        )}
       </div>
 
-      {/* Video Call Popup */}
-      <VideoCallPopup 
-        isOpen={isVideoCallPopupOpen} 
-        onClose={() => setIsVideoCallPopupOpen(false)} 
-      />
-
-      {/* Try At Home Popup */}
-      <TryAtHomePopup 
-        isOpen={isTryAtHomePopupOpen}
-        onClose={() => setIsTryAtHomePopupOpen(false)}
-      />
-
-      {/* Book Appointment Popup */}
-      <BookAppointmentPopup
-        isOpen={isBookAppointmentPopupOpen}
-        onClose={() => setIsBookAppointmentPopupOpen(false)}
-      />
+      <style jsx global>{`
+        .explore-pagination .swiper-pagination-bullet {
+          width: 8px;
+          height: 8px;
+          background: #D1D1D1;
+          opacity: 1;
+          border-radius: 4px;
+          transition: all 0.3s ease;
+        }
+        .explore-pagination .swiper-pagination-bullet-active {
+          width: 32px;
+          background: #000;
+        }
+      `}</style>
     </section>
   );
 }
+
+
