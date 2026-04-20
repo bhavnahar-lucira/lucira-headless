@@ -1,24 +1,34 @@
 import { getPageByHandle } from "@/lib/pages";
 import { notFound } from "next/navigation";
+import FooterPageContent from "@/components/FooterPageContent";
 
-export default async function page({params}) {
-    const {handle} = await params
-    
+export default async function Page({ params }) {
+    const { handle } = await params;
+
     const page = await getPageByHandle(handle);
 
-    if(!page) return notFound()
+    if (!page) return notFound();
 
-    return (
-        <>
-            <h1 className="hidden">{page.title}</h1>
+    const hasBody =
+        typeof page.body === "string" && page.body.trim() !== "";
 
+    const isAccordionPage = hasBody && page.body.includes("data-toggle");
+
+    if (hasBody) {
+        return (
             <div className="container mx-auto py-7">
-                {page.body? (
-                    <div className="footer-pages" dangerouslySetInnerHTML={{__html: page.body}} />
+                {isAccordionPage ? (
+                    <FooterPageContent html={page.body} />
                 ) : (
-                    <p>No Content Available</p>
+                    <div
+                        className="footer-pages"
+                        suppressHydrationWarning
+                        dangerouslySetInnerHTML={{ __html: page.body }}
+                    />
                 )}
             </div>
-        </>
-    )
+        );
+    }
+    
+    return notFound();
 }
