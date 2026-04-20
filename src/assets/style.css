@@ -50,6 +50,8 @@
 .footer-pages>p:last-of-type:not([style]) {
     @apply font-medium text-zinc-700 mt-8;
 }
+
+.franchise-hero-enhanced__image img { @apply rounded;}
 @media (max-width: 640px) {
     .container {
         padding-right: 1.5rem;
@@ -65,4 +67,5 @@
     .footer-pages p {
         @apply text-sm;
     }
+    
 }

@@ -43,7 +43,7 @@ const sections = [
     className: "craftmanship-polishing-banner",
     wrapperClass: "craftmanship-polishing-banner-wrapper",
     contentId: "bannerContent5",
-    zIndex: 5,
+    zIndex: 6,
     desktopImage: "https://cdn.shopify.com/s/files/1/0739/8516/3482/files/Polishing_Coating_1.png?v=1751634033",
     mobileImage: "https://cdn.shopify.com/s/files/1/0739/8516/3482/files/Polishing_Coating_Mob_1.png?v=1751635404"
   },
@@ -54,7 +54,7 @@ const sections = [
     className: "craftmanship-metal-setting-banner",
     wrapperClass: "craftmanship-metal-setting-banner-wrapper",
     contentId: "bannerContent6",
-    zIndex: 4,
+    zIndex: 5,
     desktopImage: "https://cdn.shopify.com/s/files/1/0739/8516/3482/files/Diamond-Setting_1.jpg?v=1760704290",
     mobileImage: "https://cdn.shopify.com/s/files/1/0739/8516/3482/files/Diamond-Setting_2.jpg?v=1761630096"
   },
@@ -65,7 +65,7 @@ const sections = [
     className: "craftmanship-quality-check-banner",
     wrapperClass: "craftmanship-quality-check-banner-wrapper",
     contentId: "bannerContent7",
-    zIndex: 2,
+    zIndex: 4,
     desktopImage: "https://cdn.shopify.com/s/files/1/0739/8516/3482/files/QC_1.jpg?v=1760704290",
     mobileImage: "https://cdn.shopify.com/s/files/1/0739/8516/3482/files/QC_2.jpg?v=1761630096"
   },

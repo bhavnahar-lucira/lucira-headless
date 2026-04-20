@@ -51,7 +51,6 @@ export default function PurposeAndValuePage() {
   const [words] = useState(() => ABOUT_TEXT.split(" "));
   const [revealedCount, setRevealedCount] = useState(0);
 
-  // Hide "What We Stand For" fixed labels when section is not in viewport
   useEffect(() => {
     const section = document.querySelector(".what-we-do-for-section");
     const labels = document.querySelectorAll(".center-text");
@@ -74,14 +73,12 @@ export default function PurposeAndValuePage() {
       const scrollY = window.scrollY;
       const windowHeight = window.innerHeight;
 
-      // Banner: matches original bannerContent JS (center → bottom)
       if (bannerContentRef.current) {
         const progress = Math.min(scrollY / windowHeight, 1);
         const translateY = progress * windowHeight * 0.5;
         bannerContentRef.current.style.transform = `translate(-50%, calc(50% + ${translateY}px))`;
       }
 
-      // Text reveal: matches original TextRevealOnScroll.handleScroll
       if (revealSectionRef.current) {
         const rect = revealSectionRef.current.getBoundingClientRect();
         let progress = 0;
@@ -95,7 +92,6 @@ export default function PurposeAndValuePage() {
         setRevealedCount(Math.floor(progress * words.length));
       }
 
-      // Brand section: matches original brandText JS (top → center)
       const brandSection = document.querySelector(".purpose-value-build-jewelry-brand");
       if (brandSection && brandTextRef.current) {
         const brandSectionRect = brandSection.getBoundingClientRect();
@@ -185,12 +181,10 @@ export default function PurposeAndValuePage() {
         }
       `}</style>
 
-      {/* Progress Bar */}
       <div className="progress-indicator">
         <div className="progress-bar" ref={progressBarRef} />
       </div>
 
-      {/* Banner */}
       <section className="purpose-value-banner" id="bannerSection">
         <div style={{ width: "100%" }}>
           <div
@@ -203,7 +197,6 @@ export default function PurposeAndValuePage() {
         </div>
       </section>
 
-      {/* Text Reveal */}
       <section className="purpose-value-about-us" ref={revealSectionRef} id="revealSection">
         <div className="text-reveal-container">
           <h2 className="reveal-text">
@@ -216,7 +209,6 @@ export default function PurposeAndValuePage() {
         </div>
       </section>
 
-      {/* What We Stand For */}
       <section className="what-we-do-for-section">
         <div style={{ width: "100%" }}>
           <div className="header-section" />
@@ -241,7 +233,6 @@ export default function PurposeAndValuePage() {
         </div>
       </section>
 
-      {/* Build Jewelry Brand */}
       <section className="purpose-value-build-jewelry-brand">
         <div style={{ width: "100%" }}>
           <div
