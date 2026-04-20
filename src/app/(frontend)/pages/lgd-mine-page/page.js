@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
+import { motion, useScroll, useTransform, useSpring } from "framer-motion";
 
 
 const CDN = "https://cdn.shopify.com/s/files/1/0739/8516/3482/files/";
@@ -154,9 +155,105 @@ const FINAL_BLOCK = {
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
+// TravelDiamond — Floating diamond that follows scroll progress
+// ─────────────────────────────────────────────────────────────────────────────
+const TravelDiamond = ({ sourceRef, targetRef, image }) => {
+  const { scrollY } = useScroll();
+  const [coords, setCoords] = useState({ startX: 0, startY: 0, endX: 0, endY: 0, startW: 0, endW: 0 });
+  const containerRef = useRef(null);
+
+  useEffect(() => {
+    const updateCoords = () => {
+      if (!sourceRef.current || !targetRef.current || !containerRef.current) return;
+      const s = sourceRef.current.getBoundingClientRect();
+      const t = targetRef.current.getBoundingClientRect();
+      const c = containerRef.current.getBoundingClientRect();
+
+      const scrollYVal = window.pageYOffset;
+      const scrollXVal = window.pageXOffset;
+
+      // Coordinates relative to the container
+      setCoords({
+        startX: s.left + s.width / 2 - c.left,
+        startY: s.top + s.height / 2 - c.top,
+        startW: s.width,
+        endX: t.left + t.width / 2 - c.left,
+        endY: t.top + t.height / 2 - c.top,
+        endW: t.width,
+      });
+    };
+
+    updateCoords();
+    window.addEventListener("resize", updateCoords);
+    // Intersection observer to trigger recalc when elements might have moved
+    const obs = new IntersectionObserver(updateCoords);
+    if (sourceRef.current) obs.observe(sourceRef.current);
+    if (targetRef.current) obs.observe(targetRef.current);
+
+    return () => {
+      window.removeEventListener("resize", updateCoords);
+      obs.disconnect();
+    };
+  }, [sourceRef, targetRef]);
+
+  // Adjust triggers based on container top
+  const [triggers, setTriggers] = useState([0, 0]);
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const c = containerRef.current.getBoundingClientRect();
+    const scrollYVal = window.pageYOffset;
+    // Start when source is roughly in middle of screen, end when target is in middle
+    // Add specific offsets for better start/end points
+    setTriggers([
+      coords.startY + c.top + scrollYVal - window.innerHeight / 2,
+      coords.endY + c.top + scrollYVal - window.innerHeight / 2 - 100
+    ]);
+  }, [coords]);
+
+  const progress = useTransform(scrollY, [triggers[0], triggers[1]], [0, 1]);
+  const smoothProgress = useSpring(progress, { stiffness: 100, damping: 25, restDelta: 0.001 });
+
+  const x = useTransform(smoothProgress, [0, 1], [coords.startX, coords.endX]);
+  const y = useTransform(smoothProgress, [0, 1], [coords.startY, coords.endY]);
+  const width = useTransform(smoothProgress, [0, 1], [coords.startW, coords.endW]);
+
+  const xCentered = useTransform([x, width], ([v, w]) => v - w / 2);
+  const yCentered = useTransform([y, width], ([v, w]) => v - (w * 0.8) / 2);
+
+  const opacity = useTransform(smoothProgress, [0, 0.05, 0.95, 1], [0, 1, 1, 0]);
+
+  // Hide the real images when animation is active
+  useEffect(() => {
+    const unsub = smoothProgress.on("change", (v) => {
+      if (sourceRef.current) sourceRef.current.style.visibility = v > 0.05 ? "hidden" : "visible";
+      if (targetRef.current) targetRef.current.style.visibility = v > 0.95 ? "visible" : "hidden";
+    });
+    return () => unsub();
+  }, [smoothProgress, sourceRef, targetRef]);
+
+  return (
+    <div ref={containerRef} className="absolute inset-0 pointer-events-none z-[9999]" style={{ height: '100%' }}>
+      <motion.img
+        src={image}
+        style={{
+          position: "absolute",
+          x: xCentered,
+          y: yCentered,
+          width: width,
+          height: "auto",
+          opacity: opacity,
+        }}
+        className="lgd-floating-diamond"
+      />
+    </div>
+  );
+};
+
+
+// ─────────────────────────────────────────────────────────────────────────────
 // ImageStep — each sticky comparison step with slide-in animation
 // ─────────────────────────────────────────────────────────────────────────────
-const ImageStep = ({ step }) => {
+const ImageStep = ({ step, lastStepIconRef }) => {
   const [isActive, setIsActive] = useState(step.isFirst); // first block starts active
   const ref = useRef(null);
 
@@ -172,16 +269,28 @@ const ImageStep = ({ step }) => {
   }, []);
 
   return (
+    // <div
+    //   ref={ref}
+    //   className={`lgd-step relative z-[1] flex justify-center items-center transition-transform duration-[600ms] ease-out will-change-transform ${step.isFirst ? "bg-white" : ""
+    //     } ${isActive ? "translate-y-0" : "translate-y-[80px]"}`}
+    //   style={{ position: "sticky", top: "180px", minHeight: "79vh", gap: "75px" }}
+    // >
+
     <div
       ref={ref}
       className={`lgd-step relative z-[1] flex justify-center items-center transition-transform duration-[600ms] ease-out will-change-transform ${step.isFirst ? "bg-white" : ""
         } ${isActive ? "translate-y-0" : "translate-y-[80px]"}`}
-      style={{ position: "sticky", top: "180px", minHeight: "79vh", gap: "75px" }}
+      style={{
+        position: "sticky",
+        top: step.isFirst ? "92px" : "130px",  // 👈 Conditional top value
+        minHeight: "79vh",
+        gap: "75px"
+      }}
     >
       {/* ── LEFT COLUMN ── */}
       <div className="lgd-col flex flex-col items-center text-center" style={{ maxWidth: "300px" }}>
         {step.leftHeading && (
-          <div className="lgd-col-heading block font-semibold text-[#666] uppercase tracking-[1px]" style={{ minHeight: "50px", fontSize: "24px", marginBottom: "12px" }}>
+          <div className="lgd-col-heading block font-abhaya font-semibold text-[#5A413F] uppercase tracking-[1px]" style={{ minHeight: "50px", fontSize: "24px", marginBottom: "12px" }}>
             {step.leftHeading}
           </div>
         )}
@@ -218,7 +327,7 @@ const ImageStep = ({ step }) => {
           <img
             src={step.middleImage}
             alt="Process step"
-            className={`lgd-center-img object-cover ${step.isLast ? "lgd-final-anim-src opacity-100" : ""}`}
+            className={`lgd-center-img object-cover`}
             style={{ height: "400px" }}
             loading="lazy"
           />
@@ -229,9 +338,9 @@ const ImageStep = ({ step }) => {
           <div
             className="absolute left-1/2 transition-all duration-[600ms] ease-out"
             style={{
-              top: "28%",
-              width: "35px",
-              height: "35px",
+              top: "var(--icon-top, -23%)",
+              width: "var(--icon-size, 35px)",
+              height: "var(--icon-size, 35px)",
               borderRadius: "50%",
               backgroundColor: step.dotColor,
               transform: isActive ? "translate(-50%, -75%) scale(1)" : "translate(-50%, -50%) scale(0)",
@@ -243,15 +352,16 @@ const ImageStep = ({ step }) => {
         {/* Icon */}
         {step.centerType === "icon" && step.centerIcon && (
           <img
+            ref={step.isLast ? lastStepIconRef : null}
             src={step.centerIcon}
             alt="Center icon"
-            className="lgd-final-anim-src absolute left-1/2 transition-all duration-[600ms] ease-out"
+            className={`absolute left-1/2 transition-all duration-[600ms] ease-out ${step.isLast ? "lgd-final-icon-src" : ""}`}
             style={{
-              top: "28%",
+              top: "var(--icon-top, -23%)",
               transform: isActive ? "translate(-50%, -50%) scale(1)" : "translate(-50%, -50%) scale(0)",
               opacity: isActive ? 1 : 0,
-              width: "auto",
-              height: "auto",
+              width: "var(--icon-size, auto)",
+              height: "var(--icon-size, auto)",
             }}
             loading="lazy"
           />
@@ -261,7 +371,7 @@ const ImageStep = ({ step }) => {
       {/* ── RIGHT COLUMN ── */}
       <div className="lgd-col flex flex-col items-center text-center" style={{ maxWidth: "300px" }}>
         {step.rightHeading && (
-          <div className="lgd-col-heading block font-semibold text-[#666] uppercase tracking-[1px]" style={{ minHeight: "50px", fontSize: "24px", marginBottom: "12px" }}>
+          <div className="lgd-col-heading block font-abhaya font-semibold text-[#5A413F] uppercase tracking-[1px]" style={{ minHeight: "50px", fontSize: "24px", marginBottom: "12px" }}>
             {step.rightHeading}
           </div>
         )}
@@ -292,7 +402,7 @@ const FinalDiamondBlock = ({ data, finalImgRef }) => {
     >
       {/* Left — LGD */}
       <div className="lgd-final-col lgd-final-left text-left">
-        <h3 className="font-semibold text-left mb-[60px]" style={{ fontSize: "28px", margin: "0 0 60px 0" }}>
+        <h3 className="font-abhaya font-semibold text-left mb-[60px] text-[#5A413F]" style={{ fontSize: "28px", margin: "0 0 60px 0" }}>
           {data.leftHeading}
         </h3>
         <ul className="list-none m-0 p-0">
@@ -328,7 +438,7 @@ const FinalDiamondBlock = ({ data, finalImgRef }) => {
 
       {/* Right — Mined */}
       <div className="lgd-final-col lgd-final-right text-right">
-        <h3 className="font-semibold text-right" style={{ fontSize: "28px", margin: "0 0 60px 0" }}>
+        <h3 className="font-abhaya font-semibold text-right text-[#5A413F]" style={{ fontSize: "28px", margin: "0 0 60px 0" }}>
           {data.rightHeading}
         </h3>
         <ul className="list-none m-0 p-0">
@@ -357,164 +467,34 @@ const FinalDiamondBlock = ({ data, finalImgRef }) => {
 export default function LgdMinePage() {
   const finalImgRef = useRef(null);
 
-  // ── Floating diamond animation (faithful port of the Liquid JS) ──────────
-  useEffect(() => {
-    const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
-    const lerp = (a, b, t) => a + (b - a) * t;
-
-    const startElems = Array.from(document.querySelectorAll(".lgd-final-anim-src"));
-    const finalContainer = document.querySelector(".lgd-final-diamond");
-    const originalFinalImg = document.querySelector(".lgd-final-diamond-img");
-
-    if (!startElems.length || !finalContainer || !originalFinalImg) return;
-
-    let startElem = null;
-    let floating = null;
-    let pos = {};
-    let rafId = null;
-    let smoothX = 0, smoothY = 0, smoothW = 0, smoothH = 0;
-
-    function createFloating() {
-      if (floating) floating.remove();
-      floating = originalFinalImg.cloneNode(true);
-      Object.assign(floating.style, {
-        position: "fixed",
-        pointerEvents: "none",
-        zIndex: "9999",
-        opacity: "0",
-        width: "82px",
-        height: "auto",
-        top: "0",
-        left: "0",
-        willChange: "left, top, width, opacity",
-      });
-      document.body.appendChild(floating);
-      originalFinalImg.style.visibility = "hidden";
-    }
-
-    function findVisibleStart() {
-      for (const el of startElems) {
-        const rect = el.getBoundingClientRect();
-        if (rect.top < window.innerHeight && rect.bottom > 0) return el;
-      }
-      return null;
-    }
-
-    function recalc() {
-      if (!startElem) return;
-      const s = startElem.getBoundingClientRect();
-      const e = finalContainer.getBoundingClientRect();
-      const scrollX = window.pageXOffset;
-      const scrollY = window.pageYOffset;
-      const natW = floating?.naturalWidth || 1;
-      const natH = floating?.naturalHeight || 1;
-      const ratio = natH / natW || 1;
-
-      pos = {
-        startDocCX: s.left + s.width / 2 + scrollX,
-        startDocCY: s.top + s.height / 2 + scrollY,
-        startW: s.width,
-        endDocCX: e.left + e.width / 2 + scrollX,
-        endDocCY: e.top + e.height / 2 + scrollY,
-        endW: e.width,
-        ratio,
-      };
-      smoothX = pos.startDocCX;
-      smoothY = pos.startDocCY;
-      smoothW = pos.startW;
-      smoothH = smoothW * ratio;
-    }
-
-    function render() {
-      rafId = null;
-      if (!floating || !startElem) return;
-
-      const scrollY = window.pageYOffset;
-      const scrollX = window.pageXOffset;
-
-      const startTrigger = pos.startDocCY - window.innerHeight * 0.6;
-      const endTrigger = pos.endDocCY - window.innerHeight * 0.4;
-      const denom = endTrigger - startTrigger || 1;
-
-      let progress = (scrollY - startTrigger) / denom;
-      progress = clamp(progress, 0, 1);
-
-      const ease = progress * progress * (3 - 2 * progress);
-
-      const targetW = lerp(pos.startW, pos.endW, ease);
-      const targetH = targetW * pos.ratio;
-      const targetX = lerp(pos.startDocCX, pos.endDocCX, ease);
-      const targetY = lerp(pos.startDocCY, pos.endDocCY, ease);
-
-      smoothW = lerp(smoothW, targetW, 0.2);
-      smoothH = lerp(smoothH, targetH, 0.2);
-      smoothX = lerp(smoothX, targetX, 0.2);
-      smoothY = lerp(smoothY, targetY, 0.2);
-
-      const vL = smoothX - scrollX - smoothW / 2;
-      const vT = smoothY - scrollY - smoothH / 2;
-
-      floating.style.width = smoothW + "px";
-      floating.style.height = smoothH + "px";
-      floating.style.left = vL + "px";
-      floating.style.top = vT + "px";
-      floating.style.opacity = progress > 0 && progress < 1 ? "1" : "0";
-
-      // Show/hide source image
-      const srcImg = document.querySelector(".lgd-final-anim-src");
-      if (srcImg) srcImg.style.visibility = progress === 0 ? "visible" : "hidden";
-
-      if (progress >= 1 && floating) {
-        originalFinalImg.style.visibility = "visible";
-        floating.remove();
-        floating = null;
-      } else {
-        originalFinalImg.style.visibility = "hidden";
-      }
-    }
-
-    function throttledScroll() {
-      if (!rafId) rafId = requestAnimationFrame(render);
-    }
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            const newStart = findVisibleStart() || startElems[startElems.length - 1];
-            if (startElem !== newStart || !floating) {
-              startElem = newStart;
-              createFloating();
-              recalc();
-              render();
-            }
-          }
-        });
-      },
-      { threshold: [0, 0.25, 0.5, 0.75, 1] }
-    );
-
-    startElems.forEach((el) => observer.observe(el));
-    observer.observe(originalFinalImg);
-
-    window.addEventListener("scroll", throttledScroll, { passive: true });
-    window.addEventListener("resize", () => { recalc(); render(); });
-
-    // init
-    const initialStart = findVisibleStart();
-    if (initialStart) { startElem = initialStart; createFloating(); recalc(); render(); }
-
-    return () => {
-      window.removeEventListener("scroll", throttledScroll);
-      if (floating) { floating.remove(); floating = null; }
-      observer.disconnect();
-    };
-  }, []);
+  const lastStepIconRef = useRef(null);
+  const finalDiamondRef = useRef(null);
 
   return (
     <div className="w-full bg-white font-figtree">
       {/* ─────── SCOPED STYLES ─────── */}
       <style>{`
+        /* ── Base Styles ── */
+        .lgd-step {
+          --icon-top: -23%;
+          --icon-size: 35px;
+        }
+
+        .dp-blocks-wrapper {
+          --wrapper-width: 70%;
+        }
+
+        .lgd-process-header {
+          position: sticky;
+          z-index: 2;
+          margin-top: 30px;
+          gap: 10px;
+          min-height: 50px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+        }
+
         /* ── Bullet points ── */
         .lgd-points-left ul,
         .lgd-points-right ul {
@@ -557,9 +537,21 @@ export default function LgdMinePage() {
 
         /* ── Mobile: step blocks ── */
         @media (max-width: 768px) {
+          .dp-blocks-wrapper {
+            --wrapper-width: 95%;
+          }
+          .lgd-process-header {
+            z-index: 20 !important;
+            background: white !important;
+            margin-top: 0 !important;
+            padding-top: 1.25rem !important; /* pt-5 */
+            top: 92px !important;
+          }
           .lgd-step {
             gap: 10px !important;
             flex-direction: row !important;
+            --icon-top: 14% !important;
+            --icon-size: 20px !important;
           }
           .lgd-col {
             max-width: unset !important;
@@ -637,8 +629,8 @@ export default function LgdMinePage() {
         }
 
         @media (max-width: 550px) {
-          .lgd-step { padding-top: 20px; min-height: unset !important; top: 180px !important; margin-top: 15px; }
-          .lgd-col-heading { font-size: 12px !important; }
+          .lgd-step { padding-top: 20px; min-height: unset !important; top: 285px !important; margin-top: 15px; }
+          .lgd-col-heading { font-size: 12px !important; display: none !important; }
           .lgd-main-heading { font-size: 17px !important; }
           .lgd-sub-heading { font-size: 15px !important; }
         }
@@ -668,37 +660,40 @@ export default function LgdMinePage() {
       {/* ─────── PROCESS SECTION ─────── */}
       <div className="diamond-process-section w-full relative">
 
-        {/* ── Wrapper (70% wide, centred) ── */}
-        <div className="dp-blocks-wrapper mx-auto" style={{ width: "70%" }}>
+        {/* ── Wrapper (responsive width, centred) ── */}
+        <div className="dp-blocks-wrapper mx-auto" style={{ width: "var(--wrapper-width, 70%)" }}>
 
           {/* Sticky heading row */}
-          <div
-            className="flex flex-col items-center sticky z-[2]"
-            style={{ top: "2px", gap: "10px", minHeight: "50px", marginTop: "30px" }}
-          >
+          <div className="lgd-process-header">
             <h2
-              className="lgd-main-heading font-semibold text-center text-[#333]"
+              className="lgd-main-heading font-abhaya font-semibold text-center text-[#5A413F]"
               style={{ fontSize: "28px", margin: "0 0 12px 0" }}
             >
               Two Journeys. One Diamond.
             </h2>
             <p
-              className="lgd-sub-heading text-center text-[#555] mx-auto"
-              style={{ fontSize: "18px", maxWidth: "700px", lineHeight: "22px", marginBottom: "15px" }}
+              className="lgd-sub-heading text-center text-[#555] mx-auto pb-4"
+              style={{ fontSize: "18px", maxWidth: "700px", lineHeight: "22px" }}
             >
               Whether born in a lab or deep within the Earth, each diamond follows its own path. One shaped by science, the other by nature.
             </p>
+
+            {/* Mobile-only Persistent Column Labels */}
+            <div className="flex w-full justify-between mt-2 md:hidden px-0 border-t pt-2 bg-white pb-3">
+              <span className="text-[11px] font-abhaya font-bold text-[#5A413F] uppercase tracking-wider">Lab Grown Diamonds</span>
+              <span className="text-[11px] font-abhaya font-bold text-[#5A413F] uppercase tracking-wider">Mined Diamonds</span>
+            </div>
           </div>
 
           {/* Steps */}
           {STEPS.map((step) => (
-            <ImageStep key={step.id} step={step} />
+            <ImageStep key={step.id} step={step} lastStepIconRef={lastStepIconRef} />
           ))}
         </div>
 
         {/* ── Final heading ── */}
         <div className="relative z-[1] bg-white text-center py-6">
-          <h2 className="font-semibold text-[#333] mx-3" style={{ fontSize: "28px", margin: "0 12px 0" }}>
+          <h2 className="font-abhaya font-semibold text-[#5A413F] mx-3" style={{ fontSize: "28px", margin: "0 12px 0" }}>
             What Sets Them Apart
           </h2>
           <p className="text-[16px] text-[#555] pb-[60px] mt-2">
@@ -707,7 +702,14 @@ export default function LgdMinePage() {
         </div>
 
         {/* ── Final comparison block ── */}
-        <FinalDiamondBlock data={FINAL_BLOCK} finalImgRef={finalImgRef} />
+        <FinalDiamondBlock data={FINAL_BLOCK} finalImgRef={finalDiamondRef} />
+
+        {/* ── Travel Animation Layer ── */}
+        <TravelDiamond
+          sourceRef={lastStepIconRef}
+          targetRef={finalDiamondRef}
+          image={FINAL_BLOCK.image}
+        />
 
         {/* spacer */}
         <div className="h-20" />
