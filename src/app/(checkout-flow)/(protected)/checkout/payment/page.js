@@ -7,6 +7,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import {
   clearCart,
+  removePoints,
 } from "@/redux/features/cart/cartSlice";
 import {
   Dialog,
@@ -150,10 +151,6 @@ export default function PaymentPage() {
       name: "Razorpay Secure (UPI, Cards, Int'l Cards, Wallets)",
       description: "You'll be redirected to Razorpay Secure to complete your purchase.",
     },
-    {
-      id: "phonepe",
-      name: "PhonePe Payment Gateway (UPI, Cards & NetBanking)",
-    },
   ];
 
   const [addressDialogOpen, setAddressDialogOpen] = useState(false);
@@ -169,7 +166,29 @@ export default function PaymentPage() {
   const [checkoutSelection, setCheckoutSelection] = useState(null);
 
   const user = useSelector(selectUser);
-  const {items, totalAmount, appliedCoupon } = useCart();
+  const {items, totalAmount, appliedCoupon, nectorPoints } = useCart();
+
+  useEffect(() => {
+    if (nectorPoints) {
+      const hasDiamondJewellery = items.some(item => {
+        const type = (item.type || item.productType || item.product_type || "").toLowerCase();
+        const title = (item.title || "").toLowerCase();
+        const hasDiamondCharges = !!item.diamondCharges || (item.customAttributes?.some(attr => attr.key === "_Diamond Charges" && attr.value));
+        
+        return type.includes("diamond") || title.includes("diamond") || 
+               type.includes("solitaire") || title.includes("solitaire") ||
+               type.includes("gemstone") || title.includes("gemstone") ||
+               hasDiamondCharges;
+      });
+
+      if (!hasDiamondJewellery) {
+        dispatch(removePoints());
+        toast.info("Loyalty points removed as diamond jewellery is no longer in cart.", {
+          toastId: "points-removed-safety" // Prevent duplicates
+        });
+      }
+    }
+  }, [items, nectorPoints, dispatch]);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -378,8 +397,10 @@ export default function PaymentPage() {
         }
       }
 
+      const pointsDiscountAmount = nectorPoints?.fiat_value || 0;
+
       // Final Grand Total calculation consistent with Summary
-      const grandTotalValue = subtotalValue + insuranceValue - couponDiscountAmount;
+      const grandTotalValue = subtotalValue + insuranceValue - couponDiscountAmount - pointsDiscountAmount;
 
       const loyaltyPoints = appliedCoupon?.loyaltyPoints || ""; 
 
@@ -473,6 +494,7 @@ export default function PaymentPage() {
         shippingAddress: isPickup ? checkoutSelection.selectedStore : selectedAddress,
         billingAddress: selectedBillingAddress,
         appliedCoupon: appliedCoupon,
+        nectorPoints: nectorPoints,
       });
 
       const razorpay = new window.Razorpay({
@@ -560,6 +582,28 @@ export default function PaymentPage() {
               shippingAddress: isPickup ? checkoutSelection.selectedStore : selectedAddress,
               billingAddress: selectedBillingAddress,
             });
+
+            // Call Nector Perform API if points were applied
+            if (nectorPoints) {
+              try {
+                await fetch('https://platform.nector.io/api/open/integrations/customcheckoutwebhook/1b00001c-26f4-4b62-a601-4f874e63f108', {
+                  method: 'POST',
+                  headers: { 
+                    'x-source': 'web',
+                    'Content-Type': 'application/json' 
+                  },
+                  body: JSON.stringify({
+                    mobile: normalizePhone(customer?.phone || user?.mobile || selectedAddress?.phone || ""),
+                    country: "ind",
+                    action: "perform",
+                    amount: nectorPoints.fiat_value,
+                    reference_order_id: completion?.shopifyOrderName || response.razorpay_payment_id
+                  })
+                });
+              } catch (nectorError) {
+                console.error("Nector perform error:", nectorError);
+              }
+            }
 
             dispatch(clearCart());
             toast.success(
