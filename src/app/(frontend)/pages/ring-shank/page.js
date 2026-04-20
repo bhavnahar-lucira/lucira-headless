@@ -103,7 +103,7 @@ const RingSection = ({ item, index }) => {
         <h2 className="font-abhaya text-[26px] md:text-[36px] tracking-wide uppercase mb-4 text-[#222]">
           {item.title}
         </h2>
-        <p className="text-[15px] md:text-[18px] leading-relaxed mb-6 md:mb-10 text-[#666] w-full max-w-[500px]">
+        <p className="text-[15px] md:text-[18px] leading-relaxed mb-6 md:mb-10 text-[#666] w-full max-w-[700px]">
           {item.text}
         </p>
 
