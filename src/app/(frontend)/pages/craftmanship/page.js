@@ -1,88 +1,88 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect } from "react";
 
 const sections = [
   {
     id: "bannerSection",
+    heading: "Ideation & Sketching",
     title: "Ideation & sketching",
-    desktopImage: "https://cdn.shopify.com/s/files/1/0739/8516/3482/files/Sketch_1.jpg?v=1760704290",
-    mobileImage: "https://cdn.shopify.com/s/files/1/0739/8516/3482/files/Sketch_2.jpg?v=1761630096",
     className: "craftmanship-banner",
-    zIndex: 9
+    wrapperClass: "craftmanship-banner-wrapper",
+    contentId: "bannerContent",
+    zIndex: 9,
+    desktopImage: "https://cdn.shopify.com/s/files/1/0739/8516/3482/files/Sketch_1.jpg?v=1760704290",
+    mobileImage: "https://cdn.shopify.com/s/files/1/0739/8516/3482/files/Sketch_2.jpg?v=1761630096"
   },
   {
     id: "bannerSection2",
+    heading: "3d Designing",
     title: "3d Designing",
-    desktopImage: "https://cdn.shopify.com/s/files/1/0739/8516/3482/files/CAD_1.jpg?v=1760704290",
-    mobileImage: "https://cdn.shopify.com/s/files/1/0739/8516/3482/files/3D.jpg?v=1761630096",
     className: "craftmanship-3d-design-banner",
-    zIndex: 8
+    wrapperClass: "craftmanship-3d-design-banner-wrapper",
+    contentId: "bannerContent2",
+    zIndex: 8,
+    desktopImage: "https://cdn.shopify.com/s/files/1/0739/8516/3482/files/CAD_1.jpg?v=1760704290",
+    mobileImage: "https://cdn.shopify.com/s/files/1/0739/8516/3482/files/3D.jpg?v=1761630096"
   },
   {
     id: "bannerSection3",
+    heading: "Molding & Casting",
     title: "Molding & Casting",
-    desktopImage: "https://cdn.shopify.com/s/files/1/0739/8516/3482/files/Molding_Casting_1.png?v=1751633860",
-    mobileImage: "https://cdn.shopify.com/s/files/1/0739/8516/3482/files/Molding_Casting_Mob_1.png?v=1751635669",
     className: "craftmanship-molding-casting-banner",
-    zIndex: 7
+    wrapperClass: "craftmanship-molding-casting-wrapper",
+    contentId: "bannerContent3",
+    zIndex: 7,
+    desktopImage: "https://cdn.shopify.com/s/files/1/0739/8516/3482/files/Molding_Casting_1.png?v=1751633860",
+    mobileImage: "https://cdn.shopify.com/s/files/1/0739/8516/3482/files/Molding_Casting_Mob_1.png?v=1751635669"
   },
   {
     id: "bannerSection5",
+    heading: "Quality Check",
     title: "Filing & Polishing",
-    desktopImage: "https://cdn.shopify.com/s/files/1/0739/8516/3482/files/Polishing_Coating_1.png?v=1751634033",
-    mobileImage: "https://cdn.shopify.com/s/files/1/0739/8516/3482/files/Polishing_Coating_Mob_1.png?v=1751635404",
     className: "craftmanship-polishing-banner",
-    zIndex: 5
+    wrapperClass: "craftmanship-polishing-banner-wrapper",
+    contentId: "bannerContent5",
+    zIndex: 5,
+    desktopImage: "https://cdn.shopify.com/s/files/1/0739/8516/3482/files/Polishing_Coating_1.png?v=1751634033",
+    mobileImage: "https://cdn.shopify.com/s/files/1/0739/8516/3482/files/Polishing_Coating_Mob_1.png?v=1751635404"
   },
   {
     id: "bannerSection6",
+    heading: "Metal Setting",
     title: "Diamond Setting",
-    desktopImage: "https://cdn.shopify.com/s/files/1/0739/8516/3482/files/Diamond-Setting_1.jpg?v=1760704290",
-    mobileImage: "https://cdn.shopify.com/s/files/1/0739/8516/3482/files/Diamond-Setting_2.jpg?v=1761630096",
     className: "craftmanship-metal-setting-banner",
-    zIndex: 4
+    wrapperClass: "craftmanship-metal-setting-banner-wrapper",
+    contentId: "bannerContent6",
+    zIndex: 4,
+    desktopImage: "https://cdn.shopify.com/s/files/1/0739/8516/3482/files/Diamond-Setting_1.jpg?v=1760704290",
+    mobileImage: "https://cdn.shopify.com/s/files/1/0739/8516/3482/files/Diamond-Setting_2.jpg?v=1761630096"
   },
   {
     id: "bannerSection7",
+    heading: null,
     title: "Quality Check",
-    desktopImage: "https://cdn.shopify.com/s/files/1/0739/8516/3482/files/QC_1.jpg?v=1760704290",
-    mobileImage: "https://cdn.shopify.com/s/files/1/0739/8516/3482/files/QC_2.jpg?v=1761630096",
     className: "craftmanship-quality-check-banner",
-    zIndex: 2
+    wrapperClass: "craftmanship-quality-check-banner-wrapper",
+    contentId: "bannerContent7",
+    zIndex: 2,
+    desktopImage: "https://cdn.shopify.com/s/files/1/0739/8516/3482/files/QC_1.jpg?v=1760704290",
+    mobileImage: "https://cdn.shopify.com/s/files/1/0739/8516/3482/files/QC_2.jpg?v=1761630096"
   },
   {
     id: "bannerSection8",
+    heading: "Packaging",
     title: "Packaging",
-    desktopImage: "https://cdn.shopify.com/s/files/1/0739/8516/3482/files/Packaging_1.png?v=1751634963",
-    mobileImage: "https://cdn.shopify.com/s/files/1/0739/8516/3482/files/Packaging_Mob_1.png?v=1751635669",
     className: "craftmanship-packaging-banner",
-    zIndex: 3
+    wrapperClass: "craftmanship-packaging-banner-wrapper",
+    contentId: "bannerContent2",
+    zIndex: 3,
+    desktopImage: "https://cdn.shopify.com/s/files/1/0739/8516/3482/files/Packaging_1.png?v=1751634963",
+    mobileImage: "https://cdn.shopify.com/s/files/1/0739/8516/3482/files/Packaging_Mob_1.png?v=1751635669"
   }
 ];
 
 export default function CraftmanshipPage() {
-  const [activeSection, setActiveSection] = useState(0);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            const index = parseInt(entry.target.getAttribute("data-index") || "0");
-            setActiveSection(index);
-          }
-        });
-      },
-      { threshold: 0.5 }
-    );
-
-    const sectionElements = document.querySelectorAll(".craftmanship-section");
-    sectionElements.forEach((el) => observer.observe(el));
-
-    return () => observer.disconnect();
-  }, []);
-
   return (
     <main className="page-craftmanship-template-page font-figtree">
       <style>{`
@@ -91,7 +91,14 @@ export default function CraftmanshipPage() {
         .page-craftmanship-template-page .header-wrapper.color-scheme-1.gradient.header-wrapper--border-bottom:hover summary.list-menu__item { color: #000000; }
         .page-craftmanship-template-page .header-wrapper.color-scheme-1.gradient.header-wrapper--border-bottom:hover {background: #fff;}
 
-        .craftmanship-section {
+        .craftmanship-banner,
+        .craftmanship-3d-design-banner,
+        .craftmanship-molding-casting-banner,
+        .craftmanship-grinding-filing-banner,
+        .craftmanship-polishing-banner,
+        .craftmanship-quality-check-banner,
+        .craftmanship-metal-setting-banner,
+        .craftmanship-packaging-banner {
           position: relative;
           display: flex;
           align-items: center;
@@ -104,18 +111,24 @@ export default function CraftmanshipPage() {
           background-repeat: no-repeat;
         }
 
-        ${sections.map(section => `
-          .${section.className} {
-            background-image: url(${section.desktopImage});
-            -webkit-mask-image: url(${section.desktopImage});
+        ${sections.map(s => `
+          .${s.className} {
+            background-image: url(${s.desktopImage});
+            -webkit-mask-image: url(${s.desktopImage});
             -webkit-mask-size: cover;
             -webkit-mask-repeat: no-repeat;
             -webkit-mask-position: center;
-            z-index: ${section.zIndex};
+            z-index: ${s.zIndex};
           }
         `).join('\n')}
 
-        .craftmanship-section::before {
+        .craftmanship-banner::before,
+        .craftmanship-3d-design-banner::before,
+        .craftmanship-molding-casting-banner::before,
+        .craftmanship-grinding-filing-banner::before,
+        .craftmanship-metal-setting-banner::before,
+        .craftmanship-polishing-banner::before,
+        .craftmanship-quality-check-banner::before {
           content: '';
           position: absolute;
           top: 0;
@@ -126,20 +139,23 @@ export default function CraftmanshipPage() {
           z-index: 1;
         }
 
-        .section-active::before {
-          filter: blur(2px);
-          opacity: 0.8;
-          transition: all 0.6s ease;
-        }
-
-        .craftmanship-section h2 {
+        .craftmanship-banner h2,
+        .craftmanship-3d-design-banner h2,
+        .craftmanship-molding-casting-banner h2,
+        .craftmanship-grinding-filing-banner h2,
+        .craftmanship-polishing-banner h2,
+        .craftmanship-quality-check-banner h2,
+        .craftmanship-metal-setting-banner h2,
+        .craftmanship-packaging-banner h2 {
+          font-weight: 600;
+          font-size: 38px;
+          line-height: 100%;
+          letter-spacing: 0%;
+          vertical-align: middle;
+          margin-bottom: 8px;
           color: #fff;
-          margin: 0 auto;
-          font-family: Futura, sans-serif;
-          font-weight: 500;
-          font-size: 48px;
-          line-height: 150%;
           text-transform: uppercase;
+          font-family: Figtree, sans-serif;
           opacity: 1;
           transform: translateY(0);
           transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
@@ -147,26 +163,35 @@ export default function CraftmanshipPage() {
           z-index: 3;
         }
 
-        .craftmanship-wrapper {
+        .craftmanship-banner-wrapper,
+        .craftmanship-3d-design-banner-wrapper,
+        .craftmanship-molding-casting-wrapper,
+        .craftmanship-grinding-filing-wrapper,
+        .craftmanship-polishing-banner-wrapper,
+        .craftmanship-quality-check-banner-wrapper,
+        .craftmanship-metal-setting-banner-wrapper,
+        .craftmanship-packaging-banner-wrapper {
           position: fixed;
           top: 50%;
           left: 50%;
           transform: translate(-50%, -50%) perspective(1000px) translateZ(100px);
-          z-index: 10;
+          z-index: 2;
           text-align: center;
           width: 100%;
           padding: 0 20px;
           pointer-events: none;
-          opacity: 0;
-          transition: opacity 0.4s ease;
-        }
-
-        .craftmanship-wrapper.active {
           opacity: 1;
         }
 
         @media only screen and (max-width: 767px) {
-          .craftmanship-section h2 {
+          .craftmanship-banner-wrapper h2,
+          .craftmanship-3d-design-banner-wrapper h2,
+          .craftmanship-molding-casting-wrapper h2,
+          .craftmanship-grinding-filing-wrapper h2,
+          .craftmanship-polishing-banner-wrapper h2,
+          .craftmanship-quality-check-banner-wrapper h2,
+          .craftmanship-packaging-banner-wrapper h2,
+          .craftmanship-metal-setting-banner-wrapper h2{
             font-size: 20px !important;
             letter-spacing: 2px;
             max-width: 330px;
@@ -180,10 +205,13 @@ export default function CraftmanshipPage() {
             color: #000000 !important;
           }
 
-          ${sections.map(section => `
-            .${section.className} {
-              background-image: url(${section.mobileImage});
-              -webkit-mask-image: url(${section.mobileImage});
+          ${sections.map(s => `
+            .${s.className} {
+              background-image: url(${s.mobileImage});
+              -webkit-mask-image: url(${s.mobileImage});
+              -webkit-mask-size: cover;
+              -webkit-mask-repeat: no-repeat;
+              -webkit-mask-position: center;
             }
           `).join('\n')}
         }
@@ -191,27 +219,19 @@ export default function CraftmanshipPage() {
 
       <h1 style={{ display: "none" }}>Craftmanship</h1>
 
-      {sections.map((section, index) => (
+      {sections.map((section) => (
         <section
           key={section.id}
+          className={section.className}
           id={section.id}
-          className={`craftmanship-section ${section.className} ${activeSection === index ? "section-active" : ""}`}
-          data-index={index}
+          data-heading={section.heading}
         >
           <div className="page-width">
-            {/* The actual content is fixed, but we keep the structure */}
+            <div className={section.wrapperClass} id={section.contentId}>
+              <h2>{section.title}</h2>
+            </div>
           </div>
         </section>
-      ))}
-
-      {/* Fixed Wrappers for titles */}
-      {sections.map((section, index) => (
-        <div
-          key={`wrapper-${section.id}`}
-          className={`craftmanship-wrapper ${activeSection === index ? "active" : ""}`}
-        >
-          <h2>{section.title}</h2>
-        </div>
       ))}
     </main>
   );
