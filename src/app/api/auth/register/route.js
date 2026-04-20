@@ -59,8 +59,7 @@ export async function POST(req) {
             metafields,
             email_marketing_consent: {
               state: "subscribed",
-              opt_in_level: "single_opt_in",
-              consent_updated_at: new Date().toISOString()
+              opt_in_level: "single_opt_in"
             }
           },
         }),
@@ -125,6 +124,8 @@ export async function POST(req) {
         httpOnly: true,
         path: "/",
         maxAge,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
       });
       return res;
     }

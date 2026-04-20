@@ -11,18 +11,24 @@ export function normalizeUserId(userId) {
 
 export function buildCartLookup({ userId, sessionId }) {
   const normalizedUserId = normalizeUserId(userId);
+  const conditions = [];
 
   if (normalizedUserId) {
     const numericUserId = Number(normalizedUserId);
-
     if (Number.isSafeInteger(numericUserId)) {
-      return {
-        $or: [{ userId: normalizedUserId }, { userId: numericUserId }],
-      };
+      conditions.push({ userId: normalizedUserId });
+      conditions.push({ userId: numericUserId });
+    } else {
+      conditions.push({ userId: normalizedUserId });
     }
-
-    return { userId: normalizedUserId };
   }
 
-  return { sessionId };
+  if (sessionId) {
+    conditions.push({ sessionId });
+  }
+
+  if (conditions.length === 0) return {};
+  if (conditions.length === 1) return conditions[0];
+
+  return { $or: conditions };
 }

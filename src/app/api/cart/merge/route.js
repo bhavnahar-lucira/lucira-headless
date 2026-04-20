@@ -44,7 +44,6 @@ export async function POST(req) {
         { _id: guestCart._id },
         {
           $set: { userId, updatedAt: new Date() },
-          $unset: { sessionId: "" },
         }
       );
       
@@ -81,7 +80,6 @@ export async function POST(req) {
         { _id: userCart._id },
         {
           $set: { userId, items: mergedItems, updatedAt: new Date() },
-          $unset: { sessionId: "" },
         }
       );
       // Delete guest cart
@@ -94,9 +92,9 @@ export async function POST(req) {
           $set: { 
             userId,
             items: mergedItems, 
-            updatedAt: new Date() 
+            updatedAt: new Date(),
+            sessionId: sessionId || guestCart.sessionId || null,
           },
-          $unset: { sessionId: "" } // Optionally remove sessionId or keep it
         }
       );
     }

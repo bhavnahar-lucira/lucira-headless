@@ -66,7 +66,7 @@ export default function SyncPage() {
                 : "bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200"
             }`}
           >
-            {loading ? "Syncing..." : "Start Sync"}
+            {loading ? "Syncing..." : error ? "Retry Sync" : "Start Sync"}
           </button>
 
           {result && (

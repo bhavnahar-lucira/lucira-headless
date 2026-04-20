@@ -1,9 +1,8 @@
 "use client";
 
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { Navigation, Pagination } from 'swiper/modules';
+import { Pagination } from 'swiper/modules';
 import 'swiper/css';
-import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import Image from "next/image";
 import { Star, ChevronLeft, ChevronRight } from "lucide-react";
@@ -13,10 +12,11 @@ import Link from "next/link";
 // Force en-IN formatting to be consistent across environments
 const formatPrice = (num) => {
   if (num === null || num === undefined) return "0";
-  return new Intl.NumberFormat("en-IN").format(num);
+  return new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(num);
 };
 
 export default function WearThisWith({ products = [] }) {
+  const [swiper, setSwiper] = useState(null);
   const [activeSlide, setActiveSlide] = useState(0);
 
   if (!products || products.length === 0) return null;
@@ -26,14 +26,11 @@ export default function WearThisWith({ products = [] }) {
       <h2 className="text-base font-semibold text-black mb-4">Wear This With:</h2>      
       <div className="relative group">
         <Swiper
-          modules={[Navigation, Pagination]}
+          modules={[Pagination]}
           spaceBetween={20}
           slidesPerView={1.2}
-          onSlideChange={(swiper) => setActiveSlide(swiper.realIndex)}
-          navigation={{
-            prevEl: '.wear-prev',
-            nextEl: '.wear-next',
-          }}
+          onSwiper={setSwiper}
+          onSlideChange={(s) => setActiveSlide(s.realIndex)}
           breakpoints={{
             640: { slidesPerView: 2 },
             1024: { slidesPerView: 2.2 },
@@ -48,7 +45,7 @@ export default function WearThisWith({ products = [] }) {
               : null;
 
             return (
-              <SwiperSlide key={product.id}>
+              <SwiperSlide key={product.id || product.shopifyId}>
                 <Link href={`/products/${product.handle}`} className="flex flex-col gap-4 group/item">
                   {/* Image */}
                   <div className="aspect-square bg-[#F7F7F7] rounded-lg relative overflow-hidden">
@@ -114,19 +111,26 @@ export default function WearThisWith({ products = [] }) {
             {products.map((_, i) => (
               <div 
                 key={i} 
-                className={`transition-all duration-300 rounded-full h-2 ${
+                className={`transition-all duration-300 rounded-full h-2 cursor-pointer ${
                   activeSlide === i ? "w-6 bg-black" : "w-2 bg-gray-300"
                 }`}
+                onClick={() => swiper?.slideTo(i)}
               />
             ))}
           </div>
 
           {/* Navigation Buttons */}
           <div className="flex gap-3">
-            <button className="wear-prev w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center hover:bg-black hover:text-white transition-all disabled:opacity-30">
+            <button 
+              onClick={() => swiper?.slidePrev()}
+              className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center hover:bg-black hover:text-white transition-all disabled:opacity-30"
+            >
               <ChevronLeft size={20} />
             </button>
-            <button className="wear-next w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center hover:bg-black hover:text-white transition-all disabled:opacity-30">
+            <button 
+              onClick={() => swiper?.slideNext()}
+              className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center hover:bg-black hover:text-white transition-all disabled:opacity-30"
+            >
               <ChevronRight size={20} />
             </button>
           </div>

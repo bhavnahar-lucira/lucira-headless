@@ -8,6 +8,7 @@ export default function VariantsSyncPage() {
   const [status, setStatus] = useState("");
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState(null);
+  const [lastSkip, setLastSkip] = useState(0);
   
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -29,14 +30,18 @@ export default function VariantsSyncPage() {
     fetchLocalProducts();
   }, [fetchLocalProducts]);
 
-  const startSync = async () => {
+  const startSync = async (isRetry = false) => {
     setSyncing(true);
-    setStatus("Initiating variant sync...");
-    setProgress(0);
+    setStatus(isRetry ? "Resuming variant sync..." : "Initiating variant sync...");
+    if (!isRetry) setProgress(0);
     setError(null);
 
     try {
-      const response = await fetch("/api/sync-variants", { method: "POST" });
+      const response = await fetch("/api/sync-variants", { 
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ skip: isRetry ? lastSkip : 0 })
+      });
       if (!response.ok) throw new Error("Failed to start sync");
 
       const reader = response.body.getReader();
@@ -54,6 +59,8 @@ export default function VariantsSyncPage() {
             const data = JSON.parse(line);
             setStatus(data.message);
             if (data.progress !== undefined) setProgress(data.progress);
+            if (data.skip !== undefined) setLastSkip(data.skip);
+
             if (data.status === "error") {
               setError(data.message);
               setSyncing(false);
@@ -61,6 +68,7 @@ export default function VariantsSyncPage() {
             }
             if (data.status === "complete") {
               setSyncing(false);
+              setLastSkip(0);
             }
           } catch (e) {
             console.error("Error parsing JSON chunk", e);
@@ -90,7 +98,7 @@ export default function VariantsSyncPage() {
           </div>
           
           <button 
-            onClick={startSync} 
+            onClick={() => startSync()} 
             disabled={syncing}
             className={`flex items-center gap-3 bg-zinc-900 text-white dark:bg-white dark:text-black px-6 py-3 rounded-xl shadow-lg transition-all ${syncing ? 'opacity-80 cursor-not-allowed' : 'hover:scale-105 active:scale-95'}`}
           >
@@ -116,7 +124,18 @@ export default function VariantsSyncPage() {
               />
             </div>
             
-            {error && <p className="text-sm text-red-500">{error}</p>}
+            {error && (
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-red-500">{error}</p>
+                <button 
+                  onClick={() => startSync(true)}
+                  className="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded-lg font-bold text-xs uppercase tracking-widest hover:bg-red-600 transition-colors shadow-sm"
+                >
+                  <RefreshCw size={14} />
+                  Retry from failure
+                </button>
+              </div>
+            )}
           </div>
         )}
 

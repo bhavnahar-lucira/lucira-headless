@@ -20,6 +20,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { pushProductImpression, formatGtmPrice } from "@/lib/gtm";
 
 const SORT_OPTIONS = [
   { value: "best_selling", label: "Best Selling" },
@@ -158,6 +159,52 @@ export default function SearchPage() {
     });
     return Array.from(uniqueMap.values());
   }, [data]);
+
+  const trackedImpressions = useRef(new Set());
+
+  useEffect(() => {
+    if (products.length > 0) {
+      const newProducts = products.filter(p => {
+        const id = p.shopifyId || p.id;
+        if (!trackedImpressions.current.has(id)) {
+          trackedImpressions.current.add(id);
+          return true;
+        }
+        return false;
+      });
+
+      if (newProducts.length > 0) {
+        // Helper to extract numeric ID from Shopify GID
+        const getNumericId = (gid) => {
+          if (!gid) return 0;
+          if (typeof gid === 'number') return gid;
+          const match = String(gid).match(/\d+$/);
+          return match ? Number(match[0]) : 0;
+        };
+
+        const currentOrigin = typeof window !== 'undefined' ? window.location.origin : "";
+
+        const impressionData = newProducts.map((prod, idx) => {
+          const sellingPrice = Number(prod.price || 0);
+          const originalPrice = Number(prod.compare_price || sellingPrice);
+
+          return {
+            item_id: String(getNumericId(prod.shopifyId || prod.id)),
+            item_name: prod.title,
+            item_sku: prod.variants?.[0]?.sku || "",
+            category: "Search Results",
+            item_url: `${currentOrigin}/products/${prod.handle}`,
+            price: originalPrice,
+            offer_price: sellingPrice,
+            index: trackedImpressions.current.size - newProducts.length + idx + 1
+          };
+        });
+        pushProductImpression(impressionData);
+      }
+    }
+  }, [products, query]);
+
+
 
   const totalCount = data?.pages[0]?.pagination.total || 0;
   const reachedEnd = products.length >= totalCount && totalCount > 0;

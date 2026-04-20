@@ -16,6 +16,11 @@ import Link from "next/link";
 import SearchPopup from "./SearchPopup";
 import { AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
+import { pushLogout, pushViewCart } from "@/lib/gtm";
+
+const INSURANCE_VARIANT_ID = "gid://shopify/ProductVariant/47709366026458";
+const GOLDCOIN_VARIANT_ID = "gid://shopify/ProductVariant/47661824082138";
+
 
 const getInitials = (name = "") =>
   name
@@ -36,9 +41,75 @@ export default function MainHeader() {
 
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.user);
-  const { totalQuantity } = useSelector((state) => state.cart);
+  const { totalQuantity, totalAmount, items } = useSelector((state) => state.cart);
   const wishlistItems = useSelector((state) => state.wishlist.items);
   const guestWishlistItems = useSelector((state) => state.wishlist.guestItems);
+
+  //GTM begain
+    const handleCartClick = () => {
+    if (items && items.length > 0) {
+      const getNumericId = (gid) => {
+        if (!gid) return 0;
+        if (typeof gid === 'number') return gid;
+        const match = String(gid).match(/\d+$/);
+        return match ? Number(match[0]) : 0;
+      };
+
+      const filteredItems = items.filter(
+        (item) =>
+          item.variantId !== INSURANCE_VARIANT_ID &&
+          item.variantId !== GOLDCOIN_VARIANT_ID
+      );
+
+      pushViewCart({
+        currency: "INR",
+        cart_total: Number(totalAmount),
+        grand_total: Number(totalAmount),
+        discount_amount: 0,
+        total_quantity: totalQuantity,
+        total_product: items.length,
+        coupon_code: "",
+        items: items.map((item, idx) => {
+          const getNumericId = (gid) => {
+            if (!gid) return 0;
+            if (typeof gid === 'number') return gid;
+            const match = String(gid).match(/\d+$/);
+            return match ? Number(match[0]) : 0;
+          };
+
+          const prodId = String(getNumericId(item.productId || item.shopifyId || item.id));
+          const lowerTitle = (item.title || "").toLowerCase();
+          
+          let category = item.type || item.productType || "";
+          if (!category) {
+            if (lowerTitle.includes("ring")) category = "Rings";
+            else if (lowerTitle.includes("earring") || lowerTitle.includes("bali")) category = "Earrings";
+            else if (lowerTitle.includes("pendant")) category = "Pendants";
+            else if (lowerTitle.includes("bracelet")) category = "Bracelets";
+            else if (item.variantId === GOLDCOIN_VARIANT_ID) category = "Gold Coin";
+            else if (item.variantId === INSURANCE_VARIANT_ID) category = "Insurance";
+          }
+          
+          return {
+            id: prodId,
+            sku: item.sku || "",
+            variant_id: String(getNumericId(item.variantId)),
+            product_name: item.title,
+            product_type: category,
+            category: "Lucira Jewelry",
+            sub_category: item.sub_category || category,
+            price: Number(item.comparePrice || item.price || 0),
+            offer_price: Number(item.price || 0),
+            quantity: item.quantity,
+            thumbnail_image: item.image,
+            index_position: idx + 1
+          };
+        })
+      });
+    }
+    };
+  //GTM end
+
 
   useEffect(() => {
     dispatch(fetchCart({ userId: user?.id }));
@@ -100,6 +171,15 @@ export default function MainHeader() {
 
   const handleLogout = async () => {
     try {
+      //gtm
+        pushLogout({
+          id: user?.id || "",
+          mobile: user?.mobile || "",
+          first_name: user?.first_name || "",
+          last_name: user?.last_name || "",
+          email: user?.email || ""
+        });
+      //gtm
       await fetch("/api/auth/logout", { method: "POST" });
     } catch (err) {
       console.error("Logout request failed:", err);
@@ -250,7 +330,11 @@ export default function MainHeader() {
               )}
             </button>
           )}
-          <Link href="/checkout/cart" className="relative group p-1">
+            <Link 
+              href="/checkout/cart" 
+              className="relative group p-1"
+              onClick={handleCartClick}
+            >
             <ShoppingBag size={19} className="cursor-pointer" />
             {totalQuantity > 0 && (
               <span className="absolute -top-1 -right-1 bg-primary text-white text-[10px] font-bold w-4.5 h-4.5 rounded-full flex items-center justify-center border-2 border-white shadow-sm">
