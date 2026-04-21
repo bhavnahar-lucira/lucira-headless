@@ -56,7 +56,12 @@ export default function InstagramFeed() {
       try {
         const response = await fetch("/api/instagram");
         const data = await response.json();
-        setFeedData(data);
+        if (Array.isArray(data)) {
+          setFeedData(data);
+        } else {
+          console.error("Instagram feed data is not an array:", data);
+          setFeedData([]);
+        }
       } catch (error) {
         console.error("Error fetching Instagram feed:", error);
       } finally {

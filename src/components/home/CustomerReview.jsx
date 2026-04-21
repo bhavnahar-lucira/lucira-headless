@@ -108,7 +108,12 @@ export default function CustomerReview({
       try {
         const response = await fetch("/api/home-reviews");
         const data = await response.json();
-        setReviews(data);
+        if (Array.isArray(data)) {
+          setReviews(data);
+        } else {
+          console.error("Reviews data is not an array:", data);
+          setReviews([]);
+        }
       } catch (error) {
         console.error("Error fetching reviews:", error);
       } finally {

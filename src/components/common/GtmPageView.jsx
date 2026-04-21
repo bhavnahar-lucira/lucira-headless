@@ -52,6 +52,16 @@ export default function GtmPageView() {
       });
     }
 
+    // 4. Push Marketing Data
+    pushMarketingData({
+      utmSource: searchParams.get("utm_source") || "",
+      utmMedium: searchParams.get("utm_medium") || "",
+      utmCampaign: searchParams.get("utm_campaign") || "",
+      utmTerm: searchParams.get("utm_term") || "",
+      utmContent: searchParams.get("utm_content") || "",
+      utmId: searchParams.get("utm_id") || ""
+    });
+
   }, [pathname, searchParams, user, isAuthenticated]);
 
   return null; // This component does not render anything
