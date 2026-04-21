@@ -603,7 +603,7 @@ export default function FranchisePage() {
           className="fixed inset-0 bg-black/70 flex items-center justify-center z-[99999] p-4 backdrop-blur-sm"
           onClick={(e) => e.target === e.currentTarget && handleHeroClose()}
         >
-          <div className="bg-white rounded-2xl w-full max-w-[700px] max-h-[90vh] relative shadow-2xl overflow-hidden flex flex-col">
+          <div className="bg-white rounded-2xl w-full max-w-[700px] max-h-[95vh] relative shadow-2xl overflow-hidden flex flex-col">
             <button
               onClick={handleHeroClose}
               className="
@@ -618,17 +618,17 @@ export default function FranchisePage() {
             <h3
               className="
                 text-[18px] sm:text-[22px] font-bold tracking-[1.5px]
-                uppercase text-primary text-center font-abhaya
+                uppercase text-primary text-center font-figtree
                 px-[30px] py-[25px] bg-[#FAF9F6] border-b border-gray-100
               "
             >
               REGISTRATION FORM
             </h3>
-            <div className="flex-1 overflow-hidden min-h-[550px]">
+            <div className="overflow-auto" style={{ maxHeight: "calc(100vh - 120px)" }}>
               <iframe
                 src="https://docs.google.com/forms/d/e/1FAIpQLScNWHT4WkZTuS8DCCQUOvM7MeUrdOrwqKxxcYfsEJUlapR5CQ/viewform?usp=sharing&ouid=113968896276132378000"
                 className="w-full h-full border-none"
-                loading="lazy"
+                loading="lazy" style={{ height: "800px", display: "block" }}
               >
                 Loading…
               </iframe>
