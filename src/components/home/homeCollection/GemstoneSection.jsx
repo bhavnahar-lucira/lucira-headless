@@ -83,6 +83,8 @@ export default function GemstoneSection() {
     <CollectionSection
       title="Beyond Diamonds, The Gemstone Edit"
       tabs={tabs}
+      page="home"
+      colCat="shop all gemstone"
       onTabChange={(tab) => setActiveTab(tab)}
       loading={loading || tabsLoading}
     >

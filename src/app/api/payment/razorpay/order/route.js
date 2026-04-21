@@ -45,43 +45,72 @@ export async function POST(req) {
     const billingAddress = body?.billingAddress;
     const customer = body?.customer;
     const appliedCoupon = body?.appliedCoupon;
+    const nectorPoints = body?.nectorPoints;
+
+    const couponValue = Number(appliedCoupon?.value || 0);
+    const nectorValue = Number(nectorPoints?.fiat_value || 0);
+
+    const subtotalBeforeDiscount = cart.items.reduce((acc, item) => acc + (Number(item.price || 0) * Number(item.quantity || 1)), 0);
+
+    // Prepare line items
+    const lineItems = cart.items.map(item => {
+      const price = Number(item.price || 0);
+      const lineItem = {
+        variantId: normalizeVariantId(item.variantId),
+        quantity: Number(item.quantity || 1),
+        originalUnitPrice: price,
+        customAttributes: [
+          { key: "_Gold Weight", value: String(item.goldWeight || "") },
+          { key: "_Diamond Charges", value: String(item.diamondCharges || "") },
+          { key: "Variant Title", value: String(item.variantTitle || "") },
+          { key: "Engraving Text", value: String(item.engravingText || "") },
+          { key: "Engraving Font", value: String(item.engravingFont || "") }
+        ].filter(attr => attr.value !== "")
+      };
+
+      if (price === 0) {
+        lineItem.appliedDiscount = {
+          title: "Free Gift",
+          value: 100,
+          valueType: "PERCENTAGE"
+        };
+      }
+      return lineItem;
+    });
+
+    // Apply Nector Discount to the first paid line item (separate label)
+    if (nectorValue > 0) {
+      const firstPaidItem = lineItems.find(item => item.originalUnitPrice > 0);
+      if (firstPaidItem) {
+        firstPaidItem.appliedDiscount = {
+          title: "Nector Discount",
+          value: nectorValue,
+          valueType: "FIXED_AMOUNT"
+        };
+      }
+    }
+
+    // Set Coupon as the order-level discount
+    let finalDiscount = undefined;
+    if (couponValue > 0) {
+      let totalCouponDiscountAmount = couponValue;
+      if (appliedCoupon?.valueType === "PERCENTAGE") {
+        totalCouponDiscountAmount = (subtotalBeforeDiscount * couponValue) / 100;
+      }
+
+      finalDiscount = {
+        title: appliedCoupon.code || "Coupon Discount",
+        value: totalCouponDiscountAmount,
+        valueType: "FIXED_AMOUNT"
+      };
+    }
 
     // STEP 1: Create Shopify Draft Order
     const draftOrderInput = {
-      lineItems: cart.items.map(item => {
-        const price = Number(item.price || 0);
-        const lineItem = {
-          variantId: normalizeVariantId(item.variantId),
-          quantity: Number(item.quantity || 1),
-          originalUnitPrice: price,
-          // Pass custom properties for the technical details
-          customAttributes: [
-            { key: "_Gold Weight", value: String(item.goldWeight || "") },
-            { key: "_Diamond Charges", value: String(item.diamondCharges || "") },
-            { key: "Variant Title", value: String(item.variantTitle || "") },
-            { key: "Engraving Text", value: String(item.engravingText || "") },
-            { key: "Engraving Font", value: String(item.engravingFont || "") }
-          ].filter(attr => attr.value !== "")
-        };
-
-        // If it's a free gift, apply a 100% discount to ensure Shopify respects the ₹0 price
-        if (price === 0) {
-          lineItem.appliedDiscount = {
-            title: "Free Gift",
-            value: 100,
-            valueType: "PERCENTAGE"
-          };
-        }
-
-        return lineItem;
-      }),
-      appliedDiscount: (appliedCoupon && typeof appliedCoupon === 'object') ? {
-        title: appliedCoupon.code,
-        value: Number(appliedCoupon.value || 0),
-        valueType: appliedCoupon.valueType === "PERCENTAGE" ? "PERCENTAGE" : "FIXED_AMOUNT"
-      } : undefined,
+      lineItems,
+      appliedDiscount: finalDiscount,
       useCustomerDefaultAddress: false,
-      taxExempt: true // Ensure Shopify doesn't add extra GST on top of tax-inclusive prices
+      taxExempt: true
     };
 
     // If we have a real discount code, Shopify Draft Orders usually require 

@@ -7,7 +7,6 @@ import FilterSkeleton from "./FilterSkeleton";
 import LazyImage from "../common/LazyImage";
 
 const CATEGORIES = [
-  { label: "All", slug: "all" },
   { label: "Rings", slug: "rings" },
   { label: "Earrings", slug: "earrings" },
   { label: "Bracelet", slug: "bracelet" },
@@ -18,14 +17,14 @@ const CATEGORIES = [
 const CATEGORY_FILTERS = {
   rings: {
     shapes: [
-      { id: "cushion", label: "CUSHION", img: "/images/shapes/cushion.png", href:"/collections/cushion-rings" },
+      { id: "oval", label: "OVAL", img: "/images/shapes/oval.png", href:"/collections/oval-rings" },
+      { id: "round", label: "ROUND", img: "/images/shapes/round.png", href:"/collections/round-rings" },
       { id: "emerald", label: "EMERALD", img: "/images/shapes/emerald.png", href:"/collections/emerald-rings" },
+      { id: "cushion", label: "CUSHION", img: "/images/shapes/cushion.png", href:"/collections/cushion-rings" },
       { id: "pear", label: "PEAR", img: "/images/shapes/pear.png", href:"/collections/pear-rings" },
+      { id: "princess", label: "PRINCESS", img: "/images/shapes/princess.png", href:"/collections/princess-rings" },
       { id: "marquise", label: "MARQUISE", img: "/images/shapes/marquise.png", href:"/collections/marquise-rings" },
       { id: "heart", label: "HEART", img: "/images/shapes/heart.png", href:"/collections/heart-rings" },
-      { id: "round", label: "ROUND", img: "/images/shapes/round.png", href:"/collections/round-rings" },
-      { id: "oval", label: "OVAL", img: "/images/shapes/oval.png", href:"/collections/oval-rings" },
-      { id: "princess", label: "PRINCESS", img: "/images/shapes/princess.png", href:"/collections/princess-rings" },
     ],
     styles: [
       { id: "Engagement", label: "Engagement", img: "/images/styles/hoops.png", href:"/collections/engagement-rings" },
@@ -37,7 +36,6 @@ const CATEGORY_FILTERS = {
       { id: "mens", label: "men's", img: "/images/styles/mens.png", href:"/collections/mens-ring" },
     ],
   },
-
   earrings: {
     shapes: [
       { id: "Round", label: "Round", img: "/images/shapes/Round.png", href:"/collections/earrings-round" },
@@ -47,7 +45,7 @@ const CATEGORY_FILTERS = {
       { id: "oval", label: "OVAL", img: "/images/shapes/oval.png", href:"/collections/earrings-oval" },
       { id: "pear", label: "PEAR", img: "/images/shapes/pear.png", href:"/collections/earrings-pear" },
       { id: "princess", label: "PRINCESS", img: "/images/shapes/princess.png", href:"/collections/earrings-princess" },
-      { id: "SpecialCuts", label: "Special Cuts", img: "/images/shapes/special-cuts.png", href:"/collections/earrings-special-cuts" },
+      { id: "heart", label: "HEART", img: "/images/shapes/heart.png", href:"/collections/earrings-heart" },
     ],
     styles: [
       { id: "Hoops", label: "Hoops", img: "/images/styles/hoops.png", href:"/collections/diamond-hoop-earrings" },
@@ -63,177 +61,104 @@ const CATEGORY_FILTERS = {
 };
 
 export default function ShopByCategory() {
-
   const router = useRouter();
 
-  const [activeCategory, setActiveCategory] = useState("all");
-  const [activeTab, setActiveTab] = useState(null);
+  const [activeCategory, setActiveCategory] = useState("rings");
+  const [activeTab, setActiveTab] = useState("shapes");
   const [filters, setFilters] = useState([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-
     setLoading(true);
-
     const timer = setTimeout(() => {
-
-      if (activeCategory === "all") {
-
-        const allShapes = Object.values(CATEGORY_FILTERS).flatMap(
-          (cat) => cat.shapes
-        );
-
-        const allStyles = Object.values(CATEGORY_FILTERS).flatMap(
-          (cat) => cat.styles
-        );
-
-        const merged = [...allShapes, ...allStyles];
-
-        const unique = merged.filter(
-          (item, index, self) =>
-            index === self.findIndex((t) => t.id === item.id)
-        );
-
-        setFilters(unique);
-        setActiveTab(null);
-
-      } else {
-
-        const categoryData = CATEGORY_FILTERS[activeCategory];
-        setFilters(categoryData?.[activeTab] || []);
-
-      }
-
+      const categoryData = CATEGORY_FILTERS[activeCategory];
+      setFilters(categoryData?.[activeTab] || []);
       setLoading(false);
-
-    }, 500);
+    }, 400);
 
     return () => clearTimeout(timer);
-
   }, [activeCategory, activeTab]);
 
-  const handleFilterClick = (filterId) => {
-
-    if (activeCategory === "all") {
-
-      router.push(`/collections?filter=${filterId}`);
-
-    } else {
-
-      router.push(
-        `/collections/${activeCategory}?${activeTab === "shapes" ? "shape" : "style"}=${filterId}`
-      );
-
-    }
-
-  };
-
   return (
-    <section className="w-full bg-[#FEF5F1] py-14 mt-15">
-
+    <section className="w-full bg-[#FEF5F1] py-12 md:py-14 mt-12 md:mt-15 overflow-hidden">
       <div className="container-main">
-
-        <h2 className="main-title text-center font-extrabold font-abhaya mb-5">
+        <h2 className="text-3xl md:text-4xl font-black text-center font-abhaya mb-6 md:mb-8 text-zinc-900 tracking-tight">
           Shop By
         </h2>
 
-        {/* Categories */}
-        <div className="flex justify-center gap-8 text-sm mb-7 flex-wrap">
-
+        {/* Categories Tab Bar */}
+        <div className="flex justify-start md:justify-center gap-6 md:gap-10 text-sm md:text-base mb-8 md:mb-10 overflow-x-auto no-scrollbar border-b border-zinc-100/50 md:border-none px-4 md:px-0">
           {CATEGORIES.map((cat) => (
-
             <button
               key={cat.slug}
-              onClick={() => {
-                setActiveCategory(cat.slug);
-                setActiveTab(cat.slug === "all" ? null : "shapes");
-              }}
-              className={`relative pb-2 hover:cursor-pointer font-base ${
+              onClick={() => setActiveCategory(cat.slug)}
+              className={`relative pb-3 whitespace-nowrap uppercase tracking-widest font-bold transition-all ${
                 activeCategory === cat.slug
-                  ? "font-semibold border-b-2 border-black"
-                  : "text-black hover:text-black"
+                  ? "text-zinc-900"
+                  : "text-zinc-400 hover:text-zinc-600"
               }`}
             >
               {cat.label}
+              {activeCategory === cat.slug && (
+                <div className="absolute bottom-0 left-0 w-full h-[2px] bg-zinc-900"></div>
+              )}
             </button>
-
           ))}
-
         </div>
 
-        {/* Toggle Tabs */}
-        <div className="flex justify-center mb-10">
-
-          <div className="flex border rounded-md overflow-hidden">
-
+        {/* Toggle Switch: By Shape / By Style */}
+        <div className="flex justify-center mb-10 md:mb-12">
+          <div className="flex w-[90%] md:w-auto border border-zinc-200 rounded-md overflow-hidden bg-white p-1">
             <button
-              disabled={activeCategory === "all"}
               onClick={() => setActiveTab("shapes")}
-              className={`px-6 py-2 text-base ${
+              className={`flex-1 md:flex-none md:min-w-[160px] py-2.5 text-sm md:text-base font-bold uppercase tracking-wider rounded transition-all ${
                 activeTab === "shapes"
-                  ? "bg-[#6c514d] text-white font-semibold"
-                  : "bg-white text-black"
-              } ${activeCategory === "all" ? "opacity-40 cursor-not-allowed" : ""}`}
+                  ? "bg-[#5B4740] text-white"
+                  : "bg-white text-zinc-500 hover:text-zinc-800"
+              }`}
             >
               By Shape
             </button>
-
             <button
-              disabled={activeCategory === "all"}
               onClick={() => setActiveTab("styles")}
-              className={`px-6 py-2 text-base ${
+              className={`flex-1 md:flex-none md:min-w-[160px] py-2.5 text-sm md:text-base font-bold uppercase tracking-wider rounded transition-all ${
                 activeTab === "styles"
-                  ? "bg-[#6c514d] text-white font-semibold"
-                  : "bg-white text-black"
-              } ${activeCategory === "all" ? "opacity-40 cursor-not-allowed" : ""}`}
+                  ? "bg-[#5B4740] text-white"
+                  : "bg-white text-zinc-500 hover:text-zinc-800"
+              }`}
             >
               By Style
             </button>
-
           </div>
-
         </div>
 
         {/* Filters Grid */}
-        <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-x-17 gap-y-5 text-center px-14">
-
+        <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-x-4 md:gap-x-12 gap-y-8 md:gap-y-10 text-center px-2 md:px-10">
           {loading
             ? Array.from({ length: 8 }).map((_, i) => (
                 <FilterSkeleton key={i} />
               ))
-
-            : filters.map((item) => {
-                const href = item.href || (
-                  activeCategory === "all"
-                    ? `/collections?filter=${item.id}`
-                    : `/collections/${activeCategory}?${activeTab === "shapes" ? "shape" : "style"}=${item.id}`
-                );
-
-                return (
-                  <Link
-                    key={item.id}
-                    href={href}
-                    className="flex flex-col border border-transparent items-center gap-2 p-4 rounded-md hover:bg-secondary transition hover:border-primary hover:cursor-pointer"
-                  >
-                    <div className="relative w-14 h-14">
-                      <LazyImage
-                        src={item.img}
-                        alt={item.label}
-                        fill
-                        className="object-contain"
-                      />
-                    </div>
-                    <span className="text-xs font-medium tracking-wide">
-                      {item.label}
-                    </span>
-                  </Link>
-                );
-              })}
-
+            : filters.map((item) => (
+                <Link
+                  key={item.id}
+                  href={item.href || `/collections/${activeCategory}?${activeTab === "shapes" ? "shape" : "style"}=${item.id}`}
+                  className="flex flex-col items-center gap-3 md:gap-4 group"
+                >
+                  <div className="relative w-16 h-16 md:w-20 md:h-20 transition-transform duration-300 group-hover:scale-110">
+                    <LazyImage
+                      src={item.img}
+                      alt={item.label}
+                      fill
+                      className="object-contain"
+                    />
+                  </div>
+                  <span className="text-[10px] md:text-xs font-bold uppercase tracking-[0.1em] text-zinc-800 group-hover:text-primary transition-colors">
+                    {item.label}
+                  </span>
+                </Link>
+              ))}
         </div>
-
       </div>
-
     </section>
   );
 }

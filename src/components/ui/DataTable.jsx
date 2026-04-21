@@ -3,16 +3,25 @@
 import {
   flexRender,
   getCoreRowModel,
+  getFilteredRowModel,
   getPaginationRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Search } from "lucide-react";
+import { useState } from "react";
 
 export function DataTable({ columns, data }) {
+  const [globalFilter, setGlobalFilter] = useState("");
+
   const table = useReactTable({
     data,
     columns,
+    state: {
+      globalFilter,
+    },
+    onGlobalFilterChange: setGlobalFilter,
     getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     initialState: {
       pagination: {
@@ -22,7 +31,17 @@ export function DataTable({ columns, data }) {
   });
 
   return (
-    <div className="w-full">
+    <div className="w-full space-y-4">
+      <div className="flex items-center gap-2 max-w-sm px-4 py-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-sm group focus-within:ring-1 focus-within:ring-zinc-400 transition-all">
+        <Search size={18} className="text-zinc-400 group-focus-within:text-zinc-900 dark:group-focus-within:text-white" />
+        <input
+          placeholder="Search..."
+          value={globalFilter ?? ""}
+          onChange={e => setGlobalFilter(e.target.value)}
+          className="bg-transparent border-none outline-none text-sm w-full"
+        />
+      </div>
+
       <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
         <table className="w-full text-sm text-left">
           <thead className="bg-zinc-50 dark:bg-zinc-800/50 text-zinc-500 uppercase text-xs font-semibold">

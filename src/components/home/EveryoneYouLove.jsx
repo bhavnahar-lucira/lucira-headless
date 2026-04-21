@@ -5,28 +5,28 @@ import { ArrowRight } from "lucide-react";
 import LazyImage from "../common/LazyImage";
 
 const OCCASIONS = [
-  { name: "Spark", label:"0.25 ct – 0.40 ct", image: "/images/solitaire/Spark.jpg", href: "/collections/spark" },
-  { name: "Rise", label:"0.40 ct – 0.75 ct", image: "/images/solitaire/Rise.jpg", href: "/collections/rise" },
-  { name: "Presence", label:"0.75 ct – 1.25 ct", image: "/images/solitaire/Presence.jpg", href: "/collections/presence" },
-  { name: "Legacy", label:"1.25+ ct", image: "/images/solitaire/Legacy.jpg", href: "/collections/legacy" },
+  { name: "For Her", image: "/images/love/1.jpg", href: "/collections/gifts-for-her" },
+  { name: "For Him", image: "/images/love/2.jpg", href: "/collections/gifts-for-him" },
+  { name: "For Mothers", image: "/images/love/3.jpg", href: "/collections/gift-for-mother" },
+  { name: "For Kids", image: "/images/love/4.jpg", href: "#" },
 ];
 
 export default function EveryoneYouLove() {
   return (
-    <section className="w-full mt-16 bg-[#FEF5F1] py-10">
-      <div className="container-main">
+    <section className="w-full mt-12 md:mt-20 bg-[#FEF5F1] py-12 md:py-20">
+      <div className="container-main px-4">
 
-        <div className="text-center mb-6">
-          <h2 className="main-title font-extrabold font-abhaya mb-2">Solitaire Story</h2>
-          <p className="text-black text-base">Crafted brilliance for everyday style and journey</p>
+        <div className="text-center mb-8 md:mb-12">
+          <h2 className="text-3xl md:text-5xl font-extrabold font-abhaya mb-3 text-zinc-900 tracking-tight">For Everyone You Love</h2>
+          <p className="text-zinc-600 text-sm md:text-lg">Crafted with care, for everyone you hold close.</p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
           {OCCASIONS.map((occ, index) => (
             <Link 
               key={index} 
               href={occ.href}
-              className="relative aspect-3/4 overflow-hidden group bg-gray-100 rounded-sm"
+              className="relative aspect-[3/4.2] overflow-hidden group bg-gray-100 rounded-xl shadow-sm"
             >
               <LazyImage 
                 src={occ.image} 
@@ -35,7 +35,7 @@ export default function EveryoneYouLove() {
                 className="object-cover transition-transform duration-700 group-hover:scale-105"
               />
               <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/5 to-transparent pointer-events-none" />
-              <div className="absolute bottom-6 left-6 right-6 flex justify-between items-end text-white">
+              <div className="absolute bottom-4 left-4 right-4 md:bottom-6 md:left-6 md:right-6 flex justify-between items-end text-white">
                 <div className="flex flex-col">
                   <span className="text-xl xl:text-2xl lg:text-lg font-semibold leading-tight">{occ.name}</span>
                   {occ.label && (
@@ -55,3 +55,4 @@ export default function EveryoneYouLove() {
     </section>
   );
 }
+

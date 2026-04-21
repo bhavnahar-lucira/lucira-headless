@@ -8,25 +8,25 @@ const OCCASIONS = [
   { name: "Engagement", image: "/images/occasion/1.jpg", href: "/collections/engagement-rings" },
   { name: "Wedding", image: "/images/occasion/2.jpg", href: "/collections/wedding-rings" },
   { name: "Anniversary", image: "/images/occasion/3.jpg", href: "/collections/anniversary-gifts" },
-  { name: "Couple Bands", image: "/images/occasion/4.jpg", href: "/collections/couple-bands" },
+  { name: "Valentine's", image: "/images/occasion/4.jpg", href: "/collections/valentines-gift" },
 ];
 
 export default function ShopByOccasion() {
   return (
-    <section className="w-full mt-16 bg-white">
-      <div className="container-main">
+    <section className="w-full mt-12 md:mt-20 bg-white">
+      <div className="container-main px-4">
 
-        <div className="text-center mb-6">
-          <h2 className="main-title font-extrabold font-abhaya mb-2">Shop By Occasion</h2>
-          <p className="text-black text-base">Jewelry for life's most cherished moments.</p>
+        <div className="text-center mb-6 md:mb-10">
+          <h2 className="text-3xl md:text-5xl font-extrabold font-abhaya mb-2 text-zinc-900 tracking-tight">Shop By Occasion</h2>
+          <p className="text-zinc-600 text-sm md:text-lg">Jewelry for life's most meaningful moments</p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
           {OCCASIONS.map((occ, index) => (
             <Link 
               key={index} 
               href={occ.href}
-              className="relative aspect-3/4 overflow-hidden group bg-gray-100 rounded-sm"
+              className="relative aspect-[3/4.2] overflow-hidden group bg-gray-100 rounded-lg shadow-sm"
             >
               <LazyImage 
                 src={occ.image} 
@@ -34,11 +34,11 @@ export default function ShopByOccasion() {
                 fill 
                 className="object-cover transition-transform duration-700 group-hover:scale-105"
               />
-              <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/5 to-transparent pointer-events-none" />
-              <div className="absolute bottom-6 xl:left-6 xl:right-6 lg:left-4 lg:right-4 flex justify-between items-center text-white">
-                <span className="text-xl xl:text-2xl lg:text-lg font-semibold">{occ.name}</span>
-                <div className="xl:w-10 xl:h-10 lg:w-8 lg:h-8 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center transition-all group-hover:bg-white group-hover:text-black">
-                  <ArrowRight size={20} />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+              <div className="absolute bottom-4 left-4 right-4 md:bottom-6 md:left-6 md:right-6 flex justify-between items-center text-white">
+                <span className="text-base md:text-2xl font-bold tracking-tight">{occ.name}</span>
+                <div className="w-8 h-8 md:w-11 md:h-11 rounded-full border border-white/40 flex items-center justify-center transition-all group-hover:bg-white group-hover:text-black">
+                  <ArrowRight size={16} className="md:w-5 md:h-5" />
                 </div>
               </div>
             </Link>
@@ -48,3 +48,4 @@ export default function ShopByOccasion() {
     </section>
   );
 }
+

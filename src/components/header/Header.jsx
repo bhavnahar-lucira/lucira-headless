@@ -6,6 +6,8 @@ import { motion, useScroll, useMotionValueEvent } from "framer-motion";
 import TopBar from "./TopBar";
 import MainHeader from "./MainHeader";
 import Navbar from "./Navbar";
+import MobileHeader from "./MobileHeader";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 
 const TOP_HEIGHT = 40;
 const HEADER_HEIGHT = 88;
@@ -13,10 +15,25 @@ const HEADER_HEIGHT = 88;
 export default function Header() {
   const [hideTop, setHideTop] = useState(false);
   const { scrollY } = useScroll();
+  const isMobile = useMediaQuery("(max-width: 1180px)");
 
   useMotionValueEvent(scrollY, "change", (y) => {
     setHideTop(y > 120);
   });
+
+    if (isMobile) {
+      return (
+        <header 
+          className="w-full z-[100] bg-white sticky"
+          style={{ top: '-104px' }} // Hides TopBar (40px) + Logo Row (64px) on scroll
+        >
+          <TopBar />
+          <MobileHeader />
+        </header>
+      );
+    }
+
+
 
   return (
     <>

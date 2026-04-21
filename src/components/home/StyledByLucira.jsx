@@ -168,13 +168,13 @@ export default function StyledByLucira() {
   const swiperRef = useRef(null);
 
   return (
-    <section className="w-full mt-15 bg-white overflow-hidden">
+    <section className="w-full mt-12 md:mt-15 bg-white overflow-hidden pb-10">
       <div className="container-main">
-        <div className="text-center mb-6">
-          <h2 className="main-title font-extrabold font-abhaya mb-2">Styled By Lucira</h2>
+        <div className="text-center mb-6 md:mb-8">
+          <h2 className="text-3xl md:text-4xl font-black font-abhaya mb-2 text-zinc-900 tracking-tight">Styled By Lucira</h2>
         </div>
 
-        <div className="relative w-full group/slider">
+        <div className="relative w-full group/slider px-4 md:px-0">
           <Swiper
             modules={[Navigation]}
             onSwiper={(swiper) => {
@@ -184,25 +184,28 @@ export default function StyledByLucira() {
               prevEl: ".main-prev",
               nextEl: ".main-next",
             }}
-            slidesPerView={4}
+            slidesPerView={1.2}
             centeredSlides={true}
             loop={true}
             slidesPerGroup={1}
-            spaceBetween={3}
+            spaceBetween={12}
             speed={600}
             grabCursor={true}
             breakpoints={{
               640: {
-                slidesPerView: 2,
-                spaceBetween: 20
+                slidesPerView: 3,
+                spaceBetween: 20,
+                centeredSlides: false
               },
               1024: {
                 slidesPerView: 3,
-                spaceBetween: 20
+                spaceBetween: 20,
+                centeredSlides: true
               },
               1200: {
                 slidesPerView: 5,
-                spaceBetween: 30
+                spaceBetween: 30,
+                centeredSlides: true
               }
             }}
             className="lucira-swiper overflow-visible!"
@@ -217,21 +220,23 @@ export default function StyledByLucira() {
             ))}
           </Swiper>
 
-          <button className="main-prev absolute left-3 top-1/2 -translate-y-1/2 z-20 w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center text-black opacity-0 group-hover/slider:opacity-100 transition-opacity duration-300 hover:bg-gray-50 cursor-pointer">
+          {/* Navigation Arrows - Desktop Only */}
+          <button className="main-prev absolute left-3 top-1/2 -translate-y-1/2 z-20 w-12 h-12 bg-white rounded-full shadow-lg hidden md:flex items-center justify-center text-black opacity-0 group-hover/slider:opacity-100 transition-opacity duration-300 hover:bg-gray-50 cursor-pointer">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
           </button>
-          <button className="main-next absolute right-3 top-1/2 -translate-y-1/2 z-20 w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center text-black opacity-0 group-hover/slider:opacity-100 transition-opacity duration-300 hover:bg-gray-50 cursor-pointer">
+          <button className="main-next absolute right-3 top-1/2 -translate-y-1/2 z-20 w-12 h-12 bg-white rounded-full shadow-lg hidden md:flex items-center justify-center text-black opacity-0 group-hover/slider:opacity-100 transition-opacity duration-300 hover:bg-gray-50 cursor-pointer">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
           </button>
         </div>
-
-        <VideoPopup 
-          isOpen={popupState.isOpen}
-          onClose={() => setPopupState({ ...popupState, isOpen: false })}
-          videoData={videoData}
-          initialIndex={popupState.index}
-        />
       </div>
+
+      <VideoPopup 
+        isOpen={popupState.isOpen}
+        onClose={() => setPopupState({ ...popupState, isOpen: false })}
+        videoData={videoData}
+        initialIndex={popupState.index}
+      />
     </section>
+
   );
 }

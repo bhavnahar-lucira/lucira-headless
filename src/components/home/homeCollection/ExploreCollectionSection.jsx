@@ -42,6 +42,8 @@ export default function ExploreCollectionSection() {
     <CollectionSection 
       title="Explore By Collections"
       tabs={Object.keys(COLLECTION_HANDLE_MAP)}
+      page="home"
+      colCat="shop all collections"
       onTabChange={(tab) => setActiveTab(tab)}
       loading={loading}
     >        
