@@ -220,8 +220,6 @@ export default function CustomerReview({
             </div>
           </div>
         </div>
-<<<<<<< HEAD
-=======
 
         {!isMobile && (
           <div className="mt-12 text-center">
@@ -233,7 +231,6 @@ export default function CustomerReview({
               </Link>
           </div>
         )}
->>>>>>> ff58083a46e0b1eccd5f1b284d98e7fe247005e9
       </div>
 
       {isMobile ? (
