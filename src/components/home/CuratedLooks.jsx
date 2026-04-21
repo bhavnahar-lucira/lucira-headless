@@ -417,15 +417,6 @@ export default function CuratedLooks() {
             </div>
           ))}
         </div>
-
-        <div className="mt-8 flex justify-center">
-          <Link
-            href="/collections"
-            className="inline-flex min-h-11 items-center justify-center rounded-sm bg-primary px-8 text-base font-bold uppercase tracking-wide text-white transition hover:opacity-90"
-          >
-            View All Inspiration
-          </Link>
-        </div>
       </div>
     </section>
   );

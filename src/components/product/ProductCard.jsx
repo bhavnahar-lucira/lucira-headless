@@ -161,6 +161,7 @@ function getPrioritizedVariant(product, collectionHandle) {
 }
 
 const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle }) => {
+  
   const baseColors = getUniqueBaseColors(product.colors || product.variants?.map((v) => v.color) || []);
   
   // Apply Global Variant Priority Hierarchy
@@ -592,84 +593,107 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle 
             )}
           </div>
 
-          <div className="flex flex-col gap-2 px-1">
-            {/* Color Swatches */}
-            {baseColors.length > 0 && (
-                <div className="flex gap-3 mb-2">
-                  {baseColors.map((base) => {
-                    const isActive = base === activeBase;
-                    return (
-                      <button
-                        key={`${product.shopifyId}-${base}`}
-                        type="button"
-                        title={base}
-                        aria-label={`Show ${base} color`}
-                        onClick={() => setActiveBase(base)}
-                        className={`w-7 h-7 rounded-full border transition-all flex items-center justify-center hover:scale-110 ${
-                          isActive ? "border-black dark:border-white p-0.5" : "border-transparent"
-                        }`}
-                      >
-                        <span
-                          className="w-full h-full rounded-full border border-zinc-200 dark:border-zinc-700"
-                          style={{ backgroundColor: colorMap[base] }}
-                        />
-                      </button>
-                    );
-                  })}
+          <div className="flex flex-col gap-1.5 px-1">
+            <div className="flex flex-row items-center justify-between gap-2">
+              {/* Color Swatches */}
+              {baseColors.length > 0 && (
+                  <div className="flex gap-3">
+                    {baseColors.map((base) => {
+                      const isActive = base === activeBase;
+                      return (
+                        <button
+                          key={`${product.shopifyId}-${base}`}
+                          type="button"
+                          title={base}
+                          aria-label={`Show ${base} color`}
+                          onClick={() => setActiveBase(base)}
+                          className={`w-7 h-7 rounded-full border transition-all flex items-center justify-center hover:scale-110 ${
+                            isActive ? "border-black dark:border-white p-0.5" : "border-transparent"
+                          }`}
+                        >
+                          <span
+                            className="w-full h-full rounded-full border border-zinc-200 dark:border-zinc-700"
+                            style={{ backgroundColor: colorMap[base] }}
+                          />
+                        </button>
+                      );
+                    })}
+                  </div>
+              )}
+
+              {/* Rating Section */}
+              {product.reviews?.count > 0 && (
+                <div className="flex items-center gap-1.5">
+                  <div className="flex items-center gap-0.5 text-amber-400">
+                    {[...Array(5)].map((_, i) => (
+                      <Star
+                        key={i}
+                        size={12}
+                        fill={i < Math.floor(product.reviews.average) ? "currentColor" : "none"}
+                        className={i < Math.floor(product.reviews.average) ? "" : "text-zinc-200 dark:text-zinc-800"}
+                      />
+                    ))}
+                  </div>
+                  <span className="text-sm font-semibold text-black mt-0.5">({product.reviews.count})</span>
                 </div>
-            )}
+              )}
+            </div>
 
-            {/* Product Title */}
-            <Link 
-              href={`/products/${product.handle}`}
-              onClick={() => {
-                const getNumericId = (gid) => {
-                  if (!gid) return 0;
-                  if (typeof gid === 'number') return gid;
-                  const match = String(gid).match(/\d+$/);
-                  return match ? Number(match[0]) : 0;
-                };
-                const currentOrigin = typeof window !== 'undefined' ? window.location.origin : "";
-                pushProductClick({
-                  productId: String(getNumericId(product.shopifyId || product.id)),
-                  variantId: String(getNumericId(currentVariant?.id || currentVariant?.shopifyId)),
-                  sku: currentVariant?.sku || "",
-                  productName: product.title,
-                  productType: product.type || "",
-                  productCategory: product.category || product.type || "",
-                  category: product.category || product.type || "",
-                  subCategory: product.type || "",
-                  productUrl: `${currentOrigin}/products/${product.handle}`,
-                  thumbnailImage: galleryImages?.[0]?.url || product.image?.url || "",
-                  purity: currentVariant?.metafields?.metal_purity || "",
-                  price: String(Number(displayComparePrice || displayPrice || 0)),
-                  offerPrice: String(Number(displayPrice || 0)),
-                  indexPosition: ""
-                });
-              }}
-            >
+            {/* Price Section */}
+            <div className="flex items-center gap-2 mt-2 font-figtree">
+              <p className="text-xl font-bold">₹{formatPrice(displayPrice)}</p>
+              {displayComparePrice > displayPrice && (
+                <p className="text-base text-gray-400 line-through">₹{formatPrice(displayComparePrice)}</p>
+              )}
+              {displayComparePrice > displayPrice && discountPercent > 0 && (
+                <span className="bg-[#E5E7EB] text-black px-2 py-0.5 rounded-full text-xs font-bold">
+                  {discountPercent}% OFF
+                </span>
+              )}
+            </div>
 
-              <h3 className="text-xl font-bold hover:underline underline-offset-4 decoration-1 leading-snug hover:text-gray-700 transition-colors line-clamp-2 min-h-7">
-                {product.title}
-              </h3>
-            </Link>
+            <div className="flex flex-col items-start gap-0.5">
+              {/* Product Title */}
+              <Link 
+                href={`/products/${product.handle}`}
+                onClick={() => {
+                  const getNumericId = (gid) => {
+                    if (!gid) return 0;
+                    if (typeof gid === 'number') return gid;
+                    const match = String(gid).match(/\d+$/);
+                    return match ? Number(match[0]) : 0;
+                  };
+                  const currentOrigin = typeof window !== 'undefined' ? window.location.origin : "";
+                  pushProductClick({
+                    productId: String(getNumericId(product.shopifyId || product.id)),
+                    variantId: String(getNumericId(currentVariant?.id || currentVariant?.shopifyId)),
+                    sku: currentVariant?.sku || "",
+                    productName: product.title,
+                    productType: product.type || "",
+                    productCategory: product.category || product.type || "",
+                    category: product.category || product.type || "",
+                    subCategory: product.type || "",
+                    productUrl: `${currentOrigin}/products/${product.handle}`,
+                    thumbnailImage: galleryImages?.[0]?.url || product.image?.url || "",
+                    purity: currentVariant?.metafields?.metal_purity || "",
+                    price: String(Number(displayComparePrice || displayPrice || 0)),
+                    offerPrice: String(Number(displayPrice || 0)),
+                    indexPosition: ""
+                  });
+                }}
+              >
 
-            {/* Rating Section */}
-            {product.reviews?.count > 0 && (
-              <div className="flex items-center gap-1.5">
-                <div className="flex items-center gap-0.5 text-amber-400">
-                  {[...Array(5)].map((_, i) => (
-                    <Star
-                      key={i}
-                      size={12}
-                      fill={i < Math.floor(product.reviews.average) ? "currentColor" : "none"}
-                      className={i < Math.floor(product.reviews.average) ? "" : "text-zinc-200 dark:text-zinc-800"}
-                    />
-                  ))}
-                </div>
-                <span className="text-sm font-semibold text-black mt-0.5">({product.reviews.count})</span>
+                <h3 className="text-sm font-semibold hover:underline underline-offset-4 decoration-1 leading-snug hover:text-gray-700 transition-colors line-clamp-1 min-h-5">
+                  {product.title}
+                </h3>
+              </Link>
+
+              {/* static card details - to be made dynamic based on product metafields in future iterations */}
+              <div className="flex flex-col justify-center items-start gap-2">
+                <p className="font-figtree text-xs font-light">{product.productMetafields?.carat_range || "Diamond"} · {product.productMetafields?.material_type || "Jewellery"} · {product.productMetafields?.weight || "0"}</p>
               </div>
-            )}
+              {/* end */}
+            </div>
 
             {/* Offer Badge - Dynamic Flipping */}
             {(() => {
@@ -680,7 +704,7 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle 
               if (offers.length === 0) return null;
 
               return (
-                <div className="inline-flex items-center gap-1.5 text-[#108548] bg-[#F0F9F4] rounded-full px-3 py-1 mt-1">
+                <div className="inline-flex items-center gap-1.5 text-[#108548] bg-[#F0F9F4] rounded-full px-3 py-1 mt-1 w-fit">
                   <ShieldCheck size={12} />
                   <div className="overflow-hidden">
                     <AnimatePresence mode="wait" initial={false}>
@@ -700,18 +724,7 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle 
               );
             })()}
 
-            {/* Price Section */}
-            <div className="flex items-center gap-3 mt-2">
-              <p className="text-xl font-black">₹ {formatPrice(displayPrice)}</p>
-              {displayComparePrice > displayPrice && (
-                <p className="text-base text-gray-400 line-through">₹ {formatPrice(displayComparePrice)}</p>
-              )}
-              {displayComparePrice > displayPrice && discountPercent > 0 && (
-                <span className="bg-[#E5E7EB] text-black px-2 py-0.5 rounded-full text-xs font-bold">
-                  {discountPercent}% OFF
-                </span>
-              )}
-            </div>
+            
           </div>
         </div>
         

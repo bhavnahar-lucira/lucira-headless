@@ -30,7 +30,7 @@ const features = [
 export default function WeAreLucira() {
   return (
     <section className="mt-15 w-full bg-[#FEF5F1]">
-      <div className="grid w-full grid-cols-1 overflow-hidden lg:grid-cols-[380px_minmax(0,1fr)_380px]">
+      <div className="grid w-full grid-cols-1 overflow-hidden xl:grid-cols-[380px_minmax(0,1fr)_380px] lg:grid-cols-[300px_minmax(0,1fr)_300px]">
         {/* Left Image Grid */}
         <div className="grid grid-rows-2">
           <div className="grid h-full grid-cols-[30%_70%]">

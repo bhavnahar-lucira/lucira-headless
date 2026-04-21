@@ -15,6 +15,8 @@ export default function FeaturedIn() {
     "/images/feature/madeinindia.png",
     "/images/feature/bwdisrupt.png",
     "/images/feature/retail.png",
+    "/images/feature/startuptalky.png",
+    "/images/feature/zbusinesshindi.png",
   ];
 
   return (
