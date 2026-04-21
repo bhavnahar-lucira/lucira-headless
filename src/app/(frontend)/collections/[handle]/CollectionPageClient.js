@@ -413,9 +413,9 @@ export default function CollectionPage({ params: paramsPromise }) {
         </div>
       </div>
 
-      <div className="flex gap-12 py-6 max-w-350 mx-auto">
+      <div className="flex xl:gap-12 lg:gap-6 py-6 max-w-350 mx-auto">
         {/* ================= FILTERS SIDEBAR ================= */}
-        <div className="hidden lg:block w-78 shrink-0">
+        <div className="hidden lg:block xl:w-78 lg:w-60 shrink-0">
           <div className="sticky top-5 self-start h-fit">
             <ScrollArea className="w-full h-[calc(100vh-5rem)]">
               {filtersLoading && Object.keys(availableFilters).length === 0 ? (

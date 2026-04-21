@@ -34,11 +34,18 @@ export default function EveryoneYouLove() {
                 fill 
                 className="object-cover transition-transform duration-700 group-hover:scale-105"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
-              <div className="absolute bottom-4 left-4 right-4 md:bottom-6 md:left-6 md:right-6 flex justify-between items-center text-white">
-                <span className="text-base md:text-2xl font-bold tracking-tight">{occ.name}</span>
-                <div className="w-8 h-8 md:w-11 md:h-11 rounded-full border border-white/40 flex items-center justify-center transition-all group-hover:bg-white group-hover:text-black">
-                  <ArrowRight size={16} className="md:w-5 md:h-5" />
+              <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/5 to-transparent pointer-events-none" />
+              <div className="absolute bottom-4 left-4 right-4 md:bottom-6 md:left-6 md:right-6 flex justify-between items-end text-white">
+                <div className="flex flex-col">
+                  <span className="text-xl xl:text-2xl lg:text-lg font-semibold leading-tight">{occ.name}</span>
+                  {occ.label && (
+                    <span className="xl:text-sm lg:text-xs font-medium opacity-90 mt-1 uppercase tracking-wider italic">
+                      {occ.label}
+                    </span>
+                  )}
+                </div>
+                <div className="xl:w-10 xl:h-10 lg:w-8 lg:h-8 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center transition-all group-hover:bg-white group-hover:text-black mb-1">
+                  <ArrowRight size={20} />
                 </div>
               </div>
             </Link>

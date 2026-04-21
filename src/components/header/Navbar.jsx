@@ -54,8 +54,8 @@ export default function Navbar({ hideTop }) {
         activeMenuPath;
 
   return (
-    <nav className="relative border-t bg-white">
-      <div className="page-width relative">
+    <nav className="relative border-t border-gray-100 bg-white">
+      <div className="max-w-screen-xl mx-auto px-4 lg:px-6 relative">
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{
@@ -63,7 +63,7 @@ export default function Navbar({ hideTop }) {
             scale: hideTop ? 1 : 0.8,
           }}
           transition={{ duration: 0.2 }}
-          className={`absolute left-14 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center ${hideTop ? "pointer-events-auto" : "pointer-events-none"
+          className={`absolute left-4 lg:left-6 xl:left-2 top-1/2 -translate-y-1/2 w-8 h-8 lg:w-9 lg:h-9 xl:w-10 xl:h-10 flex items-center justify-center ${hideTop ? "pointer-events-auto" : "pointer-events-none"
             }`}
         >
           <Link href="/">
@@ -75,7 +75,7 @@ export default function Navbar({ hideTop }) {
             />
           </Link>
         </motion.div>
-        <ul className="flex justify-center gap-12 text-sm uppercase">
+        <ul className="flex justify-center gap-6 xl:gap-10 2xl:gap-12 lg:text-xs xl:text-sm uppercase">
           {MEGA_MENU.map((menu, index) => {
             const isActive =
               pathname === menu.href ||
@@ -121,7 +121,7 @@ export default function Navbar({ hideTop }) {
           <motion.div
             onMouseEnter={() => handleEnter(activeMenu)}
             onMouseLeave={handleLeave}
-            className="absolute left-0 top-full w-full bg-white shadow-xl z-50 border-t"
+            className="absolute left-0 top-full w-full bg-white shadow-xl z-50 border-t border-gray-200"
           >
             <div className="container-main mx-auto py-8">
               {(() => {
@@ -159,7 +159,7 @@ export default function Navbar({ hideTop }) {
                   const items = menu.items || menu.cards;
                   return (
                     <div
-                      className="grid gap-6"
+                      className="grid gap-x-6"
                       style={{ gridTemplateColumns: gridTemplate }}
                     >
                       {items.map((item, i) => (
@@ -189,7 +189,7 @@ export default function Navbar({ hideTop }) {
                           </div>
 
                           <div className="absolute bottom-4 right-4">
-                            <div className="flex h-10 w-10 items-center justify-center rounded-full border border-white text-white group-hover:bg-white group-hover:text-black">
+                            <div className="flex lg:w-8 lg:h-8 xl:h-10 xl:w-10 items-center justify-center rounded-full border border-white text-white group-hover:bg-white group-hover:text-black">
                               <ArrowRight size={18} />
                             </div>
                           </div>
@@ -299,7 +299,7 @@ export default function Navbar({ hideTop }) {
                           onClick={closeMenu}
                           className="group relative block"
                         >
-                          <div className="relative aspect-[5/5.5] overflow-hidden rounded-md">
+                          <div className="relative aspect-4/4 overflow-hidden rounded-md">
                             <Image
                               src={card.image}
                               alt={card.title}
@@ -315,7 +315,7 @@ export default function Navbar({ hideTop }) {
                           </div>
 
                           <div className="absolute bottom-4 right-4">
-                            <div className="flex h-10 w-10 items-center justify-center rounded-full border border-white text-white group-hover:bg-white group-hover:text-black">
+                            <div className="flex lg:h-8 lg:w-8 xl:h-10 xl:w-10 items-center justify-center rounded-full border border-white text-white group-hover:bg-white group-hover:text-black">
                               <ArrowRight size={18} />
                             </div>
                           </div>

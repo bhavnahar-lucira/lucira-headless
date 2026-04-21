@@ -195,7 +195,7 @@ export default function MainHeader() {
   const showSearch = isSearchOpen || isFocused;
 
   return (
-    <div className="border-b border-gray-100 bg-white px-18 relative">
+    <div className="border-b border-gray-100 bg-white xl:px-18 lg:px-8 relative">
       <div className="page-width grid grid-cols-[1fr_2fr_1fr] items-center py-5">
 
         {/* Logo */}
@@ -245,7 +245,7 @@ export default function MainHeader() {
         </div>
 
         {/* Right Icons */}
-        <div className="flex items-center justify-end gap-6 text-sm">
+        <div className="flex items-center justify-end lg:gap-3 xl:gap-6 text-sm">
 
           <div className="hidden lg:flex items-center gap-2 cursor-pointer">
             <Store size={18} />

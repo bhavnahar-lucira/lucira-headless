@@ -42,7 +42,7 @@ export default function BestsellerSection() {
         "Men's Bracelet",
       ]}
       page="home"
-      colCat="shop all bestsellers"
+      colCat="Shop All Bestsellers"
       onTabChange={(tab) => setActiveTab(tab)}
       loading={loading}
     >        
