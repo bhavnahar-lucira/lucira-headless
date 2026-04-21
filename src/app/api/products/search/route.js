@@ -158,7 +158,7 @@ export async function GET(request) {
       .project({
         description: 0,
         "reviews.list": 0,
-        productMetafields: 0,
+        // Include productMetafields for dynamic card details
       })
       .sort(sortConfig)
       .skip((page - 1) * limit)

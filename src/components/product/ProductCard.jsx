@@ -688,9 +688,38 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle 
                 </h3>
               </Link>
 
-              {/* static card details - to be made dynamic based on product metafields in future iterations */}
+              {/* dynamic card details based on product/variant metafields */}
               <div className="flex flex-col justify-center items-start gap-2">
-                <p className="font-figtree text-xs font-light">{product.productMetafields?.carat_range || "Diamond"} · {product.productMetafields?.material_type || "Jewellery"} · {product.productMetafields?.weight || "0"}</p>
+                {(() => {
+                  const variantMeta = prioritizedVariant?.metafields;
+                  const prodMeta = product.productMetafields;
+                  
+                  // 1. Diamond Quality
+                  let quality = variantMeta?.diamonds?.[0]?.quality || prodMeta?.quality;
+                  
+                  // Fallback for quality if it's a ring but metadata is missing (matching ProductPage logic)
+                  if (!quality && String(product.type || "").toLowerCase().includes("ring")) {
+                    quality = "VVS-VS, EF";
+                  }
+                  
+                  // 2. Diamond Carat
+                  const carat = variantMeta?.diamonds?.[0]?.weight 
+                    ? `${variantMeta.diamonds[0].weight}ct` 
+                    : prodMeta?.carat_range;
+                  
+                  // 3. Metal Weight
+                  const weightVal = variantMeta?.metal_weight || prodMeta?.weight;
+                  const weight = weightVal ? `${weightVal}${String(weightVal).toLowerCase().includes('g') ? '' : 'g'}` : null;
+
+                  const parts = [quality, carat, weight].filter(Boolean);
+                  if (parts.length === 0) return null;
+                  
+                  return (
+                    <p className="font-figtree text-xs font-light text-gray-500 uppercase tracking-tight">
+                      {parts.join(" · ")}
+                    </p>
+                  );
+                })()}
               </div>
               {/* end */}
             </div>
