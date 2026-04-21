@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Menu, Search, Heart, ShoppingBag, Home, X, ChevronRight, ChevronLeft, User as UserIcon, LogOut, MessageCircle, Package, Video, Store, ChevronDown } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useSelector, useDispatch } from "react-redux";
 import { logout } from "@/redux/features/user/userSlice";
 import { clearCart } from "@/redux/features/cart/cartSlice";
@@ -16,6 +16,7 @@ import { MEGA_MENU as STATIC_MENU } from "@/data/megaMenu";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { pushLogout, pushViewCart } from "@/lib/gtm";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import LuciraLogo from "./LuciraLogo";
 
 const CATEGORY_IMAGES = {
   "BEST SELLERS": "/images/menu/engagement-ring.jpg",
@@ -66,12 +67,20 @@ function SafeImage({ src, alt, fallback = "/images/icons/diamond.svg", ...props 
 
 export default function MobileHeader() {
   const router = useRouter();
-  const dispatch = useDispatch();
+  const pathname = usePathname();
+  const dispatch = useDispatch();  
+  const isProductPage = pathname.startsWith('/products/');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [showSearch, setShowSearch] = useState(!isProductPage);
   const { menuData } = useMenu("main-menu-official");
   const MEGA_MENU = menuData || STATIC_MENU;
+
+  // Sync showSearch when pathname changes
+  useEffect(() => {
+    setShowSearch(!pathname.startsWith('/products/'));
+  }, [pathname]);
 
   const { user } = useSelector((state) => state.user);
   const { totalQuantity, totalAmount, items } = useSelector((state) => state.cart);
@@ -144,7 +153,7 @@ export default function MobileHeader() {
 
   const getMenuTitle = () => {
     const activeItem = getActiveItem();
-    return activeItem ? (activeItem.label || activeItem.title) : "MENU";
+    return activeItem ? (activeItem.label || activeItem.title) : <LuciraLogo className="w-6" />;
   };
 
   const handleBack = () => {
@@ -166,7 +175,7 @@ export default function MobileHeader() {
         <Accordion type="multiple" className="w-full" defaultValue={activeItem.columns?.map((_, i) => `item-${i}`)}>
           {activeItem.columns?.map((col, idx) => (
             <AccordionItem key={idx} value={`item-${idx}`} className="border-none">
-              <AccordionTrigger className="text-sm font-bold uppercase tracking-widest hover:no-underline py-4">
+              <AccordionTrigger className="text-sm font-semibold capitalize font-figtree tracking-widest hover:no-underline py-4">
                 {col.title}
               </AccordionTrigger>
               <AccordionContent>
@@ -189,7 +198,7 @@ export default function MobileHeader() {
                               className="w-12 h-12 rounded-full border border-gray-100 shadow-sm"
                               style={{ backgroundColor: METAL_COLORS[item.label] || "#eee" }}
                             />
-                            <span className="text-[10px] text-center font-medium leading-tight">{item.label}</span>
+                            <span className="text-[13px] font-figtree text-center font-normal leading-tight">{item.label}</span>
                           </Link>
                         );
                       }
@@ -209,7 +218,7 @@ export default function MobileHeader() {
                               className="w-10 h-10 object-contain"
                             />
                           </div>
-                          <span className="text-[10px] text-center font-medium leading-tight">{item.label}</span>
+                          <span className="text-[13px] font-figtree text-center font-normal leading-tight">{item.label}</span>
                         </Link>
                       );
                     })}
@@ -275,7 +284,7 @@ export default function MobileHeader() {
                 />
                 <div className="absolute inset-0 bg-black/10 group-active:bg-black/20 transition-colors" />
                 <div className="absolute bottom-4 left-4 right-4">
-                  <span className="text-white text-xs font-bold uppercase tracking-wider drop-shadow-md">
+                  <span className="text-black text-sm font-medium capitalize tracking-wider font-figtree">
                     {label}
                   </span>
                 </div>
@@ -287,13 +296,13 @@ export default function MobileHeader() {
         {/* Bottom Section */}
         <div className="mt-4 space-y-6">
           <div className="bg-[#FAF6F3] mx-4 p-4 space-y-4 rounded-lg">
-            <Link href="/account/orders" onClick={() => setIsMenuOpen(false)} className="block text-sm font-bold uppercase tracking-wider text-gray-800 border-b border-gray-200 pb-3">
+            <Link href="/account/orders" onClick={() => setIsMenuOpen(false)} className="block text-[16px] font-bold capitalize font-figtree tracking-wider text-gray-800 border-b border-gray-200 pb-3">
               Track Your Order
             </Link>
-            <Link href="/pages/contact-us" onClick={() => setIsMenuOpen(false)} className="block text-sm font-bold uppercase tracking-wider text-gray-800 border-b border-gray-200 pb-3">
+            <Link href="/pages/contact-us" onClick={() => setIsMenuOpen(false)} className="block text-[16px] font-bold capitalize font-figtree tracking-wider text-gray-800 border-b border-gray-200 pb-3">
               Contact Us
             </Link>
-            <Link href="/pages/faqs" onClick={() => setIsMenuOpen(false)} className="block text-sm font-bold uppercase tracking-wider text-gray-800">
+            <Link href="/pages/faqs" onClick={() => setIsMenuOpen(false)} className="block text-[16px] font-bold capitalize font-figtree tracking-wider text-gray-800">
               FAQs
             </Link>
           </div>
@@ -381,21 +390,21 @@ export default function MobileHeader() {
             </button>
           </SheetTrigger>
           <SheetContent side="left" className="w-full p-0 border-none" showCloseButton={false}>
-            <div className="flex flex-col h-screen bg-white overflow-hidden">
-              <SheetHeader className="px-4 py-4 border-b flex flex-row items-center justify-between sticky top-0 bg-white z-10 shrink-0">
+            <div className="flex flex-col h-screen bg-[#F1F1F1] overflow-hidden">
+              <SheetHeader className="px-4 py-4 border-b border-gray-200 flex flex-row items-center justify-between sticky top-0 bg-white z-10 shrink-0">
                 <div className="flex items-center gap-2">
                   {activeMenuPath.length > 0 && (
                     <button onClick={handleBack} className="p-1 mr-1">
                       <ChevronLeft size={20} />
                     </button>
                   )}
-                  <SheetTitle className="text-sm font-bold uppercase tracking-widest">
+                  <SheetTitle className="text-sm font-semibold capitalize font-figtree tracking-widest">
                     {getMenuTitle()}
                   </SheetTitle>
                 </div>
                 <SheetClose asChild>
                   <button className="p-1">
-                    <X size={20} />
+                    <X size={24} />
                   </button>
                 </SheetClose>
               </SheetHeader>
@@ -420,6 +429,12 @@ export default function MobileHeader() {
 
         {/* Right: Icons */}
         <div className="flex items-center gap-4">
+          {isProductPage && (
+            <button onClick={() => setShowSearch(!showSearch)} className="p-1">
+              <Search size={22} strokeWidth={1.5} className={showSearch ? "text-primary" : ""} />
+            </button>
+          )}
+
           <Link href="/">
             <Home size={22} strokeWidth={1.5} />
           </Link>
@@ -443,20 +458,22 @@ export default function MobileHeader() {
       </div>
 
       {/* Search Bar Row */}
-      <div className="px-4 py-2 bg-white">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-          <input
-            type="text"
-            placeholder="Shop for Solitaire Rings"
-            className="w-full bg-gray-50 h-10 pl-10 pr-4 rounded-sm text-sm outline-none focus:ring-1 focus:ring-gray-200"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            onKeyDown={handleSearch}
-          />
+      {showSearch && (
+        <div className="px-4 py-2 bg-white animate-in slide-in-from-top-2 duration-200">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+            <input
+              type="text"
+              placeholder="Shop for Solitaire Rings"
+              className="w-full bg-gray-50 h-10 pl-10 pr-4 rounded-sm text-sm outline-none focus:ring-1 focus:ring-gray-200"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={handleSearch}
+              autoFocus={isProductPage}
+            />
+          </div>
         </div>
-      </div>
-
+      )}
       <AuthDialog open={isAuthOpen} onOpenChange={setIsAuthOpen} />
     </div>
   );

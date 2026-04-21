@@ -110,7 +110,7 @@ function ServiceCard({ item }) {
 }
 
 export default function StoreLocatorSection() {
-  const isMobile = useMediaQuery("(max-width: 1024px)");
+  const isMobile = useMediaQuery("(max-width: 1023px)");
   const [activeIndex, setActiveIndex] = useState(0);
   const activeStore = stores[activeIndex];
 
@@ -246,7 +246,7 @@ export default function StoreLocatorSection() {
 
         <div className="grid grid-cols-1 xl:gap-6 lg:gap-4 lg:grid-cols-[minmax(0,42fr)_minmax(0,58fr)]">
           <div className="relative overflow-hidden rounded-sm">
-            <div className="relative aspect-[4/4.3] w-full">
+            <div className="relative aspect-[4/4.3] w-full h-full">
               <LazyImage src={activeStore.image} alt={activeStore.name} fill className="object-cover" />
             </div>
 

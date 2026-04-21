@@ -42,7 +42,7 @@ export default function Home() {
         <StyledByLucira/>
       </Suspense>
       <Suspense fallback={<div className="h-20 bg-gray-100 animate-pulse"></div>}>
-        <LuxuryMarquee prop={["bg-secondary", "text-black", "mt-15", "text-lg", "font-semibold"]}/>
+        <LuxuryMarquee prop={["bg-secondary", "text-black", "mt-5", "lg:mt-15", "text-lg", "font-semibold"]}/>
       </Suspense>
       <Suspense fallback={<div className="h-20 bg-gray-100 animate-pulse"></div>}>
         <ShopByOccasion/>

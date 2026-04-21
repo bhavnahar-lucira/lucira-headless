@@ -34,6 +34,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { pushProductClick, pushAddToWishlist, pushRemoveFromWishlist, formatGtmPrice } from "@/lib/gtm";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 
 const colorMap = {
   yellow: "#E2C07E",
@@ -161,7 +162,7 @@ function getPrioritizedVariant(product, collectionHandle) {
 }
 
 const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle }) => {
-  
+  const isMobile = useMediaQuery("(max-width: 1023px)");
   const baseColors = getUniqueBaseColors(product.colors || product.variants?.map((v) => v.color) || []);
   
   // Apply Global Variant Priority Hierarchy
@@ -381,7 +382,7 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle 
                           fill
                           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                           priority={index === 0}
-                          className={`object-contain p-6 grayscale-[0.2] group-hover:grayscale-0 transition-all duration-300`}
+                          className={`object-contain p-4 lg:p-6 grayscale-[0.2] group-hover:grayscale-0 transition-all duration-300`}
                         />
                       </div>
                     </SwiperSlide>
@@ -396,9 +397,9 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle 
             {videoMedia && (
               <button 
                 onClick={(e) => { e.preventDefault(); setShowVideoPopup(true); }}
-                className="absolute bottom-4 left-4 z-10 w-9 h-9 flex items-center justify-center rounded-full bg-white/90 backdrop-blur-sm border border-zinc-200 text-zinc-900 shadow-sm hover:bg-black hover:text-white transition-all duration-300"
+                className="absolute bottom-2 left-2 lg:bottom-4 lg:left-4 z-10 w-7 h-7 lg:w-9 lg:h-9 flex items-center justify-center rounded-full bg-white/90 backdrop-blur-sm border border-zinc-200 text-zinc-900 shadow-sm hover:bg-black hover:text-white transition-all duration-300"
               >
-                <Play size={16} fill="currentColor" />
+                <Play fill="currentColor" className="w-3 lg:w-4" />
               </button>
             )}
 
@@ -465,7 +466,7 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle 
 
                 handleWishlistToggle();
               }}
-              className={`absolute top-4 right-4 z-10 p-1.5 transition-transform duration-200 ${isWishlistAnimating ? "scale-110" : ""}`}
+              className={`absolute top-2 right-0 lg:top-4 lg:right-4 z-10 p-1.5 transition-transform duration-200 ${isWishlistAnimating ? "scale-110" : ""}`}
             >
               <Heart
                 size={24}
@@ -476,7 +477,7 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle 
 
             {/* Product Labels (with Seamless Vertical Slide) */}
             {displayLabels.length > 0 && (
-              <div className="absolute top-3 left-0 z-10 w-28 h-7 overflow-hidden bg-[#E2C07E]">
+              <div className="absolute top-3 left-0 z-10 w-24 lg:w-28 h-6 lg:h-7 overflow-hidden bg-[#E2C07E]">
                 <AnimatePresence initial={false}>
                   <motion.div
                     key={displayLabels[currentLabelIndex]}
@@ -484,7 +485,7 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle 
                     animate={{ y: 0 }}
                     exit={{ y: -28 }}
                     transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
-                    className="absolute inset-0 text-black text-[10px] font-bold px-2 uppercase tracking-wider flex items-center justify-center whitespace-nowrap"
+                    className="absolute inset-0 text-black text-[10px] font-bold px-1 lg:px-2 font-figtree uppercase tracking-wider flex items-center justify-center whitespace-nowrap"
                   >
                     {displayLabels[currentLabelIndex]}
                   </motion.div>
@@ -498,9 +499,9 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle 
                 <DrawerTrigger asChild>
                   <button 
                     onClick={(e) => { e.preventDefault(); fetchSimilar(); }}
-                    className="absolute bottom-4 right-4 z-10 w-9 h-9 flex items-center justify-center rounded-full bg-white/90 backdrop-blur-sm border border-zinc-200 text-zinc-900 shadow-sm hover:bg-black hover:text-white transition-all duration-300"
+                    className="absolute bottom-2 right-2 lg:bottom-4 lg:right-4 z-10 w-7 h-7 lg:w-9 lg:h-9 flex items-center justify-center rounded-full bg-white/90 backdrop-blur-sm border border-zinc-200 text-zinc-900 shadow-sm hover:bg-black hover:text-white transition-all duration-300"
                   >
-                    <Copy size={16} />
+                    <Copy className="w-3 lg:w-4" />
                   </button>
                 </DrawerTrigger>
                 <DrawerContent className="max-h-[90vh] h-[90vh] bg-white rounded-t-[20px] flex flex-col">
@@ -607,7 +608,7 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle 
                           title={base}
                           aria-label={`Show ${base} color`}
                           onClick={() => setActiveBase(base)}
-                          className={`w-7 h-7 rounded-full border transition-all flex items-center justify-center hover:scale-110 ${
+                          className={`w-5 h-5 lg:w-7 lg:h-7 rounded-full border transition-all flex items-center justify-center hover:scale-110 ${
                             isActive ? "border-black dark:border-white p-0.5" : "border-transparent"
                           }`}
                         >
@@ -625,14 +626,18 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle 
               {product.reviews?.count > 0 && (
                 <div className="flex items-center gap-1.5">
                   <div className="flex items-center gap-0.5 text-amber-400">
-                    {[...Array(5)].map((_, i) => (
-                      <Star
-                        key={i}
-                        size={12}
-                        fill={i < Math.floor(product.reviews.average) ? "currentColor" : "none"}
-                        className={i < Math.floor(product.reviews.average) ? "" : "text-zinc-200 dark:text-zinc-800"}
-                      />
-                    ))}
+                    {isMobile ? (
+                      <Star size={12} fill="currentColor" />
+                    ) : (
+                      [...Array(5)].map((_, i) => (
+                        <Star
+                          key={i}
+                          size={12}
+                          fill={i < i < Math.floor(product.reviews.average) ? "currentColor" : "none"}
+                          className={ i < i < Math.floor(product.reviews.average) ? "" : "text-zinc-200 dark:text-zinc-800"}
+                        />
+                      ))
+                    )}
                   </div>
                   <span className="text-sm font-semibold text-black mt-0.5">({product.reviews.count})</span>
                 </div>
@@ -641,15 +646,15 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle 
 
             {/* Price Section */}
             <div className="flex items-center gap-2 mt-2 font-figtree">
-              <p className="text-xl font-bold">₹{formatPrice(displayPrice)}</p>
+              <p className="text-base lg:text-xl font-bold">₹{formatPrice(displayPrice)}</p>
               {displayComparePrice > displayPrice && (
-                <p className="text-base text-gray-400 line-through">₹{formatPrice(displayComparePrice)}</p>
+                <p className="text-[14px] lg:text-base text-gray-400 line-through">₹{formatPrice(displayComparePrice)}</p>
               )}
-              {displayComparePrice > displayPrice && discountPercent > 0 && (
+              {/* {displayComparePrice > displayPrice && discountPercent > 0 && (
                 <span className="bg-[#E5E7EB] text-black px-2 py-0.5 rounded-full text-xs font-bold">
                   {discountPercent}% OFF
                 </span>
-              )}
+              )} */}
             </div>
 
             <div className="flex flex-col items-start gap-0.5">
@@ -683,14 +688,43 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle 
                 }}
               >
 
-                <h3 className="text-sm font-semibold hover:underline underline-offset-4 decoration-1 leading-snug hover:text-gray-700 transition-colors line-clamp-1 min-h-5">
+                <h3 className="text-sm font-figtree font-semibold hover:underline underline-offset-4 decoration-1 leading-snug hover:text-gray-700 transition-colors line-clamp-1 min-h-5">
                   {product.title}
                 </h3>
               </Link>
 
-              {/* static card details - to be made dynamic based on product metafields in future iterations */}
+              {/* dynamic card details based on product/variant metafields */}
               <div className="flex flex-col justify-center items-start gap-2">
-                <p className="font-figtree text-xs font-light">{product.productMetafields?.carat_range || "Diamond"} · {product.productMetafields?.material_type || "Jewellery"} · {product.productMetafields?.weight || "0"}</p>
+                {(() => {
+                  const variantMeta = prioritizedVariant?.metafields;
+                  const prodMeta = product.productMetafields;
+                  
+                  // 1. Diamond Quality
+                  let quality = variantMeta?.diamonds?.[0]?.quality || prodMeta?.quality;
+                  
+                  // Fallback for quality if it's a ring but metadata is missing (matching ProductPage logic)
+                  if (!quality && String(product.type || "").toLowerCase().includes("ring")) {
+                    quality = "VVS-VS, EF";
+                  }
+                  
+                  // 2. Diamond Carat
+                  const carat = variantMeta?.diamonds?.[0]?.weight 
+                    ? `${variantMeta.diamonds[0].weight}ct` 
+                    : prodMeta?.carat_range;
+                  
+                  // 3. Metal Weight
+                  const weightVal = variantMeta?.metal_weight || prodMeta?.weight;
+                  const weight = weightVal ? `${weightVal}${String(weightVal).toLowerCase().includes('g') ? '' : 'g'}` : null;
+
+                  const parts = [quality, carat, weight].filter(Boolean);
+                  if (parts.length === 0) return null;
+                  
+                  return (
+                    <p className="font-figtree text-[10px] lg:text-xs font-medium text-gray-500 uppercase tracking-tight">
+                      {parts.join(" · ")}
+                    </p>
+                  );
+                })()}
               </div>
               {/* end */}
             </div>
@@ -704,7 +738,7 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle 
               if (offers.length === 0) return null;
 
               return (
-                <div className="inline-flex items-center gap-1.5 text-[#108548] bg-[#F0F9F4] rounded-full px-3 py-1 mt-1 w-fit">
+                <div className="inline-flex items-center gap-1.5 text-[#108548] bg-[#F0F9F4] rounded-full px-1.5 lg:px-3 py-1 mt-1 w-fit">
                   <ShieldCheck size={12} />
                   <div className="overflow-hidden">
                     <AnimatePresence mode="wait" initial={false}>
@@ -714,7 +748,7 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle 
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -2 }}
                         transition={{ duration: 0.25, ease: "easeInOut" }}
-                        className="text-[10px] font-bold uppercase tracking-tight whitespace-nowrap block"
+                        className="text-[8px] lg:text-[10px] font-bold uppercase tracking-tight whitespace-nowrap block"
                       >
                         {offers[currentLabelIndex % offers.length]}
                       </motion.span>

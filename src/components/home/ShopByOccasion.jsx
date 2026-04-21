@@ -36,8 +36,8 @@ export default function ShopByOccasion() {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
               <div className="absolute bottom-4 left-4 right-4 md:bottom-6 md:left-6 md:right-6 flex justify-between items-center text-white">
-                <span className="text-base md:text-2xl font-bold tracking-tight">{occ.name}</span>
-                <div className="w-8 h-8 md:w-11 md:h-11 rounded-full border border-white/40 flex items-center justify-center transition-all group-hover:bg-white group-hover:text-black">
+                <span className="text-[14px] md:text-2xl lg:text-lg font-bold tracking-tight">{occ.name}</span>
+                <div className="w-6 h-6 md:w-10 md:h-10 rounded-full border border-white/40 flex items-center justify-center transition-all group-hover:bg-white group-hover:text-black">
                   <ArrowRight size={16} className="md:w-5 md:h-5" />
                 </div>
               </div>

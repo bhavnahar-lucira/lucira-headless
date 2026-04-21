@@ -25,15 +25,15 @@ export default function Footer() {
 
   if (isMobile) {
     return (
-      <footer className="w-full bg-primary text-white mt-12 pt-12 pb-6">
+      <footer className="w-full bg-primary text-white mt-12 pt-10 pb-6">
         <div className="px-6 flex flex-col items-center">
           {/* LOGO & TAGLINE */}
           <div className="mb-10 text-center">
             <Image
               src="/images/footer-logo.svg"
               alt="Lucira"
-              width={80}
-              height={140}
+              width={50}
+              height={100}
               className="mx-auto mb-4"
             />
             <p className="text-[13px] font-figtree tracking-wide opacity-80 italic">

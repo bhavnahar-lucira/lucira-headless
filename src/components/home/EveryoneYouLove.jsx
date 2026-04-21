@@ -35,17 +35,17 @@ export default function EveryoneYouLove() {
                 className="object-cover transition-transform duration-700 group-hover:scale-105"
               />
               <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/5 to-transparent pointer-events-none" />
-              <div className="absolute bottom-4 left-4 right-4 md:bottom-6 md:left-6 md:right-6 flex justify-between items-end text-white">
+              <div className="absolute bottom-4 left-4 right-4 md:bottom-6 md:left-6 md:right-6 flex justify-between items-center text-white">
                 <div className="flex flex-col">
-                  <span className="text-xl xl:text-2xl lg:text-lg font-semibold leading-tight">{occ.name}</span>
+                  <span className="text-[14px] xl:text-2xl lg:text-lg font-semibold leading-tight">{occ.name}</span>
                   {occ.label && (
-                    <span className="xl:text-sm lg:text-xs font-medium opacity-90 mt-1 uppercase tracking-wider italic">
+                    <span className="text-[14px] md:text-2xl lg:text-lg font-medium opacity-90 mt-1 uppercase tracking-wider italic">
                       {occ.label}
                     </span>
                   )}
                 </div>
-                <div className="xl:w-10 xl:h-10 lg:w-8 lg:h-8 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center transition-all group-hover:bg-white group-hover:text-black mb-1">
-                  <ArrowRight size={20} />
+                <div className="w-6 h-6 md:w-10 md:h-10 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center transition-all group-hover:bg-white group-hover:text-black mb-1">
+                  <ArrowRight size={16}  className="md:w-5 md:h-5" />
                 </div>
               </div>
             </Link>
