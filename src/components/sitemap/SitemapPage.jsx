@@ -684,7 +684,7 @@ function SitemapColumn({ title, links }) {
 
 function SitemapSection({ section, url, columns }) {
   return (
-    <div className="pb-10 mb-2 border-b border-zinc-100 last:border-b-0">
+    <div className="pb-10 mb-2 border-b border-zinc-100 last:border-b-0 font-figtree">
       <div className="mb-8">
         <h2 className="text-[13px] font-semibold tracking-[0.25em] uppercase text-zinc-900 pb-3 border-b border-zinc-900 inline-block">
           {url ? (
