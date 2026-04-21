@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Menu, Search, Heart, ShoppingBag, Home, X, ChevronRight, ChevronLeft, User as UserIcon, LogOut, MessageCircle, Package, Video, Store, ChevronDown } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useSelector, useDispatch } from "react-redux";
 import { logout } from "@/redux/features/user/userSlice";
 import { clearCart } from "@/redux/features/cart/cartSlice";
@@ -66,12 +66,22 @@ function SafeImage({ src, alt, fallback = "/images/icons/diamond.svg", ...props 
 
 export default function MobileHeader() {
   const router = useRouter();
+  const pathname = usePathname();
   const dispatch = useDispatch();
+  const isProductPage = pathname.startsWith('/products/');
+  
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [showSearch, setShowSearch] = useState(!isProductPage);
+  
   const { menuData } = useMenu("main-menu-official");
   const MEGA_MENU = menuData || STATIC_MENU;
+
+  // Sync showSearch when pathname changes
+  useEffect(() => {
+    setShowSearch(!pathname.startsWith('/products/'));
+  }, [pathname]);
 
   const { user } = useSelector((state) => state.user);
   const { totalQuantity, totalAmount, items } = useSelector((state) => state.cart);
@@ -420,6 +430,11 @@ export default function MobileHeader() {
 
         {/* Right: Icons */}
         <div className="flex items-center gap-4">
+          {isProductPage && (
+            <button onClick={() => setShowSearch(!showSearch)} className="p-1">
+              <Search size={22} strokeWidth={1.5} className={showSearch ? "text-primary" : ""} />
+            </button>
+          )}
           <Link href="/">
             <Home size={22} strokeWidth={1.5} />
           </Link>
@@ -443,19 +458,22 @@ export default function MobileHeader() {
       </div>
 
       {/* Search Bar Row */}
-      <div className="px-4 py-2 bg-white">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-          <input
-            type="text"
-            placeholder="Shop for Solitaire Rings"
-            className="w-full bg-gray-50 h-10 pl-10 pr-4 rounded-sm text-sm outline-none focus:ring-1 focus:ring-gray-200"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            onKeyDown={handleSearch}
-          />
+      {showSearch && (
+        <div className="px-4 py-2 bg-white animate-in slide-in-from-top-2 duration-200">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+            <input
+              type="text"
+              placeholder="Shop for Solitaire Rings"
+              className="w-full bg-gray-50 h-10 pl-10 pr-4 rounded-sm text-sm outline-none focus:ring-1 focus:ring-gray-200"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={handleSearch}
+              autoFocus={isProductPage}
+            />
+          </div>
         </div>
-      </div>
+      )}
 
       <AuthDialog open={isAuthOpen} onOpenChange={setIsAuthOpen} />
     </div>
