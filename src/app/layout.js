@@ -1,10 +1,12 @@
 import { Figtree, Abhaya_Libre, Lobster, Yellowtail, Satisfy, ABeeZee } from "next/font/google";
 import "./globals.css";
+import { Suspense } from "react";
 import ReduxProvider from "@/redux/provider";
 import QueryProvider from "@/providers/QueryProvider";
 import BackToTop from "@/components/common/BackToTop";
 import ToastProvider from "@/components/common/ToastProvider";
 import Script from "next/script";
+import GtmPageView from "@/components/common/GtmPageView";
 
 const figtree = Figtree({
   subsets: ["latin"],
@@ -82,6 +84,11 @@ export default function RootLayout({ children }) {
         )}
         <ReduxProvider>
           <QueryProvider> 
+            {isProd && (
+              <Suspense fallback={null}>
+                <GtmPageView />
+              </Suspense>
+            )}
             {children}
             <BackToTop />
           </QueryProvider>
