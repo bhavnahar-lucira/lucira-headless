@@ -40,7 +40,7 @@ export default function Header() {
       {/* Placeholder to prevent layout jump */}
       <div style={{ height: TOP_HEIGHT + HEADER_HEIGHT + 56 }} />
 
-      <header className="fixed top-0 left-0 w-full z-100 bg-white border-b">
+      <header className="fixed top-0 left-0 w-full z-100 bg-white border-b border-gray-100">
 
         {/* Announcement Bar */}
         <motion.div

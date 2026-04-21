@@ -110,6 +110,7 @@ const initialState = {
   totalQuantity: 0,
   totalAmount: 0,
   appliedCoupon: null,
+  nectorPoints: null, // { coin_value: 0, fiat_value: 0, points_label: "" }
   isCartOpen: false,
   loading: false,
   error: null,
@@ -124,12 +125,19 @@ const cartSlice = createSlice({
       state.totalQuantity = 0;
       state.totalAmount = 0;
       state.appliedCoupon = null;
+      state.nectorPoints = null;
     },
     applyCoupon: (state, action) => {
       state.appliedCoupon = action.payload;
     },
     removeCoupon: (state) => {
       state.appliedCoupon = null;
+    },
+    applyPoints: (state, action) => {
+      state.nectorPoints = action.payload;
+    },
+    removePoints: (state) => {
+      state.nectorPoints = null;
     },
     openCart: (state) => {
       state.isCartOpen = true;
@@ -184,6 +192,8 @@ export const {
   clearCart, 
   applyCoupon, 
   removeCoupon, 
+  applyPoints,
+  removePoints,
   openCart, 
   closeCart, 
   toggleCart 
