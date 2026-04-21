@@ -637,7 +637,7 @@ export default function CollectionPage({ params: paramsPromise }) {
 
       {/* Sticky Mobile Filter Bar */}
       {isMobile && (
-        <div className="fixed bottom-0 left-0 right-0 z-[600] bg-primary text-white flex justify-around items-center py-4 border-t border-white/10 px-4 gap-2">          
+        <div className="fixed bottom-0 left-0 right-0 z-10 bg-primary text-white flex justify-around items-center py-4 border-t border-white/10 px-4 gap-2">          
           <button 
             onClick={() => setIsSortSheetOpen(true)}
             className="flex-1 flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-wider border-r border-white/20"

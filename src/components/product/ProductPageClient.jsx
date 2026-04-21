@@ -59,6 +59,7 @@ import {
 } from "@/redux/features/wishlist/wishlistSlice";
 import { addRecentlyViewed, selectRecentlyViewed } from "@/redux/features/recentlyViewed/recentlyViewedSlice";
 import AtcBar from "@/components/AtcBar";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { pushProductView, pushAddToCart, pushAddToWishlist, pushRemoveFromWishlist, formatGtmPrice } from "@/lib/gtm";
 
 import {
@@ -112,6 +113,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
   const router = useRouter();
   const dispatch = useDispatch();
   const user = useSelector(selectUser);
+  const isMobile = useMediaQuery("(max-width: 1024px)");
   const wishlistItems = useSelector((state) => state.wishlist.items);
   const [addingToCart, setAddingToCart] = useState(false);
   const [wishlistLoading, setWishlistLoading] = useState(false);
@@ -549,7 +551,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
   return (
     <div className="w-full">
       <AtcBar 
-        isVisible={showStickyAtc} 
+        isVisible={isMobile || showStickyAtc} 
         product={product} 
         activeVariant={activeVariant}
         onAddToCart={handleAddToCart}
@@ -558,7 +560,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
         isWishlisted={isWishlisted}
         wishlistLoading={wishlistLoading}
       />
-      <div className="max-w-480 mx-auto px-17 min-[1440px]:px-17">
+      <div className="w-[91%] lg:w-full lg:max-w-480 mx-auto lg:px-17">
         {/* Breadcrumb */}
         <Breadcrumb className="py-5">
           <BreadcrumbList>
@@ -576,7 +578,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
           </BreadcrumbList>
         </Breadcrumb>
 
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_45%] xl:grid-cols-[1fr_530px] gap-10 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_530px] gap-10 items-start">
           {/* Left: Product Gallery */}
           <ProductGallery 
             media={product.media || []} 
@@ -1330,7 +1332,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
             <ProductAccordion/>
             {/* Wear This With Slider */}
             {complementaryProducts.length > 0 && <WearThisWith products={complementaryProducts} />}
-                <div ref={mainAtcRef} className="py-2 bg-white sticky bottom-0 z-[90] mt-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] lg:shadow-none">
+                <div ref={mainAtcRef} className="py-2 bg-white sticky bottom-0 z-[90] mt-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] lg:shadow-none hidden lg:block">
                   <div className="flex gap-2">
                       <Button 
                       onClick={handleAddToCart}
