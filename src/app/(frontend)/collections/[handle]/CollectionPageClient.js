@@ -10,7 +10,7 @@ import ProductCardSkeleton from "@/components/product/ProductCardSkeleton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ChevronDown, XIcon, ChevronsDown, Hammer, Filter as FilterIcon, LayoutDashboard, ShoppingBag, Loader2, ListFilter, ArrowUpDown, LayoutGrid, X } from "lucide-react";
+import { ChevronDown, XIcon, ChevronsDown, Hammer, Filter as FilterIcon, LayoutDashboard, ShoppingBag, Loader2, ListFilter, ArrowUpDown, LayoutGrid, X, SlidersHorizontal } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area"
 import {
@@ -637,11 +637,7 @@ export default function CollectionPage({ params: paramsPromise }) {
 
       {/* Sticky Mobile Filter Bar */}
       {isMobile && (
-        <div className="fixed bottom-0 left-0 right-0 z-[600] bg-[#35255F] text-white flex justify-around items-center py-4 border-t border-white/10 px-4 gap-2">
-          <button className="flex-1 flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-wider border-r border-white/20">
-            <LayoutGrid size={16} /> Categories
-          </button>
-          
+        <div className="fixed bottom-0 left-0 right-0 z-[600] bg-primary text-white flex justify-around items-center py-4 border-t border-white/10 px-4 gap-2">          
           <button 
             onClick={() => setIsSortSheetOpen(true)}
             className="flex-1 flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-wider border-r border-white/20"
@@ -653,7 +649,7 @@ export default function CollectionPage({ params: paramsPromise }) {
             onClick={() => setIsFilterSheetOpen(true)}
             className="flex-1 flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-wider"
           >
-            <ListFilter size={16} /> Filter 
+            <SlidersHorizontal size={16} /> Filter 
             {activeFilterCount > 0 && (
               <span className="bg-[#FF69B4] text-white text-[10px] min-w-4 h-4 rounded-full flex items-center justify-center px-1">
                 {activeFilterCount}
@@ -733,8 +729,8 @@ export default function CollectionPage({ params: paramsPromise }) {
                       <button
                         key={groupKey}
                         onClick={() => setActiveMobileGroup(groupKey)}
-                        className={`w-full text-left px-4 py-5 text-[11px] font-bold uppercase tracking-tight border-b border-gray-100 relative leading-tight ${
-                          activeMobileGroup === groupKey ? "bg-white text-[#8A70FF]" : "text-gray-500"
+                        className={`w-full text-left px-4 py-5 text-[11px] font-figtree font-bold uppercase tracking-tight border-b border-gray-100 relative leading-tight ${
+                          activeMobileGroup === groupKey ? "bg-white text-primary" : "text-gray-500"
                         }`}
                       >
                         {groupKey}
@@ -783,16 +779,16 @@ export default function CollectionPage({ params: paramsPromise }) {
                 </div>
               </div>
 
-              <div className="p-4 grid grid-cols-2 gap-4 border-t bg-white shadow-[0_-4px_10px_rgba(0,0,0,0.05)]">
+              <div className="grid grid-cols-2 border-t border-gray-300 bg-white shadow-[0_-4px_10px_rgba(0,0,0,0.05)]">
                 <button 
                   onClick={clearAllFilters}
-                  className="py-4 px-2 rounded-xl text-[11px] font-black bg-[#E6E1FF] text-[#35255F] uppercase tracking-[0.1em]"
+                  className="py-4 px-2 text-[11px] font-black bg-accent text-white font-figtree uppercase tracking-[0.1em]"
                 >
                   Clear All
                 </button>
                 <button 
                   onClick={() => setIsFilterSheetOpen(false)}
-                  className="py-4 px-2 rounded-xl text-[11px] font-black bg-[#8A70FF] text-white uppercase tracking-[0.1em]"
+                  className="py-4 px-2 text-[11px] font-black bg-primary text-white font-figtree uppercase tracking-[0.1em]"
                 >
                   APPLY FILTERS
                 </button>
