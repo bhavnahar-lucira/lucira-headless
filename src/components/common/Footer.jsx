@@ -16,7 +16,7 @@ export default function Footer() {
     <footer className="w-full bg-primary text-white mt-15">
       <div className="container-main py-12">
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-[220px_1fr]">
-          
+
           {/* LEFT LOGO */}
           <div className="text-center">
             <div className="mb-4 opacity-75">
@@ -35,7 +35,7 @@ export default function Footer() {
 
           {/* RIGHT LINKS */}
           <div className="grid grid-cols-2 gap-8 md:grid-cols-3 lg:grid-cols-5">
-            
+
             {/* SHOP ALL */}
             <div>
               <h4 className="mb-4 text-lg font-extrabold font-abhaya">Shop All</h4>
@@ -67,9 +67,10 @@ export default function Footer() {
                 <li><Link href="/pages/size-guide-1">Size Guide</Link></li>
                 <li><Link href="/pages/how-to-wear-2">How To Wear</Link></li>
                 <li><Link href="/pages/new-tips-care">Jewelry Care Tips</Link></li>
-                <li><Link href="#">LGD vs Mined</Link></li>
+                <li><Link href="/pages/lgd-mine-page">LGD vs Mined</Link></li>
+                <li><Link href="/pages/ring-shank">Ring Shank</Link></li>
                 <li><Link href="/pages/product-passport">Product Passport</Link></li>
-                <li><Link href="#">Diamond Shapes</Link></li>
+                <li><Link href="/pages/diamond-shapes">Diamond Shapes</Link></li>
               </ul>
             </div>
 
@@ -138,25 +139,25 @@ export default function Footer() {
           </div>
         </div>
       </div>
-       {/* SOCIAL */}
-        <div className="mb-6.5 flex items-center justify-center gap-6 border-t border-white/20 pt-6">
-          <p className="text-lg font-extraboldfont-abhaya">Follow Us</p>
+      {/* SOCIAL */}
+      <div className="mb-6.5 flex items-center justify-center gap-6 border-t border-white/20 pt-6">
+        <p className="text-lg font-extraboldfont-abhaya">Follow Us</p>
 
-          <div className="flex items-center gap-4">
-            <Link href="https://www.facebook.com/lucirajewelry">
-              <Facebook size={18} />
-            </Link>
-            <Link href="https://www.instagram.com/lucirajewelry">
-              <Instagram size={18} />
-            </Link>
-            <Link href="https://www.youtube.com/@Lucira_Jewelry">
-              <Youtube size={18} />
-            </Link>
-            <Link href="https://www.linkedin.com/company/lucira-jewelry">
-              <Linkedin size={18} />
-            </Link>
-          </div>
+        <div className="flex items-center gap-4">
+          <Link href="https://www.facebook.com/lucirajewelry">
+            <Facebook size={18} />
+          </Link>
+          <Link href="https://www.instagram.com/lucirajewelry">
+            <Instagram size={18} />
+          </Link>
+          <Link href="https://www.youtube.com/@Lucira_Jewelry">
+            <Youtube size={18} />
+          </Link>
+          <Link href="https://www.linkedin.com/company/lucira-jewelry">
+            <Linkedin size={18} />
+          </Link>
         </div>
+      </div>
 
       {/* BOTTOM BAR */}
       <div className="border-t border-white/20 py-4 text-sm">
