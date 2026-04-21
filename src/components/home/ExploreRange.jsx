@@ -102,7 +102,7 @@ function CategoryCard({ cat }) {
       />
       <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent pointer-events-none" />
       <div className="absolute bottom-4 md:bottom-6 left-3 md:left-4 right-3 md:right-4 flex justify-between items-center text-white">
-        <span className="text-base md:text-xl font-bold tracking-tight">{cat.name}</span>
+        <span className="text-base md:text-xl lg:text-lg font-bold tracking-tight">{cat.name}</span>
         <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center transition-all group-hover:bg-white group-hover:text-black shrink-0">
           <ArrowRight size={16} className="md:w-5 md:h-5" />
         </div>

@@ -15,7 +15,7 @@ const HEADER_HEIGHT = 88;
 export default function Header() {
   const [hideTop, setHideTop] = useState(false);
   const { scrollY } = useScroll();
-  const isMobile = useMediaQuery("(max-width: 1180px)");
+  const isMobile = useMediaQuery("(max-width: 1023px)");
 
   useMotionValueEvent(scrollY, "change", (y) => {
     setHideTop(y > 120);

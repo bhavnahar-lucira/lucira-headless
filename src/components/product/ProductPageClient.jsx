@@ -576,7 +576,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
           </BreadcrumbList>
         </Breadcrumb>
 
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_530px] gap-10 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_45%] xl:grid-cols-[1fr_530px] gap-10 items-start">
           {/* Left: Product Gallery */}
           <ProductGallery 
             media={product.media || []} 

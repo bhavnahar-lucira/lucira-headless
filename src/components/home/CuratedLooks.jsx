@@ -287,12 +287,6 @@ export default function CuratedLooks() {
                </div>
             </div>
           </div>
-
-          <div className="mt-10 flex justify-center">
-            <Button className="h-14 px-10 bg-[#5A413F] hover:bg-[#4a3533] text-white font-bold text-sm tracking-[0.15em] uppercase rounded-xl transition-all shadow-md">
-              VIEW ALL INSPIRATION
-            </Button>
-          </div>
         </div>
 
         <style jsx global>{`

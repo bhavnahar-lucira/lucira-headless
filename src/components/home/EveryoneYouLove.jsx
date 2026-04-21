@@ -35,7 +35,7 @@ export default function EveryoneYouLove() {
                 className="object-cover transition-transform duration-700 group-hover:scale-105"
               />
               <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/5 to-transparent pointer-events-none" />
-              <div className="absolute bottom-4 left-4 right-4 md:bottom-6 md:left-6 md:right-6 flex justify-between items-end text-white">
+              <div className="absolute bottom-4 left-4 right-4 md:bottom-6 md:left-6 md:right-6 flex justify-between items-center text-white">
                 <div className="flex flex-col">
                   <span className="text-xl xl:text-2xl lg:text-lg font-semibold leading-tight">{occ.name}</span>
                   {occ.label && (
