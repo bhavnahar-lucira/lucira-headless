@@ -51,6 +51,15 @@ export default function GtmPageView() {
         device_type: window.innerWidth < 768 ? 'mobile' : window.innerWidth < 1024 ? 'tablet' : 'desktop'
       });
     }
+    // 4. Push Marketing Data
+    pushMarketingData({
+      utmSource: searchParams.get("utm_source") || "",
+      utmMedium: searchParams.get("utm_medium") || "",
+      utmCampaign: searchParams.get("utm_campaign") || "",
+      utmTerm: searchParams.get("utm_term") || "",
+      utmContent: searchParams.get("utm_content") || "",
+      utmId: searchParams.get("utm_id") || ""
+    });
 
   }, [pathname, searchParams, user, isAuthenticated]);
 
