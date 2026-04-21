@@ -8,7 +8,6 @@ import "@/assets/style.css";
 export default async function Page({ params }) {
   const { handle } = await params;
 
-  // 1. Static-like Dynamic Routes
   if (handle === "contact-us") {
     return <ContactSection />;
   }
@@ -17,7 +16,6 @@ export default async function Page({ params }) {
     return <SitemapPage />;
   }
 
-  // 2. Fetch Data (DB with Shopify Fallback)
   let page = await getPageByHandle(handle);
 
   if (!page) {
@@ -28,7 +26,6 @@ export default async function Page({ params }) {
 
   const hasBody = typeof page.body === "string" && page.body.trim() !== "";
 
-  // 3. Custom Layouts
   if (handle === "exclusive-promotions-page") {
     return (
       <div className="w-full bg-white min-h-screen">
@@ -115,7 +112,6 @@ export default async function Page({ params }) {
     );
   }
 
-  // 4. Standard Layout with Accordion support
   const isAccordionPage = hasBody && page.body.includes("data-toggle");
 
   return (
