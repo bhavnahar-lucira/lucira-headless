@@ -586,14 +586,20 @@ export default function PaymentPage() {
             // Call Nector Perform API if points were applied
             if (nectorPoints) {
               try {
-                await fetch('https://platform.nector.io/api/open/integrations/customcheckoutwebhook/1b00001c-26f4-4b62-a601-4f874e63f108', {
+                const getNectorCustomerId = (gid) => {
+                  if (!gid) return "";
+                  const match = String(gid).match(/\d+$/);
+                  const numericId = match ? match[0] : gid;
+                  return `shopify-${numericId}`;
+                };
+
+                await fetch('/api/nector/checkout', {
                   method: 'POST',
                   headers: { 
-                    'x-source': 'web',
                     'Content-Type': 'application/json' 
                   },
                   body: JSON.stringify({
-                    mobile: normalizePhone(customer?.phone || user?.mobile || selectedAddress?.phone || ""),
+                    customer_id: getNectorCustomerId(user?.id),
                     country: "ind",
                     action: "perform",
                     amount: nectorPoints.fiat_value,

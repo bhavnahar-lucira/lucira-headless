@@ -64,10 +64,10 @@ export default function CheckoutSummary() {
   const grandTotalValue = subtotalValue + insuranceValue - discountValue - pointsDiscountAmount;
 
   useEffect(() => {
-    if (isPaymentPage && user?.mobile && hasDiamondJewellery) {
+    if (isPaymentPage && user?.id && hasDiamondJewellery) {
       fetchPoints();
     }
-  }, [isPaymentPage, user?.mobile, hasDiamondJewellery]);
+  }, [isPaymentPage, user?.id, hasDiamondJewellery]);
 
   const fetchPoints = async () => {
     try {
@@ -82,11 +82,18 @@ export default function CheckoutSummary() {
         })
         .reduce((acc, item) => acc + (item.price * item.quantity), 0);
 
-      const response = await fetch('https://platform.nector.io/api/open/integrations/customcheckoutwebhook/1b00001c-26f4-4b62-a601-4f874e63f108', {
+      const getNectorCustomerId = (gid) => {
+        if (!gid) return "";
+        const match = String(gid).match(/\d+$/);
+        const numericId = match ? match[0] : gid;
+        return `shopify-${numericId}`;
+      };
+
+      const response = await fetch('/api/nector/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          mobile: user.mobile,
+          customer_id: getNectorCustomerId(user.id),
           country: "ind",
           action: "list",
           amount: diamondJewelleryAmount
