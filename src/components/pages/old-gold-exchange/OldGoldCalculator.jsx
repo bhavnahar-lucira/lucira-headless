@@ -184,7 +184,7 @@ export default function OldGoldCalculator({ config }) {
                   </div>
                 </div>
 
-                <div className="space-y-6 mb-8">
+                <div className="space-y-6 mb-8 text-left px-2">
                   <div className="flex justify-between items-center pb-4 border-b border-white/10">
                     <div>
                       <div className="text-base font-medium">Market Value</div>
@@ -193,7 +193,7 @@ export default function OldGoldCalculator({ config }) {
                     <div className="text-xl font-bold">{loading ? "₹ --" : formatCurrency(calculation.marketValue)}</div>
                   </div>
 
-                  <div className="flex justify-between items-start pt-4">
+                  <div className="flex justify-between items-center pt-4">
                     <div>
                       <div className="text-base font-medium flex items-center gap-2">
                         Exchange Value
@@ -201,7 +201,7 @@ export default function OldGoldCalculator({ config }) {
                       </div>
                       <div className="text-[11px] opacity-70">Total value for your gold</div>
                     </div>
-                    <div className="text-2xl md:text-2xl font-bold">{loading ? "₹ --" : formatCurrency(calculation.exchangeValue)}</div>
+                    <div className="text-2xl font-bold">{loading ? "₹ --" : formatCurrency(calculation.exchangeValue)}</div>
                   </div>
                 </div>
 
