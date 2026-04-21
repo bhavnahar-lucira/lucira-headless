@@ -33,7 +33,7 @@ export default function NoteFromFounder() {
             </div>
 
             {/* Signature Image */}
-            <div className="absolute bottom-10 right-10 md:bottom-12 md:right-16 opacity-90">
+            <div className="absolute bottom-2 right-6 md:bottom-12 md:right-16 opacity-90">
                <LazyImage 
                 src="/images/signature.png" 
                 alt="Rupesh Jain Signature" 

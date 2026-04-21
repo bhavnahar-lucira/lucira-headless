@@ -16,6 +16,7 @@ import { MEGA_MENU as STATIC_MENU } from "@/data/megaMenu";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { pushLogout, pushViewCart } from "@/lib/gtm";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import LuciraLogo from "./LuciraLogo";
 
 const CATEGORY_IMAGES = {
   "BEST SELLERS": "/images/menu/engagement-ring.jpg",
@@ -144,7 +145,7 @@ export default function MobileHeader() {
 
   const getMenuTitle = () => {
     const activeItem = getActiveItem();
-    return activeItem ? (activeItem.label || activeItem.title) : "MENU";
+    return activeItem ? (activeItem.label || activeItem.title) : <LuciraLogo className="w-6" />;
   };
 
   const handleBack = () => {
@@ -166,7 +167,7 @@ export default function MobileHeader() {
         <Accordion type="multiple" className="w-full" defaultValue={activeItem.columns?.map((_, i) => `item-${i}`)}>
           {activeItem.columns?.map((col, idx) => (
             <AccordionItem key={idx} value={`item-${idx}`} className="border-none">
-              <AccordionTrigger className="text-sm font-bold uppercase tracking-widest hover:no-underline py-4">
+              <AccordionTrigger className="text-sm font-semibold capitalize font-figtree tracking-widest hover:no-underline py-4">
                 {col.title}
               </AccordionTrigger>
               <AccordionContent>
@@ -189,7 +190,7 @@ export default function MobileHeader() {
                               className="w-12 h-12 rounded-full border border-gray-100 shadow-sm"
                               style={{ backgroundColor: METAL_COLORS[item.label] || "#eee" }}
                             />
-                            <span className="text-[10px] text-center font-medium leading-tight">{item.label}</span>
+                            <span className="text-[13px] font-figtree text-center font-normal leading-tight">{item.label}</span>
                           </Link>
                         );
                       }
@@ -209,7 +210,7 @@ export default function MobileHeader() {
                               className="w-10 h-10 object-contain"
                             />
                           </div>
-                          <span className="text-[10px] text-center font-medium leading-tight">{item.label}</span>
+                          <span className="text-[13px] font-figtree text-center font-normal leading-tight">{item.label}</span>
                         </Link>
                       );
                     })}
@@ -275,7 +276,7 @@ export default function MobileHeader() {
                 />
                 <div className="absolute inset-0 bg-black/10 group-active:bg-black/20 transition-colors" />
                 <div className="absolute bottom-4 left-4 right-4">
-                  <span className="text-white text-xs font-bold uppercase tracking-wider drop-shadow-md">
+                  <span className="text-black text-sm font-medium capitalize tracking-wider font-figtree">
                     {label}
                   </span>
                 </div>
@@ -287,13 +288,13 @@ export default function MobileHeader() {
         {/* Bottom Section */}
         <div className="mt-4 space-y-6">
           <div className="bg-[#FAF6F3] mx-4 p-4 space-y-4 rounded-lg">
-            <Link href="/account/orders" onClick={() => setIsMenuOpen(false)} className="block text-sm font-bold uppercase tracking-wider text-gray-800 border-b border-gray-200 pb-3">
+            <Link href="/account/orders" onClick={() => setIsMenuOpen(false)} className="block text-[16px] font-bold capitalize font-figtree tracking-wider text-gray-800 border-b border-gray-200 pb-3">
               Track Your Order
             </Link>
-            <Link href="/pages/contact-us" onClick={() => setIsMenuOpen(false)} className="block text-sm font-bold uppercase tracking-wider text-gray-800 border-b border-gray-200 pb-3">
+            <Link href="/pages/contact-us" onClick={() => setIsMenuOpen(false)} className="block text-[16px] font-bold capitalize font-figtree tracking-wider text-gray-800 border-b border-gray-200 pb-3">
               Contact Us
             </Link>
-            <Link href="/pages/faqs" onClick={() => setIsMenuOpen(false)} className="block text-sm font-bold uppercase tracking-wider text-gray-800">
+            <Link href="/pages/faqs" onClick={() => setIsMenuOpen(false)} className="block text-[16px] font-bold capitalize font-figtree tracking-wider text-gray-800">
               FAQs
             </Link>
           </div>
@@ -381,21 +382,21 @@ export default function MobileHeader() {
             </button>
           </SheetTrigger>
           <SheetContent side="left" className="w-full p-0 border-none" showCloseButton={false}>
-            <div className="flex flex-col h-screen bg-white overflow-hidden">
-              <SheetHeader className="px-4 py-4 border-b flex flex-row items-center justify-between sticky top-0 bg-white z-10 shrink-0">
+            <div className="flex flex-col h-screen bg-[#F1F1F1] overflow-hidden">
+              <SheetHeader className="px-4 py-4 border-b border-gray-200 flex flex-row items-center justify-between sticky top-0 bg-white z-10 shrink-0">
                 <div className="flex items-center gap-2">
                   {activeMenuPath.length > 0 && (
                     <button onClick={handleBack} className="p-1 mr-1">
                       <ChevronLeft size={20} />
                     </button>
                   )}
-                  <SheetTitle className="text-sm font-bold uppercase tracking-widest">
+                  <SheetTitle className="text-sm font-semibold capitalize font-figtree tracking-widest">
                     {getMenuTitle()}
                   </SheetTitle>
                 </div>
                 <SheetClose asChild>
                   <button className="p-1">
-                    <X size={20} />
+                    <X size={24} />
                   </button>
                 </SheetClose>
               </SheetHeader>
