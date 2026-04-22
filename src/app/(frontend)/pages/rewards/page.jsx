@@ -1,6 +1,6 @@
 'use client'
 import Image from "next/image";
-import { Suspense, useState } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { AuthDialog } from "@/components/auth/AuthDialog";
 import { toast } from "react-toastify";
@@ -91,35 +91,71 @@ export default function RewardsPage() {
         },
     ];
 
-    const [open, setOpen] = useState();
-    const {user} = useSelector((state) => state.user);
-    const isLoggedIn = user?.isAuthenticated;
-    const referralLink = user?.referralLink || "";
+    const [open, setOpen] = useState(false);
+    const [nectorData, setNectorData] = useState({ referralLink: "", balance: 0 });
+    const [loading, setLoading] = useState(false);
+    
+    // Check Redux state - Ensure these fields exist in your userSlice
+    const { user } = useSelector((state) => state.user);
+    
+    // IMPORTANT: Check if your slice uses 'isAuthenticated' or just checks if 'user' exists
+    const isLoggedIn = !!user?.id;
+    console.log(isLoggedIn);
+    
+
+    console.log("Current User Data:", user);
+
+    // Fetch Nector data from Shopify Metafields via our internal API
+    useEffect(() => {
+        const fetchReferralData = async () => {
+            if (isLoggedIn && user?.id) {
+                setLoading(true);
+                try {
+                    // Call the API we created above
+                    const res = await fetch(`/api/nector/customer?customerId=${user.id}`);
+                    const data = await res.json();
+                    
+                    if (data.referralLink) {
+                        setNectorData({
+                            referralLink: data.referralLink,
+                            balance: data.balance || 0
+                        });
+                    }
+                } catch (err) {
+                    console.error("Error fetching nector data:", err);
+                } finally {
+                    setLoading(false);
+                }
+            }
+        };
+
+        fetchReferralData();
+    }, [isLoggedIn, user?.id]);
 
     const handleScroll = () => {
         const element = document.getElementById("refer-and-earn");
         if (!element) return;
-
-        const offset = 60;
-        const top = element.getBoundingClientRect().top + window.scrollY - offset;
-
         window.scrollTo({
-            top,
+            top: element.getBoundingClientRect().top + window.scrollY - 60,
             behavior: "smooth",
         });
     };
 
     const handleClick = () => {
-        if(!isLoggedIn) {
-            setOpen(true)
-            return
+        if (!isLoggedIn) {
+            setOpen(true);
+            return;
         }
 
-        if (referralLink) {
-            navigator.clipboard.writeText(referralLink);
+        if (nectorData.referralLink) {
+            navigator.clipboard.writeText(nectorData.referralLink);
             toast.success("Referral link copied!");
+        } else if (loading) {
+            toast.info("Loading your referral details...");
+        } else {
+            toast.error("Referral link not found. Please try again later.");
         }
-    }
+    };
     
     return (
         <>
@@ -202,60 +238,58 @@ export default function RewardsPage() {
                     </div>
                 </div>
             </section>
-            <section className="py-16">
+            <section className="py-16" id="refer-and-earn">
                 <div className="w-full mx-auto px-12">
                     <div className="text-center mb-10">
                         <h2 className="text-2xl md:text-3xl font-medium uppercase mb-4">
-                        Referral Program
+                            Referral Program
                         </h2>
                         <p className="max-w-3xl mx-auto text-gray-800 text-sm">
-                        Let your sparkle inspire and earn while you do. Invite your friends to join Lucira and enjoy exclusive perks when they make their first purchase - you earn Lucira Coins and they get a discount. It's our way of saying thank you.
+                            Invite your friends to join Lucira and enjoy exclusive perks.
                         </p>
                     </div>
+
                     <div className="grid md:grid-cols-3 gap-6 items-center">
                         <div>
                             <p className="mb-4 text-gray-800">
-                                Your Referral Link is Ready to Share with your friends
+                                Your Referral Link is Ready to Share
                             </p>
                             <div className="flex">
                                 <input
-                                className="flex-1 border px-4 py-3 rounded-l-md text-sm"
-                                value={
-                                    isLoggedIn
-                                    ? referralLink || "Generating your referral link..."
-                                    : "Please Login to Share your Referral Link"
-                                }
-                                readOnly
+                                    className="flex-1 border px-4 py-3 rounded-l-md text-sm bg-gray-50 focus:outline-none"
+                                    value={
+                                        isLoggedIn 
+                                            ? (loading ? "Fetching link..." : nectorData.referralLink || "Link not generated yet")
+                                            : "Please Login to Share your Referral Link"
+                                    }
+                                    readOnly
                                 />
                                 <button
-                                onClick={handleClick}
-                                className="bg-[#A68380] text-white px-6 py-3 text-sm uppercase rounded-r-md cursor-pointer"
+                                    onClick={handleClick}
+                                    className="bg-[#A68380] text-white px-6 py-3 text-sm uppercase rounded-r-md cursor-pointer hover:bg-[#8e6e6b] transition-all"
                                 >
-                                {isLoggedIn ? "Copy" : "Login"}
+                                    {isLoggedIn ? "Copy" : "Login"}
                                 </button>
                             </div>
                         </div>
+
+                        {/* Rewards Cards */}
                         <div className="relative bg-[#F3E0CF] p-6 rounded-md text-right h-[180px] flex flex-col justify-center">
                             <Image alt="They Get" width={300} height={300}
                                 src="https://cdn.shopify.com/s/files/1/0739/8516/3482/files/They_Get_img_2.png?v=1751354604"
                                 className="absolute bottom-0 left-0 w-auto h-full object-contain"
                             />
                             <p className="text-sm mb-2">They Get</p>
-                            <p className="text-3xl font-bold">
-                                ₹1,000 Off <br />
-                                <span className="text-xl font-bold">on their 1st Order</span>
-                            </p>
+                            <p className="text-3xl font-bold">₹1,000 Off</p>
                         </div>
+
                         <div className="relative bg-[#F3E0CF] p-6 rounded-md text-left h-[180px] flex flex-col justify-center">
                             <Image alt="You Get" width={300} height={300}
                                 src="https://cdn.shopify.com/s/files/1/0739/8516/3482/files/7d93784d-d99f-4716-8c45-779b911938f6_2.png?v=1751352893"
                                 className="absolute bottom-0 right-0 w-auto h-full object-contain"
                             />
                             <p className="text-sm mb-2">You Get</p>
-                            <p className="text-3xl font-bold">
-                                2,000 <br />
-                                <span className="text-xl font-bold">Lucira Coins</span>
-                            </p>
+                            <p className="text-3xl font-bold">2,000 Coins</p>
                         </div>
                     </div>
                 </div>
