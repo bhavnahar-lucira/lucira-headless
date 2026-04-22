@@ -21,14 +21,6 @@ export default function ProductAccordion() {
             quality and finish.
           </p>
         </Item>
-
-        <Item title="Product Passport">
-          <p className="text-sm leading-relaxed">
-            Each Lucira piece includes a digital product passport containing
-            material details, certifications, and authenticity information.
-          </p>
-        </Item>
-
         <Item title="Warranty & Return Policy">
           <p className="text-sm leading-relaxed">
             Lucira offers lifetime exchange and a 15-day free return policy.

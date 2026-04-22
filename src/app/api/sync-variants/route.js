@@ -92,11 +92,14 @@ export async function POST(req) {
                       ring_size: metafield(namespace: "custom", key: "ring_size_inventory") { value }
                       diamond_shape: metafield(namespace: "custom", key: "diamond_1_shape") { value }
                       metal_purity: metafield(namespace: "custom", key: "metal_purity") { value }
-                      metal_weight: metafield(namespace: "custom", key: "metal_weight") { value }
+                      custom_metal_weight: metafield(namespace: "custom", key: "metal_weight") { value }
+                      ornaverse_metal_weight: metafield(namespace: "ornaverse", key: "metal_weight") { value }
                       metal_color: metafield(namespace: "custom", key: "metal_color") { value }
-                      gross_weight: metafield(namespace: "custom", key: "gross_weight") { value }
+                      custom_gross_weight: metafield(namespace: "custom", key: "gross_weight") { value }
+                      ornaverse_gross_weight: metafield(namespace: "ornaverse", key: "gross_weight") { value }
                       top_height: metafield(namespace: "custom", key: "top_height") { value }
                       top_width: metafield(namespace: "custom", key: "top_width") { value }
+                      ornaverse_components: metafield(namespace: "ornaverse", key: "components") { value }
                       d1_clarity: metafield(namespace: "custom", key: "diamond_1_clarity") { value }
                       d1_color: metafield(namespace: "custom", key: "diamond_1_color") { value }
                       d1_shape: metafield(namespace: "custom", key: "diamond_1_shape") { value }
@@ -107,6 +110,16 @@ export async function POST(req) {
                       d2_shape: metafield(namespace: "custom", key: "diamond_2_shape") { value }
                       d2_pcs: metafield(namespace: "custom", key: "diamond_2_numbers") { value }
                       d2_wt: metafield(namespace: "custom", key: "diamond_2_weight") { value }
+                      d3_clarity: metafield(namespace: "custom", key: "diamond_3_clarity") { value }
+                      d3_color: metafield(namespace: "custom", key: "diamond_3_color") { value }
+                      d3_shape: metafield(namespace: "custom", key: "diamond_3_shape") { value }
+                      d3_pcs: metafield(namespace: "custom", key: "diamond_3_numbers") { value }
+                      d3_wt: metafield(namespace: "custom", key: "diamond_3_weight") { value }
+                      d4_clarity: metafield(namespace: "custom", key: "diamond_4_clarity") { value }
+                      d4_color: metafield(namespace: "custom", key: "diamond_4_color") { value }
+                      d4_shape: metafield(namespace: "custom", key: "diamond_4_shape") { value }
+                      d4_pcs: metafield(namespace: "custom", key: "diamond_4_numbers") { value }
+                      d4_wt: metafield(namespace: "custom", key: "diamond_4_weight") { value }
                       gem1_color: metafield(namespace: "custom", key: "gemstone_1_color") { value }
                       gem1_shape: metafield(namespace: "custom", key: "gemstone_1_shape") { value }
                       gem1_pcs: metafield(namespace: "custom", key: "gemstone_1_numbers") { value }
@@ -115,6 +128,14 @@ export async function POST(req) {
                       gem2_shape: metafield(namespace: "custom", key: "gemstone_2_shape") { value }
                       gem2_pcs: metafield(namespace: "custom", key: "gemstone_2_numbers") { value }
                       gem2_wt: metafield(namespace: "custom", key: "gemstone_2_weight") { value }
+                      gem3_color: metafield(namespace: "custom", key: "gemstone_3_color") { value }
+                      gem3_shape: metafield(namespace: "custom", key: "gemstone_3_shape") { value }
+                      gem3_pcs: metafield(namespace: "custom", key: "gemstone_3_numbers") { value }
+                      gem3_wt: metafield(namespace: "custom", key: "gemstone_3_weight") { value }
+                      gem4_color: metafield(namespace: "custom", key: "gemstone_4_color") { value }
+                      gem4_shape: metafield(namespace: "custom", key: "gemstone_4_shape") { value }
+                      gem4_pcs: metafield(namespace: "custom", key: "gemstone_4_numbers") { value }
+                      gem4_wt: metafield(namespace: "custom", key: "gemstone_4_weight") { value }
                       variant_config: metafield(namespace: "DI-GoldPrice", key: "variant_config") { value }
                     }
                   }
@@ -141,22 +162,22 @@ export async function POST(req) {
               }
             }
 
-            // A. Diamonds from Config (Preferred)
-            let diamonds = config?.advanced_stone_config?.filter(s => s.stone_type === "diamond")?.map(s => ({
-              pieces: s.stone_quantity,
-              weight: s.stone_weight,
-              clarity: s.stone_clarity,
-              color: s.stone_color,
-              shape: s.stone_shape,
-              setting: s.stone_setting
+            // A. Diamonds from ornaverse components (Preferred)
+            const ornaverseComponents = v.ornaverse_components?.value ? JSON.parse(v.ornaverse_components.value).components : [];
+            
+            let diamonds = ornaverseComponents?.filter(s => s.item_group_name?.toLowerCase() === "diamond")?.map(s => ({
+              pieces: s.pieces,
+              weight: s.weight,
+              quality: `${s.quality_code || ""}${s.stone_color_code ? `, ${s.stone_color_code}` : ""}`.trim().replace(/^,/, ""),
+              shape: s.shape_code,
             })) || [];
 
-            // B. Fallback to individual metafields if config is empty
+            // B. Fallback to individual custom metafields if no JSON diamonds
             if (diamonds.length === 0) {
-              [1, 2].forEach(i => {
-                if (v[`d${i}_clarity`]?.value) {
+              [1, 2, 3, 4].forEach(i => {
+                if (v[`d${i}_clarity`]?.value || v[`d${i}_wt`]?.value) {
                   diamonds.push({
-                    quality: `${v[`d${i}_clarity`].value}, ${v[`d${i}_color`]?.value || ""}`.trim().replace(/,$/, ""),
+                    quality: `${v[`d${i}_clarity`]?.value || ""}, ${v[`d${i}_color`]?.value || ""}`.trim().replace(/^, | ,$|^,|,$/g, ""),
                     shape: v[`d${i}_shape`]?.value || "Round",
                     pieces: v[`d${i}_pcs`]?.value || "1",
                     weight: v[`d${i}_wt`]?.value || "0"
@@ -165,19 +186,21 @@ export async function POST(req) {
               });
             }
 
-            // C. Gemstones from Config
-            let gemstones = config?.advanced_stone_config?.filter(s => s.stone_type === "gemstone")?.map(s => ({
-              pieces: s.stone_quantity,
-              weight: s.stone_weight,
-              type: s.stone_name,
-              shape: s.stone_shape,
-              setting: s.stone_setting
+            // C. Gemstones from ornaverse components (Exclude metal/gold/silver/platinum/diamond)
+            const excludeTypes = ["gold", "metal", "silver", "platinum", "diamond"];
+            let gemstones = ornaverseComponents?.filter(s => 
+              s.item_group_name && !excludeTypes.includes(s.item_group_name.toLowerCase())
+            )?.map(s => ({
+              pieces: s.pieces,
+              weight: s.weight,
+              color: s.stone_color_code,
+              shape: s.shape_code,
             })) || [];
 
-            // D. Fallback to individual metafields
+            // D. Fallback to individual custom metafields for gemstones
             if (gemstones.length === 0) {
-              [1, 2].forEach(i => {
-                if (v[`gem${i}_color`]?.value || v[`gem${i}_shape`]?.value) {
+              [1, 2, 3, 4].forEach(i => {
+                if (v[`gem${i}_color`]?.value || v[`gem${i}_wt`]?.value) {
                   gemstones.push({
                     color: v[`gem${i}_color`]?.value || "",
                     shape: v[`gem${i}_shape`]?.value || "Round",
@@ -209,11 +232,12 @@ export async function POST(req) {
                 diamond_1_shape: v.diamond_shape?.value || v.d1_shape?.value,
                 ring_size_inventory: v.ring_size?.value,
                 metal_purity: v.metal_purity?.value || config?.purity,
-                metal_weight: v.metal_weight?.value || config?.metal_weight,
+                metal_weight: v.ornaverse_metal_weight?.value || v.custom_metal_weight?.value || config?.metal_weight,
                 metal_color: v.metal_color?.value,
-                gross_weight: v.gross_weight?.value,
+                gross_weight: v.ornaverse_gross_weight?.value || v.custom_gross_weight?.value,
                 top_height: v.top_height?.value,
                 top_width: v.top_width?.value,
+                ornaverse_components: v.ornaverse_components?.value ? JSON.parse(v.ornaverse_components.value) : null,
                 diamonds: diamonds.length > 0 ? diamonds : null,
                 gemstones: gemstones.length > 0 ? gemstones : null
               }

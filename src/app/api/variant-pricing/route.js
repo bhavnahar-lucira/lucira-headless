@@ -106,44 +106,60 @@ export async function GET(req) {
     const totalSavingsAmt = originalGrandTotal - finalGrandTotal;
 
     const luciraDiamondPrice = breakup.diamond.final || 0;
+    const hasDiamonds = (breakup.diamond.pcs || 0) > 0 || (breakup.diamond.carat || 0) > 0;
     const comparisonSavings = minedDiamondTotal - luciraDiamondPrice;
 
     // --- Construct UI Data ---
+    const priceRows = [
+      { 
+        label: `${breakup.metal.purity || ''} ${metalColor} ${breakup.metal.metal_type || 'Gold'} (₹${formatPrice(breakup.metal.rate_per_gram)}/g)`, 
+        value: `₹${formatPrice(breakup.metal.cost || 0)}` 
+      }
+    ];
+
+    if (hasDiamonds) {
+      priceRows.push({ 
+        label: `${breakup.diamond.color || 'E-F'}, ${breakup.diamond.clarity || 'VVS/VS'} (${breakup.diamond.pcs || 0} Pcs.)`, 
+        value: `₹${formatPrice(breakup.diamond.final || 0)}`,
+        oldValue: breakup.diamond.original > breakup.diamond.final ? `₹${formatPrice(breakup.diamond.original)}` : null,
+        discount: breakup.diamond.discount_percent > 0 ? `${breakup.diamond.discount_percent}% OFF` : null
+      });
+    }
+
+    if (breakup.gemstone.final > 0) {
+      priceRows.push({
+        label: `Gemstone Charges (${breakup.gemstone.pcs || 0} Pcs)`, 
+        value: `₹${formatPrice(breakup.gemstone.final || 0)}`,
+        oldValue: breakup.gemstone.original > breakup.gemstone.final ? `₹${formatPrice(breakup.gemstone.original)}` : null,
+        discount: breakup.gemstone.discount_percent > 0 ? `${breakup.gemstone.discount_percent}% OFF` : null
+      });
+    }
+
+    priceRows.push(
+      { 
+        label: `Making Charges`, 
+        value: `₹${formatPrice(breakup.making_charges.final || 0)}`,
+        oldValue: breakup.making_charges.original > breakup.making_charges.final ? `₹${formatPrice(breakup.making_charges.original)}` : null,
+        discount: breakup.making_charges.discount_percent > 0 ? `${breakup.making_charges.discount_percent}% OFF` : null
+      },
+      { 
+        label: `GST (${taxPercent}%)`, 
+        value: `₹${formatPrice(breakup.gst.amount || 0)}`,
+        oldValue: originalGst > (breakup.gst.amount || 0) ? `₹${formatPrice(originalGst)}` : null
+      }
+    );
+
     const uiPriceBreakup = {
-      price: [
-        { 
-          label: `${breakup.metal.purity || ''} ${metalColor} ${breakup.metal.metal_type || 'Gold'} (₹${formatPrice(breakup.metal.rate_per_gram)}/g)`, 
-          value: `₹${formatPrice(breakup.metal.cost || 0)}` 
-        },
-        { 
-          label: `${breakup.diamond.color || 'E-F'}, ${breakup.diamond.clarity || 'VVS/VS'} (${breakup.diamond.pcs || 0} Pcs.) ${breakup.diamond.discount_percent > 0 ? breakup.diamond.discount_percent + '% OFF' : ''}`, 
-          value: `₹${formatPrice(breakup.diamond.final || 0)}`,
-          oldValue: breakup.diamond.original > breakup.diamond.final ? `₹${formatPrice(breakup.diamond.original)}` : null
-        },
-        ...(breakup.gemstone.final > 0 ? [{
-          label: `Gemstone Charges (${breakup.gemstone.pcs || 0} Pcs)`, 
-          value: `₹${formatPrice(breakup.gemstone.final || 0)}`,
-          oldValue: breakup.gemstone.original > breakup.gemstone.final ? `₹${formatPrice(breakup.gemstone.original)}` : null
-        }] : []),
-        { 
-          label: `Making Charges ${breakup.making_charges.discount_percent > 0 ? breakup.making_charges.discount_percent + '% OFF' : ''}`, 
-          value: `₹${formatPrice(breakup.making_charges.final || 0)}`,
-          oldValue: breakup.making_charges.original > breakup.making_charges.final ? `₹${formatPrice(breakup.making_charges.original)}` : null
-        },
-        { 
-          label: `GST (${taxPercent}%)`, 
-          value: `₹${formatPrice(breakup.gst.amount || 0)}`,
-          oldValue: originalGst > (breakup.gst.amount || 0) ? `₹${formatPrice(originalGst)}` : null
-        }
-      ],
+      price: priceRows,
       savings: [
         { label: "Diamond Discount", value: `₹${formatPrice(breakup.diamond.original - breakup.diamond.final)}` },
         { label: "Making Charge Discount", value: `₹${formatPrice(breakup.making_charges.original - breakup.making_charges.final)}` },
         { label: "Tax Savings", value: `₹${formatPrice(originalGst - (breakup.gst.amount || 0))}` }
       ],
-      total_savings: `₹${formatPrice(totalSavingsAmt)}`,
+      // Hide savings if total is less than 10 (handles rounding issues/gold jewelry small diffs)
+      total_savings: totalSavingsAmt >= 10 ? `₹${formatPrice(totalSavingsAmt)}` : null,
       grand_total: `₹${formatPrice(finalGrandTotal)}`,
-      comparison: {
+      comparison: hasDiamonds ? {
         carat: `${breakup.diamond.carat || 0} CT`,
         clarity: { lucira: breakup.diamond.clarity?.split(',')[0] || "VVS", mined: "SI" },
         color: { lucira: breakup.diamond.color?.split(',')[0] || "EF", mined: "IJ" },
@@ -152,7 +168,7 @@ export async function GET(req) {
           mined: `₹${formatPrice(minedDiamondTotal)}` 
         },
         savings: `₹${formatPrice(comparisonSavings)}`
-      }
+      } : null
     };
 
     return NextResponse.json({
@@ -161,6 +177,7 @@ export async function GET(req) {
       selectedVariant: data.node.title,
       price: finalGrandTotal,
       price_breakup: uiPriceBreakup,
+      diamond_info: breakup.diamond,
       raw_breakup: {
         ...breakup,
         original_total: originalGrandTotal,

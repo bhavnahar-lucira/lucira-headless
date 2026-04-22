@@ -84,6 +84,7 @@ export async function POST(req) {
                     weight: metafield(namespace: "custom", key: "weight") { value }
                     carat_range: metafield(namespace: "custom", key: "carat_range") { value }
                     material_type: metafield(namespace: "ornaverse", key: "material_type") { value }
+                    components: metafield(namespace: "ornaverse", key: "components") { value }
                     finishing: metafield(namespace: "custom", key: "finishing") { value }
                     fit: metafield(namespace: "custom", key: "fit") { value }
                     matching_products: metafield(namespace: "custom", key: "matching_product") { value }
@@ -93,6 +94,7 @@ export async function POST(req) {
                         node {
                           id price compareAtPrice inventoryQuantity sku selectedOptions { name value }
                           image { url }
+                          components: metafield(namespace: "ornaverse", key: "components") { value }
                         }
                       }
                     }
@@ -151,7 +153,10 @@ export async function POST(req) {
                   price: Number(v.price),
                   compare_price: v.compareAtPrice ? Number(v.compareAtPrice) : null,
                   inStock: v.inventoryQuantity > 0,
-                  image: v.image?.url || p.featuredImage?.url
+                  image: v.image?.url || p.featuredImage?.url,
+                  metafields: {
+                    components: v.components?.value
+                  }
                 };
               });
 
@@ -269,6 +274,7 @@ export async function POST(req) {
                   weight: p.weight?.value,
                   carat_range: p.carat_range?.value,
                   material_type: p.material_type?.value,
+                  components: p.components?.value,
                   finishing: p.finishing?.value,
                   fit: p.fit?.value
                 },
