@@ -8,6 +8,7 @@ import MainHeader from "./MainHeader";
 import Navbar from "./Navbar";
 import MobileHeader from "./MobileHeader";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
+import AuthPopupTrigger from "../auth/AuthPopupTrigger";
 
 const TOP_HEIGHT = 40;
 const HEADER_HEIGHT = 88;
@@ -27,6 +28,7 @@ export default function Header() {
           className="w-full z-[100] bg-white sticky"
           style={{ top: '-104px' }} // Hides TopBar (40px) + Logo Row (64px) on scroll
         >
+          <AuthPopupTrigger />
           <TopBar />
           <MobileHeader />
         </header>
@@ -37,6 +39,7 @@ export default function Header() {
 
   return (
     <>
+      <AuthPopupTrigger />
       {/* Placeholder to prevent layout jump */}
       <div style={{ height: TOP_HEIGHT + HEADER_HEIGHT + 56 }} />
 

@@ -6,7 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { useSelector, useDispatch } from "react-redux";
-import { logout } from "@/redux/features/user/userSlice";
+import { logout, setAuthModalOpen } from "@/redux/features/user/userSlice";
 import { clearCart } from "@/redux/features/cart/cartSlice";
 import { restoreGuestWishlist } from "@/redux/features/wishlist/wishlistSlice";
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle, SheetClose } from "@/components/ui/sheet";
@@ -71,7 +71,10 @@ export default function MobileHeader() {
   const dispatch = useDispatch();  
   const isProductPage = pathname.startsWith('/products/');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isAuthOpen, setIsAuthOpen] = useState(false);
+  
+  const { user, isAuthModalOpen: isAuthOpen } = useSelector((state) => state.user);
+  const setIsAuthOpen = (val) => dispatch(setAuthModalOpen(val));
+
   const [searchQuery, setSearchQuery] = useState("");
   const [showSearch, setShowSearch] = useState(!isProductPage);
   const { menuData } = useMenu("main-menu-official");
@@ -82,7 +85,6 @@ export default function MobileHeader() {
     setShowSearch(!pathname.startsWith('/products/'));
   }, [pathname]);
 
-  const { user } = useSelector((state) => state.user);
   const { totalQuantity, totalAmount, items } = useSelector((state) => state.cart);
   const wishlistItems = useSelector((state) => state.wishlist.items);
 

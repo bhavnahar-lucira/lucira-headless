@@ -3,12 +3,16 @@ import { createSlice } from "@reduxjs/toolkit";
 const initialState = {
   user: null,
   isAuthenticated: false,
+  isAuthModalOpen: false,
 };
 
 const userSlice = createSlice({
   name: "user",
   initialState,
   reducers: {
+    setAuthModalOpen: (state, action) => {
+      state.isAuthModalOpen = action.payload;
+    },
     login: (state, action) => {
       state.user = action.payload;
       state.isAuthenticated = true;
@@ -25,7 +29,7 @@ const userSlice = createSlice({
   },
 });
 
-export const { login, logout, setAvatar } = userSlice.actions;
+export const { setAuthModalOpen, login, logout, setAvatar } = userSlice.actions;
 export default userSlice.reducer;
 
 export const selectUser = (state) => state.user.user;

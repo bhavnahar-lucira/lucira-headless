@@ -4,7 +4,7 @@ import { Search, Store, Heart, ShoppingBag, CirclePile, LogOut, User as UserIcon
 import Image from "next/image";
 import { AuthDialog } from "@/components/auth/AuthDialog";
 import { useSelector, useDispatch } from "react-redux";
-import { logout, setAvatar } from "@/redux/features/user/userSlice";
+import { logout, setAvatar, setAuthModalOpen } from "@/redux/features/user/userSlice";
 import { fetchCart, clearCart } from "@/redux/features/cart/cartSlice";
 import {
   mergeGuestWishlist,
@@ -32,15 +32,16 @@ const getInitials = (name = "") =>
 
 export default function MainHeader() {
   const router = useRouter();
-  const [open, setOpen] = useState(false);
+  const dispatch = useDispatch();
+  const { user, isAuthModalOpen: open } = useSelector((state) => state.user);
+  const setOpen = (val) => dispatch(setAuthModalOpen(val));
+
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
 
-  const dispatch = useDispatch();
-  const { user } = useSelector((state) => state.user);
   const { totalQuantity, totalAmount, items } = useSelector((state) => state.cart);
   const wishlistItems = useSelector((state) => state.wishlist.items);
   const guestWishlistItems = useSelector((state) => state.wishlist.guestItems);
@@ -141,7 +142,7 @@ export default function MainHeader() {
       fetchUserAvatar();
     }
   }, [dispatch, user?.id, user?.avatar, wishlistItems.length, guestWishlistItems.length]);
-
+  
   const handleSearchChange = async (e) => {
     const query = e.target.value;
     setSearchQuery(query);
