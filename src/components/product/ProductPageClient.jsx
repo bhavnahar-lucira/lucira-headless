@@ -119,6 +119,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
   const [wishlistLoading, setWishlistLoading] = useState(false);
   const [showStickyAtc, setShowStickyAtc] = useState(false);
   const mainAtcRef = useRef(null);
+  const productDetailsRef = useRef(null);
 
   const [engraving, setEngraving] = useState("");
   const [engravingFont, setEngravingFont] = useState("Lobster");
@@ -597,31 +598,49 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                   <h1 className="text-28px font-bold leading-[1.2] tracking-tight">
                     {product.title}
                   </h1>
-                  <div className="flex items-center gap-1.5 leading-none overflow-hidden justify-start">
-                    <span className="text-base text-gray-800">
-                      {product.productMetafields?.carat_range || "2 CT"} · {product.productMetafields?.material_type || "Lab-Grown diamond"} · {product.vendor}
-                      <button className="inline-flex items-center">
-                        <Info size={14} className="text-gray-800 ml-2 top-0.75 relative hover:cursor-pointer" />
-                      </button>
-                    </span>
-                  </div>
+                  <div className="flex justify-between gap-2 items-center">
+                    {(() => {
+                      const variantMeta = activeVariant?.metafields;
+                      const prodMeta = product.productMetafields;
+                      
+                      // 1. Diamond Quality
+                      let quality = variantMeta?.diamonds?.[0]?.quality || prodMeta?.quality;
+                      
+                      // Fallback for quality if it's a ring but metadata is missing (matching ProductPage logic)
+                      if (!quality && String(product.type || "").toLowerCase().includes("ring")) {
+                        quality = "VVS-VS, EF";
+                      }
+                      
+                      // 2. Diamond Carat
+                      const carat = variantMeta?.diamonds?.[0]?.weight 
+                        ? `${variantMeta.diamonds[0].weight}ct` 
+                        : prodMeta?.carat_range;
+                      
+                      // 3. Metal Weight
+                      const weightVal = variantMeta?.metal_weight || prodMeta?.weight;
+                      const weight = weightVal ? `${weightVal}${String(weightVal).toLowerCase().includes('g') ? '' : 'g'}` : null;
+
+                      const parts = [quality, carat, weight].filter(Boolean);
+                      if (parts.length === 0) return null;
+                      
+                      return (
+                        <p className="font-figtree text-[10px] lg:text-sm font-medium text-gray-800 uppercase tracking-tight">
+                          {parts.join(" · ")}
+                        </p>
+                      );
+                    })()}
+                    {/* Rating */}
+                    {product.reviews && (
+                      <div className="flex items-center gap-1.5">
+                        <Star size={14} fill="currentColor" className="text-amber-400" />
+                        <span className="font-figtree text-[10px] lg:text-sm font-semibold text-gray-800 uppercase tracking-tight">
+                          {product.reviews.average} ({product.reviews.count})
+                        </span>
+                      </div>
+                    )}
+                  </div>                  
                 </div>
-                {/* Rating */}
-                {product.reviews && (
-                  <div className="flex items-center gap-2 mt-3">
-                    <div className="flex items-center gap-0.5 text-amber-400">
-                      {[...Array(5)].map((_, i) => (
-                        <Star 
-                          key={`rating-star-${i}`} 
-                          size={16} 
-                          fill={i < Math.floor(product.reviews.average) ? "currentColor" : "none"} 
-                          className={i < Math.floor(product.reviews.average) ? "" : "text-zinc-200"}
-                        />
-                      ))}
-                    </div>
-                    <span className="text-sm font-semibold">{product.reviews.average} ({product.reviews.count})</span>
-                  </div>
-                )}
+                
               </div>
 
               {/* Price */}
@@ -636,7 +655,10 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                       {Math.round((1 - currentPrice / currentComparePrice) * 100)}% OFF
                     </span>
                   )}
-                  <button className="text-sm font-semibold underline underline-offset-4 ml-auto decoration-gray-300">
+                  <button 
+                    onClick={() => productDetailsRef.current?.scrollIntoView({ behavior: 'smooth' })}
+                    className="text-sm font-semibold underline underline-offset-4 ml-auto decoration-gray-300 hover:cursor-pointer"
+                  >
                     See Savings Breakup
                   </button>
                 </div>
@@ -644,41 +666,61 @@ export default function ProductPageClient({ product, complementaryProducts = [],
               </div>
               
               {/* Savings Banners Slider */}
-              <div className="w-full">
-                <Swiper
-                  modules={[Autoplay]}
-                  spaceBetween={8}
-                  slidesPerView={1.5}
-                  autoplay={false}
-                  loop={true}
-                  className="w-full"
-                >
-                  <SwiperSlide>
-                    <div className="border border-dashed border-gray-400 rounded-lg px-3 py-3 flex items-center gap-2 bg-gray-50 h-full">
-                      <span className="text-base shrink-0">💎</span>
-                      <p className="text-sm font-semibold text-black whitespace-nowrap">
-                        You&apos;re saving flat <span className="font-extrabold text-black">25% OFF</span> on diamond prices.
-                      </p>
-                    </div>
-                  </SwiperSlide>
-                  <SwiperSlide>
-                    <div className="border border-dashed border-gray-400 rounded-lg px-3 py-3 flex items-center gap-2 bg-gray-50 h-full">
-                      <span className="text-base shrink-0">🪙</span>
-                      <p className="text-sm font-semibold text-black whitespace-nowrap">
-                        Save more with <span className="font-extrabold text-black">Lucira coins</span>
-                      </p>
-                    </div>
-                  </SwiperSlide>
-                  <SwiperSlide>
-                    <div className="border border-dashed border-gray-400 rounded-lg px-3 py-3 flex items-center gap-2 bg-gray-50 h-full">
-                      <span className="text-base shrink-0">✨</span>
-                      <p className="text-sm font-semibold text-black whitespace-nowrap">
-                        Free <span className="font-extrabold text-black">Gift</span> included
-                      </p>
-                    </div>
-                  </SwiperSlide>
-                </Swiper>
-              </div>
+              {(() => {
+                const raw = priceBreakup?.raw_breakup;
+                const diamondDiscount = raw?.diamond?.discount_percent || 0;
+                const mcDiscount = raw?.making_charges?.discount_percent || 0;
+                const isDiamondJewelry = (raw?.diamond?.final || 0) > 0;
+                const currentTotalPrice = activeVariant?.price || 0;
+                const isGoldCoinEligible = isDiamondJewelry && currentTotalPrice >= 20000;
+
+                const slides = [];
+                if (diamondDiscount > 0) {
+                  slides.push({
+                    icon: "💎",
+                    text: <>You&apos;re saving flat <span className="font-extrabold text-black">{diamondDiscount}% OFF</span> on diamond prices.</>
+                  });
+                }
+                if (mcDiscount > 0) {
+                  slides.push({
+                    icon: "⚒️",
+                    text: <>You&apos;re saving flat <span className="font-extrabold text-black">{mcDiscount}% OFF</span> on making charges.</>
+                  });
+                }
+                if (isGoldCoinEligible) {
+                  slides.push({
+                    icon: "🪙",
+                    text: <>Complimentary <span className="font-extrabold text-black">Gold Coin</span> available on this order</>
+                  });
+                }
+
+                if (slides.length === 0) return null;
+
+                return (
+                  <div className="w-full">
+                    <Swiper
+                      modules={[Autoplay]}
+                      spaceBetween={8}
+                      slidesPerView={slides.length > 1 ? 1.3 : 1}
+                      speed={1800}
+                      autoplay={{ delay: 3000, disableOnInteraction: false }}
+                      loop={slides.length > 2}
+                      className="w-full"
+                    >
+                      {slides.map((slide, idx) => (
+                        <SwiperSlide key={`promo-slide-${idx}`}>
+                          <div className="border border-dashed border-gray-400 rounded-lg px-3 py-3 flex items-center gap-2 bg-secondary/50 h-full">
+                            <span className="text-base shrink-0">{slide.icon}</span>
+                            <p className="text-sm font-semibold text-black whitespace-nowrap">
+                              {slide.text}
+                            </p>
+                          </div>
+                        </SwiperSlide>
+                      ))}
+                    </Swiper>
+                  </div>
+                );
+              })()}
               <Separator />
             </div> 
 
@@ -1144,7 +1186,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
             </div>
 
             {/* Product Details Section */}
-            <div className="space-y-4 mt-4">
+            <div ref={productDetailsRef} className="space-y-4 mt-4">
               <div className="flex items-center justify-between mb-2">
                 <h2 className="text-base font-semibold tracking-tight uppercase tracking-wider">Product Details:</h2>
                 {activeVariant?.sku && (
