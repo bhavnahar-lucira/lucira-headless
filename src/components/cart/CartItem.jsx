@@ -221,7 +221,7 @@ export default function CartItem({ item, onAuthRequired }) {
                 </h3>
               </Link>
               <p className="text-[10px] font-medium uppercase tracking-wider text-zinc-400">
-                Variant: {item.variantTitle}
+                SKU: {currentVariant.sku || item.sku || "N/A"}
               </p>
               {item.engraving && (
                 <p className="text-[10px] font-bold uppercase tracking-wider text-primary">
@@ -239,13 +239,6 @@ export default function CartItem({ item, onAuthRequired }) {
                 </div>
               )}
             </div>
-          </div>
-
-          <div className="flex items-center gap-2 rounded-sm border border-pink-100/30 bg-pink-50/50 p-2">
-            <div className="rounded-full bg-transparent p-0.5">
-              <BadgePercent size={14} className="text-green-800" />
-            </div>
-            <span className="text-xs font-bold text-green-800">Complimentary Gift Included</span>
           </div>
 
           <div className="grid grid-cols-1 divide-y rounded-sm border border-zinc-100 md:grid-cols-[1.2fr_2fr] md:divide-x md:divide-y-0 divide-zinc-100">

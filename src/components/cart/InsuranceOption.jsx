@@ -52,7 +52,7 @@ export default function InsuranceOption() {
   if (otherItemsQuantity === 0 && !isAdded) return null;
 
   return (
-    <div className="bg-white border border-zinc-200 p-4 rounded-2xl flex items-center gap-4 shadow-sm">
+    <div className="bg-white border border-accent/30 p-4 rounded-2xl flex items-center gap-4">
       <div className="relative size-24 shrink-0 rounded-xl overflow-hidden border border-zinc-100">
         <Image 
           src="/images/story-ring.jpg" 
@@ -72,39 +72,40 @@ export default function InsuranceOption() {
         <p className="text-[11px] text-zinc-500 font-medium leading-normal pr-4">
           Protect your jewelry from accidental damage, loss, or theft with a one-time protection plan.
         </p>
-        <div className="flex items-center gap-2 pt-1">
-          <span className="text-xs text-zinc-400 line-through font-medium">₹999</span>
-          <span className="text-sm font-bold text-zinc-900">₹{INSURANCE_PRICE}</span>
-        </div>
-      </div>
-
-      <div className="flex flex-col gap-2 shrink-0 min-w-[120px]">
-        {isAdded ? (
-          <>
-            <button
-              onClick={handleRemove}
-              disabled={isProcessing || loading}
-              className="w-full py-2.5 border border-[#965A60] text-[#965A60] text-[10px] font-bold uppercase tracking-widest rounded-full transition-all hover:bg-[#965A60]/5 disabled:opacity-50"
-            >
-              {isProcessing ? <Loader2 size={14} className="animate-spin mx-auto" /> : "Remove"}
-            </button>
-            <div className="w-full py-2.5 bg-[#4F7A5E] text-white text-[10px] font-bold uppercase tracking-widest rounded-full flex items-center justify-center gap-1 cursor-default shadow-lg shadow-[#4F7A5E]/20">
-              Added <Check size={12} />
-            </div>
-          </>
-        ) : (
-          <button
-            onClick={handleAdd}
-            disabled={isProcessing || loading}
-            className="w-full py-3 bg-[#965A60] hover:bg-[#854d53] text-white text-[10px] font-bold uppercase tracking-widest rounded-full transition-all disabled:opacity-50 shadow-lg shadow-[#965A60]/20"
-          >
-            {isProcessing ? (
-              <Loader2 size={16} className="animate-spin mx-auto" />
+        <div className="flex items-center justify-between gap-2 pt-1">
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-zinc-400 line-through font-medium">₹999</span>
+            <span className="text-sm font-bold text-zinc-900">₹{INSURANCE_PRICE}</span>
+          </div>
+          <div className="flex flex-row gap-2 shrink-0 min-w-50">
+            {isAdded ? (
+              <>
+                <button
+                  onClick={handleRemove}
+                  disabled={isProcessing || loading}
+                  className="w-full py-2.5 border border-[#965A60] text-[#965A60] text-[10px] font-bold uppercase tracking-widest rounded-full transition-all hover:bg-[#965A60]/5 disabled:opacity-50"
+                >
+                  {isProcessing ? <Loader2 size={14} className="animate-spin mx-auto" /> : "Remove"}
+                </button>
+                <div className="w-full py-2.5 bg-[#4F7A5E] text-white text-[10px] font-bold uppercase tracking-widest rounded-full flex items-center justify-center gap-1 cursor-default shadow-lg shadow-[#4F7A5E]/20">
+                  Added <Check size={12} />
+                </div>
+              </>
             ) : (
-              "Add"
+              <button
+                onClick={handleAdd}
+                disabled={isProcessing || loading}
+                className="w-full py-3 bg-[#965A60] hover:bg-[#854d53] text-white text-[10px] font-bold uppercase tracking-widest rounded-full transition-all disabled:opacity-50 shadow-lg shadow-[#965A60]/20"
+              >
+                {isProcessing ? (
+                  <Loader2 size={16} className="animate-spin mx-auto" />
+                ) : (
+                  "Add"
+                )}
+              </button>
             )}
-          </button>
-        )}
+          </div>
+        </div>
       </div>
     </div>
   );
