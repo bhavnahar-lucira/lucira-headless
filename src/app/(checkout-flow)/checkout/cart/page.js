@@ -102,12 +102,12 @@ export default function CartPage() {
   }
 
   return (
-    <div className="bg-white min-h-screen overflow-x-hidden pb-20 lg:pb-0">
+    <div className="bg-white min-h-screen overflow-x-hidden pb-12 lg:pb-0">
       <div className="max-w-7xl w-full mx-auto relative z-10 px-4">
         <div className="flex flex-col lg:flex-row lg:items-start min-h-[calc(100vh-80px)]">
           
           {/* Left Column: Cart Items (60%) */}
-          <div className="grow lg:basis-[60%] lg:shrink-0 py-10 px-4 lg:pr-12 bg-white">
+          <div className="grow lg:basis-[60%] lg:shrink-0 py-10 px-4 lg:pr-8 xl:pr-12 bg-white">
             <div className="lg:sticky lg:top-10">
               <div className="flex items-baseline gap-2 mb-5">
                 <h1 className="text-xl font-bold text-zinc-800 font-abhaya">My Shopping Cart</h1>
@@ -131,7 +131,7 @@ export default function CartPage() {
             {/* Background Layer that stretches to the right edge of screen */}
             <div className="hidden lg:block absolute inset-y-0 left-0 w-screen bg-[#FAFAFA] border-l border-zinc-100 z-0" />
             
-            <div className="relative z-10 py-10 px-4 lg:pl-12 bg-[#FAFAFA] lg:bg-transparent min-h-full">
+            <div className="relative z-10 py-10 px-4 lg:pl-8 xl:pl-12 bg-[#FAFAFA] lg:bg-transparent min-h-full">
               <div className="lg:sticky lg:top-6">
                 <CartSummary onPlaceOrder={handlePlaceOrder} />
               </div>

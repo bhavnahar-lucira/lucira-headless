@@ -71,7 +71,7 @@ export default function CollectionPage({ params: paramsPromise }) {
   const [expandedFilters, setExpandedFilters] = useState({ "In Store Available": true });
   const loadMoreRef = useRef(null);
 
-  const isMobile = useMediaQuery("(max-width: 1024px)");
+  const isMobile = useMediaQuery("(max-width: 1023px)");
   const [activeMobileGroup, setActiveMobileGroup] = useState(null);
   const [isFilterSheetOpen, setIsFilterSheetOpen] = useState(false);
   const [isSortSheetOpen, setIsSortSheetOpen] = useState(false);
