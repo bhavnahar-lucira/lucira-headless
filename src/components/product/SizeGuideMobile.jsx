@@ -119,7 +119,7 @@ export function SizeGuideMobile({ children }) {
               <div className="pt-6 pb-2">
                  <button 
                   onClick={() => setIsOpen(false)}
-                  className="w-full py-4 bg-black text-white rounded-full font-bold text-sm uppercase tracking-widest"
+                  className="w-full py-4 bg-primary text-white rounded-full font-bold text-sm uppercase tracking-widest"
                 >
                   CLOSE
                 </button>

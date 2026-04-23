@@ -142,7 +142,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
   const router = useRouter();
   const dispatch = useDispatch();
   const user = useSelector(selectUser);
-  const isMobile = useMediaQuery("(max-width: 1024px)");
+  const isMobile = useMediaQuery("(max-width: 1023px)");
   const wishlistItems = useSelector((state) => state.wishlist.items);
   const [addingToCart, setAddingToCart] = useState(false);
   const [wishlistLoading, setWishlistLoading] = useState(false);
@@ -602,13 +602,13 @@ export default function ProductPageClient({ product, complementaryProducts = [],
               <BreadcrumbLink href={`/collections/${slugify(product.type)}`} className="text-sm font-medium text-black">{product.type}</BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator><ChevronRight size={14}/></BreadcrumbSeparator>
-            <BreadcrumbItem className="text-sm font-medium text-gray-400 truncate max-w-[200px]">
+            <BreadcrumbItem className="text-sm font-medium text-gray-400 truncate">
               {product.title}
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
 
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_530px] gap-10 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] xl:grid-cols-[1fr_530px] gap-10 items-start">
           {/* Left: Product Gallery */}
           <ProductGallery 
             media={product.media || []} 
@@ -689,29 +689,36 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                     )}
                   </div>                  
                 </div>
-                
               </div>
 
               {/* Price */}
-              <div className="w-full">
-                <div className="flex items-center gap-3 pt-1">
-                  <span className="text-xl font-bold">₹{formatPrice(currentPrice)}</span>
-                  {currentComparePrice > currentPrice && (
-                    <span className="text-lg text-gray-500 line-through font-medium">₹{formatPrice(currentComparePrice)}</span>
-                  )}
-                  {currentComparePrice > currentPrice && (
-                    <span className="bg-gray-100 text-black text-base font-semibold px-3 py-1 rounded-full">
-                      {Math.round((1 - currentPrice / currentComparePrice) * 100)}% OFF
-                    </span>
-                  )}
+              <div className="w-full">  
+                <div className="flex flex-row flex-wrap items-center justify-between gap-3 pt-1">
+                  <div className="flex flex-wrap items-center gap-2 md:gap-3">
+                    <span className="text-lg sm:text-xl md:text-2xl font-bold">&#8377;{formatPrice(currentPrice)}</span>
+                    {currentComparePrice > currentPrice && (
+                      <span className="text-sm sm:text-base md:text-lg text-gray-500 line-through font-medium">
+                        &#8377;{formatPrice(currentComparePrice)}
+                      </span>
+                    )}
+                    {currentComparePrice > currentPrice && (
+                      <span className="shrink-0 bg-gray-100 text-black text-xs sm:text-sm md:text-base font-semibold px-2.5 sm:px-3 py-1 rounded-full">
+                        {Math.round((1 - currentPrice / currentComparePrice) * 100)}% OFF
+                      </span>
+                    )}
+                  </div>
                   <button 
-                    onClick={() => productDetailsRef.current?.scrollIntoView({ behavior: 'smooth' })}
-                    className="text-sm font-semibold underline underline-offset-4 ml-auto decoration-gray-300 hover:cursor-pointer"
-                  >
+                    onClick={() =>
+                      productDetailsRef.current?.scrollIntoView({ behavior: "smooth" })
+                    }
+                    className="text-xs sm:text-sm font-semibold underline underline-offset-4 decoration-gray-300 hover:cursor-pointer sm:ml-auto whitespace-nowrap">
                     See Savings Breakup
                   </button>
                 </div>
-                <p className="text-sm text-gray-400 font-medium tracking-tight mt-2">Inclusive of all taxes.</p>
+
+                <p className="text-xs sm:text-sm text-gray-400 font-medium tracking-tight mt-2">
+                  Inclusive of all taxes.
+                </p>
               </div>
               
               {/* Savings Banners Slider */}
@@ -750,15 +757,32 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                     <Swiper
                       modules={[Autoplay]}
                       spaceBetween={8}
-                      slidesPerView={slides.length > 1 ? 1.3 : 1}
+                      // slidesPerView={slides.length > 1 ? 1.1 : 1}
                       speed={1800}
                       autoplay={{ delay: 3000, disableOnInteraction: false }}
                       loop={slides.length > 2}
-                      className="w-full"
+                      breakpoints={{
+                        0: {
+                          slidesPerView: slides.length > 1 ? 1 : 1,
+                          spaceBetween: 8,
+                        },
+                        768: {
+                          slidesPerView: slides.length > 1 ? 1.8 : 1,
+                          spaceBetween: 12,
+                        },
+                        1024: {
+                          slidesPerView: slides.length > 1 ? 1.1 : 1,
+                          spaceBetween: 16,
+                        },
+                        1280: {
+                          slidesPerView: slides.length > 1 ? 1.4 : 1,
+                          spaceBetween: 20,
+                        }
+                      }}
                     >
                       {slides.map((slide, idx) => (
                         <SwiperSlide key={`promo-slide-${idx}`}>
-                          <div className="border border-dashed border-gray-400 rounded-lg px-3 py-3 flex items-center gap-2 bg-secondary/50 h-full">
+                          <div className="border border-dashed border-gray-400 rounded-lg px-3 py-3 flex items-center gap-2 bg-secondary/50 h-full w-fit">
                             <span className="text-base shrink-0">{slide.icon}</span>
                             <p className="text-sm font-semibold text-black whitespace-nowrap">
                               {slide.text}
@@ -879,14 +903,14 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                     </>
                   )}              
                     {activeVariant?.inStock ? (
-                      <div className="bg-[#ECF7F2] border border-[#B3E1CD] text-black  rounded-lg px-4 py-3 flex items-center gap-1">
+                      <div className="bg-[#ECF7F2] border border-[#B3E1CD] text-black rounded-lg px-4 py-3 flex items-center gap-1 xl:flex-nowrap lg:flex-wrap">
                         <span className="w-2.5 h-2.5 bg-[#189351] rounded-full"></span>
-                        This combination is <span className="font-semibold">in-stock & ready to ship in 24 hrs</span>
+                        This combination is <span className="font-semibold xl:basis-auto lg:basis-full">in-stock & ready to ship in 24 hrs</span>
                       </div>
                     ) : (
-                      <div className="bg-amber-50 border border-amber-200 text-black rounded-lg px-4 py-3 flex items-center gap-1">
+                      <div className="bg-amber-50 border border-amber-200 text-black rounded-lg px-4 py-3 flex items-center gap-1 xl:flex-nowrap lg:flex-wrap">
                         <span className="w-2.5 h-2.5 bg-amber-500 rounded-full"></span>
-                        This combination will be <span className="font-semibold">made to order (dispatched in 10-15 days)</span>
+                        This combination will be <span className="font-semibold xl:basis-auto lg:basis-full">made to order (dispatched in 10-15 days)</span>
                       </div>
                     )}
                   </div>
@@ -1124,15 +1148,11 @@ export default function ProductPageClient({ product, complementaryProducts = [],
            
             {/* Features */}
             <div className="space-y-4">
-              <div className="flex justify-between items-center gap-x-4 text-sm font-medium text-black">
-                <div className="flex flex-col space-y-4.5 flex-1">
-                    <Feature icon={<Image src="/images/product/shipping.svg" alt="Shipping icon" width={20} height={20} />} text="Free and secure shipping" />
-                    <Feature icon={<Image src="/images/product/exchange.svg" alt="Exchange icon" width={20} height={20} />} text="Lifetime exchange and 100% value guarantee" />                  
-                </div>
-                <div className="flex flex-col space-y-4.5">
-                  <Feature icon={<Image src="/images/product/return.svg" alt="Return icon" width={20} height={20} />} text="15-day free returns" />
-                  <Feature icon={<BadgeCheck size={20} className="text-black" />} text="IGI and Hallmark certified" />
-                </div>
+              <div className="grid  grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-6 lg:gap-x-10 text-xs sm:text-sm font-medium text-black">
+                <Feature icon={<Image src="/images/product/shipping.svg" alt="Shipping icon" width={20} height={20} />} text="Free and secure shipping" />
+                <Feature icon={ <Image src="/images/product/exchange.svg" alt="Exchange icon" width={20} height={20} />} text="Lifetime exchange and 100% value guarantee" />
+                <Feature icon={<Image src="/images/product/return.svg" alt="Return icon" width={20} height={20} />} text="15-day free returns" />
+                <Feature icon={<BadgeCheck size={20} className="text-black shrink-0" />} text="IGI and Hallmark certified" />
               </div>
 
               <Separator/>
@@ -1417,7 +1437,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                   <div className="flex items-center gap-2 text-base font-semibold text-black mb-4">
                      Certified Quality Guaranteed.
                   </div>
-                  <div className="flex items-start justify-between gap-4">
+                  <div className="flex items-start justify-between gap-4 xl:flex-nowrap flex-wrap">
                     <button className="text-sm font-semibold underline underline-offset-[6px] decoration-black mt-1 whitespace-nowrap">
                       See Sample Certificate
                     </button>

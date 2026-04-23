@@ -54,66 +54,103 @@ export default function DiamondComparison() {
   );
 
   return (
-    <section className="w-full py-16 bg-[#F9F9F9] mt-15">
-      <div className="max-w-480 mx-auto px-46 min-[1440px]:px-46">
-        <h2 className="text-28px font-bold text-black text-center mb-15">
+    <section className="w-full py-10 md:py-14 lg:py-16 bg-[#F9F9F9] mt-10 md:mt-14">
+      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 md:px-10 lg:px-16 xl:px-24">
+        <h2 className="text-2xl md:text-3xl lg:text-[28px] font-bold text-black text-center mb-8 md:mb-12 lg:mb-15">
           Lab Grown Vs. Mined Diamonds
         </h2>
 
         <div className="relative">
-          {/* Highlight Container for the middle column */}
-          <div className="absolute -top-7.5 -bottom-7.5 left-[35.5%] w-[33%] bg-white rounded-2xl border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] z-0"></div>
+          {/* Highlight middle column only for desktop */}
+          <div className="hidden lg:block absolute -top-6 -bottom-6 left-[35.5%] w-[33%] bg-white rounded-2xl border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] z-0"></div>
+          {/* Desktop / Tablet Table */}
+          <div className="hidden md:grid grid-cols-[1.5fr_1.3fr_1.3fr] relative z-10">
 
-          <div className="grid grid-cols-[1.5fr_1.3fr_1.3fr] relative z-10">
-            {/* Table Header */}
-            <div className="pb-10 px-4 text-xl font-semibold text-black flex items-end">
+            {/* Header */}
+            <div className="pb-6 lg:pb-10 px-4 text-base lg:text-xl font-semibold text-black flex items-end">
               Comparison Basis
             </div>
-            <div className="pb-10 text-center text-xl font-semibold text-black flex items-end justify-center">
+
+            <div className="pb-6 lg:pb-10 text-center text-base lg:text-xl font-semibold text-black flex items-end justify-center">
               Lab-Grown Diamond
             </div>
-            <div className="pb-10 text-center text-xl font-semibold text-black flex items-end justify-center">
+
+            <div className="pb-6 lg:pb-10 text-center text-base lg:text-xl font-semibold text-black flex items-end justify-center">
               Mined Diamond
             </div>
 
-            {/* Table Rows */}
+            {/* Rows */}
             {rows.map((row, i) => (
               <React.Fragment key={i}>
-                <div className="py-7 px-4 border-t border-[#E5E5E5] text-lg font-semibold text-black leading-snug flex items-center">
+                <div className="py-5 lg:py-7 px-4 border-t border-[#E5E5E5] text-sm md:text-base lg:text-lg font-semibold text-black leading-snug flex items-center">
                   {row.label}
                 </div>
-                <div className="py-7 border-t border-[#E5E5E5] flex items-center justify-center">
+
+                <div className="py-5 lg:py-7 border-t border-[#E5E5E5] flex items-center justify-center">
                   {row.lab ? <CheckIcon /> : <XIcon />}
                 </div>
-                <div className="py-7 border-t border-[#E5E5E5] flex items-center justify-center">
+
+                <div className="py-5 lg:py-7 border-t border-[#E5E5E5] flex items-center justify-center">
                   {row.mined ? <CheckIcon /> : <XIcon />}
                 </div>
               </React.Fragment>
+            ))}
+          </div>          
+          <div className="md:hidden space-y-4">
+            {rows.map((row, i) => (
+              <div
+                key={i}
+                className="bg-white rounded-2xl p-5 shadow-sm border border-[#E5E5E5]"
+              >
+                <h3 className="text-base font-semibold text-black mb-4">
+                  {row.label}
+                </h3>
+
+                <div className="grid grid-cols-2 gap-4">
+
+                  <div className="bg-[#F7F7F7] rounded-xl p-4 text-center">
+                    <p className="text-sm font-medium mb-3">
+                      Lab-Grown
+                    </p>
+                    <div className="flex justify-center">
+                      {row.lab ? <CheckIcon /> : <XIcon />}
+                    </div>
+                  </div>
+
+                  <div className="bg-[#F7F7F7] rounded-xl p-4 text-center">
+                    <p className="text-sm font-medium mb-3">
+                      Mined
+                    </p>
+                    <div className="flex justify-center">
+                      {row.mined ? <CheckIcon /> : <XIcon />}
+                    </div>
+                  </div>
+
+                </div>
+              </div>
             ))}
           </div>
         </div>
 
         {/* Bottom Info Section */}
-        <div className="mt-20 space-y-4">
-          <div className="flex gap-5 items-center bg-[#EDEDED] rounded-xl px-6 py-3">
-            <div className="w-8 h-8 flex items-center justify-center">
-              <RefreshCw size={22} className="text-black" />
+        <div className="mt-10 md:mt-14 lg:mt-20 space-y-4">
+          <div className="flex items-start md:items-center gap-4 md:gap-5 bg-[#EDEDED] rounded-xl px-4 md:px-6 py-4">
+            <div className="w-7 h-7 md:w-8 md:h-8 flex items-center justify-center shrink-0">
+              <RefreshCw size={20} className="text-black" />
             </div>
-            <p className="text-lg text-black font-medium">
+            <p className="text-sm md:text-base lg:text-lg text-black font-medium leading-relaxed">
               Every lab-grown diamond jewelry by Lucira comes with lifetime
               buyback assurance.
             </p>
           </div>
-
-          <div className="flex gap-5 items-center bg-[#EDEDED] rounded-xl px-6 py-3">
-            <div className="w-8 h-8 flex items-center justify-center">
-              <Sparkle size={22} className="text-black fill-black" />
+          <div className="flex items-start md:items-center gap-4 md:gap-5 bg-[#EDEDED] rounded-xl px-4 md:px-6 py-4">
+            <div className="w-7 h-7 md:w-8 md:h-8 flex items-center justify-center shrink-0">
+              <Sparkle size={20} className="text-black fill-black" />
             </div>
-            <p className="text-lg text-black font-medium leading-relaxed">
+            <p className="text-sm md:text-base lg:text-lg text-black font-medium leading-relaxed">
               The only real difference is how they&apos;re formed; lab-grown and
               natural diamonds are optically identical, with no visible
-              difference to the naked eye, with distinctions detectable only
-              by experts using advanced equipment.
+              difference to the naked eye.
             </p>
           </div>
         </div>
