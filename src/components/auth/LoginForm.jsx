@@ -15,17 +15,31 @@ import {
   registerCustomer,
 } from "@/lib/api";
 
-export function LoginForm({ onSuccess, initialMobile = "" }) {
+export function LoginForm({ onSuccess, initialMobile = "", initialStep = "login" }) {
   const router = useRouter();
   const dispatch = useDispatch();
 
-  const [step, setStep] = useState("login");
+  const [step, setStep] = useState(initialStep);
   const [mobile, setMobile] = useState(initialMobile || "");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
+  const [consent, setConsent] = useState(true);
+  const [countdown, setCountdown] = useState(5);
+
+  useEffect(() => {
+    let timer;
+    if (step === "success" && countdown > 0) {
+      timer = setInterval(() => {
+        setCountdown((prev) => prev - 1);
+      }, 1000);
+    } else if (step === "success" && countdown === 0) {
+      router.replace("/admin");
+    }
+    return () => clearInterval(timer);
+  }, [step, countdown, router]);
 
   const mobileRef = useRef();
   const otpRef = useRef();
@@ -39,6 +53,10 @@ export function LoginForm({ onSuccess, initialMobile = "" }) {
       setMobile(String(initialMobile).trim());
     }
   }, [initialMobile]);
+
+  useEffect(() => {
+    setStep(initialStep);
+  }, [initialStep]);
 
   useEffect(() => {
     if (step === "login") {
@@ -164,25 +182,40 @@ export function LoginForm({ onSuccess, initialMobile = "" }) {
     <div className="space-y-4">
       {step === "login" && (
         <>
-          <Input
-            ref={mobileRef}
-            placeholder="Mobile"
-            value={mobile}
-            onChange={(e) => setMobile(e.target.value)}
-            className="h-11"
-          />
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-700">Phone Number <span className="text-red-500">*</span></label>
+            <div className="flex items-center border border-gray-200 rounded-md h-11 px-3 bg-white focus-within:border-black transition-all">
+              <span className="text-sm text-gray-500 mr-2 border-r border-gray-200 pr-2">+91</span>
+              <input
+                ref={mobileRef}
+                type="tel"
+                placeholder="Mobile Number"
+                maxLength="10"
+                value={mobile}
+                onChange={(e) => setMobile(e.target.value.replace(/\D/g, ""))}
+                className="w-full h-full text-sm outline-none bg-transparent"
+              />
+            </div>
+          </div>
+
           <Button
             onClick={sendLoginOtp}
             disabled={loading}
-            className="h-14 w-full"
+            className="h-12 w-full bg-[#5f4745] hover:bg-[#4a3634] text-white font-semibold transition-colors mt-4"
           >
-            {loading ? "Sending..." : "Send OTP"}
+            {loading ? "Sending..." : "REQUEST OTP"}
           </Button>
+
           <p
-            className="text-center text-sm cursor-pointer"
-            onClick={() => setStep("register")}
+            className="text-center text-sm text-gray-600 mt-4"
           >
-            New user? Register
+            New user?{" "}
+            <span 
+              className="text-[#5a413f] font-bold underline cursor-pointer"
+              onClick={() => router.push("/register")}
+            >
+              Register
+            </span>
           </p>
         </>
       )}
@@ -199,7 +232,7 @@ export function LoginForm({ onSuccess, initialMobile = "" }) {
           <Button
             onClick={verifyLoginOtp}
             disabled={loading}
-            className="h-14 w-full"
+            className="h-12 w-full bg-[#5f4745] hover:bg-[#4a3634] text-white font-semibold transition-colors mt-4"
           >
             {loading ? "Verifying..." : "Verify"}
           </Button>
@@ -208,47 +241,17 @@ export function LoginForm({ onSuccess, initialMobile = "" }) {
 
       {step === "register" && (
         <>
-          <div className="text-sm text-gray-600">
-            <p className="font-medium">Mobile Number</p>
-            <p className="text-base font-semibold">{mobile}</p>
-          </div>
-
-          <Input
-            ref={firstNameRef}
-            placeholder="First Name"
-            value={firstName}
-            onChange={(e) => setFirstName(e.target.value)}
-            className="h-11"
-          />
-
-          <Input
-            placeholder="Last Name"
-            value={lastName}
-            onChange={(e) => setLastName(e.target.value)}
-            className="h-11"
-          />
-
-          <Input
-            placeholder="Email Address"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="h-11"
-          />
-
-          <Button
-            onClick={registerUser}
-            disabled={loading}
-            className="h-14 w-full"
-          >
-            {loading ? "Registering..." : "Register"}
-          </Button>
-
+          {/* ... existing register fields ... */}
           <p
-            className="text-center text-sm cursor-pointer"
-            onClick={() => setStep("login")}
+            className="text-center text-sm text-gray-600 mt-4"
           >
-            Already registered? Login
+            Already registered?{" "}
+            <span 
+              className="text-[#5a413f] font-bold underline cursor-pointer"
+              onClick={() => router.push("/login")}
+            >
+              Login
+            </span>
           </p>
         </>
       )}

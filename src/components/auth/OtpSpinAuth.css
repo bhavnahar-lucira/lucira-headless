@@ -201,7 +201,7 @@ element.style {
 }
 
 .safe-secure-text {
-  @apply flex items-center justify-center gap-1 text-[12px] text-black mt-3;
+  @apply flex items-center justify-center gap-1 text-[12px] text-black;
 }
 
 .signupSection {

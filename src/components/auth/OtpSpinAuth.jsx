@@ -417,9 +417,15 @@ export function OtpSpinAuth({ onSuccess, onClose, initialMobile = "" }) {
               />
 
               <label>Phone Number</label>
-              <div className="mobile-wrap mb-3" style={{ opacity: 0.8, backgroundColor: "#f3f3f3" }}>
+              <div className="mobile-wrap mb-3">
                 <span className="country-code">+91</span>
-                <input type="tel" value={mobile} readOnly />
+                <input
+                  type="tel"
+                  placeholder="Enter Phone Number"
+                  maxLength="10"
+                  value={mobile}
+                  onChange={(e) => setMobile(e.target.value.replace(/\D/g, ""))}
+                />
               </div>
 
               <div className="consent-wrapper">
@@ -468,6 +474,18 @@ export function OtpSpinAuth({ onSuccess, onClose, initialMobile = "" }) {
               CONTINUE SHOPPING
             </button>
           </div>
+        )}
+
+        {step === "register" && (
+          <p className="register-link" style={{ marginBottom: "5px" }}>
+            Already have an account?{" "}
+            <span
+              className="cursor-pointer font-bold underline"
+              onClick={() => setStep("login")}
+            >
+              Login
+            </span>
+          </p>
         )}
 
         <div className="safe-secure-text">
