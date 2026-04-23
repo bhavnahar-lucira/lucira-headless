@@ -1,8 +1,9 @@
 'use client'
 import Image from "next/image";
-import { Suspense, useState } from "react";
-import { useSelector } from "react-redux";
+import { Suspense, useState, useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import { AuthDialog } from "@/components/auth/AuthDialog";
+import { setReferralLink, setReferralLoading, setReferralError } from "@/redux/features/user/userSlice";
 import { toast } from "react-toastify";
 import FAQ from "@/components/common/FAQ";
 
@@ -91,10 +92,56 @@ export default function RewardsPage() {
         },
     ];
 
+    const dispatch = useDispatch();
     const [open, setOpen] = useState();
-    const {user} = useSelector((state) => state.user);
-    const isLoggedIn = user?.isAuthenticated;
-    const referralLink = user?.referralLink || "";
+    const {user, isAuthenticated} = useSelector((state) => state.user);
+    const isLoggedIn = isAuthenticated;
+    const referralLink = useSelector((state) => state.user.referralLink);
+
+    useEffect(() => {
+        if ( isLoggedIn && user?.id && !referralLink) {
+            fetchReferralLink();
+        }
+    }, [isLoggedIn, user, referralLink ]);
+
+    async function fetchReferralLink() {
+        try {
+            dispatch(
+                setReferralLoading(true)
+            );
+            const response = await fetch("/api/customer/referral",
+                {
+                    method:"POST",
+                    headers:{
+                        "Content-Type":
+                        "application/json"
+                    },
+                        body: JSON.stringify({
+                        customerId: user.id
+                    })
+                }
+            );
+            const data = await response.json();
+            if(data.referralLink){
+                dispatch(
+                    setReferralLink(
+                    data.referralLink
+                    )
+                );
+            }
+        } catch(error){
+            dispatch(
+                setReferralError(
+                "Failed loading referral link"
+                )
+            );
+        } finally {
+            dispatch(
+                setReferralLoading(false)
+            );
+
+        }
+    }
 
     const handleScroll = () => {
         const element = document.getElementById("refer-and-earn");
@@ -109,16 +156,26 @@ export default function RewardsPage() {
         });
     };
 
-    const handleClick = () => {
+    const handleClick = async () => {
         if(!isLoggedIn) {
             setOpen(true)
             return
         }
 
-        if (referralLink) {
-            navigator.clipboard.writeText(referralLink);
-            toast.success("Referral link copied!");
-        }
+        if (!referralLink) {
+ toast.info(
+  "Referral link still generating"
+ );
+ return;
+}
+
+await navigator.clipboard.writeText(
+ referralLink
+);
+
+toast.success(
+ "Referral link copied!"
+);
     }
     
     return (
@@ -202,61 +259,78 @@ export default function RewardsPage() {
                     </div>
                 </div>
             </section>
-            <section className="py-16">
-                <div className="w-full mx-auto px-12">
-                    <div className="text-center mb-10">
+            <section className="py-12 md:py-16">
+                <div className="w-full mx-auto px-4 sm:px-6 md:px-8 lg:px-12">                    
+                    <div className="text-center mb-8 md:mb-10">
                         <h2 className="text-2xl md:text-3xl font-medium uppercase mb-4">
-                        Referral Program
+                            Referral Program
                         </h2>
-                        <p className="max-w-3xl mx-auto text-gray-800 text-sm">
-                        Let your sparkle inspire and earn while you do. Invite your friends to join Lucira and enjoy exclusive perks when they make their first purchase - you earn Lucira Coins and they get a discount. It's our way of saying thank you.
+                        <p className="max-w-3xl mx-auto text-gray-800 text-sm md:text-base leading-relaxed">
+                            Let your sparkle inspire and earn while you do. Invite your friends to
+                            join Lucira and enjoy exclusive perks when they make their first
+                            purchase - you earn Lucira Coins and they get a discount. It's our way
+                            of saying thank you.
                         </p>
                     </div>
-                    <div className="grid md:grid-cols-3 gap-6 items-center">
-                        <div>
-                            <p className="mb-4 text-gray-800">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
+                        <div className="md:col-span-2 lg:col-span-1 flex flex-col justify-center">
+                            <p className="mb-4 text-gray-800 text-sm md:text-base">
                                 Your Referral Link is Ready to Share with your friends
                             </p>
-                            <div className="flex">
-                                <input
-                                className="flex-1 border px-4 py-3 rounded-l-md text-sm"
-                                value={
+                            <div className="flex flex-col sm:flex-row">
+                                <input className="flex-1 border px-4 py-3 text-sm rounded-md sm:rounded-l-md sm:rounded-r-none"
+                                    value={
                                     isLoggedIn
-                                    ? referralLink || "Generating your referral link..."
-                                    : "Please Login to Share your Referral Link"
-                                }
-                                readOnly
+                                        ? referralLink || "Generating your referral link..."
+                                        : "Please Login to Share your Referral Link"
+                                    }
+                                    readOnly
                                 />
                                 <button
-                                onClick={handleClick}
-                                className="bg-[#A68380] text-white px-6 py-3 text-sm uppercase rounded-r-md cursor-pointer"
-                                >
-                                {isLoggedIn ? "Copy" : "Login"}
+                                    onClick={handleClick}
+                                    className="bg-[#A68380] text-white px-6 py-3 text-sm uppercase rounded-md mt-2 sm:mt-0 sm:rounded-r-md sm:rounded-l-none cursor-pointer">
+                                    {isLoggedIn ? "Copy" : "Login"}
                                 </button>
                             </div>
                         </div>
-                        <div className="relative bg-[#F3E0CF] p-6 rounded-md text-right h-[180px] flex flex-col justify-center">
-                            <Image alt="They Get" width={300} height={300}
-                                src="https://cdn.shopify.com/s/files/1/0739/8516/3482/files/They_Get_img_2.png?v=1751354604"
-                                className="absolute bottom-0 left-0 w-auto h-full object-contain"
+                        
+                        <div className="relative bg-[#F3E0CF] rounded-md p-5 md:p-6 min-h-[160px] md:min-h-[180px] flex flex-col justify-center text-right overflow-hidden">
+                            <Image
+                            alt="They Get"
+                            width={300}
+                            height={300}
+                            src="https://cdn.shopify.com/s/files/1/0739/8516/3482/files/They_Get_img_2.png?v=1751354604"
+                            className="absolute bottom-0 left-0 h-[85%] md:h-full w-auto object-contain"
                             />
-                            <p className="text-sm mb-2">They Get</p>
-                            <p className="text-3xl font-bold">
-                                ₹1,000 Off <br />
-                                <span className="text-xl font-bold">on their 1st Order</span>
+                            <p className="text-sm mb-2 relative z-10">
+                            They Get
+                            </p>
+                            <p className="text-2xl md:text-3xl font-bold relative z-10">
+                            ₹1,000 Off <br />
+                            <span className="text-lg md:text-xl font-bold">
+                                on their 1st Order
+                            </span>
                             </p>
                         </div>
-                        <div className="relative bg-[#F3E0CF] p-6 rounded-md text-left h-[180px] flex flex-col justify-center">
-                            <Image alt="You Get" width={300} height={300}
-                                src="https://cdn.shopify.com/s/files/1/0739/8516/3482/files/7d93784d-d99f-4716-8c45-779b911938f6_2.png?v=1751352893"
-                                className="absolute bottom-0 right-0 w-auto h-full object-contain"
-                            />
-                            <p className="text-sm mb-2">You Get</p>
-                            <p className="text-3xl font-bold">
-                                2,000 <br />
-                                <span className="text-xl font-bold">Lucira Coins</span>
+                        
+                        <div className="relative bg-[#F3E0CF] rounded-md p-5 md:p-6 min-h-[160px] md:min-h-[180px] flex flex-col justify-center text-left overflow-hidden">
+                            <Image
+                            alt="You Get"
+                            width={300}
+                            height={300}
+                            src="https://cdn.shopify.com/s/files/1/0739/8516/3482/files/7d93784d-d99f-4716-8c45-779b911938f6_2.png?v=1751352893"
+                            className="absolute bottom-0 right-0 h-[85%] md:h-full w-auto object-contain" />
+                            <p className="text-sm mb-2 relative z-10">
+                            You Get
+                            </p>
+                            <p className="text-2xl md:text-3xl font-bold relative z-10">
+                            2,000 <br />
+                            <span className="text-lg md:text-xl font-bold">
+                                Lucira Coins
+                            </span>
                             </p>
                         </div>
+
                     </div>
                 </div>
             </section>

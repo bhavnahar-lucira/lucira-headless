@@ -3,6 +3,9 @@ import { createSlice } from "@reduxjs/toolkit";
 const initialState = {
   user: null,
   isAuthenticated: false,
+  referralLink: "",
+  referralLoading: false,
+  referralError: null,
 };
 
 const userSlice = createSlice({
@@ -22,10 +25,20 @@ const userSlice = createSlice({
         state.user.avatar = action.payload;
       }
     },
+    setReferralLoading: (state, action) => {
+      state.referralLoading = action.payload;
+    },
+    setReferralLink: (state, action) => {
+      state.referralLink = action.payload;
+      state.referralError = null;
+    },
+    setReferralError: (state, action) => {
+      state.referralError = action.payload;
+    },
   },
 });
 
-export const { login, logout, setAvatar } = userSlice.actions;
+export const { login, logout, setAvatar, setReferralLoading, setReferralLink, setReferralError } = userSlice.actions;
 export default userSlice.reducer;
 
 export const selectUser = (state) => state.user.user;
