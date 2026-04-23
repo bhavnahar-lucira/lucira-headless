@@ -93,12 +93,15 @@ export default function Footer() {
                 </AccordionTrigger>
                 <AccordionContent className="pb-6">
                   <ul className="space-y-3 font-figtree text-[13px]">
-                    <li><Link href="/pages/diamond-education">Diamond Education</Link></li>
-                    <li><Link href="/pages/metal-education">Metal Education</Link></li>
-                    <li><Link href="/pages/size-guide-1">Size Guide</Link></li>
-                    <li><Link href="/pages/how-to-wear-2">How To Wear</Link></li>
-                    <li><Link href="/pages/new-tips-care">Jewelry Care Tips</Link></li>
-                    <li><Link href="/pages/product-passport">Product Passport</Link></li>
+                      <li><Link href="/pages/diamond-education">Diamond Education</Link></li>
+                      <li><Link href="/pages/metal-education">Metal Education</Link></li>
+                      <li><Link href="/pages/size-guide-1">Size Guide</Link></li>
+                      <li><Link href="/pages/how-to-wear-2">How To Wear</Link></li>
+                      <li><Link href="/pages/new-tips-care">Jewelry Care Tips</Link></li>
+                      <li><Link href="/pages/lgd-mine-page">LGD vs Mined</Link></li>
+                      <li><Link href="/pages/ring-shank">Ring Shank</Link></li>
+                      <li><Link href="/pages/product-passport">Product Passport</Link></li>
+                      <li><Link href="/pages/diamond-shapes">Diamond Shapes</Link></li>
                   </ul>
                 </AccordionContent>
               </AccordionItem>
@@ -242,9 +245,10 @@ export default function Footer() {
                 <li><Link href="/pages/size-guide-1">Size Guide</Link></li>
                 <li><Link href="/pages/how-to-wear-2">How To Wear</Link></li>
                 <li><Link href="/pages/new-tips-care">Jewelry Care Tips</Link></li>
-                <li><Link href="#">LGD vs Mined</Link></li>
+                <li><Link href="/pages/lgd-mine-page">LGD vs Mined</Link></li>
+                <li><Link href="/pages/ring-shank">Ring Shank</Link></li>
                 <li><Link href="/pages/product-passport">Product Passport</Link></li>
-                <li><Link href="#">Diamond Shapes</Link></li>
+                <li><Link href="/pages/diamond-shapes">Diamond Shapes</Link></li>
               </ul>
             </div>
 
