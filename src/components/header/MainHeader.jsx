@@ -283,7 +283,16 @@ export default function MainHeader() {
               </div>
             </div>
           ) : (
-            <UserIcon size={19} className="cursor-pointer" onClick={() => setOpen(true)} />
+            <UserIcon 
+              size={19} 
+              className="cursor-pointer" 
+              onClick={() => {
+                const path = window.location.pathname;
+                if (path !== "/login" && path !== "/register") {
+                  setOpen(true);
+                }
+              }} 
+            />
           )}
 
           {user ? (
@@ -296,7 +305,16 @@ export default function MainHeader() {
               )}
             </Link>
           ) : (
-            <button type="button" onClick={() => setOpen(true)} className="relative group p-1">
+            <button 
+              type="button" 
+              onClick={() => {
+                const path = window.location.pathname;
+                if (path !== "/login" && path !== "/register") {
+                  setOpen(true);
+                }
+              }} 
+              className="relative group p-1"
+            >
               <Heart size={19} className={`cursor-pointer ${wishlistItems.length > 0 ? "text-rose-500" : "text-zinc-900"}`} />
               {wishlistItems.length > 0 && (
                 <span className="absolute -top-1 -right-1 bg-rose-500 text-white text-[10px] font-bold w-4.5 h-4.5 rounded-full flex items-center justify-center border-2 border-white shadow-sm">
