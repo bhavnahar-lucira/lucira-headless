@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useState, useEffect } from "react";
-import { Tag, Phone, MessageSquare, Gift, Truck, MessageCircle, ChevronRight, X, Loader2, CircleChevronRight } from "lucide-react";
+import { Tag, Phone, MessageSquare, Gift, Truck, MessageCircle, ChevronRight, X, Loader2, CircleChevronRight, BadgePercent } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import Image from "next/image";
@@ -73,7 +73,6 @@ export default function CartSummary({ onPlaceOrder }) {
 
   // Re-validate coupon when items change
   useEffect(() => {
-    // If no items, coupon definitely shouldn't be there
     if (appliedCoupon && items.length === 0) {
       dispatch(removeCoupon());
       return;
@@ -93,7 +92,6 @@ export default function CartSummary({ onPlaceOrder }) {
           });
 
           if (!res.ok) {
-            // Coupon no longer valid for these items
             dispatch(removeCoupon());
             toast.warn("Coupon removed: items in cart are no longer eligible.");
           }
@@ -101,17 +99,12 @@ export default function CartSummary({ onPlaceOrder }) {
           console.error("Auto-validation failed:", err);
         }
       };
-
-      // 500ms delay to prevent too many requests during rapid quantity changes
       const timer = setTimeout(validateCurrentCoupon, 500);
       return () => clearTimeout(timer);
     }
   }, [items, appliedCoupon, couponDetails?.code, user?.email, dispatch]);
 
-  // Subtotal is total cart amount MINUS insurance amount
   const subtotal = totalAmount - insuranceAmount;
-
-  // Calculate dynamic discount
   let couponDiscountAmount = 0;
   if (appliedCoupon) {
     if (couponDetails.valueType === "FIXED_AMOUNT") {
@@ -122,7 +115,7 @@ export default function CartSummary({ onPlaceOrder }) {
   }
 
   const discount = couponDiscountAmount; 
-  const shipping = 0; // Free shipping
+  const shipping = 0; 
   const grandTotal = subtotal + insuranceAmount - discount + shipping;
 
   const handleApplyCoupon = async () => {
@@ -136,23 +129,16 @@ export default function CartSummary({ onPlaceOrder }) {
           items, 
           couponCode: couponCode.trim(),
           customerEmail: user?.email 
-        })
+            })
       });
-
       const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || "Invalid coupon");
-      }
-
-      // Store coupon details in Redux
+      if (!res.ok) throw new Error(data.error || "Invalid coupon");
       dispatch(applyCoupon({ 
         code: data.code, 
         summary: data.summary,
         value: data.value,
         valueType: data.valueType
       }));
-
       toast.success(`Coupon "${data.code}" applied!`);
       setIsCouponDialogOpen(false);
       setCouponCode("");
@@ -170,8 +156,8 @@ export default function CartSummary({ onPlaceOrder }) {
 
   return (
     <div className="space-y-6">
-      {/* Pricing Breakdown (Same as Shipping/Payment) */}
-      <div className="space-y-3 px-1 pt-2">
+      {/* Desktop Pricing Breakdown (LG) */}
+      <div className="hidden lg:block space-y-3 px-1 pt-2">
         <div className="flex justify-between text-sm text-zinc-600">
           <span>Subtotal</span>
           <span className="font-medium text-zinc-900">₹ {subtotal.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
@@ -213,15 +199,95 @@ export default function CartSummary({ onPlaceOrder }) {
         </div>
       </div>
 
-      {/* Actions (Voucher, Gift, Place Order) */}
-      <div className="space-y-4">
+      {/* Mobile Order Summary (LG Hidden) */}
+      <div className="lg:hidden space-y-4">
+        <h3 className="text-[14px] font-bold text-[#443360] uppercase tracking-wider ml-1">Order Summary</h3>
+        <div className="bg-[#F9F9F9] rounded-3xl p-6 space-y-4 border border-zinc-50 shadow-sm">
+          <div className="space-y-3">
+            <div className="flex justify-between text-[14px] text-zinc-500 font-medium">
+              <span>Subtotal</span>
+              <span className="text-zinc-900">₹ {subtotal.toLocaleString('en-IN')}</span>
+            </div>
+            
+            {appliedCoupon && (
+              <div className="flex justify-between text-[14px] font-medium items-center">
+                <div className="flex items-center gap-2">
+                  <span className="text-zinc-500">Coupon ({couponDetails.code})</span>
+                  <button 
+                    onClick={handleRemoveCoupon}
+                    className="text-[10px] font-bold text-red-500 hover:underline uppercase"
+                  >
+                    (Remove)
+                  </button>
+                </div>
+                <span className="text-[#A855F7] font-bold">- ₹ {couponDiscountAmount.toLocaleString('en-IN')}</span>
+              </div>
+            )}
+
+            {goldCoinItem && (
+              <div className="flex justify-between text-[14px] text-[#189351] font-medium">
+                <span>Free Gold Coin ({goldCoinItem.quantity})</span>
+                <span className="font-bold">₹ 0</span>
+              </div>
+            )}
+
+            {insuranceItem && (
+              <div className="flex justify-between text-[14px] text-zinc-500 font-medium">
+                <span>Insurance</span>
+                <span className="text-zinc-900">₹ {insuranceAmount.toLocaleString('en-IN')}</span>
+              </div>
+            )}
+
+            <div className="flex justify-between text-[14px] text-zinc-500 font-medium">
+              <span>Shipping (Standard)</span>
+              <span className="text-[#A855F7] font-bold">Free</span>
+            </div>
+          </div>
+
+          <div className="border-t border-zinc-200 pt-4 flex justify-between items-center">
+            <span className="text-base font-bold text-[#443360] uppercase tracking-wider">GRAND TOTAL</span>
+            <span className="text-lg font-bold text-[#443360]">₹ {grandTotal.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile Offers Group (Coupon, Gold Coin, Insurance) - ALL BELOW SUMMARY */}
+      <div className="lg:hidden space-y-6">
+        <div className="space-y-4">
+          <h3 className="text-[14px] font-bold text-[#443360] uppercase tracking-wider ml-1">Lucira Offers</h3>
+          <button 
+            onClick={() => setIsCouponDialogOpen(true)}
+            className="flex items-center justify-between w-full p-4 bg-[#F0E6FF] border border-[#E9D5FF] rounded-2xl group transition-all"
+          >
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-white rounded-xl shadow-sm">
+                <BadgePercent size={20} className="text-[#A855F7]" />
+              </div>
+              <span className="text-[15px] font-bold text-[#443360]">
+                {appliedCoupon ? `Applied: ${couponDetails.code}` : "Apply Coupon"}
+              </span>
+            </div>
+            <div className="bg-[#A855F7] p-1.5 rounded-full">
+              <ChevronRight size={18} className="text-white" />
+            </div>
+          </button>
+        </div>
+
+        <div className="space-y-4 px-1">
+          <GoldCoinOption />
+          <InsuranceOption />
+        </div>
+      </div>
+
+      {/* Desktop Only Actions & Options */}
+      <div className="hidden lg:block space-y-4">
         <Button 
           onClick={onPlaceOrder}
           className="w-full bg-primary hover:bg-primary/90 text-white font-bold h-14 uppercase tracking-[0.2em] shadow-lg shadow-zinc-100 transition-all rounded-lg text-base"
         >
           Place Order
         </Button>
-
+        
         <GoldCoinOption />
 
         <div className="space-y-3">
@@ -249,31 +315,20 @@ export default function CartSummary({ onPlaceOrder }) {
                   Enter your coupon code below to unlock special discounts.
                 </DialogDescription>
               </DialogHeader>
-
               <div className="space-y-4 py-4">
-                <div className="flex flex-col gap-2">
-                  <Input 
-                    value={couponCode}
-                    onChange={(e) => setCouponCode(e.target.value)}
-                    placeholder="Enter Coupon Code" 
-                    className="h-12 text-center text-lg font-bold tracking-widest uppercase placeholder:font-normal placeholder:tracking-normal"
-                  />
-                  <Button 
-                    onClick={handleApplyCoupon}
-                    disabled={isApplying || !couponCode.trim()}
-                    className="w-full h-12 bg-primary hover:bg-primary/90 uppercase font-bold tracking-widest text-white transition-all shadow-md"
-                  >
-                    {isApplying ? <Loader2 className="animate-spin" /> : "Apply Coupon"}
-                  </Button>
-                </div>
-                {appliedCoupon && (
-                  <button 
-                    onClick={handleRemoveCoupon}
-                    className="w-full text-center text-xs font-bold text-red-500 uppercase tracking-widest hover:underline pt-2"
-                  >
-                    Remove Current Coupon
-                  </button>
-                )}
+                <Input 
+                  value={couponCode}
+                  onChange={(e) => setCouponCode(e.target.value)}
+                  placeholder="Enter Coupon Code" 
+                  className="h-12 text-center text-lg font-bold tracking-widest uppercase"
+                />
+                <Button 
+                  onClick={handleApplyCoupon}
+                  disabled={isApplying || !couponCode.trim()}
+                  className="w-full h-12 bg-primary hover:bg-primary/90 uppercase font-bold tracking-widest text-white transition-all shadow-md"
+                >
+                  {isApplying ? <Loader2 className="animate-spin" /> : "Apply Coupon"}
+                </Button>
               </div>
             </DialogContent>
           </Dialog>
@@ -282,8 +337,8 @@ export default function CartSummary({ onPlaceOrder }) {
         <InsuranceOption />
       </div>
 
-      {/* Contact Section (Same as Shipping/Payment) */}
-      <div className="bg-white border border-zinc-50 rounded-2xl p-6 shadow-sm text-center space-y-4">
+      {/* Desktop Only Contact Section */}
+      <div className="bg-white border border-zinc-50 rounded-2xl p-6 shadow-sm text-center space-y-4 hidden lg:block">
         <h4 className="text-[11px] font-bold text-[#443360] uppercase tracking-[0.2em]">CONTACT US FOR ASSISTANCE</h4>
         <div className="flex justify-around items-center pt-2">
           <Link href="tel:+918976773659" className="flex items-center gap-2 bg-zinc-50 px-3 py-2.5 rounded-xl hover:bg-zinc-100 transition-colors">

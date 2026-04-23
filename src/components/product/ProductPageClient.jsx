@@ -48,6 +48,7 @@ import {
 } from "@/components/ui/drawer";
 
 import { SizeGuideSheet } from "@/components/product/SizeGuideSheet";
+import { ProductCustomizerMobile } from "@/components/product/ProductCustomizerMobile";
 import { useDispatch, useSelector } from "react-redux";
 import { addToCart } from "@/redux/features/cart/cartSlice";
 import { selectUser } from "@/redux/features/user/userSlice";
@@ -773,107 +774,123 @@ export default function ProductPageClient({ product, complementaryProducts = [],
             </div> 
 
             <div className="space-y-6 mt-4">
-              {/* Gold Selection */}
-              <div className="space-y-3">
-                <div className="text-base font-bold">
-                  Select Gold Color & Karat: <span className="text-gray-500 font-medium ml-1">{activeKarat} {activeColor}</span>
-                </div>
-                <div className="grid grid-cols-3 gap-3">
-                  {(() => {
-                    const combinations = [];
-                    product.variants?.forEach(v => {
-                      const parts = v.color.split(" ");
-                      if (parts.length >= 3) {
-                        const karat = parts[0];
-                        const metal = parts.slice(1).join(" ");
-                        if (!combinations.find(c => c.karat === karat && c.metal === metal)) {
-                          combinations.push({ karat, metal });
+              {/* Mobile Customizer */}
+              <ProductCustomizerMobile
+                activeColor={activeColor}
+                activeKarat={activeKarat}
+                selectedSize={selectedSize}
+                handleGoldSelection={handleGoldSelection}
+                handleSizeSelection={handleSizeSelection}
+                availableSizes={availableSizes}
+                product={product}
+                isColorInStock={isColorInStock}
+                isSizeInStock={isSizeInStock}
+              />
+
+              {/* Desktop Selection Blocks */}
+              <div className="hidden lg:block space-y-6">
+                {/* Gold Selection */}
+                <div className="space-y-3">
+                  <div className="text-base font-bold">
+                    Select Gold Color & Karat: <span className="text-gray-500 font-medium ml-1">{activeKarat} {activeColor}</span>
+                  </div>
+                  <div className="grid grid-cols-3 gap-3">
+                    {(() => {
+                      const combinations = [];
+                      product.variants?.forEach(v => {
+                        const parts = v.color.split(" ");
+                        if (parts.length >= 3) {
+                          const karat = parts[0];
+                          const metal = parts.slice(1).join(" ");
+                          if (!combinations.find(c => c.karat === karat && c.metal === metal)) {
+                            combinations.push({ karat, metal });
+                          }
                         }
-                      }
-                    });
-                    
-                    // Sort combinations: 14KT first, then 18KT. Inside each, White, Yellow, Rose.
-                    const metalOrder = ["White Gold", "Yellow Gold", "Rose Gold"];
-                    combinations.sort((a, b) => {
-                      if (a.karat !== b.karat) return a.karat.localeCompare(b.karat);
-                      return metalOrder.indexOf(a.metal) - metalOrder.indexOf(b.metal);
-                    });
-
-                    return combinations.map(({ karat, metal }) => {
-                      let colorClass = "bg-[#EBC15C]";
-                      if (metal.includes("White")) colorClass = "bg-[#E5E5E5]";
-                      if (metal.includes("Rose")) colorClass = "bg-[#F6C7C7]";
+                      });
                       
-                      return (
-                        <GoldOption 
-                          key={`${karat}-${metal}`}
-                          metal={metal} 
-                          karat={karat} 
-                          onClick={handleGoldSelection} 
-                          active={activeColor === metal && activeKarat === karat} 
-                          color={colorClass} 
-                          inStock={isColorInStock(metal, karat)} 
-                        />
-                      );
-                    });
-                  })()}
-                </div>
-              </div>
+                      // Sort combinations: 14KT first, then 18KT. Inside each, White, Yellow, Rose.
+                      const metalOrder = ["White Gold", "Yellow Gold", "Rose Gold"];
+                      combinations.sort((a, b) => {
+                        if (a.karat !== b.karat) return a.karat.localeCompare(b.karat);
+                        return metalOrder.indexOf(a.metal) - metalOrder.indexOf(b.metal);
+                      });
 
-              {/* Ring Size */}
-                <div className="space-y-4">
-              {availableSizes.length > 0 && availableSizes[0] !== null && availableSizes[0] !== undefined && (
-                <>
-                  <div className="flex justify-between items-center text-sm">
-                    <span className="font-semibold text-base">Select Ring Size: <span className="font-medium ml-1">{selectedSize} IND</span></span>
-                    {String(product.type || "").toLowerCase().includes("ring") && (
-                      <SizeGuideSheet>
-                        <button className="text-sm font-medium underline underline-offset-4 decoration-gray-300 hover:cursor-pointer">Size Guide</button>
-                      </SizeGuideSheet>
+                      return combinations.map(({ karat, metal }) => {
+                        let colorClass = "bg-[#EBC15C]";
+                        if (metal.includes("White")) colorClass = "bg-[#E5E5E5]";
+                        if (metal.includes("Rose")) colorClass = "bg-[#F6C7C7]";
+                        
+                        return (
+                          <GoldOption 
+                            key={`${karat}-${metal}`}
+                            metal={metal} 
+                            karat={karat} 
+                            onClick={handleGoldSelection} 
+                            active={activeColor === metal && activeKarat === karat} 
+                            color={colorClass} 
+                            inStock={isColorInStock(metal, karat)} 
+                          />
+                        );
+                      });
+                    })()}
+                  </div>
+                </div>
+
+                {/* Ring Size */}
+                  <div className="space-y-4">
+                {availableSizes.length > 0 && availableSizes[0] !== null && availableSizes[0] !== undefined && (
+                  <>
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="font-semibold text-base">Select Ring Size: <span className="font-medium ml-1">{selectedSize} IND</span></span>
+                      {String(product.type || "").toLowerCase().includes("ring") && (
+                        <SizeGuideSheet>
+                          <button className="text-sm font-medium underline underline-offset-4 decoration-gray-300 hover:cursor-pointer">Size Guide</button>
+                        </SizeGuideSheet>
+                      )}
+                    </div>
+                    
+                    <div className="bg-[#F8F9FA] rounded-lg flex items-center gap-4 px-4 py-2.5 border border-gray-100">
+                      <div className="bg-white rounded-lg p-2 shadow-sm">
+                        <Play size={16} fill="black" />
+                      </div>
+                      <span className="text-base text-black">Watch this quick video to measure your ring right.</span>
+                    </div>
+
+                    <div className="grid grid-cols-7 gap-4">
+                      {availableSizes.map(sizeStr => {
+                        const inStock = isSizeInStock(sizeStr);
+                        return (
+                          <button
+                            key={`size-${sizeStr}`}
+                            onClick={() => handleSizeSelection(sizeStr)}
+                            className={`relative border rounded-md h-10 flex items-center justify-center text-base transition-all ${
+                              sizeStr === selectedSize
+                                ? "border-primary bg-white ring-1 ring-primary font-bold"
+                                : "border-gray-200 hover:border-primary font-normal"
+                            }`}
+                          >
+                            {sizeStr}
+                            {inStock && <span className="absolute top-1 left-1 w-1.5 h-1.5 bg-[#2DB36F] rounded-full"></span>}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <p className="text-sm text-black font-medium">Didn&apos;t get the size right? We&apos;ll exchange it.</p>  
+                    </>
+                  )}              
+                    {activeVariant?.inStock ? (
+                      <div className="bg-[#ECF7F2] border border-[#B3E1CD] text-black  rounded-lg px-4 py-3 flex items-center gap-1">
+                        <span className="w-2.5 h-2.5 bg-[#189351] rounded-full"></span>
+                        This combination is <span className="font-semibold">in-stock & ready to ship in 24 hrs</span>
+                      </div>
+                    ) : (
+                      <div className="bg-amber-50 border border-amber-200 text-black rounded-lg px-4 py-3 flex items-center gap-1">
+                        <span className="w-2.5 h-2.5 bg-amber-500 rounded-full"></span>
+                        This combination will be <span className="font-semibold">made to order (dispatched in 10-15 days)</span>
+                      </div>
                     )}
                   </div>
-                  
-                  <div className="bg-[#F8F9FA] rounded-lg flex items-center gap-4 px-4 py-2.5 border border-gray-100">
-                    <div className="bg-white rounded-lg p-2 shadow-sm">
-                      <Play size={16} fill="black" />
-                    </div>
-                    <span className="text-base text-black">Watch this quick video to measure your ring right.</span>
-                  </div>
-
-                  <div className="grid grid-cols-7 gap-4">
-                    {availableSizes.map(sizeStr => {
-                      const inStock = isSizeInStock(sizeStr);
-                      return (
-                        <button
-                          key={`size-${sizeStr}`}
-                          onClick={() => handleSizeSelection(sizeStr)}
-                          className={`relative border rounded-md h-10 flex items-center justify-center text-base transition-all ${
-                            sizeStr === selectedSize
-                              ? "border-primary bg-white ring-1 ring-primary font-bold"
-                              : "border-gray-200 hover:border-primary font-normal"
-                          }`}
-                        >
-                          {sizeStr}
-                          {inStock && <span className="absolute top-1 left-1 w-1.5 h-1.5 bg-[#2DB36F] rounded-full"></span>}
-                        </button>
-                      );
-                    })}
-                  </div>
-                  <p className="text-sm text-black font-medium">Didn&apos;t get the size right? We&apos;ll exchange it.</p>  
-                  </>
-                )}              
-                  {activeVariant?.inStock ? (
-                    <div className="bg-[#ECF7F2] border border-[#B3E1CD] text-black  rounded-lg px-4 py-3 flex items-center gap-1">
-                      <span className="w-2.5 h-2.5 bg-[#189351] rounded-full"></span>
-                      This combination is <span className="font-semibold">in-stock & ready to ship in 24 hrs</span>
-                    </div>
-                  ) : (
-                    <div className="bg-amber-50 border border-amber-200 text-black rounded-lg px-4 py-3 flex items-center gap-1">
-                      <span className="w-2.5 h-2.5 bg-amber-500 rounded-full"></span>
-                      This combination will be <span className="font-semibold">made to order (dispatched in 10-15 days)</span>
-                    </div>
-                  )}
-                </div>
+              </div>
               
               <Separator />
             </div>
