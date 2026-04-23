@@ -27,11 +27,11 @@ export default function CheckoutFooter() {
   ];
 
   const paymentIcons = [
-    { name: "VISA", src: "https://upload.wikimedia.org/wikipedia/commons/d/d6/Visa_2021.svg" },
-    { name: "MASTERCARD", src: "https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" },
-    { name: "RUPAY", src: "https://upload.wikimedia.org/wikipedia/commons/c/cb/Rupay-Logo.svg" },
-    { name: "UPI", src: "https://upload.wikimedia.org/wikipedia/commons/e/e1/UPI-Logo.png" },
-    { name: "COD", src: "https://cdn-icons-png.flaticon.com/512/6491/6491490.png" }, // Generic COD icon
+    { name: "VISA", src: "/images/icons/visa.svg" },
+    { name: "MASTERCARD", src: "/images/icons/mastercard.svg" },
+    { name: "RUPAY", src: "/images/icons/rupay.svg" },
+    { name: "UPI", src: "/images/icons/upi.svg" },
+    { name: "COD", src: "/images/icons/cod.png" }, // Generic COD icon
   ];
 
   return (

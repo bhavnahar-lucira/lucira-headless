@@ -42,6 +42,15 @@ const colorMap = {
   white: "#E5E4E2",
 };
 
+const parseOrnaverseComponent = (val) => {
+  if (!val) return null;
+  try {
+    return JSON.parse(val);
+  } catch (e) {
+    return null;
+  }
+};
+
 // Force en-IN formatting to be consistent across environments
 const formatPrice = (num) => {
   if (num === null || num === undefined) return "0";
@@ -698,27 +707,45 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle 
                 {(() => {
                   const variantMeta = prioritizedVariant?.metafields;
                   const prodMeta = product.productMetafields;
-                  
-                  // 1. Diamond Quality
-                  let quality = variantMeta?.diamonds?.[0]?.quality || prodMeta?.quality;
-                  
-                  // Fallback for quality if it's a ring but metadata is missing (matching ProductPage logic)
-                  if (!quality && String(product.type || "").toLowerCase().includes("ring")) {
-                    quality = "VVS-VS, EF";
-                  }
-                  
-                  // 2. Diamond Carat
-                  const carat = variantMeta?.diamonds?.[0]?.weight 
-                    ? `${variantMeta.diamonds[0].weight}ct` 
-                    : prodMeta?.carat_range;
-                  
-                  // 3. Metal Weight
-                  const weightVal = variantMeta?.metal_weight || prodMeta?.weight;
-                  const weight = weightVal ? `${weightVal}${String(weightVal).toLowerCase().includes('g') ? '' : 'g'}` : null;
+                  const ornaverseComp = parseOrnaverseComponent(variantMeta?.components || prodMeta?.components);
 
-                  const parts = [quality, carat, weight].filter(Boolean);
+                  // Find the first diamond component for summary display
+                  const firstDiamond = ornaverseComp?.components?.find(c => 
+                    (c.item_group_name === "Diamond" || (c.quality_code && c.quality_code !== "NA")) && (parseFloat(c.weight) > 0 || parseInt(c.pieces) > 0)
+                  );
+
+                  const variantDiamonds = variantMeta?.diamonds?.filter(d => parseFloat(d.weight) > 0 || parseInt(d.pieces) > 0) || [];
+                  const isDiamondProduct = !!firstDiamond || variantDiamonds.length > 0;
+
+                  const parts = [];
+
+                  if (isDiamondProduct) {
+                    // 1. Diamond Quality
+                    const quality = (firstDiamond?.quality_code && firstDiamond?.stone_color_code && firstDiamond.quality_code !== "NA" && firstDiamond.stone_color_code !== "NA")
+                      ? `${firstDiamond.quality_code}, ${firstDiamond.stone_color_code}`
+                      : (firstDiamond?.purity || variantDiamonds[0]?.quality || prodMeta?.quality);
+
+                    // 2. Diamond Carat
+                    const carat = variantDiamonds[0]?.weight 
+                      ? `${variantDiamonds[0].weight}ct` 
+                      : (firstDiamond?.weight ? `${firstDiamond.weight}ct` : prodMeta?.carat_range);
+
+                    if (quality && quality !== "NA") parts.push(quality);
+                    if (carat && carat !== "NA" && !carat.startsWith("0ct")) parts.push(carat);
+                  }
+
+                  // If no diamond parts were added, or it's not a diamond product, show metal purity
+                  if (parts.length === 0) {
+                    const metalPurity = variantMeta?.metal_purity || (prioritizedVariant?.color?.split(" ")[0]);
+                    if (metalPurity) parts.push(metalPurity);
+                  }
+
+                  // 3. Metal Weight
+                  const weightVal = variantMeta?.metal_weight || prodMeta?.weight;                  const weight = weightVal ? `${weightVal}${String(weightVal).toLowerCase().includes('g') ? '' : 'g'}` : null;
+                  if (weight) parts.push(weight);
+
                   if (parts.length === 0) return null;
-                  
+
                   return (
                     <p className="font-figtree text-[10px] lg:text-xs font-medium text-gray-500 uppercase tracking-tight">
                       {parts.join(" · ")}

@@ -3,8 +3,9 @@
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useState, useEffect } from "react";
-import { Tag, Phone, MessageSquare, Gift, Truck, MessageCircle, ChevronRight, X, Loader2 } from "lucide-react";
+import { Tag, Phone, MessageSquare, Gift, Truck, MessageCircle, ChevronRight, X, Loader2, CircleChevronRight } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import Link from "next/link";
 import Image from "next/image";
 import { useSelector, useDispatch } from "react-redux";
 import InsuranceOption from "./InsuranceOption";
@@ -226,16 +227,16 @@ export default function CartSummary({ onPlaceOrder }) {
         <div className="space-y-3">
           <Dialog open={isCouponDialogOpen} onOpenChange={setIsCouponDialogOpen}>
             <DialogTrigger asChild>
-              <button className="flex items-center justify-between w-full p-4 bg-white border border-zinc-200 rounded-xl hover:border-primary/30 hover:bg-primary/5 transition-all group shadow-sm">
+              <button className="flex items-center justify-between w-full p-4 bg-white border border-accent/30 rounded-xl hover:border-accent transition-all group cursor-pointer">
                 <div className="flex items-center gap-3">
-                  <div className="size-8 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors">
-                    <Tag size={16} />
+                  <div className="size-8 rounded-full bg-[#f3ede3] flex items-center justify-center transition-colors">
+                    <Tag size={16} color="#b8924a" />
                   </div>
-                  <span className="text-sm font-bold text-zinc-700 uppercase tracking-wider">
+                  <span className="text-sm font-bold text-[#8b7d72] uppercase tracking-widest font-figtree">
                     {appliedCoupon ? `Applied: ${couponDetails.code}` : "Apply Coupon"}
                   </span>
                 </div>
-                <ChevronRight size={18} className="text-zinc-400 group-hover:text-primary transition-colors" />
+                <ChevronRight size={20} className="text-gray-400 group-hover:text-primary transition-colors" />
               </button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-md">
@@ -285,14 +286,14 @@ export default function CartSummary({ onPlaceOrder }) {
       <div className="bg-white border border-zinc-50 rounded-2xl p-6 shadow-sm text-center space-y-4">
         <h4 className="text-[11px] font-bold text-[#443360] uppercase tracking-[0.2em]">CONTACT US FOR ASSISTANCE</h4>
         <div className="flex justify-around items-center pt-2">
-          <button className="flex items-center gap-2 bg-zinc-50 px-3 py-2.5 rounded-xl hover:bg-zinc-100 transition-colors">
+          <Link href="tel:+918976773659" className="flex items-center gap-2 bg-zinc-50 px-3 py-2.5 rounded-xl hover:bg-zinc-100 transition-colors">
             <Phone size={18} className="text-[#443360]" />
             <span className="text-xs font-bold text-[#443360]">Call</span>
-          </button>
-          <button className="flex items-center gap-2 bg-zinc-50 px-3 py-2.5 rounded-xl hover:bg-zinc-100 transition-colors">
+          </Link>
+          <Link href="https://wa.me/919004435760?text=Hi%2C+I+want+to+get+more+information+about+Lucira" target="_blank" className="flex items-center gap-2 bg-zinc-50 px-3 py-2.5 rounded-xl hover:bg-zinc-100 transition-colors">
             <MessageCircle size={18} className="text-[#443360]" />
             <span className="text-xs font-bold text-[#443360]">Whatsapp</span>
-          </button>
+          </Link>
           <button className="flex items-center gap-2 bg-zinc-50 px-3 py-2.5 rounded-xl hover:bg-zinc-100 transition-colors">
             <MessageSquare size={18} className="text-[#443360]" />
             <span className="text-xs font-bold text-[#443360]">Chat</span>

@@ -473,7 +473,7 @@ export default function CollectionPage({ params: paramsPromise }) {
                   {Object.entries(availableFilters || {}).map(([groupKey, options]) => {
                     const isExpanded = expandedFilters[groupKey] ?? false;
                     return (
-                      <div key={groupKey} className="border-b mb-0">                     
+                      <div key={groupKey} className="border-b mb-0 border-gray-200">                     
                           <button
                             onClick={() => toggleFilterExpand(groupKey)}
                             className="w-full flex items-center justify-between py-5 hover:opacity-70 transition-opacity"

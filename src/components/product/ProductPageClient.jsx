@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
 import Image from "next/image";
 import {
   Breadcrumb,
@@ -47,6 +47,7 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 
+import { SizeGuideSheet } from "@/components/product/SizeGuideSheet";
 import { useDispatch, useSelector } from "react-redux";
 import { addToCart } from "@/redux/features/cart/cartSlice";
 import { selectUser } from "@/redux/features/user/userSlice";
@@ -69,6 +70,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import StyledByLucira from "../home/StyledByLucira";
 
 // Force en-IN formatting to be consistent across environments
 const formatPrice = (num) => {
@@ -109,6 +111,32 @@ const getVariantSelection = (variant) => {
   };
 };
 
+const parseOrnaverseComponent = (val) => {
+  if (!val) return null;
+  try {
+    return JSON.parse(val);
+  } catch (e) {
+    return null;
+  }
+};
+
+const mapShapeCode = (code) => {
+  if (!code || code === "NA") return null;
+  const maps = {
+    "PR": "Princess",
+    "RD": "Round",
+    "MQ": "Marquise",
+    "OV": "Oval",
+    "PE": "Pear",
+    "EM": "Emerald",
+    "CU": "Cushion",
+    "HE": "Heart",
+    "RA": "Radiant",
+    "AS": "Asscher"
+  };
+  return maps[code.toUpperCase()] || code;
+};
+
 export default function ProductPageClient({ product, complementaryProducts = [], matchingProducts = [] }) {
   const router = useRouter();
   const dispatch = useDispatch();
@@ -119,6 +147,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
   const [wishlistLoading, setWishlistLoading] = useState(false);
   const [showStickyAtc, setShowStickyAtc] = useState(false);
   const mainAtcRef = useRef(null);
+  const productDetailsRef = useRef(null);
 
   const [engraving, setEngraving] = useState("");
   const [engravingFont, setEngravingFont] = useState("Lobster");
@@ -597,31 +626,69 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                   <h1 className="text-28px font-bold leading-[1.2] tracking-tight">
                     {product.title}
                   </h1>
-                  <div className="flex items-center gap-1.5 leading-none overflow-hidden justify-start">
-                    <span className="text-base text-gray-800">
-                      {product.productMetafields?.carat_range || "2 CT"} · {product.productMetafields?.material_type || "Lab-Grown diamond"} · {product.vendor}
-                      <button className="inline-flex items-center">
-                        <Info size={14} className="text-gray-800 ml-2 top-0.75 relative hover:cursor-pointer" />
-                      </button>
-                    </span>
-                  </div>
+                  <div className="flex justify-between gap-2 items-center">
+                    {(() => {
+                      const variantMeta = activeVariant?.metafields;
+                      const prodMeta = product.productMetafields;
+                      const pricingDiamond = priceBreakup?.diamond_info;
+                      const ornaverseComp = parseOrnaverseComponent(variantMeta?.components || prodMeta?.components);
+                      
+                      // Find the first diamond component for summary display
+                      const firstDiamond = ornaverseComp?.components?.find(c => 
+                        (c.item_group_name === "Diamond" || (c.quality_code && c.quality_code !== "NA")) && (parseFloat(c.weight) > 0 || parseInt(c.pieces) > 0)
+                      );
+                      
+                      const variantDiamonds = variantMeta?.diamonds?.filter(d => parseFloat(d.weight) > 0 || parseInt(d.pieces) > 0) || [];
+                      const isDiamondProduct = !!firstDiamond || variantDiamonds.length > 0 || (!!pricingDiamond && (parseFloat(pricingDiamond.weight) > 0 || parseInt(pricingDiamond.pcs) > 0));
+                      
+                      const parts = [];
+                      
+                      if (isDiamondProduct) {
+                        // 1. Diamond Quality
+                        const quality = (firstDiamond?.quality_code && firstDiamond?.stone_color_code && firstDiamond.quality_code !== "NA" && firstDiamond.stone_color_code !== "NA")
+                          ? `${firstDiamond.quality_code}, ${firstDiamond.stone_color_code}`
+                          : (firstDiamond?.purity || variantDiamonds[0]?.quality || pricingDiamond?.title || prodMeta?.quality);
+                        
+                        // 2. Diamond Carat
+                        const carat = variantDiamonds[0]?.weight 
+                          ? `${variantDiamonds[0].weight}ct` 
+                          : (firstDiamond?.weight ? `${firstDiamond.weight}ct` : prodMeta?.carat_range);
+                          
+                        if (quality && quality !== "NA") parts.push(quality);
+                        if (carat && carat !== "NA" && !carat.startsWith("0ct")) parts.push(carat);
+                      } 
+                      
+                      // If no diamond parts were added, or it's not a diamond product, show metal purity
+                      if (parts.length === 0) {
+                        const metalPurity = variantMeta?.metal_purity || activeKarat;
+                        if (metalPurity) parts.push(metalPurity);
+                      }
+                      
+                      // 3. Metal Weight
+                      const weightVal = variantMeta?.metal_weight || prodMeta?.weight;
+                      const weight = weightVal ? `${weightVal}${String(weightVal).toLowerCase().includes('g') ? '' : 'g'}` : null;
+                      if (weight) parts.push(weight);
+
+                      if (parts.length === 0) return null;
+                      
+                      return (
+                        <p className="font-figtree text-[10px] lg:text-sm font-medium text-gray-800 uppercase tracking-tight">
+                          {parts.join(" · ")}
+                        </p>
+                      );
+                    })()}
+                    {/* Rating */}
+                    {product.reviews && (
+                      <div className="flex items-center gap-1.5">
+                        <Star size={14} fill="currentColor" className="text-amber-400" />
+                        <span className="font-figtree text-[10px] lg:text-sm font-semibold text-gray-800 uppercase tracking-tight">
+                          {product.reviews.average} ({product.reviews.count})
+                        </span>
+                      </div>
+                    )}
+                  </div>                  
                 </div>
-                {/* Rating */}
-                {product.reviews && (
-                  <div className="flex items-center gap-2 mt-3">
-                    <div className="flex items-center gap-0.5 text-amber-400">
-                      {[...Array(5)].map((_, i) => (
-                        <Star 
-                          key={`rating-star-${i}`} 
-                          size={16} 
-                          fill={i < Math.floor(product.reviews.average) ? "currentColor" : "none"} 
-                          className={i < Math.floor(product.reviews.average) ? "" : "text-zinc-200"}
-                        />
-                      ))}
-                    </div>
-                    <span className="text-sm font-semibold">{product.reviews.average} ({product.reviews.count})</span>
-                  </div>
-                )}
+                
               </div>
 
               {/* Price */}
@@ -636,7 +703,10 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                       {Math.round((1 - currentPrice / currentComparePrice) * 100)}% OFF
                     </span>
                   )}
-                  <button className="text-sm font-semibold underline underline-offset-4 ml-auto decoration-gray-300">
+                  <button 
+                    onClick={() => productDetailsRef.current?.scrollIntoView({ behavior: 'smooth' })}
+                    className="text-sm font-semibold underline underline-offset-4 ml-auto decoration-gray-300 hover:cursor-pointer"
+                  >
                     See Savings Breakup
                   </button>
                 </div>
@@ -644,41 +714,61 @@ export default function ProductPageClient({ product, complementaryProducts = [],
               </div>
               
               {/* Savings Banners Slider */}
-              <div className="w-full">
-                <Swiper
-                  modules={[Autoplay]}
-                  spaceBetween={8}
-                  slidesPerView={1.5}
-                  autoplay={false}
-                  loop={true}
-                  className="w-full"
-                >
-                  <SwiperSlide>
-                    <div className="border border-dashed border-gray-400 rounded-lg px-3 py-3 flex items-center gap-2 bg-gray-50 h-full">
-                      <span className="text-base shrink-0">💎</span>
-                      <p className="text-sm font-semibold text-black whitespace-nowrap">
-                        You&apos;re saving flat <span className="font-extrabold text-black">25% OFF</span> on diamond prices.
-                      </p>
-                    </div>
-                  </SwiperSlide>
-                  <SwiperSlide>
-                    <div className="border border-dashed border-gray-400 rounded-lg px-3 py-3 flex items-center gap-2 bg-gray-50 h-full">
-                      <span className="text-base shrink-0">🪙</span>
-                      <p className="text-sm font-semibold text-black whitespace-nowrap">
-                        Save more with <span className="font-extrabold text-black">Lucira coins</span>
-                      </p>
-                    </div>
-                  </SwiperSlide>
-                  <SwiperSlide>
-                    <div className="border border-dashed border-gray-400 rounded-lg px-3 py-3 flex items-center gap-2 bg-gray-50 h-full">
-                      <span className="text-base shrink-0">✨</span>
-                      <p className="text-sm font-semibold text-black whitespace-nowrap">
-                        Free <span className="font-extrabold text-black">Gift</span> included
-                      </p>
-                    </div>
-                  </SwiperSlide>
-                </Swiper>
-              </div>
+              {(() => {
+                const raw = priceBreakup?.raw_breakup;
+                const diamondDiscount = raw?.diamond?.discount_percent || 0;
+                const mcDiscount = raw?.making_charges?.discount_percent || 0;
+                const isDiamondJewelry = (raw?.diamond?.final || 0) > 0;
+                const currentTotalPrice = activeVariant?.price || 0;
+                const isGoldCoinEligible = isDiamondJewelry && currentTotalPrice >= 20000;
+
+                const slides = [];
+                if (diamondDiscount > 0) {
+                  slides.push({
+                    icon: "💎",
+                    text: <>You&apos;re saving flat <span className="font-extrabold text-black">{diamondDiscount}% OFF</span> on diamond prices.</>
+                  });
+                }
+                if (mcDiscount > 0) {
+                  slides.push({
+                    icon: "⚒️",
+                    text: <>You&apos;re saving flat <span className="font-extrabold text-black">{mcDiscount}% OFF</span> on making charges.</>
+                  });
+                }
+                if (isGoldCoinEligible) {
+                  slides.push({
+                    icon: "🪙",
+                    text: <>Complimentary <span className="font-extrabold text-black">Gold Coin</span> available on this order</>
+                  });
+                }
+
+                if (slides.length === 0) return null;
+
+                return (
+                  <div className="w-full">
+                    <Swiper
+                      modules={[Autoplay]}
+                      spaceBetween={8}
+                      slidesPerView={slides.length > 1 ? 1.3 : 1}
+                      speed={1800}
+                      autoplay={{ delay: 3000, disableOnInteraction: false }}
+                      loop={slides.length > 2}
+                      className="w-full"
+                    >
+                      {slides.map((slide, idx) => (
+                        <SwiperSlide key={`promo-slide-${idx}`}>
+                          <div className="border border-dashed border-gray-400 rounded-lg px-3 py-3 flex items-center gap-2 bg-secondary/50 h-full">
+                            <span className="text-base shrink-0">{slide.icon}</span>
+                            <p className="text-sm font-semibold text-black whitespace-nowrap">
+                              {slide.text}
+                            </p>
+                          </div>
+                        </SwiperSlide>
+                      ))}
+                    </Swiper>
+                  </div>
+                );
+              })()}
               <Separator />
             </div> 
 
@@ -736,7 +826,11 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                 <>
                   <div className="flex justify-between items-center text-sm">
                     <span className="font-semibold text-base">Select Ring Size: <span className="font-medium ml-1">{selectedSize} IND</span></span>
-                    <button className="text-sm font-medium underline underline-offset-4 decoration-gray-300">Size Guide</button>
+                    {String(product.type || "").toLowerCase().includes("ring") && (
+                      <SizeGuideSheet>
+                        <button className="text-sm font-medium underline underline-offset-4 decoration-gray-300 hover:cursor-pointer">Size Guide</button>
+                      </SizeGuideSheet>
+                    )}
                   </div>
                   
                   <div className="bg-[#F8F9FA] rounded-lg flex items-center gap-4 px-4 py-2.5 border border-gray-100">
@@ -1033,10 +1127,10 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                 </div>
                 <div className="space-y-1">
                   <p className="text-sm font-semibold leading-tight">
-                    Earn 5138 Lucira Coins worth ₹500 with this order
+                    Earn {Math.floor(currentPrice * 0.04)} Lucira Coins worth ₹{formatPrice(Math.floor(currentPrice * 0.04))} with this order
                   </p>
                   <p className="text-sm font-medium text-black">
-                    10 Lucira Coins = ₹1
+                    1 Lucira Coin = ₹1
                   </p>
                 </div>
               </div>
@@ -1144,153 +1238,150 @@ export default function ProductPageClient({ product, complementaryProducts = [],
             </div>
 
             {/* Product Details Section */}
-            <div className="space-y-4 mt-4">
-              <div className="flex items-center justify-between mb-2">
-                <h2 className="text-base font-semibold tracking-tight uppercase tracking-wider">Product Details:</h2>
+            <div ref={productDetailsRef} className="space-y-4 mt-6">
+              <div className="flex justify-between items-center">
+                <h2 className="text-base font-bold tracking-tight uppercase">Product Details</h2>
                 {activeVariant?.sku && (
-                  <div className="flex items-center gap-2 bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-100">
-                    <span className="text-xs font-bold text-gray-500 tracking-tight">SKU: {activeVariant.sku}</span>
-                    <button 
-                      onClick={() => {
-                        navigator.clipboard.writeText(activeVariant.sku);
-                        toast.success("SKU Copied!", { position: "bottom-center", autoClose: 1000, hideProgressBar: true });
-                      }}
-                      className="p-1 hover:bg-white rounded transition-colors"
-                    >
-                      <Copy size={12} className="text-gray-400" />
-                    </button>
-                  </div>
+                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">SKU: {activeVariant.sku}</span>
                 )}
               </div>
-              <div className="bg-gray-50 border border-gray-100 rounded-xl p-4 space-y-4">
-                {/* Metal & Dimensions */}
-                <div className="flex gap-3 relative justify-between">
-                  {/* Metal */}
-                  <div className="w-[48%] border-r border-gray-200">
-                    <div className="flex items-center gap-2 font-semibold text-sm mb-3 uppercase tracking-wide">
-                      <Image src="/images/icons/metal.svg" alt="Metal details icon" width={18} height={18} />
-                      Metal
-                    </div>
-                    <div className="flex items-start gap-3.5 pr-2">
-                      <div className="w-16 h-16 bg-white rounded-lg border border-gray-100 flex items-center justify-center p-2 shadow-sm shrink-0">
-                        <Image src="/images/product/try.jpg" alt="Metal sample" width={60} height={60} className="object-contain" />
-                      </div>
-                      <div className="space-y-1.5 pt-1">
-                        <p className="text-sm font-medium leading-none">
-                          <span className="text-gray-400 font-normal">Carat:</span> {activeVariant?.metafields?.metal_purity || activeKarat}
-                        </p>
-                        <p className="text-sm font-medium leading-none">
-                          <span className="text-gray-400 font-normal">Color:</span> {activeVariant?.metafields?.metal_color || activeColor.split(' ')[0]}
-                        </p>
-                        <p className="text-sm font-medium leading-none">
-                          <span className="text-gray-400 font-normal">Net Wt:</span> {activeVariant?.metafields?.metal_weight || "2.07"} g
-                        </p>
-                      </div>
-                    </div>
+
+              {product.description && (
+                <div 
+                  className="text-sm text-gray-600 leading-relaxed product-description"
+                  dangerouslySetInnerHTML={{ __html: product.description }}
+                />
+              )}
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Metal Card */}
+                <div className="bg-[#F9F9F9] rounded-2xl p-5 space-y-4">
+                  <div className="flex items-center gap-2 font-bold text-sm uppercase text-gray-700">
+                    <Image src="/images/icons/metal.svg" alt="Metal" width={18} height={18} />
+                    Metal <Info size={14} className="text-gray-400 cursor-pointer ml-auto" />
                   </div>
-                  {/* Dimensions */}
-                  <div className="w-[48%] pl-2">
-                    <div className="flex items-center gap-2 font-semibold text-sm mb-3 uppercase tracking-wide">
-                      <Image src="/images/icons/dimension.svg" alt="Dimensions icon" width={18} height={18} />
-                      Dimensions
-                    </div>
-                    <div className="flex items-start gap-3.5">
-                      <div className="w-16 h-16 bg-white rounded-lg border border-gray-100 flex items-center justify-center p-2 shadow-sm shrink-0">
-                        <Image src="/images/product/try.jpg" alt="Dimensions sample" width={60} height={60} className="object-contain" />
+                  <div className="space-y-2">
+                    {activeVariant?.metafields?.metal_purity && (
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-500">Purity</span>
+                        <span className="font-medium">{activeVariant.metafields.metal_purity}</span>
                       </div>
-                      <div className="space-y-1.5 pt-1">
-                        <p className="text-sm font-medium leading-none">
-                          <span className="text-gray-400 font-normal">Height:</span> {activeVariant?.metafields?.top_height || "7.1"} mm
-                        </p>
-                        <p className="text-sm font-medium leading-none">
-                          <span className="text-gray-400 font-normal">Width:</span> {activeVariant?.metafields?.top_width || "8.0"} mm
-                        </p>
-                        <p className="text-sm font-medium leading-none">
-                          <span className="text-gray-400 font-normal">Gross Wt:</span> {activeVariant?.metafields?.gross_weight || "2.58"} g
-                        </p>
+                    )}
+                    {activeVariant?.metafields?.metal_color && (
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-500">Color</span>
+                        <span className="font-medium">{activeVariant.metafields.metal_color}</span>
                       </div>
-                    </div>
+                    )}
+                    {activeVariant?.metafields?.metal_weight && (
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-500">Net Wt</span>
+                        <span className="font-medium">{activeVariant.metafields.metal_weight} g</span>
+                      </div>
+                    )}
                   </div>
                 </div>
-                
-                {/* Diamond Section */}
-                {!isGoldCoin && ((activeVariant?.metafields?.diamonds && activeVariant.metafields.diamonds.length > 0) || (!activeVariant?.metafields?.diamonds && String(product.type || "").toLowerCase().includes("ring"))) && (
-                  <>
-                    <Separator className="bg-gray-200" />
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-2 font-semibold text-sm uppercase tracking-wide">
-                        <Image src="/images/icons/diamond.svg" alt="Diamond details icon" width={18} height={18} />
-                        Diamond
+
+                {/* Dimensions Card */}
+                <div className="bg-[#F9F9F9] rounded-2xl p-5 space-y-4">
+                  <div className="flex items-center gap-2 font-bold text-sm uppercase text-gray-700">
+                    <Image src="/images/icons/dimension.svg" alt="Dimensions" width={18} height={18} />
+                    Dimension <Info size={14} className="text-gray-400 cursor-pointer ml-auto" />
+                  </div>
+                  <div className="space-y-2">
+                    {activeVariant?.metafields?.top_height && (
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-500">Height</span>
+                        <span className="font-medium">{activeVariant.metafields.top_height} mm</span>
                       </div>
-                      
-                      {activeVariant?.metafields?.diamonds ? (
-                        <div className="flex divide-x divide-gray-200">
-                          {activeVariant.metafields.diamonds.map((d, i) => (
-                            <div key={`diamond-${i}`} className="flex-1 ps-6 pe-6 first:ps-0 last:pe-0 flex flex-col items-start">
-                              <div className="flex justify-start w-full mb-4">
-                                <div className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center overflow-hidden bg-white shadow-sm p-1">
-                                  <Image src={`/images/product/${(i % 3) + 1}.jpg`} alt={`${d.shape} diamond shape`} width={24} height={24} className="object-cover" />
-                                </div>
-                              </div>
-                              <div className="space-y-1.5 text-xs w-full">
-                                <div className="flex justify-between gap-2"><span className="text-gray-400">Quality:</span><span className="font-semibold text-gray-900">{d.quality || "VVS-VS, EF"}</span></div>
-                                <div className="flex justify-between gap-2"><span className="text-gray-400">Shape:</span><span className="font-semibold text-gray-900">{d.shape}</span></div>
-                                <div className="flex justify-between gap-2"><span className="text-gray-400">Pcs:</span><span className="font-semibold text-gray-900">{d.pieces}</span></div>
-                                <div className="flex justify-between gap-2"><span className="text-gray-400">Carat:</span><span className="font-semibold text-gray-900">{d.weight}ct</span></div>
-                              </div>
-                            </div>
-                          ))}
+                    )}
+                    {activeVariant?.metafields?.top_width && (
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-500">Width</span>
+                        <span className="font-medium">{activeVariant.metafields.top_width} mm</span>
+                      </div>
+                    )}
+                    {activeVariant?.metafields?.gross_weight && (
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-500">Gross Wt</span>
+                        <span className="font-medium">{activeVariant.metafields.gross_weight} g</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Diamond Card */}
+                {!isGoldCoin && activeVariant?.metafields?.diamonds && activeVariant.metafields.diamonds.length > 0 && (
+                  <div className="bg-[#F9F9F9] rounded-2xl p-5 space-y-4">
+                    <div className="flex items-center gap-2 font-bold text-sm uppercase text-gray-700">
+                      <Image src="/images/icons/diamond.svg" alt="Diamond" width={18} height={18} />
+                      Diamond <Info size={14} className="text-gray-400 cursor-pointer ml-auto" />
+                    </div>
+                    {activeVariant.metafields.diamonds.map((d, i) => (
+                      <div key={`diamond-det-${i}`} className="space-y-2 pt-2 first:pt-0 border-t first:border-0 border-gray-100">
+                        {d.quality && (
+                          <div className="flex justify-between text-sm">
+                            <span className="text-gray-500">Quality</span>
+                            <span className="font-medium">{d.quality}</span>
+                          </div>
+                        )}
+                        {d.shape && (
+                          <div className="flex justify-between text-sm">
+                            <span className="text-gray-500">Shape</span>
+                            <span className="font-medium uppercase">{mapShapeCode(d.shape) || d.shape}</span>
+                          </div>
+                        )}
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-500">Quantity</span>
+                          <span className="font-medium">{d.pieces || "1"}pcs</span>
                         </div>
-                      ) : (
-                        <>
-                          <div className="bg-[#EDEDED] rounded-md px-4 py-2 flex items-center gap-2.5 w-fit">
-                            <div className="w-5 h-5 rounded-full bg-gray-500 flex items-center justify-center text-[10px] text-white font-semibold">i</div>
-                            <span className="text-[11px] font-medium">Clarity & Color: <span className="font-bold">VVS-VS, EF</span></span>
-                          </div>
-                          <div className="flex divide-x divide-gray-200">
-                            {[ 
-                              { img: "/images/product/1.jpg", shape: "Round", pcs: "1", carat: "2.00ct" },
-                              { img: "/images/product/2.jpg", shape: "Round", pcs: "4", carat: "0.048ct" },
-                              { img: "/images/product/3.jpg", shape: "Marquise", pcs: "4", carat: "0.48ct" }
-                            ].map((d, i) => (
-                              <DiamondDetail key={`diamond-fallback-${i}`} {...d} index={i} />
-                            ))}
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  </>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-500">Carat</span>
+                          <span className="font-medium">{d.weight}ct</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 )}
 
-                {activeVariant?.metafields?.gemstones && (
-                  <>
-                    <Separator className="bg-gray-200" />
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-2 font-semibold text-sm uppercase tracking-wide">
-                        <Image src="/images/icons/diamond.svg" alt="diamond3" width={18} height={18} />
-                        Gemstone
-                      </div>
-
-                      <div className="flex divide-x divide-gray-200">
-                        {activeVariant.metafields.gemstones.map((g, i) => (
-                          <div key={`gemstone-${i}`} className="flex-1 ps-6 pe-6 first:ps-0 last:pe-0 flex flex-col items-start">
-                             <div className="space-y-1.5 text-xs w-full">
-                              <div className="flex justify-between gap-2"><span className="text-gray-400">Color:</span><span className="font-semibold text-gray-900">{g.color}</span></div>
-                              <div className="flex justify-between gap-2"><span className="text-gray-400">Shape:</span><span className="font-semibold text-gray-900">{g.shape}</span></div>
-                              <div className="flex justify-between gap-2"><span className="text-gray-400">Pcs:</span><span className="font-semibold text-gray-900">{g.pieces}</span></div>
-                              <div className="flex justify-between gap-2"><span className="text-gray-400">Carat:</span><span className="font-semibold text-gray-900">{g.weight}ct</span></div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
+                {/* Gemstone Card */}
+                {activeVariant?.metafields?.gemstones && activeVariant.metafields.gemstones.length > 0 && (
+                  <div className="bg-[#F9F9F9] rounded-2xl p-5 space-y-4">
+                    <div className="flex items-center gap-2 font-bold text-sm uppercase text-gray-700">
+                      <Image src="/images/icons/diamond.svg" alt="Gemstone" width={18} height={18} className="grayscale opacity-70" />
+                      Gemstone <Info size={14} className="text-gray-400 cursor-pointer ml-auto" />
                     </div>
-                  </>
+                    {activeVariant.metafields.gemstones.map((g, i) => (
+                      <div key={`gemstone-det-${i}`} className="space-y-2 pt-2 first:pt-0 border-t first:border-0 border-gray-100">
+                        {g.color && (
+                          <div className="flex justify-between text-sm">
+                            <span className="text-gray-500">Color</span>
+                            <span className="font-medium uppercase">{g.color}</span>
+                          </div>
+                        )}
+                        {g.shape && (
+                          <div className="flex justify-between text-sm">
+                            <span className="text-gray-500">Shape</span>
+                            <span className="font-medium uppercase">{mapShapeCode(g.shape) || g.shape}</span>
+                          </div>
+                        )}
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-500">Quantity</span>
+                          <span className="font-medium">{g.pieces || "1"}pcs</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-500">Carat</span>
+                          <span className="font-medium">{g.weight || "0"}ct</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 )}
-
-                <p className="text-[11px] leading-relaxed text-gray-400 italic">
-                  * Our products are handcrafted and personalised for your delight, hence a weight variance is expected.
-                </p>
               </div>
+
+              <p className="text-[11px] leading-relaxed text-gray-400 italic mt-2">
+                * Our products are handcrafted and personalised for your delight, hence a weight variance is expected.
+              </p>
             </div>
 
             <PriceSavingsDetails priceBreakup={priceBreakup?.price_breakup}/>
@@ -1332,52 +1423,55 @@ export default function ProductPageClient({ product, complementaryProducts = [],
             <ProductAccordion/>
             {/* Wear This With Slider */}
             {complementaryProducts.length > 0 && <WearThisWith products={complementaryProducts} />}
-                <div ref={mainAtcRef} className="py-2 bg-white sticky bottom-0 z-[90] mt-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] lg:shadow-none hidden lg:block">
-                  <div className="flex gap-2">
-                      <Button 
-                      onClick={handleAddToCart}
-                      disabled={addingToCart}
-                      className="flex-1 h-12 text-lg font-bold  rounded-md hover:cursor-pointer"
-                      >
-                      {addingToCart ? (
-                          <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          ADDING...
-                          </>
-                      ) : "ADD TO CART"}
-                      </Button>
-                      <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={handleToggleWishlist}
-                      disabled={wishlistLoading}
-                      className={`h-12 w-12 rounded-md bg-gray-50 hover:cursor-pointer ${isWishlisted ? "text-rose-500" : "text-black"}`}
-                      >
-                      <Heart
-                          size={24}
-                          fill={isWishlisted ? "currentColor" : "none"}
-                          className={`${isWishlisted ? "text-rose-500" : "text-black"}`}
-                      />
-                      </Button>
-                  </div>
-                </div>
+            
+            <div ref={mainAtcRef} className="py-2 bg-white sticky bottom-0 z-[90] mt-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] lg:shadow-none hidden lg:block">
+              <div className="flex gap-2">
+                <Button 
+                  onClick={handleAddToCart}
+                  disabled={addingToCart}
+                  className="flex-1 h-12 text-lg font-bold rounded-md hover:cursor-pointer"
+                >
+                  {addingToCart ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      ADDING...
+                    </>
+                  ) : "ADD TO CART"}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={handleToggleWishlist}
+                  disabled={wishlistLoading}
+                  className={`h-12 w-12 rounded-md bg-gray-50 hover:cursor-pointer ${isWishlisted ? "text-rose-500" : "text-black"}`}
+                >
+                  <Heart
+                    size={24}
+                    fill={isWishlisted ? "currentColor" : "none"}
+                    className={`${isWishlisted ? "text-rose-500" : "text-black"}`}
+                  />
+                </Button>
+              </div>
+            </div>
 
-                 <div className="grid grid-cols-2 gap-4 mt-2">
-                    <Button variant="outline" className="h-auto py-3 font-medium text-lg flex items-center justify-center gap-2 bg-gray-50 hover:cursor-pointer hover:bg-primary hover:text-white transition-all group">
-                      <Image src="/images/icons/whatsapp.png" alt="Whatsapp icon" width={24} height={24} />
-                      <span className="hidden lg:inline text-base uppercase">Whatsapp Us</span>
-                    </Button>
-                    <Button variant="outline" className="h-auto py-3 font-medium text-lg flex items-center justify-center gap-2 bg-gray-50 hover:cursor-pointer group hover:bg-primary hover:text-white transition-all">
-                      <Video size={30} className="text-black group-hover:text-white transition-all" />
-                      <span className="hidden lg:inline text-base uppercase">Shop Live</span>
-                    </Button>
-                </div>
-
+            <div className="grid grid-cols-2 gap-4 mt-2">
+              <Button variant="outline" className="h-auto py-3 font-medium text-lg flex items-center justify-center gap-2 bg-gray-50 hover:cursor-pointer hover:bg-primary hover:text-white transition-all group">
+                <Image src="/images/icons/whatsapp.png" alt="Whatsapp icon" width={24} height={24} />
+                <span className="hidden lg:inline text-base uppercase">Whatsapp Us</span>
+              </Button>
+              <Button variant="outline" className="h-auto py-3 font-medium text-lg flex items-center justify-center gap-2 bg-gray-50 hover:cursor-pointer group hover:bg-primary hover:text-white transition-all">
+                <Video size={30} className="text-black group-hover:text-white transition-all" />
+                <span className="hidden lg:inline text-base uppercase">Shop Live</span>
+              </Button>
+            </div>
           </div>
         </div>
       </div>
       <LuxuryMarquee prop={["bg-primary", "text-white", "mt-10", "text-md", "font-semibold"]}/>
       <ProductStory/>  
+      <Suspense fallback={<div className="h-20 bg-gray-100 animate-pulse"></div>}>
+        <StyledByLucira/>
+      </Suspense>
       <FeaturedIn/>
       <OurProcess/>
       <CustomerReviews 
@@ -1387,8 +1481,6 @@ export default function ProductPageClient({ product, complementaryProducts = [],
         productImage={getValidSrc(product.image)}
         productHandle={product.handle}
       />
-      <FAQSection/>
-      {!isGoldCoin && <DiamondComparison/>}
       {matchingProducts.length > 0 && (
         <ProductSlider 
           title="From the Same Collection" 
@@ -1396,20 +1488,22 @@ export default function ProductPageClient({ product, complementaryProducts = [],
           products={matchingProducts}
         />
       )}
-      <ExploreOtherRings />
-      <CategorySlider />
+      <FAQSection/>
       <ProductSlider
         title={recentlyViewedState?.title || "Recently Viewed"}
         products={Array.isArray(recentlyViewedState?.products) && recentlyViewedState.products.length > 0 ? recentlyViewedState.products.slice(0, 12) : undefined}
         preservePriceOnColorChange={true}
       />
+      {!isGoldCoin && <DiamondComparison/>}      
+      <ExploreOtherRings />
+      <CategorySlider />      
       <FindLuciraStore />
       <JoinLuciraCommunity/>
     </div>
   );
 }
 
-function DiamondDetail({ img, shape, pcs, carat, quality = "VVS-VS, EF" }) {
+function DiamondDetail({ img, shape, pcs, carat, quality }) {
   return (
     <div className="flex-1 ps-6 pe-6 first:ps-0 last:pe-0 flex flex-col items-start">
       <div className="flex justify-start w-full mb-5">
@@ -1418,7 +1512,7 @@ function DiamondDetail({ img, shape, pcs, carat, quality = "VVS-VS, EF" }) {
         </div>
       </div>
       <div className="space-y-2 text-12px w-full">
-        <div className="flex justify-between"><span className="w-18">Quality:</span><span className="font-medium">{quality}</span></div>
+        {quality && <div className="flex justify-between"><span className="w-18">Quality:</span><span className="font-medium">{quality}</span></div>}
         <div className="flex justify-between"><span className="w-18">Shape:</span><span className="font-medium">{shape}</span></div>
         <div className="flex justify-between"><span className="w-18">No. of Pcs:</span><span className="font-medium">{pcs}</span></div>
         <div className="flex justify-between"><span className="w-18">Carat:</span><span className="font-medium">{carat}</span></div>
