@@ -108,6 +108,7 @@ export function OtpSpinAuth({ onSuccess, onClose, initialMobile = "" }) {
     if (cleanCode.length === 4) {
       const newOtp = cleanCode.split("");
       setOtp(newOtp);
+      handleVerifyOtp(cleanCode);
     }
   };
 
@@ -160,8 +161,8 @@ export function OtpSpinAuth({ onSuccess, onClose, initialMobile = "" }) {
     }
   };
 
-  const handleVerifyOtp = async () => {
-    const otpValue = otp.join("");
+  const handleVerifyOtp = async (overrideOtp) => {
+    const otpValue = typeof overrideOtp === "string" ? overrideOtp : otp.join("");
     if (otpValue.length !== 4) return toast.error("Enter 4-digit OTP");
     setLoading(true);
     try {
@@ -197,8 +198,7 @@ export function OtpSpinAuth({ onSuccess, onClose, initialMobile = "" }) {
         setTimeout(() => {
            const otpVal = finalOtp.join("");
            if (otpVal.length === 4) {
-             // We can optionally auto-verify here
-             // handleVerifyOtp(); 
+             handleVerifyOtp(otpVal); 
            }
         }, 50);
       }
