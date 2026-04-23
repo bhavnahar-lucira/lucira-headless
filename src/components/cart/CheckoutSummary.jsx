@@ -25,6 +25,8 @@ export default function CheckoutSummary() {
 
   const isPaymentPage = pathname === "/checkout/payment";
 
+  const isCheckoutPage = pathname.startsWith("/checkout") && pathname !== "/checkout/cart";
+
   // Check if cart contains Diamond Jewellery
   const hasDiamondJewellery = items.some(item => {
     const type = (item.type || item.productType || item.product_type || "").toLowerCase();
@@ -176,15 +178,11 @@ export default function CheckoutSummary() {
         <div className="bg-white border border-zinc-100 rounded-lg p-4 space-y-4 shadow-sm">
           {displayItems.map((item, index) => {
             const isInsurance = item.variantId === INSURANCE_VARIANT_ID;
-            const itemLink = item.handle ? `/products/${item.handle}${item.variantId ? `?variant=${item.variantId}` : ""}` : "#";
             
             return (
               <div key={index} className="space-y-3">
                 <div className="flex gap-4">
-                  <Link 
-                    href={itemLink}
-                    className="w-20 h-20 bg-zinc-50 rounded-md border border-zinc-100 p-1 flex-shrink-0 block transition-opacity hover:opacity-90"
-                  >
+                  <div className="w-20 h-20 bg-zinc-50 rounded-md border border-zinc-100 p-1 flex-shrink-0 block">
                     <Image 
                       src={item.image || "/images/product/1.jpg"} 
                       alt={item.title} 
@@ -192,21 +190,14 @@ export default function CheckoutSummary() {
                       height={80} 
                       className="w-full h-full object-contain mix-blend-multiply"
                     />
-                  </Link>
+                  </div>
                   <div className="flex-grow space-y-1">
-                    <Link href={itemLink}>
-                      <h3 className="text-sm font-medium text-zinc-800 leading-tight hover:text-primary transition-colors">{item.title}</h3>
-                    </Link>
+                    <h3 className="text-sm font-medium text-zinc-800 leading-tight transition-colors">{item.title}</h3>
                     <p className="text-xs text-zinc-500">Quantity:: {item.quantity}</p>
                     <div className="flex items-center gap-2 pt-1">
                       <span className="text-sm font-bold text-zinc-900">₹{(item.price || 0).toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
                       {item.comparePrice > item.price && (
-                        <>
-                          <span className="text-xs text-zinc-400 line-through">₹{(item.comparePrice).toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
-                          <span className="text-xs font-bold text-red-500">
-                            ({Math.round(((item.comparePrice - item.price) / item.comparePrice) * 100)}% OFF)
-                          </span>
-                        </>
+                        <span className="text-xs text-zinc-400 line-through">₹{(item.comparePrice).toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
                       )}
                     </div>
                   </div>
@@ -236,12 +227,14 @@ export default function CheckoutSummary() {
           <div className="flex justify-between text-sm text-[#189351]">
             <div className="flex items-center gap-2">
               <span className="font-bold uppercase tracking-wider">Coupon ({typeof appliedCoupon === 'object' ? appliedCoupon.code : appliedCoupon})</span>
-              <button 
-                onClick={removeCoupon}
-                className="text-[10px] font-bold text-red-500 hover:underline uppercase tracking-tighter"
-              >
-                (Remove)
-              </button>
+              {!isCheckoutPage && (
+                <button 
+                  onClick={removeCoupon}
+                  className="text-[10px] font-bold text-red-500 hover:underline uppercase tracking-tighter"
+                >
+                  (Remove)
+                </button>
+              )}
             </div>
             <span className="font-bold">- ₹ {couponDiscountAmount.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
           </div>

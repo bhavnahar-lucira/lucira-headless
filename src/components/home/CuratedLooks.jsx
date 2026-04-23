@@ -199,7 +199,7 @@ export default function CuratedLooks() {
             <p className="text-zinc-600 text-sm">Explore the jewelry pieces that defines the look</p>
           </div>
 
-          <div className="relative group">
+          <div className="relative">
             <Swiper
               modules={[Pagination]}
               onSwiper={(swiper) => {

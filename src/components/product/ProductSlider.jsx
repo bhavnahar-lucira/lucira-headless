@@ -24,7 +24,7 @@ export function ProductSlider({ title, subtitle, products = [], preservePriceOnC
           </div>
         )}
 
-        <div className="relative group">
+        <div className="relative">
           <Swiper
             modules={[Pagination]}
             spaceBetween={20}
