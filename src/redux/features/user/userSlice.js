@@ -3,6 +3,7 @@ import { createSlice } from "@reduxjs/toolkit";
 const initialState = {
   user: null,
   isAuthenticated: false,
+  pincode: "",
   referralLink: "",
   referralLoading: false,
   referralError: null,
@@ -15,6 +16,9 @@ const userSlice = createSlice({
     login: (state, action) => {
       state.user = action.payload;
       state.isAuthenticated = true;
+    },
+    setPincode: (state, action) => {
+      state.pincode = action.payload;
     },
     logout: (state) => {
       state.user = null;
@@ -38,7 +42,7 @@ const userSlice = createSlice({
   },
 });
 
-export const { login, logout, setAvatar, setReferralLoading, setReferralLink, setReferralError } = userSlice.actions;
+export const { login, setPincode, logout, setAvatar, setReferralLoading, setReferralLink, setReferralError } = userSlice.actions;
 export default userSlice.reducer;
 
 export const selectUser = (state) => state.user.user;
