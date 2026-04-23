@@ -221,7 +221,7 @@ export default function CartItem({ item, onAuthRequired }) {
                 </h3>
               </Link>
               <p className="text-[10px] font-medium uppercase tracking-wider text-zinc-400">
-                SKU: {currentVariant.sku || item.sku || "N/A"}
+                SKU: {currentVariant?.sku || item.sku || "N/A"}
               </p>
               {item.engraving && (
                 <p className="text-[10px] font-bold uppercase tracking-wider text-primary">

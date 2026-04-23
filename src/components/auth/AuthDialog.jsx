@@ -8,7 +8,12 @@ import {
 } from "@/components/ui/dialog";
 import { OtpSpinAuth } from "./OtpSpinAuth";
 
-export function AuthDialog({ open, onOpenChange }) {
+export function AuthDialog({ open, onOpenChange, onSuccess }) {
+  const handleSuccess = () => {
+    onOpenChange(false);
+    if (onSuccess) onSuccess();
+  };
+
   return (
     <Dialog
       open={open}
@@ -21,7 +26,7 @@ export function AuthDialog({ open, onOpenChange }) {
             Login or register to access your account and win prizes.
           </DialogDescription>
         </div>
-        <OtpSpinAuth onSuccess={() => onOpenChange(false)} onClose={() => onOpenChange(false)} />
+        <OtpSpinAuth onSuccess={handleSuccess} onClose={() => onOpenChange(false)} />
       </DialogContent>
     </Dialog>
   );
