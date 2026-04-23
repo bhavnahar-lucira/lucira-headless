@@ -154,7 +154,14 @@ export default function CartPage() {
         </Button>
       </div>
 
-      <AuthDialog open={isAuthDialogOpen} onOpenChange={setIsAuthDialogOpen} />
+      <AuthDialog 
+        open={isAuthDialogOpen} 
+        onOpenChange={setIsAuthDialogOpen} 
+        onSuccess={() => {
+          setIsAuthDialogOpen(false);
+          router.push("/checkout/shipping");
+        }}
+      />
     </div>
   );
 }
