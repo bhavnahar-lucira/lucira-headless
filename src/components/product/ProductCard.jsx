@@ -325,7 +325,7 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle 
   return (
     <>
       <div className="space-y-4">
-        <div className="group block space-y-4">
+        <div className="group/card block space-y-4">
           <div className="relative aspect-square w-full bg-[#fafafa] overflow-hidden">
               <Link 
                 href={`/products/${product.handle}`} 
@@ -391,7 +391,7 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle 
                           fill
                           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                           priority={index === 0}
-                          className={`object-contain p-4 lg:p-6 grayscale-[0.2] group-hover:grayscale-0 transition-all duration-300`}
+                          className={`object-contain p-4 lg:p-6 grayscale-[0.2] group-hover/card:grayscale-0 transition-all duration-300`}
                         />
                       </div>
                     </SwiperSlide>
@@ -587,7 +587,7 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle 
                   ref={prevImageBtnRef}
                   type="button"
                   aria-label="Previous image"
-                  className={`custom-prev-${swiperId} absolute left-3 top-1/2 -translate-y-1/2 z-10 w-9 h-9 flex items-center justify-center rounded-full bg-white/85 text-black shadow-md opacity-0 group-hover:opacity-100 transition-opacity`}
+                  className={`custom-prev-${swiperId} absolute left-3 top-1/2 -translate-y-1/2 z-10 w-9 h-9 flex items-center justify-center rounded-full bg-white/85 text-black shadow-md opacity-0 group-hover/card:opacity-100 transition-opacity`}
                 >
                   <ChevronLeft size={18} />
                 </button>
@@ -595,7 +595,7 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle 
                   ref={nextImageBtnRef}
                   type="button"
                   aria-label="Next image"
-                  className={`custom-next-${swiperId} absolute right-3 top-1/2 -translate-y-1/2 z-10 w-9 h-9 flex items-center justify-center rounded-full bg-white/85 text-black shadow-md opacity-0 group-hover:opacity-100 transition-opacity`}
+                  className={`custom-next-${swiperId} absolute right-3 top-1/2 -translate-y-1/2 z-10 w-9 h-9 flex items-center justify-center rounded-full bg-white/85 text-black shadow-md opacity-0 group-hover/card:opacity-100 transition-opacity`}
                 >
                   <ChevronRight size={18} />
                 </button>

@@ -16,7 +16,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { ChevronLeft, Trash2 } from "lucide-react";
+import { ChevronLeft, Trash2, Plus, Loader2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -29,6 +31,7 @@ import {
   fetchCustomerAddresses,
   saveCheckoutAddressSelection,
   selectDefaultCustomerAddress,
+  createCustomerAddress,
 } from "@/lib/api";
 import { selectUser } from "@/redux/features/user/userSlice";
 import { useCart } from "@/hooks/useCart";
@@ -40,6 +43,92 @@ const INSURANCE_VARIANT_ID = "gid://shopify/ProductVariant/47709366026458";
 const GOLDCOIN_VARIANT_ID = "gid://shopify/ProductVariant/47661824082138";
 
 const BILLING_SELECTION_STORAGE_KEY = "checkoutBillingAddressSelection";
+
+const emptyAddressForm = {
+  firstName: "",
+  lastName: "",
+  company: "",
+  address1: "",
+  address2: "",
+  city: "",
+  province: "",
+  zip: "",
+  country: "India",
+  phone: "",
+  gstin: "",
+};
+
+function normalizeAddressForm(address = {}, customer = {}) {
+  return {
+    ...emptyAddressForm,
+    firstName: address.firstName || customer.firstName || "",
+    lastName: address.lastName || customer.lastName || "",
+    company: address.company || "",
+    address1: address.address1 || "",
+    address2: address.address2 || "",
+    city: address.city || "",
+    province: address.province || "",
+    zip: address.zip || "",
+    country: address.country || "India",
+    phone: address.phone || "",
+    gstin: address.gstin || "",
+  };
+}
+
+function AddressFields({ form, onChange, makeDefault, onDefaultChange, submitLabel, onSubmit, saving, children }) {
+  return (
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Input placeholder="First name" value={form.firstName} onChange={(e) => onChange("firstName", e.target.value)} className="h-12 border-zinc-200" />
+        <Input placeholder="Last name" value={form.lastName} onChange={(e) => onChange("lastName", e.target.value)} className="h-12 border-zinc-200" />
+        <Input placeholder="Company (optional)" value={form.company} onChange={(e) => onChange("company", e.target.value)} className="h-12 border-zinc-200" />
+        {form.country.trim().toLowerCase() === "india" ? (
+          <Input
+            placeholder="GSTIN (optional, 15 characters)"
+            value={form.gstin}
+            onChange={(e) => onChange("gstin", e.target.value.toUpperCase())}
+            maxLength={15}
+            className="h-12 border-zinc-200"
+          />
+        ) : (
+          <div className="hidden md:block" />
+        )}
+        <div className="md:col-span-2">
+          <Input placeholder="Address" value={form.address1} onChange={(e) => onChange("address1", e.target.value)} className="h-12 border-zinc-200" />
+        </div>
+        <div className="md:col-span-2">
+          <Input placeholder="Apartment, suite, etc. (optional)" value={form.address2} onChange={(e) => onChange("address2", e.target.value)} className="h-12 border-zinc-200" />
+        </div>
+        <Input placeholder="City" value={form.city} onChange={(e) => onChange("city", e.target.value)} className="h-12 border-zinc-200" />
+        <Input placeholder="State" value={form.province} onChange={(e) => onChange("province", e.target.value)} className="h-12 border-zinc-200" />
+        <Input placeholder="PIN code" value={form.zip} onChange={(e) => onChange("zip", e.target.value)} className="h-12 border-zinc-200" />
+        <Input placeholder="Country/Region" value={form.country} onChange={(e) => onChange("country", e.target.value)} className="h-12 border-zinc-200" />
+        <div className="md:col-span-2">
+          <Input
+            placeholder="Phone (optional)"
+            value={form.phone}
+            onChange={(e) => onChange("phone", e.target.value)}
+            className="h-12 border-zinc-200"
+          />
+        </div>
+      </div>
+
+      <div className="flex items-center space-x-2">
+        <Checkbox id="make-default-address" checked={makeDefault} onCheckedChange={(checked) => onDefaultChange(Boolean(checked))} />
+        <label htmlFor="make-default-address" className="text-sm font-medium text-zinc-700 cursor-pointer">
+          Use this as my default shipping address
+        </label>
+      </div>
+
+      <div className="flex items-center justify-between gap-4">
+        <Button type="button" onClick={onSubmit} disabled={saving} className="w-full md:w-auto h-12 bg-primary hover:bg-primary/90 text-white font-bold">
+          {saving ? <Loader2 className="size-4 animate-spin" /> : submitLabel}
+        </Button>
+        {children}
+      </div>
+    </div>
+  );
+}
 
 function formatAddressPreview(address) {
   if (!address) return "";
@@ -165,8 +254,64 @@ export default function PaymentPage() {
   const [paymentLoading, setPaymentLoading] = useState(false);
   const [checkoutSelection, setCheckoutSelection] = useState(null);
 
+  const [addAddressDialogOpen, setAddAddressDialogOpen] = useState(false);
+  const [addressForm, setAddressForm] = useState(emptyAddressForm);
+  const [addressSaving, setAddressSaving] = useState(false);
+  const [makeDefault, setMakeDefault] = useState(false);
+
   const user = useSelector(selectUser);
   const {items, totalAmount, appliedCoupon, nectorPoints } = useCart();
+
+  useEffect(() => {
+    if (customer) {
+      setAddressForm(normalizeAddressForm({}, customer));
+    }
+  }, [customer]);
+
+  const updateAddressForm = (field, value) => {
+    setAddressForm((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleCreateNewAddress = async () => {
+    if (!addressForm.firstName.trim() || !addressForm.address1.trim() || !addressForm.city.trim() || !addressForm.zip.trim()) {
+      toast.error("Please fill in all required fields");
+      return;
+    }
+
+    setAddressSaving(true);
+    try {
+      const payload = await createCustomerAddress({
+        address: addressForm,
+        makeDefault,
+      });
+      
+      // Update local addresses list
+      setAddresses(payload.addresses || []);
+      
+      // Find the newly created address
+      const newAddress = payload.addresses.find(a => 
+        a.address1 === addressForm.address1 && a.zip === addressForm.zip
+      ) || payload.addresses[payload.addresses.length - 1];
+
+      if (newAddress) {
+        // Automatically select it for billing
+        handleSelectBillingAddress(newAddress.id);
+      }
+
+      setAddAddressDialogOpen(false);
+      setAddressForm(normalizeAddressForm({}, customer));
+      toast.success("Address added successfully");
+    } catch (error) {
+      toast.error(error.message || "Unable to add address");
+    } finally {
+      setAddressSaving(false);
+    }
+  };
+
+  const openAddNewAddress = () => {
+    setBillingDialogOpen(false);
+    setAddAddressDialogOpen(true);
+  };
 
   useEffect(() => {
     if (nectorPoints) {
@@ -1062,7 +1207,58 @@ export default function PaymentPage() {
                 </div>
               );
             })}
+            
+            <Button
+              variant="outline"
+              onClick={openAddNewAddress}
+              className="w-full h-12 border-dashed border-2 border-zinc-200 text-zinc-500 hover:text-primary hover:border-primary transition-all flex items-center justify-center gap-2 font-bold"
+            >
+              <Plus size={18} />
+              Add new address
+            </Button>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog 
+        open={addAddressDialogOpen} 
+        onOpenChange={(open) => {
+          setAddAddressDialogOpen(open);
+          // If closing manually (e.g. clicking X or backdrop) and we haven't confirmed a different address selection yet,
+          // revert the radio selection back to "same" as requested.
+          if (!open && !billingDialogOpen && billingAddressMode === "different") {
+            handleBillingModeChange("same");
+          }
+        }}
+      >
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Add new address</DialogTitle>
+            <DialogDescription>
+              Email and phone stay tied to your logged-in customer account and are not editable here.
+            </DialogDescription>
+          </DialogHeader>
+
+          <AddressFields
+            form={addressForm}
+            onChange={updateAddressForm}
+            makeDefault={makeDefault}
+            onDefaultChange={setMakeDefault}
+            submitLabel="Save address"
+            onSubmit={handleCreateNewAddress}
+            saving={addressSaving}
+          >
+            <Button
+              variant="link"
+              onClick={() => {
+                setAddAddressDialogOpen(false);
+                setBillingDialogOpen(true);
+              }}
+              className="font-bold underline px-0"
+            >
+              Choose existing
+            </Button>
+          </AddressFields>
         </DialogContent>
       </Dialog>
     </div>

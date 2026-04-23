@@ -24,7 +24,7 @@ export default function WearThisWith({ products = [] }) {
   return (
     <div className="pt-4 border-t border-gray-100">
       <h2 className="text-base font-semibold text-black mb-4">Wear This With:</h2>      
-      <div className="relative group">
+      <div className="relative">
         <Swiper
           modules={[Pagination]}
           spaceBetween={20}
