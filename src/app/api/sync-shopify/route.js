@@ -5,23 +5,32 @@ import { fetchNectorReviews } from "@/lib/nector";
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  const SHOPIFY_DOMAIN = process.env.SHOPIFY_STORE;
-  const ACCESS_TOKEN = process.env.SHOPIFY_ADMIN_TOKEN;
+  const SHOPIFY_DOMAIN = process.env.SHOPIFY_STORE || process.env.SHOPIFYSTORE;
+  const ACCESS_TOKEN = process.env.ADMIN_TOKEN || process.env.SHOPIFY_ADMIN_TOKEN;
   if (!SHOPIFY_DOMAIN || !ACCESS_TOKEN) return NextResponse.json({ error: "Missing credentials" }, { status: 500 });
 
   try {
     const response = await fetch(`https://${SHOPIFY_DOMAIN}/admin/api/2024-01/products/count.json?status=active`, {
       headers: { "Content-Type": "application/json", "X-Shopify-Access-Token": ACCESS_TOKEN },
     });
+    
+    if (!response.ok) {
+        const text = await response.text();
+        throw new Error(`Shopify Count Error (${response.status})`);
+    }
+    
     const result = await response.json();
     return NextResponse.json({ count: result.count || 0 });
   } catch (error) { return NextResponse.json({ error: error.message }, { status: 500 }); }
 }
 
 export async function POST(req) {
-  const SHOPIFY_DOMAIN = process.env.SHOPIFY_STORE;
-  const ACCESS_TOKEN = process.env.SHOPIFY_ADMIN_TOKEN;
-  if (!SHOPIFY_DOMAIN || !ACCESS_TOKEN) return NextResponse.json({ error: "Missing Shopify credentials" }, { status: 500 });
+  const SHOPIFY_DOMAIN = process.env.SHOPIFY_STORE || process.env.SHOPIFYSTORE;
+  const ACCESS_TOKEN = process.env.ADMIN_TOKEN || process.env.SHOPIFY_ADMIN_TOKEN;
+  
+  if (!SHOPIFY_DOMAIN || !ACCESS_TOKEN) {
+    return NextResponse.json({ error: "Missing Shopify credentials (ADMIN_TOKEN and SHOPIFY_STORE)" }, { status: 500 });
+  }
 
   let startCursor = null;
   let startProcessed = 0;
@@ -39,10 +48,9 @@ export async function POST(req) {
       const sendUpdate = (data) => {
         try {
           controller.enqueue(encoder.encode(JSON.stringify(data) + "\n"));
-        } catch (e) {
-          // Client likely disconnected or controller closed
-        }
+        } catch (e) {}
       };
+      
       try {
         const client = await clientPromise;
         const db = client.db("next_local_db");
@@ -51,7 +59,7 @@ export async function POST(req) {
         sendUpdate({ 
           status: "starting", 
           message: startCursor ? `Resuming Sync from ${startProcessed} products...` : "Fetching Products...", 
-          progress: startProcessed ? Math.min(Math.round((startProcessed / 1000) * 100), 10) : 0 // Rough estimation if total unknown
+          progress: 0
         });
 
         let totalToSync = 0;
@@ -59,15 +67,15 @@ export async function POST(req) {
           const countRes = await fetch(`https://${SHOPIFY_DOMAIN}/admin/api/2024-01/products/count.json?status=active`, {
             headers: { "X-Shopify-Access-Token": ACCESS_TOKEN }
           });
-          const countData = await countRes.json();
-          totalToSync = countData.count || 0;
+          if (countRes.ok) {
+            const countData = await countRes.json();
+            totalToSync = countData.count || 0;
+          }
         } catch (e) { console.error("Count fetch failed", e); }
 
         let hasNextPage = true;
         let cursor = startCursor;
         let totalProcessed = startProcessed;
-
-        // REMOVED deleteMany to prevent 404s
 
         while (hasNextPage) {
           const query = `
@@ -96,6 +104,16 @@ export async function POST(req) {
                           id price compareAtPrice inventoryQuantity sku selectedOptions { name value }
                           image { url }
                           components: metafield(namespace: "ornaverse", key: "components") { value }
+                          inventoryItem {
+                            inventoryLevels(first: 15) {
+                              edges {
+                                node {
+                                  location { id name }
+                                  quantities(names: ["available"]) { name quantity }
+                                }
+                              }
+                            }
+                          }
                         }
                       }
                     }
@@ -122,8 +140,17 @@ export async function POST(req) {
             body: JSON.stringify({ query, variables: { cursor } }),
           });
 
+          if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Shopify API responded with status ${response.status}.`);
+          }
+
+          const contentType = response.headers.get("content-type");
+          if (!contentType || !contentType.includes("application/json")) {
+            throw new Error("Shopify returned an invalid response. Please retry.");
+          }
+
           const result = await response.json();
-          
           if (result.errors) {
             console.error("Shopify GraphQL Errors:", result.errors);
             throw new Error(result.errors[0]?.message || "Shopify GraphQL error");
@@ -134,8 +161,6 @@ export async function POST(req) {
           if (products.length > 0) {
             for (const edge of products) {
               const p = edge.node;
-              
-              // [Media Mapping - Unchanged]
               const media = p.media.edges.map(({ node: m }) => {
                 const type = m.mediaContentType;
                 let url = type === "IMAGE" ? m.image?.url : (type === "VIDEO" ? m.sources?.[0]?.url : m.embeddedUrl);
@@ -146,6 +171,19 @@ export async function POST(req) {
                 const options = {};
                 v.selectedOptions.forEach(o => { options[o.name.toLowerCase()] = o.value; });
 
+                const inventoryLevels = v.inventoryItem?.inventoryLevels?.edges?.map(({ node: inv }) => {
+                    const availableQty = inv.quantities?.find(q => q.name === "available")?.quantity || 0;
+                    return {
+                        locationId: inv.location.id,
+                        locationName: inv.location.name,
+                        available: availableQty
+                    };
+                }) || [];
+
+                const inStoreAvailable = inventoryLevels
+                  .filter(inv => inv.available > 0)
+                  .map(inv => inv.locationId);
+
                 return {
                   id: v.id.split("/").pop(),
                   sku: v.sku || "",
@@ -155,87 +193,55 @@ export async function POST(req) {
                   compare_price: v.compareAtPrice ? Number(v.compareAtPrice) : null,
                   inStock: v.inventoryQuantity > 0,
                   image: v.image?.url || p.featuredImage?.url,
+                  inventoryLevels,
                   metafields: {
-                    components: v.components?.value
+                    components: v.components?.value,
+                    in_store_available: inStoreAvailable
                   }
                 };
               });
 
-              // Fetch existing product to merge variant details
               const existingProduct = await productsCollection.findOne({ shopifyId: p.id });
               const existingVariants = existingProduct?.variants || [];
 
               const finalVariants = variants.map(newV => {
                 const existingV = existingVariants.find(ev => ev.id === newV.id);
                 if (existingV) {
-                  return {
-                    ...existingV, // Keep detailed fields (metafields, price_breakup)
-                    ...newV,      // Overwrite with fresh basic fields (price, inventory)
-                  };
+                  return { ...existingV, ...newV };
                 }
                 return newV;
               });
 
-              // Fetch Nector Reviews for this product
               let reviewsData = { count: 0, average: 0, list: [], stats: [] };
               try {
                 reviewsData = await fetchNectorReviews(p.id);
-                
-                // Detailed Review Storage in separate collection
                 if (reviewsData.list && reviewsData.list.length > 0) {
                   const reviewsCollection = db.collection("reviews");
                   const productIdSimple = p.id.split("/").pop();
-                  
                   const reviewOps = reviewsData.list.map(review => ({
                     updateOne: {
                       filter: { id: review.id },
-                      update: { 
-                        $set: {
-                          ...review,
-                          productId: productIdSimple,
-                          productHandle: p.handle,
-                          productTitle: p.title,
-                          productImage: p.featuredImage?.url || ""
-                        } 
-                      },
+                      update: { $set: { ...review, productId: productIdSimple, productHandle: p.handle, productTitle: p.title, productImage: p.featuredImage?.url || "" } },
                       upsert: true
                     }
                   }));
-
-                  if (reviewOps.length > 0) {
-                    await reviewsCollection.bulkWrite(reviewOps);
-                  }
+                  if (reviewOps.length > 0) await reviewsCollection.bulkWrite(reviewOps);
                 }
-              } catch (reviewErr) {
-                console.error(`Skipping reviews for ${p.handle} due to error:`, reviewErr.message);
-              }
+              } catch (reviewErr) {}
 
-              // Parse matching and complementary products GIDs
-              const matchingProductIds = p.matching_products?.value 
-                ? JSON.parse(p.matching_products.value).map(gid => gid.split("/").pop())
-                : [];
-              
-              const complementaryProductIds = p.complementary_products?.value
-                ? JSON.parse(p.complementary_products.value).map(gid => gid.split("/").pop())
-                : [];
+              const matchingProductIds = p.matching_products?.value ? JSON.parse(p.matching_products.value).map(gid => gid.split("/").pop()) : [];
+              const complementaryProductIds = p.complementary_products?.value ? JSON.parse(p.complementary_products.value).map(gid => gid.split("/").pop()) : [];
 
-              // Extract discounts and representative info following stock priority hierarchy
               const inStockVariants = finalVariants.filter(v => v.inStock === true || v.inStock === "true");
               const isRing = String(p.productType || "").toLowerCase().includes("ring");
               
               let representativeVariant = null;
               if (inStockVariants.length > 0) {
-                // Prefer Yellow Gold in stock for Rings, otherwise first in-stock
-                if (isRing) {
-                  representativeVariant = inStockVariants.find(v => String(v.color || v.title).includes("Yellow Gold"));
-                }
+                if (isRing) representativeVariant = inStockVariants.find(v => String(v.color || v.title).includes("Yellow Gold"));
                 if (!representativeVariant) representativeVariant = inStockVariants[0];
               } else {
                 representativeVariant = finalVariants[0];
               }
-
-              const diamondDiscount = representativeVariant?.price_breakup?.diamond?.discount_percent || 0;
-              const makingDiscount = representativeVariant?.price_breakup?.making_charges?.discount_percent || 0;
 
               const mappedProduct = {
                 shopifyId: p.id,
@@ -255,65 +261,44 @@ export async function POST(req) {
                 selectedColor: representativeVariant?.color,
                 colors: [...new Set(finalVariants.map(v => v.color).filter(Boolean))],
                 variants: finalVariants,
-                diamondDiscount,
-                makingDiscount,
-                seo: {
-                  title: p.seo?.title || p.title,
-                  description: p.seo?.description || p.descriptionHtml?.replace(/<[^>]*>?/gm, '').slice(0, 160)
-                },
-                reviewStats: {
-                  count: reviewsData.count || 0,
-                  average: reviewsData.average || 0,
-                  stats: reviewsData.stats || []
-                },
-                reviews: reviewsData.count > 0 ? reviewsData : null, // Keep for backward compatibility
+                diamondDiscount: representativeVariant?.price_breakup?.diamond?.discount_percent || 0,
+                makingDiscount: representativeVariant?.price_breakup?.making_charges?.discount_percent || 0,
+                seo: { title: p.seo?.title || p.title, description: p.seo?.description || p.descriptionHtml?.replace(/<[^>]*>?/gm, '').slice(0, 160) },
+                reviewStats: { count: reviewsData.count || 0, average: reviewsData.average || 0, stats: reviewsData.stats || [] },
                 collectionHandles: p.collections.edges.map(e => e.node.handle),
                 matchingProductIds,
                 complementaryProductIds,
                 productMetafields: {
-                  shop_for: p.shop_for?.value,
-                  weight: p.weight?.value,
-                  carat_range: p.carat_range?.value,
-                  material_type: p.material_type?.value,
-                  components: p.components?.value,
-                  finishing: p.finishing?.value,
-                  fit: p.fit?.value,
-                  lead_time: p.lead_time?.value
+                  shop_for: p.shop_for?.value, weight: p.weight?.value, carat_range: p.carat_range?.value,
+                  material_type: p.material_type?.value, components: p.components?.value, finishing: p.finishing?.value,
+                  fit: p.fit?.value, lead_time: p.lead_time?.value
                 },
                 lastUpdated: new Date(),
                 lastReviewsUpdated: new Date()
               };
 
-              // 3. UPSERT Logic to prevent 404s
-              await productsCollection.updateOne(
-                { shopifyId: p.id },
-                { $set: mappedProduct },
-                { upsert: true }
-              );
+              await productsCollection.updateOne({ shopifyId: p.id }, { $set: mappedProduct }, { upsert: true });
             }
 
             totalProcessed += products.length;
             cursor = result.data?.products?.pageInfo?.endCursor;
+            
             sendUpdate({ 
               status: "progress", 
               message: `Synced ${totalProcessed} products...`, 
-              progress: Math.min(Math.round((totalProcessed / totalToSync) * 100), 99),
+              progress: totalToSync ? Math.min(Math.round((totalProcessed / totalToSync) * 100), 99) : 50,
               cursor: cursor,
               totalProcessed: totalProcessed
             });
           }
           hasNextPage = result.data?.products?.pageInfo?.hasNextPage;
-          // cursor already updated above from pageInfo.endCursor
-
-          if (hasNextPage) {
-            await sleep(2000);
-          }
+          if (hasNextPage) await sleep(2000);
         }
 
-        // 4. Tag Bestsellers from Storefront API
+        // 4. Tag Bestsellers
         sendUpdate({ status: "progress", message: "Updating Bestseller tags...", progress: 99 });
         try {
-          const storefrontRes = await fetch(`https://${process.env.SHOPIFY_STORE}/api/2024-10/graphql.json`, {
+          const storefrontRes = await fetch(`https://${SHOPIFY_DOMAIN}/api/2024-10/graphql.json`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -339,8 +324,7 @@ export async function POST(req) {
         controller.close();
       } catch (error) {
         console.error("Critical Sync Error:", error);
-        const errorMsg = error.name === "AbortError" ? "Request timed out" : error.message;
-        sendUpdate({ status: "error", message: `Sync Failed: ${errorMsg}` });
+        sendUpdate({ status: "error", message: `Sync Stopped: ${error.message}` });
         controller.close();
       }
     }

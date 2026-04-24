@@ -26,10 +26,10 @@ import { pushProductImpression, formatGtmPrice } from "@/lib/gtm";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 
 const SORT_OPTIONS = [
-  { value: "best_selling", label: "Best Selling" },
-  { value: "price_low_high", label: "Price: Low to High" },
-  { value: "price_high_low", label: "Price: High to Low" },
-  { value: "az", label: "A to Z" },
+  { value: "best_selling", label: "Best selling" },
+  { value: "price_low_high", label: "Price, low to high" },
+  { value: "price_high_low", label: "Price, high to low" },
+  { value: "az", label: "Alphabetically, A-Z" },
 ];
 
 const FilterSidebarSkeleton = () => (

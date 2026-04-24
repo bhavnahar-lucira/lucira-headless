@@ -118,14 +118,14 @@ export async function resolveSearchMatch(productsCollection, baseFilter = {}, qu
     };
   }
 
-  // Production-style search: search across all fields by default to ensure high recall
-  // (e.g. matching tags even if title matches exist)
-  const fallbackFilter = mergeMongoFilters(...filters, buildFallbackKeywordMatch(keywords));
+  // Use MongoDB $text search for relevance scoring
+  const textFilter = { $text: { $search: keywords.join(" ") } };
+  const finalFilter = mergeMongoFilters(...filters, textFilter);
 
   return {
-    filter: fallbackFilter,
+    filter: finalFilter,
     normalizedQuery,
     keywords,
-    strategy: "fallback",
+    strategy: "text",
   };
 }

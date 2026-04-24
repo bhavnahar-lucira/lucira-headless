@@ -105,7 +105,12 @@ export default function Dashboard() {
       return;
     }
 
-    const apiPath = type === "products" ? "/api/sync-shopify" : "/api/sync-reviews";
+    const apiPaths = {
+      products: "/api/sync-shopify",
+      reviews: "/api/sync-reviews"
+    };
+    const apiPath = apiPaths[type];
+    
     const body = {};
     if (isRetry) {
       if (type === "products") {
@@ -166,7 +171,7 @@ export default function Dashboard() {
                 ...prev,
                 [type]: type === "products" ? { cursor: null, totalProcessed: 0 } : { skip: 0 }
               }));
-              fetchLocalProducts(1); // Refresh list after complete
+              if (type === "products") fetchLocalProducts(1);
             }
           } catch (e) {
             console.error("Error parsing JSON chunk", e);
@@ -195,7 +200,7 @@ export default function Dashboard() {
             </p>
           </div>
           
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center gap-4">
             <button 
               onClick={() => startSync("menu")} 
               disabled={syncing}
@@ -213,14 +218,6 @@ export default function Dashboard() {
               <MessageSquare size={18} className="text-zinc-400" />
               Sync Reviews
             </button>
-
-            <Link 
-              href="/products" 
-              className="flex items-center gap-2 bg-white dark:bg-zinc-900 px-6 py-2 rounded-xl border border-zinc-200 dark:border-zinc-800 shadow-sm font-bold text-sm uppercase tracking-widest hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
-            >
-              <Store size={18} className="text-zinc-400" />
-              View Store
-            </Link>
 
             <button 
               onClick={() => startSync("products")} 
