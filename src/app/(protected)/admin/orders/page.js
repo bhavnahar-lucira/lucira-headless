@@ -8,7 +8,10 @@ import { toast } from "react-toastify";
 
 export default function MyOrdersPage() {
   const [orders, setOrders] = useState([]);
+  const [filteredOrders, setFilteredOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
 
   useEffect(() => {
     async function fetchOrders() {
@@ -18,6 +21,7 @@ export default function MyOrdersPage() {
         if (res.ok) {
           const data = await res.json();
           setOrders(data.orders || []);
+          setFilteredOrders(data.orders || []);
         }
       } catch (err) {
         toast.error("Failed to load orders");
@@ -28,6 +32,23 @@ export default function MyOrdersPage() {
     fetchOrders();
   }, []);
 
+  useEffect(() => {
+    let result = orders;
+    
+    if (searchQuery) {
+      result = result.filter(order => 
+        order.orderNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        order.product.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+    
+    if (statusFilter) {
+      result = result.filter(order => order.status === statusFilter);
+    }
+    
+    setFilteredOrders(result);
+  }, [searchQuery, statusFilter, orders]);
+
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4 bg-white rounded-[3rem] border border-zinc-100">
@@ -36,6 +57,8 @@ export default function MyOrdersPage() {
       </div>
     );
   }
+
+  const uniqueStatuses = [...new Set(orders.map(o => o.status))];
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -51,8 +74,36 @@ export default function MyOrdersPage() {
         </div>
       </div>
 
+      {/* Filters Toolbar */}
+      <div className="flex flex-col md:flex-row gap-4">
+        <div className="flex-1 relative">
+          <input 
+            type="text" 
+            placeholder="Search by order # or product..." 
+            className="w-full pl-12 pr-4 py-4 bg-white border border-zinc-100 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          <div className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400">
+            <ShoppingBag size={20} />
+          </div>
+        </div>
+        <div className="w-full md:w-64">
+          <select 
+            className="w-full px-4 py-4 bg-white border border-zinc-100 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all appearance-none"
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+          >
+            <option value="">All Statuses</option>
+            {uniqueStatuses.map(status => (
+              <option key={status} value={status}>{status}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+
       <div className="space-y-6">
-        {orders.map((order) => {
+        {filteredOrders.map((order) => {
           const isDelivered = order.status === "Delivered";
           const isInTransit = order.status === "In Transit";
           
@@ -92,9 +143,12 @@ export default function MyOrdersPage() {
                   <button className="w-full md:px-8 py-3.5 bg-primary text-white text-xs font-black uppercase tracking-[0.2em] rounded-2xl hover:opacity-90 transition-colors shadow-xl shadow-primary/20">
                     Track Order
                   </button>
-                  <button className="w-full md:px-8 py-3.5 bg-white border-2 border-zinc-100 text-zinc-900 text-xs font-black uppercase tracking-[0.2em] rounded-2xl hover:bg-zinc-50 hover:border-zinc-200 transition-all">
+                  <Link 
+                    href={`/admin/orders/${order.id.split('/').pop()}`}
+                    className="w-full md:px-8 py-3.5 bg-white border-2 border-zinc-100 text-zinc-900 text-xs text-center font-black uppercase tracking-[0.2em] rounded-2xl hover:bg-zinc-50 hover:border-zinc-200 transition-all"
+                  >
                     View Details
-                  </button>
+                  </Link>
                 </div>
               </div>
             </div>
