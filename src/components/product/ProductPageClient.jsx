@@ -12,7 +12,7 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Star, Play, Info, Heart, Video, Store, ChevronRight, Share2, Check, Copy, Loader2, X, ArrowRight  } from "lucide-react";
+import { Star, Play, Info, Heart, Video, Store, ChevronRight, Share2, Check, Copy, Loader2, X, ArrowRight, MapPin, Phone, Package } from "lucide-react";
 import { BadgeCheck } from "lucide-react";
 import PriceSavingsDetails from "@/components/product/PriceSavingsDetails";
 import ProductAccordion from "@/components/product/ProductAccordion";
@@ -38,6 +38,7 @@ import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { calculateDistance } from "@/utils/distance";
 import {
   Drawer,
   DrawerClose,
@@ -48,6 +49,7 @@ import {
 } from "@/components/ui/drawer";
 
 import { SizeGuideSheet } from "@/components/product/SizeGuideSheet";
+import { ProductCustomizerMobile } from "@/components/product/ProductCustomizerMobile";
 import { useDispatch, useSelector } from "react-redux";
 import { addToCart } from "@/redux/features/cart/cartSlice";
 import { selectUser, setPincode as setGlobalPincode } from "@/redux/features/user/userSlice";
@@ -141,7 +143,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
   const router = useRouter();
   const dispatch = useDispatch();
   const user = useSelector(selectUser);
-  const isMobile = useMediaQuery("(max-width: 1024px)");
+  const isMobile = useMediaQuery("(max-width: 1023px)");
   const wishlistItems = useSelector((state) => state.wishlist.items);
   const [addingToCart, setAddingToCart] = useState(false);
   const [wishlistLoading, setWishlistLoading] = useState(false);
@@ -160,6 +162,12 @@ export default function ProductPageClient({ product, complementaryProducts = [],
   const [showSimilar, setShowSimilar] = useState(false);
   const [similarProducts, setSimilarProducts] = useState([]);
   const [loadingSimilar, setLoadingSimilar] = useState(false);
+
+  const [allStores, setAllStores] = useState([]);
+  const [availableStores, setAvailableStores] = useState([]);
+  const [nearestStore, setNearestStore] = useState(null);
+  const [availableStoreCount, setAvailableStoreCount] = useState(0);
+  const [isStoreDrawerOpen, setIsStoreDrawerOpen] = useState(false);
 
   // Initialize with the first in-stock variant if available, otherwise first variant
   const initialVariant = product.variants?.find(v => v.inStock) || (product.variants && product.variants.length > 0 ? product.variants[0] : null);
@@ -181,8 +189,22 @@ export default function ProductPageClient({ product, complementaryProducts = [],
   const [checkingPincode, setCheckingPincode] = useState(false);
   const [deliveryInfo, setDeliveryInfo] = useState({
     status: "idle", // idle, loading, deliverable, undeliverable
-    message: ""
+    message: "",
+    coords: null
   });
+
+  useEffect(() => {
+    const fetchStores = async () => {
+      try {
+        const res = await fetch("/api/stores");
+        const data = await res.json();
+        setAllStores(data.stores || []);
+      } catch (err) {
+        console.error("Error fetching stores:", err);
+      }
+    };
+    fetchStores();
+  }, []);
 
   const calculateDispatchDate = useCallback(() => {
     // 1. Check if product is in stock or made to order
@@ -228,14 +250,16 @@ export default function ProductPageClient({ product, complementaryProducts = [],
         const dispatchMsg = calculateDispatchDate();
         setDeliveryInfo({
           status: "deliverable",
-          message: dispatchMsg
+          message: dispatchMsg,
+          coords: data.latitude && data.longitude ? { lat: data.latitude, lng: data.longitude } : null
         });
         // Store in global Redux for persistence
         dispatch(setGlobalPincode(pincodeToCheck));
       } else {
         setDeliveryInfo({
           status: "undeliverable",
-          message: "Sorry, we do not deliver to this pincode yet."
+          message: "Sorry, we do not deliver to this pincode yet.",
+          coords: null
         });
       }
     } catch (err) {
@@ -267,6 +291,68 @@ export default function ProductPageClient({ product, complementaryProducts = [],
       }));
     }
   }, [activeVariant, calculateDispatchDate, deliveryInfo.status]);
+
+  // Handle Nearest Store Logic
+  useEffect(() => {
+    if (!allStores.length || !activeVariant) return;
+
+    const tagMapping = {
+      "Malad": ["divinecarat", "malad", "goregaon"],
+      "Chembur": ["chembur", "cs1"],
+      "Pune": ["pune", "ps1"],
+      "Borivali": ["borivali", "bo1"],
+      "Noida": ["noida", "nos18"]
+    };
+
+    const inStoreTags = activeVariant.metafields?.in_store_available || [];
+    
+    // 1. Identify which stores actually have stock
+    const stockStoreIds = allStores.filter(store => {
+      if (inStoreTags.includes(store.shopifyId)) return true;
+      const storeNumericId = store.shopifyId.split("/").pop();
+      if (inStoreTags.some(tag => String(tag).includes(storeNumericId))) return true;
+
+      const storeNameLower = store.name.toLowerCase();
+      const storeCityLower = (store.city || "").toLowerCase();
+      
+      return inStoreTags.some(tag => {
+        const tagLower = String(tag).toLowerCase();
+        if (tagLower.includes("gid://")) return false;
+        const searchTerms = tagMapping[tag] || [tagLower];
+        return searchTerms.some(term => storeNameLower.includes(term) || storeCityLower.includes(term));
+      });
+    }).map(s => s.shopifyId);
+
+    setAvailableStoreCount(stockStoreIds.length);
+
+    // 2. Prepare ALL stores with distance and stock status for the Side Sheet
+    const storesWithData = allStores.map(store => {
+      let distance = null;
+      if (deliveryInfo.coords && store.latitude && store.longitude) {
+        distance = calculateDistance(deliveryInfo.coords.lat, deliveryInfo.coords.lng, store.latitude, store.longitude);
+      }
+      return { 
+        ...store, 
+        distance, 
+        isInStock: stockStoreIds.includes(store.shopifyId) 
+      };
+    });
+
+    // Sort by distance if coords exist, otherwise alphabetical
+    if (deliveryInfo.coords) {
+      storesWithData.sort((a, b) => (a.distance || Infinity) - (b.distance || Infinity));
+    }
+
+    setAvailableStores(storesWithData);
+
+    // 3. Find the nearest store THAT HAS STOCK for the main display
+    if (stockStoreIds.length > 0) {
+      const stockOnly = storesWithData.filter(s => s.isInStock);
+      setNearestStore(stockOnly.length > 0 ? stockOnly[0] : null);
+    } else {
+      setNearestStore(null);
+    }
+  }, [allStores, activeVariant, deliveryInfo.coords]);
 
   const hasEngraving = product.tags?.some(tag => tag.toLowerCase() === "engraving available");
   const isGoldCoin = product.tags?.some(tag => tag.toLowerCase() === "gold coin");
@@ -694,13 +780,13 @@ export default function ProductPageClient({ product, complementaryProducts = [],
               <BreadcrumbLink href={`/collections/${slugify(product.type)}`} className="text-sm font-medium text-black">{product.type}</BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator><ChevronRight size={14}/></BreadcrumbSeparator>
-            <BreadcrumbItem className="text-sm font-medium text-gray-400 truncate max-w-[200px]">
+            <BreadcrumbItem className="text-sm font-medium text-gray-400 truncate">
               {product.title}
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
 
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_530px] gap-10 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] xl:grid-cols-[1fr_530px] gap-10 items-start">
           {/* Left: Product Gallery */}
           <ProductGallery 
             media={product.media || []} 
@@ -781,29 +867,36 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                     )}
                   </div>                  
                 </div>
-                
               </div>
 
               {/* Price */}
-              <div className="w-full">
-                <div className="flex items-center gap-3 pt-1">
-                  <span className="text-xl font-bold">₹{formatPrice(currentPrice)}</span>
-                  {currentComparePrice > currentPrice && (
-                    <span className="text-lg text-gray-500 line-through font-medium">₹{formatPrice(currentComparePrice)}</span>
-                  )}
-                  {currentComparePrice > currentPrice && (
-                    <span className="bg-gray-100 text-black text-base font-semibold px-3 py-1 rounded-full">
-                      {Math.round((1 - currentPrice / currentComparePrice) * 100)}% OFF
-                    </span>
-                  )}
+              <div className="w-full">  
+                <div className="flex flex-row flex-wrap items-center justify-between gap-3 pt-1">
+                  <div className="flex flex-wrap items-center gap-2 md:gap-3">
+                    <span className="text-lg sm:text-xl md:text-2xl font-bold">&#8377;{formatPrice(currentPrice)}</span>
+                    {currentComparePrice > currentPrice && (
+                      <span className="text-sm sm:text-base md:text-lg text-gray-500 line-through font-medium">
+                        &#8377;{formatPrice(currentComparePrice)}
+                      </span>
+                    )}
+                    {currentComparePrice > currentPrice && (
+                      <span className="shrink-0 bg-gray-100 text-black text-xs sm:text-sm md:text-base font-semibold px-2.5 sm:px-3 py-1 rounded-full">
+                        {Math.round((1 - currentPrice / currentComparePrice) * 100)}% OFF
+                      </span>
+                    )}
+                  </div>
                   <button 
-                    onClick={() => productDetailsRef.current?.scrollIntoView({ behavior: 'smooth' })}
-                    className="text-sm font-semibold underline underline-offset-4 ml-auto decoration-gray-300 hover:cursor-pointer"
-                  >
+                    onClick={() =>
+                      productDetailsRef.current?.scrollIntoView({ behavior: "smooth" })
+                    }
+                    className="text-xs sm:text-sm font-semibold underline underline-offset-4 decoration-gray-300 hover:cursor-pointer sm:ml-auto whitespace-nowrap">
                     See Savings Breakup
                   </button>
                 </div>
-                <p className="text-sm text-gray-400 font-medium tracking-tight mt-2">Inclusive of all taxes.</p>
+
+                <p className="text-xs sm:text-sm text-gray-400 font-medium tracking-tight mt-2">
+                  Inclusive of all taxes.
+                </p>
               </div>
               
               {/* Savings Banners Slider */}
@@ -842,15 +935,32 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                     <Swiper
                       modules={[Autoplay]}
                       spaceBetween={8}
-                      slidesPerView={slides.length > 1 ? 1.3 : 1}
+                      // slidesPerView={slides.length > 1 ? 1.1 : 1}
                       speed={1800}
                       autoplay={{ delay: 3000, disableOnInteraction: false }}
                       loop={slides.length > 2}
-                      className="w-full"
+                      breakpoints={{
+                        0: {
+                          slidesPerView: slides.length > 1 ? 1 : 1,
+                          spaceBetween: 8,
+                        },
+                        768: {
+                          slidesPerView: slides.length > 1 ? 1.8 : 1,
+                          spaceBetween: 12,
+                        },
+                        1024: {
+                          slidesPerView: slides.length > 1 ? 1.1 : 1,
+                          spaceBetween: 16,
+                        },
+                        1280: {
+                          slidesPerView: slides.length > 1 ? 1.4 : 1,
+                          spaceBetween: 20,
+                        }
+                      }}
                     >
                       {slides.map((slide, idx) => (
                         <SwiperSlide key={`promo-slide-${idx}`}>
-                          <div className="border border-dashed border-gray-400 rounded-lg px-3 py-3 flex items-center gap-2 bg-secondary/50 h-full">
+                          <div className="border border-dashed border-gray-400 rounded-lg px-3 py-3 flex items-center gap-2 bg-secondary/50 h-full w-fit">
                             <span className="text-base shrink-0">{slide.icon}</span>
                             <p className="text-sm font-semibold text-black whitespace-nowrap">
                               {slide.text}
@@ -866,107 +976,123 @@ export default function ProductPageClient({ product, complementaryProducts = [],
             </div> 
 
             <div className="space-y-6 mt-4">
-              {/* Gold Selection */}
-              <div className="space-y-3">
-                <div className="text-base font-bold">
-                  Select Gold Color & Karat: <span className="text-gray-500 font-medium ml-1">{activeKarat} {activeColor}</span>
-                </div>
-                <div className="grid grid-cols-3 gap-3">
-                  {(() => {
-                    const combinations = [];
-                    product.variants?.forEach(v => {
-                      const parts = v.color.split(" ");
-                      if (parts.length >= 3) {
-                        const karat = parts[0];
-                        const metal = parts.slice(1).join(" ");
-                        if (!combinations.find(c => c.karat === karat && c.metal === metal)) {
-                          combinations.push({ karat, metal });
+              {/* Mobile Customizer */}
+              <ProductCustomizerMobile
+                activeColor={activeColor}
+                activeKarat={activeKarat}
+                selectedSize={selectedSize}
+                handleGoldSelection={handleGoldSelection}
+                handleSizeSelection={handleSizeSelection}
+                availableSizes={availableSizes}
+                product={product}
+                isColorInStock={isColorInStock}
+                isSizeInStock={isSizeInStock}
+              />
+
+              {/* Desktop Selection Blocks */}
+              <div className="hidden lg:block space-y-6">
+                {/* Gold Selection */}
+                <div className="space-y-3">
+                  <div className="text-base font-bold">
+                    Select Gold Color & Karat: <span className="text-gray-500 font-medium ml-1">{activeKarat} {activeColor}</span>
+                  </div>
+                  <div className="grid grid-cols-3 gap-3">
+                    {(() => {
+                      const combinations = [];
+                      product.variants?.forEach(v => {
+                        const parts = v.color.split(" ");
+                        if (parts.length >= 3) {
+                          const karat = parts[0];
+                          const metal = parts.slice(1).join(" ");
+                          if (!combinations.find(c => c.karat === karat && c.metal === metal)) {
+                            combinations.push({ karat, metal });
+                          }
                         }
-                      }
-                    });
-                    
-                    // Sort combinations: 14KT first, then 18KT. Inside each, White, Yellow, Rose.
-                    const metalOrder = ["White Gold", "Yellow Gold", "Rose Gold"];
-                    combinations.sort((a, b) => {
-                      if (a.karat !== b.karat) return a.karat.localeCompare(b.karat);
-                      return metalOrder.indexOf(a.metal) - metalOrder.indexOf(b.metal);
-                    });
-
-                    return combinations.map(({ karat, metal }) => {
-                      let colorClass = "bg-[#EBC15C]";
-                      if (metal.includes("White")) colorClass = "bg-[#E5E5E5]";
-                      if (metal.includes("Rose")) colorClass = "bg-[#F6C7C7]";
+                      });
                       
-                      return (
-                        <GoldOption 
-                          key={`${karat}-${metal}`}
-                          metal={metal} 
-                          karat={karat} 
-                          onClick={handleGoldSelection} 
-                          active={activeColor === metal && activeKarat === karat} 
-                          color={colorClass} 
-                          inStock={isColorInStock(metal, karat)} 
-                        />
-                      );
-                    });
-                  })()}
-                </div>
-              </div>
+                      // Sort combinations: 14KT first, then 18KT. Inside each, White, Yellow, Rose.
+                      const metalOrder = ["White Gold", "Yellow Gold", "Rose Gold"];
+                      combinations.sort((a, b) => {
+                        if (a.karat !== b.karat) return a.karat.localeCompare(b.karat);
+                        return metalOrder.indexOf(a.metal) - metalOrder.indexOf(b.metal);
+                      });
 
-              {/* Ring Size */}
-                <div className="space-y-4">
-              {availableSizes.length > 0 && availableSizes[0] !== null && availableSizes[0] !== undefined && (
-                <>
-                  <div className="flex justify-between items-center text-sm">
-                    <span className="font-semibold text-base">Select Ring Size: <span className="font-medium ml-1">{selectedSize} IND</span></span>
-                    {String(product.type || "").toLowerCase().includes("ring") && (
-                      <SizeGuideSheet>
-                        <button className="text-sm font-medium underline underline-offset-4 decoration-gray-300 hover:cursor-pointer">Size Guide</button>
-                      </SizeGuideSheet>
+                      return combinations.map(({ karat, metal }) => {
+                        let colorClass = "bg-[#EBC15C]";
+                        if (metal.includes("White")) colorClass = "bg-[#E5E5E5]";
+                        if (metal.includes("Rose")) colorClass = "bg-[#F6C7C7]";
+                        
+                        return (
+                          <GoldOption 
+                            key={`${karat}-${metal}`}
+                            metal={metal} 
+                            karat={karat} 
+                            onClick={handleGoldSelection} 
+                            active={activeColor === metal && activeKarat === karat} 
+                            color={colorClass} 
+                            inStock={isColorInStock(metal, karat)} 
+                          />
+                        );
+                      });
+                    })()}
+                  </div>
+                </div>
+
+                {/* Ring Size */}
+                  <div className="space-y-4">
+                {availableSizes.length > 0 && availableSizes[0] !== null && availableSizes[0] !== undefined && (
+                  <>
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="font-semibold text-base">Select Ring Size: <span className="font-medium ml-1">{selectedSize} IND</span></span>
+                      {String(product.type || "").toLowerCase().includes("ring") && (
+                        <SizeGuideSheet>
+                          <button className="text-sm font-medium underline underline-offset-4 decoration-gray-300 hover:cursor-pointer">Size Guide</button>
+                        </SizeGuideSheet>
+                      )}
+                    </div>
+                    
+                    <div className="bg-[#F8F9FA] rounded-lg flex items-center gap-4 px-4 py-2.5 border border-gray-100">
+                      <div className="bg-white rounded-lg p-2 shadow-sm">
+                        <Play size={16} fill="black" />
+                      </div>
+                      <span className="text-base text-black">Watch this quick video to measure your ring right.</span>
+                    </div>
+
+                    <div className="grid grid-cols-7 gap-4">
+                      {availableSizes.map(sizeStr => {
+                        const inStock = isSizeInStock(sizeStr);
+                        return (
+                          <button
+                            key={`size-${sizeStr}`}
+                            onClick={() => handleSizeSelection(sizeStr)}
+                            className={`relative border rounded-md h-10 flex items-center justify-center text-base transition-all ${
+                              sizeStr === selectedSize
+                                ? "border-primary bg-white ring-1 ring-primary font-bold"
+                                : "border-gray-200 hover:border-primary font-normal"
+                            }`}
+                          >
+                            {sizeStr}
+                            {inStock && <span className="absolute top-1 left-1 w-1.5 h-1.5 bg-[#2DB36F] rounded-full"></span>}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <p className="text-sm text-black font-medium">Didn&apos;t get the size right? We&apos;ll exchange it.</p>  
+                    </>
+                  )}              
+                    {activeVariant?.inStock ? (
+                      <div className="bg-[#ECF7F2] border border-[#B3E1CD] text-black rounded-lg px-4 py-3 flex items-center gap-1 xl:flex-nowrap lg:flex-wrap">
+                        <span className="w-2.5 h-2.5 bg-[#189351] rounded-full"></span>
+                        This combination is <span className="font-semibold xl:basis-auto lg:basis-full">in-stock & ready to ship in 24 hrs</span>
+                      </div>
+                    ) : (
+                      <div className="bg-amber-50 border border-amber-200 text-black rounded-lg px-4 py-3 flex items-center gap-1 xl:flex-nowrap lg:flex-wrap">
+                        <span className="w-2.5 h-2.5 bg-amber-500 rounded-full"></span>
+                        This combination will be <span className="font-semibold xl:basis-auto lg:basis-full">made to order (dispatched in 10-15 days)</span>
+                      </div>
                     )}
                   </div>
-                  
-                  <div className="bg-[#F8F9FA] rounded-lg flex items-center gap-4 px-4 py-2.5 border border-gray-100">
-                    <div className="bg-white rounded-lg p-2 shadow-sm">
-                      <Play size={16} fill="black" />
-                    </div>
-                    <span className="text-base text-black">Watch this quick video to measure your ring right.</span>
-                  </div>
-
-                  <div className="grid grid-cols-7 gap-4">
-                    {availableSizes.map(sizeStr => {
-                      const inStock = isSizeInStock(sizeStr);
-                      return (
-                        <button
-                          key={`size-${sizeStr}`}
-                          onClick={() => handleSizeSelection(sizeStr)}
-                          className={`relative border rounded-md h-10 flex items-center justify-center text-base transition-all ${
-                            sizeStr === selectedSize
-                              ? "border-primary bg-white ring-1 ring-primary font-bold"
-                              : "border-gray-200 hover:border-primary font-normal"
-                          }`}
-                        >
-                          {sizeStr}
-                          {inStock && <span className="absolute top-1 left-1 w-1.5 h-1.5 bg-[#2DB36F] rounded-full"></span>}
-                        </button>
-                      );
-                    })}
-                  </div>
-                  <p className="text-sm text-black font-medium">Didn&apos;t get the size right? We&apos;ll exchange it.</p>  
-                  </>
-                )}              
-                  {activeVariant?.inStock ? (
-                    <div className="bg-[#ECF7F2] border border-[#B3E1CD] text-black  rounded-lg px-4 py-3 flex items-center gap-1">
-                      <span className="w-2.5 h-2.5 bg-[#189351] rounded-full"></span>
-                      This combination is <span className="font-semibold">in-stock & ready to ship in 48 hrs</span>
-                    </div>
-                  ) : (
-                    <div className="bg-amber-50 border border-amber-200 text-black rounded-lg px-4 py-3 flex items-center gap-1">
-                      <span className="w-2.5 h-2.5 bg-amber-500 rounded-full"></span>
-                      This combination will be <span className="font-semibold">made to order (dispatched in 10-15 days)</span>
-                    </div>
-                  )}
-                </div>
+              </div>
               
               <Separator />
             </div>
@@ -1200,15 +1326,11 @@ export default function ProductPageClient({ product, complementaryProducts = [],
            
             {/* Features */}
             <div className="space-y-4">
-              <div className="flex justify-between items-center gap-x-4 text-sm font-medium text-black">
-                <div className="flex flex-col space-y-4.5 flex-1">
-                    <Feature icon={<Image src="/images/product/shipping.svg" alt="Shipping icon" width={20} height={20} />} text="Free and secure shipping" />
-                    <Feature icon={<Image src="/images/product/exchange.svg" alt="Exchange icon" width={20} height={20} />} text="Lifetime exchange and 100% value guarantee" />                  
-                </div>
-                <div className="flex flex-col space-y-4.5">
-                  <Feature icon={<Image src="/images/product/return.svg" alt="Return icon" width={20} height={20} />} text="15-day free returns" />
-                  <Feature icon={<BadgeCheck size={20} className="text-black" />} text="IGI and Hallmark certified" />
-                </div>
+              <div className="grid  grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-6 lg:gap-x-10 text-xs sm:text-sm font-medium text-black">
+                <Feature icon={<Image src="/images/product/shipping.svg" alt="Shipping icon" width={20} height={20} />} text="Free and secure shipping" />
+                <Feature icon={ <Image src="/images/product/exchange.svg" alt="Exchange icon" width={20} height={20} />} text="Lifetime exchange and 100% value guarantee" />
+                <Feature icon={<Image src="/images/product/return.svg" alt="Return icon" width={20} height={20} />} text="15-day free returns" />
+                <Feature icon={<BadgeCheck size={20} className="text-black shrink-0" />} text="IGI and Hallmark certified" />
               </div>
 
               <Separator/>
@@ -1250,7 +1372,6 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                     {checkingPincode ? <Loader2 className="animate-spin" size={18} /> : "CHECK"}
                   </Button>
                 </div>
-                
                 {deliveryInfo.status !== "idle" && (
                   <div className={`text-sm flex items-center gap-2 ${deliveryInfo.status === "undeliverable" ? "text-red-500" : "text-black"}`}>
                     {deliveryInfo.status === "undeliverable" ? (
@@ -1267,21 +1388,36 @@ export default function ProductPageClient({ product, complementaryProducts = [],
 
               {/* Nearest Store */}
               <div className="border border-gray-200 rounded-md p-4 space-y-2.5 bg-gray-50">
-                <div className="flex items-center gap-2">
-                  <Store size={20} className="text-black" strokeWidth={1.2} />
-                  <span className="text-base font-bold">Nearest Store - <span className="italic font-semibold text-black">Pune Lucira Store (3Km)</span></span>
-                </div>
-                <div className="flex items-center gap-2 bg-[#E3F5E0] text-black px-3 py-1.5 rounded-full w-fit">
-                      <div className="w-3.5 h-3.5 bg-[#76D168] rounded-full flex items-center justify-center">
-                        <Check size={9} className="text-white" strokeWidth={4} />
-                      </div>
-                      <span className="text-12px font-semibold tracking-tight">Design Available</span>
-                </div>
-                <p className="text-sm text-black">
-                  Also available in <button className="underline underline-offset-2 font-bold">2 other stores</button>
-                </p>
-                <Button className="w-full h-12 font-bold rounded-md mt-1 text-sm">
-                  FIND IN STORE
+                {availableStoreCount > 0 && (
+                  <>
+                    <div className="flex items-center gap-2">
+                      <Store size={20} className="text-black" strokeWidth={1.2} />
+                      <span className="text-base font-bold">
+                        {nearestStore ? (
+                          <>Nearest Store - <span className="italic font-semibold text-black">{nearestStore.name} ({Math.round(nearestStore.distance)}Km)</span></>
+                        ) : (
+                          <>Available in <span className="italic font-semibold text-black">{availableStoreCount} stores</span></>
+                        )}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 bg-[#E3F5E0] text-black px-3 py-1.5 rounded-full w-fit">
+                          <div className="w-3.5 h-3.5 bg-[#76D168] rounded-full flex items-center justify-center">
+                            <Check size={9} className="text-white" strokeWidth={4} />
+                          </div>
+                          <span className="text-12px font-semibold tracking-tight">Design Available</span>
+                    </div>
+                  </>
+                )}
+                {availableStoreCount > 1 && (
+                  <p className="text-sm text-black">
+                    Also available in <button onClick={() => setIsStoreDrawerOpen(true)} className="underline underline-offset-2 font-bold">{availableStoreCount - 1} other stores</button>
+                  </p>
+                )}
+                <Button 
+                  onClick={() => setIsStoreDrawerOpen(true)}
+                  className="w-full h-12 font-bold rounded-md mt-1 text-sm uppercase tracking-widest"
+                >
+                  {availableStoreCount > 0 ? "FIND IN STORE" : "FIND STORE"}
                 </Button>
               </div>
               <Separator/>
@@ -1508,7 +1644,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                   <div className="flex items-center gap-2 text-base font-semibold text-black mb-4">
                      Certified Quality Guaranteed.
                   </div>
-                  <div className="flex items-start justify-between gap-4">
+                  <div className="flex items-start justify-between gap-4 xl:flex-nowrap flex-wrap">
                     <button className="text-sm font-semibold underline underline-offset-[6px] decoration-black mt-1 whitespace-nowrap">
                       See Sample Certificate
                     </button>
@@ -1607,6 +1743,74 @@ export default function ProductPageClient({ product, complementaryProducts = [],
       <CategorySlider />      
       <FindLuciraStore />
       <JoinLuciraCommunity/>
+
+      <Sheet open={isStoreDrawerOpen} onOpenChange={setIsStoreDrawerOpen}>
+        <SheetContent side="right" className="w-full sm:max-w-[450px] p-0 flex flex-col">
+          <SheetHeader className="p-6 border-b border-gray-100 flex flex-row items-center justify-between">
+            <SheetTitle className="text-lg font-bold">Store Availability</SheetTitle>
+          </SheetHeader>
+          
+          <div className="flex-1 overflow-y-auto p-6">
+            <div className="space-y-6">
+              {availableStores.length > 0 ? (
+                availableStores.map((store) => (
+                  <div key={store.id || store.shopifyId} className="border border-gray-100 rounded-xl p-5 space-y-4 bg-gray-50/50">
+                    <div className="flex justify-between items-start">
+                      <div className="space-y-1">
+                        <h3 className="font-bold text-lg">{store.name}</h3>
+                        {store.distance && (
+                          <div className="flex items-center gap-1.5 text-primary font-semibold text-sm">
+                            <MapPin size={14} />
+                            {Math.round(store.distance)} Km away
+                          </div>
+                        )}
+                      </div>
+                      <div className="bg-[#E3F5E0] text-black px-3 py-1 rounded-full flex items-center gap-1.5">
+                        <div className="w-2 h-2 bg-[#76D168] rounded-full"></div>
+                        <span className="text-xs font-bold uppercase">In Stock</span>
+                      </div>
+                    </div>
+
+                    <div className="space-y-3 pt-2">
+                      <div className="flex items-start gap-3 text-sm text-gray-600">
+                        <MapPin size={18} className="shrink-0 text-gray-400 mt-0.5" />
+                        <p className="leading-relaxed font-medium">{store.address1 || store.address}, {store.city}</p>
+                      </div>
+                      <div className="flex items-center gap-3 text-sm text-gray-600">
+                        <Phone size={18} className="shrink-0 text-gray-400" />
+                        <p className="font-medium">{store.phone || "+91 91724 99912"}</p>
+                      </div>
+                      <div className="flex items-center gap-3 text-sm text-gray-600">
+                        <Package size={18} className="shrink-0 text-gray-400" />
+                        <p className="font-medium">Ready for pickup in 2-4 hours</p>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3 pt-2">
+                      <Button variant="outline" className="font-bold h-11 rounded-lg border-gray-200" asChild>
+                        <a href={`tel:${store.phone || "+919172499912"}`}>CALL STORE</a>
+                      </Button>
+                      <Button className="font-bold h-11 rounded-lg">
+                        DIRECTIONS
+                      </Button>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="flex flex-col items-center justify-center py-20 text-center gap-4">
+                  <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center">
+                    <Store className="text-gray-300" size={32} />
+                  </div>
+                  <div className="space-y-1">
+                    <p className="font-bold text-gray-900">No Stores with Stock</p>
+                    <p className="text-sm text-gray-500">This design is currently not available in any nearby stores.</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }
@@ -1631,17 +1835,17 @@ function DiamondDetail({ img, shape, pcs, carat, quality }) {
 
 function ExploreCard({ title, description, action, img }) {
   return (
-    <div className="bg-[#F9F9F9] border border-gray-100 rounded-lg p-3 flex items-center justify-between gap-3">
-      <div className="w-24 h-16 rounded-md bg-gray-200 shrink-0 relative overflow-hidden shadow-sm">
-        {img && <Image src={getValidSrc(img)} alt={title} fill className="object-cover" />}
+    <div className="bg-[#F9F9F9] border border-gray-100 rounded-lg p-3 md:p-4 flex items-start gap-3 md:gap-4">
+      <div className="w-20 h-20 sm:w-24 sm:h-24 md:w-24 md:h-16 shrink-0 rounded-md bg-gray-200 relative overflow-hidden shadow-sm">
+        {img && ( <Image src={getValidSrc(img)} alt={title} fill className="object-cover" /> )}
       </div>
-      <div className="flex-1 space-y-1">
-        <p className="text-sm font-semibold leading-tight">{title}</p>
-        <p className="text-12px font-medium leading-[1.3]">{description}</p>
+      <div className="flex-1 min-w-0 flex flex-col gap-2">
+        <p className="text-sm md:text-base font-semibold leading-tight"> {title} </p>
+        <p className="text-xs md:text-sm font-medium leading-[1.5] text-gray-700"> {description} </p>
+        <Button variant="link" className=" p-0 m-0 h-auto w-fit text-sm font-bold underline underline-offset-4 justify-start">
+          {action}
+        </Button>
       </div>
-      <Button variant="link" className="text-sm p-0 m-0 font-bold underline underline-offset-4 whitespace-nowrap">
-        {action}
-      </Button>
     </div>
   );
 }

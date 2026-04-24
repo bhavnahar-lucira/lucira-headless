@@ -41,6 +41,8 @@ import {
 } from "@/lib/api";
 import { useCart } from "@/hooks/useCart";
 import { pushAddShippingInfo } from "@/lib/gtm";
+import { MobileBottomSheet } from "@/components/common/MobileBottomSheet";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 
 const INSURANCE_VARIANT_ID = "gid://shopify/ProductVariant/47709366026458";
 const GOLDCOIN_VARIANT_ID = "gid://shopify/ProductVariant/47661824082138";
@@ -114,18 +116,17 @@ const STORES = [
   },
 ];
 
-// Mock pincode coordinates mapping for demo
 const PINCODE_COORDS = {
   "400071": { lat: 19.0522, lng: 72.8995 },
   "400064": { lat: 19.186, lng: 72.848 },
   "400092": { lat: 19.231, lng: 72.8521 },
   "411005": { lat: 18.5196, lng: 73.8447 },
-  "400001": { lat: 18.9322, lng: 72.8344 }, // South Mumbai
-  "110001": { lat: 28.6353, lng: 77.225 }, // Delhi
+  "400001": { lat: 18.9322, lng: 72.8344 }, 
+  "110001": { lat: 28.6353, lng: 77.225 }, 
 };
 
 function calculateDistance(lat1, lon1, lat2, lon2) {
-  const R = 6371; // km
+  const R = 6371; 
   const dLat = (lat2 - lat1) * (Math.PI / 180);
   const dLon = (lon2 - lon1) * (Math.PI / 180);
   const a =
@@ -168,7 +169,7 @@ function formatAddressPreview(address) {
   return pieces.filter(Boolean);
 }
 
-function AddressFields({ form, onChange, makeDefault, onDefaultChange, submitLabel, onSubmit, saving }) {
+function AddressFields({ form, onChange, makeDefault, onDefaultChange, submitLabel, onSubmit, saving, isMobile = false }) {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -207,13 +208,13 @@ function AddressFields({ form, onChange, makeDefault, onDefaultChange, submitLab
       </div>
 
       <div className="flex items-center space-x-2">
-        <Checkbox id="make-default-address" checked={makeDefault} onCheckedChange={(checked) => onDefaultChange(Boolean(checked))} />
-        <label htmlFor="make-default-address" className="text-sm font-medium text-zinc-700 cursor-pointer">
+        <Checkbox id={`make-default-${isMobile ? 'mobile' : 'desktop'}`} checked={makeDefault} onCheckedChange={(checked) => onDefaultChange(Boolean(checked))} />
+        <label htmlFor={`make-default-${isMobile ? 'mobile' : 'desktop'}`} className="text-sm font-medium text-zinc-700 cursor-pointer">
           Use this as my default shipping address
         </label>
       </div>
 
-      <Button type="button" onClick={onSubmit} disabled={saving} className="w-full md:w-auto h-12 bg-primary hover:bg-primary/90 text-white font-bold">
+      <Button type="button" onClick={onSubmit} disabled={saving} className={`w-full md:w-auto h-14 md:h-12 bg-primary hover:bg-primary/90 text-white font-bold ${isMobile ? 'rounded-full uppercase tracking-widest' : ''}`}>
         {saving ? <Loader2 className="size-4 animate-spin" /> : submitLabel}
       </Button>
     </div>
@@ -221,6 +222,7 @@ function AddressFields({ form, onChange, makeDefault, onDefaultChange, submitLab
 }
 
 export default function ShippingPage() {
+  const isDesktop = useMediaQuery("(min-width: 1024px)");
   const { items: cartItems, totalAmount, appliedCoupon } = useCart();
   const searchParams = useSearchParams();
   const [deliveryMethod, setDeliveryMethod] = useState(searchParams.get("method") || "ship");
@@ -283,7 +285,6 @@ export default function ShippingPage() {
     }
     
     if (!center) {
-      // Prioritize Borivali as requested by user if no location
       const priority = ["borivali", "chembur", "malad", "pune"];
       return [...STORES].sort((a, b) => priority.indexOf(a.id) - priority.indexOf(b.id));
     }
@@ -296,7 +297,6 @@ export default function ShippingPage() {
       .sort((a, b) => (a.distance || 0) - (b.distance || 0));
   }, [selectedAddress, searchCoords]);
 
-  // Mock availability for each store
   const storeAvailability = useMemo(() => {
     return sortedStores.reduce((acc, store) => {
       acc[store.id] = cartItems.map((item, index) => ({
@@ -313,7 +313,6 @@ export default function ShippingPage() {
     }
   }, [sortedStores, selectedStoreId]);
 
-  // Save selection to localStorage for payment page
   useEffect(() => {
     if (typeof window !== "undefined") {
       const selection = {
@@ -331,10 +330,8 @@ export default function ShippingPage() {
     const query = storeSearchQuery.trim();
     if (!query) return;
     
-    // Simulate pincode lookup
     let coords = PINCODE_COORDS[query];
     
-    // If not exact match, try to find a "nearby" pincode from our map
     if (!coords && query.length >= 3) {
       const prefix = query.substring(0, 3);
       const similarPincode = Object.keys(PINCODE_COORDS).find(p => p.startsWith(prefix));
@@ -346,8 +343,6 @@ export default function ShippingPage() {
 
     if (coords) {
       setSearchCoords(coords);
-      
-      // Automatically find and highlight the nearest store from the search point
       const nearest = [...STORES]
         .map((store) => ({
           ...store,
@@ -376,8 +371,6 @@ export default function ShippingPage() {
           lng: position.coords.longitude,
         };
         setSearchCoords(coords);
-        
-        // Automatically find and highlight the nearest store from real location
         const nearest = [...STORES]
           .map((store) => ({
             ...store,
@@ -388,7 +381,6 @@ export default function ShippingPage() {
         if (nearest) {
           setTempSelectedStoreId(nearest.id);
         }
-        
         toast.success("Nearby stores updated based on your location");
       },
       () => {
@@ -523,7 +515,6 @@ export default function ShippingPage() {
 
   const handleSelectAddress = async (addressId) => {
     setSelectedAddressId(addressId);
-
     try {
       applyAddressPayload(await selectDefaultCustomerAddress(addressId));
     } catch (error) {
@@ -543,9 +534,7 @@ export default function ShippingPage() {
 
   const selectedStore = STORES.find(s => s.id === selectedStoreId) || sortedStores[0];
 
-  
   const handleContinueToPayment = () => {
-    // Helper to extract numeric ID from Shopify GID
     const getNumericId = (gid) => {
       if (!gid) return 0;
       if (typeof gid === 'number') return gid;
@@ -553,7 +542,6 @@ export default function ShippingPage() {
       return match ? Number(match[0]) : 0;
     };
 
-    // Calculate grand total consistently with CheckoutSummary.jsx
     const insuranceItem = (cartItems || []).find(item => item.variantId === INSURANCE_VARIANT_ID);
     const insuranceValue = insuranceItem ? (insuranceItem.price * (insuranceItem.quantity || 1)) : 0;
     const subtotalValue = (totalAmount || 0) - insuranceValue;
@@ -616,8 +604,144 @@ export default function ShippingPage() {
     pushAddShippingInfo(shippingData);
   };
 
+  const StorePickupContent = () => (
+    <div className="p-6 space-y-6">
+      <div className="space-y-4">
+        <div className="flex gap-2">
+          <div className="flex items-center gap-2 px-3 py-2 border border-zinc-200 rounded-lg bg-zinc-50 min-w-[80px] shrink-0">
+            <span className="text-lg">🇮🇳</span>
+            <ChevronRight size={14} className="rotate-90 text-zinc-400" />
+          </div>
+          <div className="relative flex-grow">
+            <Input 
+              placeholder="PIN code or address" 
+              value={storeSearchQuery}
+              onChange={(e) => setStoreSearchQuery(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleStoreSearch()}
+              className="h-11 pl-4 pr-10 border-zinc-200 focus-visible:ring-primary/20" 
+            />
+            <Search size={18} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400" />
+          </div>
+          <Button onClick={handleStoreSearch} variant="secondary" className="h-11 px-4 bg-zinc-100 hover:bg-zinc-200 text-zinc-600">
+            <Search size={18} />
+          </Button>
+        </div>
+
+        <button onClick={handleUseMyLocation} className="flex items-center gap-2 text-sm font-medium text-[#005BD3] hover:underline">
+          <Navigation size={16} />
+          Use my location
+        </button>
+      </div>
+
+      <div className="space-y-3">
+        <p className="text-sm text-zinc-500">
+          There are {sortedStores.length} locations with your item
+        </p>
+
+        <div className="max-h-[50vh] overflow-y-auto space-y-3 pr-2 custom-scrollbar">
+          {sortedStores.map((store) => {
+            const isSelected = tempSelectedStoreId === store.id;
+            return (
+              <div
+                key={store.id}
+                onClick={() => setTempSelectedStoreId(store.id)}
+                className={`relative flex items-start gap-4 p-5 rounded-xl border-2 transition-all cursor-pointer ${
+                  isSelected ? "border-primary bg-primary/5 shadow-sm" : "border-zinc-100 hover:border-zinc-200"
+                }`}
+              >
+                <div className={`mt-1 size-5 rounded-full border-2 flex items-center justify-center shrink-0 ${
+                  isSelected ? "border-primary bg-primary" : "border-zinc-300"
+                }`}>
+                  {isSelected && <div className="size-2 rounded-full bg-white" />}
+                </div>
+                
+                <div className="flex-grow space-y-2">
+                  <div className="flex justify-between items-start">
+                    <h3 className="font-bold text-zinc-900">{store.code || store.name}</h3>
+                    <span className="font-bold text-zinc-900 text-sm">FREE</span>
+                  </div>
+                  <p className="text-sm text-zinc-500 leading-relaxed pr-8">
+                    {store.address}, {store.city} {store.state}
+                  </p>
+                  <div className="flex items-center gap-2 text-zinc-400 text-xs">
+                    <Clock size={14} />
+                    <span>{store.readyTime}</span>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+
+  const AddressListContent = () => (
+    <div className="max-h-[60vh] space-y-3 overflow-y-auto pr-1 custom-scrollbar">
+      {addresses.map((address) => {
+        const isSelected = selectedAddressId === address.id;
+        return (
+          <div
+            key={`all-${address.id}`}
+            onClick={async () => {
+              await handleSelectAddress(address.id);
+              setAddressListOpen(false);
+            }}
+            role="button"
+            tabIndex={0}
+            className={`rounded-xl border p-4 text-left transition-all ${
+              isSelected ? "border-primary bg-[#FFF8F4]" : "border-zinc-200 bg-white"
+            }`}
+          >
+            <div className="flex items-start gap-3">
+              <input
+                type="radio"
+                name="all-shipping-addresses"
+                checked={isSelected}
+                onChange={() => {}}
+                className="mt-1 size-4 accent-black"
+              />
+              <div className="flex-1">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-semibold text-zinc-900">
+                      {[address.firstName, address.lastName].filter(Boolean).join(" ") || "Saved address"}
+                    </h3>
+                    {address.isDefault && (
+                      <span className="rounded-full bg-zinc-900 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-white">
+                        Default
+                      </span>
+                    )}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={async (e) => {
+                      e.stopPropagation();
+                      await handleDeleteAddress(address.id);
+                    }}
+                    className="rounded-full border border-zinc-200 p-2 text-zinc-600 transition hover:border-red-200 hover:text-red-600"
+                  >
+                    <Trash2 className="size-4" />
+                  </button>
+                </div>
+                <div className="mt-2 space-y-1 text-sm text-zinc-600">
+                  {formatAddressPreview(address).map((line) => (
+                    <p key={`list-${address.id}-${line}`}>{line}</p>
+                  ))}
+                  {address.gstin && <p className="font-medium text-zinc-800">GSTIN: {address.gstin}</p>}
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+
+  const isContinueDisabled = deliveryMethod === "ship" ? !selectedAddress : !selectedStoreId;
+
   return (
-    <div className="bg-white min-h-screen overflow-x-hidden">
+    <div className="bg-white min-h-screen overflow-x-hidden pb-32 lg:pb-0">
       <div className="max-w-7xl w-full mx-auto relative z-10 px-4">
         <div className="flex flex-col lg:flex-row min-h-[calc(100vh-80px)]">
           <div className="grow lg:basis-[60%] lg:shrink-0 py-10 px-4 lg:pr-12 space-y-10 bg-white">
@@ -672,12 +796,6 @@ export default function ShippingPage() {
                           <div
                             key={address.id}
                             onClick={() => handleSelectAddress(address.id)}
-                            onKeyDown={(e) => {
-                              if (e.key === "Enter" || e.key === " ") {
-                                e.preventDefault();
-                                handleSelectAddress(address.id);
-                              }
-                            }}
                             role="button"
                             tabIndex={0}
                             className={`w-full rounded-2xl border p-5 text-left transition-all ${
@@ -711,13 +829,13 @@ export default function ShippingPage() {
                                     <button type="button" onClick={(e) => {
                                       e.stopPropagation();
                                       openEditDialog(address);
-                                    }} className="rounded-full border border-zinc-200 p-2 text-zinc-600 transition hover:border-zinc-300 hover:text-zinc-900" aria-label="Edit address">
+                                    }} className="rounded-full border border-zinc-200 p-2 text-zinc-600 transition hover:border-zinc-300 hover:text-zinc-900">
                                       <Pencil className="size-4" />
                                     </button>
                                     <button type="button" onClick={(e) => {
                                       e.stopPropagation();
                                       handleDeleteAddress(address.id);
-                                    }} className="rounded-full border border-zinc-200 p-2 text-zinc-600 transition hover:border-red-200 hover:text-red-600" aria-label="Remove address">
+                                    }} className="rounded-full border border-zinc-200 p-2 text-zinc-600 transition hover:border-red-200 hover:text-red-600">
                                       <Trash2 className="size-4" />
                                     </button>
                                   </div>
@@ -763,7 +881,7 @@ export default function ShippingPage() {
                   </div>
                 )}
 
-                <div className="flex flex-col md:flex-row items-center justify-between gap-6 pt-4">
+                <div className="hidden lg:flex flex-col md:flex-row items-center justify-between gap-6 pt-4">
                   <Link href="/checkout/cart" className="flex items-center gap-2 text-sm font-medium text-[#005BD3] hover:underline">
                     <ChevronLeft size={16} />
                     Return to cart
@@ -790,7 +908,6 @@ export default function ShippingPage() {
                 </div>
 
                 <div className="border border-zinc-200 rounded-xl overflow-hidden bg-white shadow-sm">
-                  {/* Primary Store Card */}
                   {selectedStore && (
                     <div className="p-6">
                       <div className="flex justify-between items-start mb-2">
@@ -809,7 +926,6 @@ export default function ShippingPage() {
                     </div>
                   )}
 
-                  {/* More locations footer */}
                   <button
                     onClick={handleOpenStoreDialog}
                     className="w-full flex items-center justify-between px-6 py-4 border-t border-zinc-100 hover:bg-zinc-50 transition-colors"
@@ -821,7 +937,7 @@ export default function ShippingPage() {
                   </button>
                 </div>
 
-                <div className="flex flex-col md:flex-row items-center justify-between gap-6 pt-4">
+                <div className="hidden lg:flex flex-col md:flex-row items-center justify-between gap-6 pt-4">
                   <Link href="/checkout/cart" className="flex items-center gap-2 text-sm font-medium text-[#005BD3] hover:underline">
                     <ChevronLeft size={16} />
                     Return to cart
@@ -847,203 +963,97 @@ export default function ShippingPage() {
         </div>
       </div>
 
-      {/* Store Pickup Dialog */}
-      <Dialog open={showStoreDialog} onOpenChange={setShowStoreDialog}>
-        <DialogContent className="max-w-2xl p-0 overflow-hidden rounded-2xl border-none">
-          <div className="p-6 space-y-6">
-            <div className="flex items-center justify-between">
-              <DialogTitle className="text-xl font-bold text-zinc-900">Pickup locations</DialogTitle>
-              <button onClick={() => setShowStoreDialog(false)} className="text-zinc-400 hover:text-zinc-600">
-                <X size={20} />
-              </button>
-            </div>
-
-            <div className="space-y-4">
-              <div className="flex gap-2">
-                <div className="flex items-center gap-2 px-3 py-2 border border-zinc-200 rounded-lg bg-zinc-50 min-w-[80px] shrink-0">
-                  <span className="text-lg">🇮🇳</span>
-                  <ChevronRight size={14} className="rotate-90 text-zinc-400" />
-                </div>
-                <div className="relative flex-grow">
-                  <Input 
-                    placeholder="PIN code or address" 
-                    value={storeSearchQuery}
-                    onChange={(e) => setStoreSearchQuery(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && handleStoreSearch()}
-                    className="h-11 pl-4 pr-10 border-zinc-200 focus-visible:ring-primary/20" 
-                  />
-                  <Search size={18} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400" />
-                </div>
-                <Button onClick={handleStoreSearch} variant="secondary" className="h-11 px-4 bg-zinc-100 hover:bg-zinc-200 text-zinc-600">
-                  <Search size={18} />
-                </Button>
-              </div>
-
-              <button onClick={handleUseMyLocation} className="flex items-center gap-2 text-sm font-medium text-[#005BD3] hover:underline">
-                <Navigation size={16} />
-                Use my location
-              </button>
-            </div>
-
-            <div className="space-y-3">
-              <p className="text-sm text-zinc-500">
-                There are {sortedStores.length} locations with your item
-              </p>
-
-              <div className="max-h-[40vh] overflow-y-auto space-y-3 pr-2 scrollbar-thin">
-                {sortedStores.map((store) => {
-                  const isSelected = tempSelectedStoreId === store.id;
-                  return (
-                    <div
-                      key={store.id}
-                      onClick={() => setTempSelectedStoreId(store.id)}
-                      className={`relative flex items-start gap-4 p-5 rounded-xl border-2 transition-all cursor-pointer ${
-                        isSelected ? "border-primary bg-primary/5 shadow-sm" : "border-zinc-100 hover:border-zinc-200"
-                      }`}
-                    >
-                      <div className={`mt-1 size-5 rounded-full border-2 flex items-center justify-center shrink-0 ${
-                        isSelected ? "border-primary bg-primary" : "border-zinc-300"
-                      }`}>
-                        {isSelected && <div className="size-2 rounded-full bg-white" />}
-                      </div>
-                      
-                      <div className="flex-grow space-y-2">
-                        <div className="flex justify-between items-start">
-                          <h3 className="font-bold text-zinc-900">{store.code || store.name}</h3>
-                          <span className="font-bold text-zinc-900 text-sm">FREE</span>
-                        </div>
-                        <p className="text-sm text-zinc-500 leading-relaxed pr-8">
-                          {store.address}, {store.city} {store.state}
-                        </p>
-                        <div className="flex items-center gap-2 text-zinc-400 text-xs">
-                          <Clock size={14} />
-                          <span>{store.readyTime}</span>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
+      {/* Mobile Sticky Footer */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-zinc-100 p-4 shadow-[0_-4px_15px_rgba(0,0,0,0.08)] z-[60]">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex flex-col">
+            <span className="text-lg font-bold text-zinc-900 leading-none">₹ {totalAmount.toLocaleString('en-IN')}</span>
+            <button className="text-[11px] font-bold text-[#A855F7] uppercase tracking-tight mt-1 text-left">
+              View Order Summary
+            </button>
           </div>
-
-          <div className="p-4 bg-zinc-50 border-t border-zinc-100 flex items-center justify-end gap-3">
-            <Button 
-              variant="outline" 
-              onClick={() => setShowStoreDialog(false)}
-              className="px-8 h-12 border-zinc-200 text-zinc-600 font-bold rounded-lg"
+          <Link href="/checkout/payment" className="grow" onClick={handleContinueToPayment}>
+             <Button 
+              disabled={isContinueDisabled}
+              className="w-full bg-[#A855F7] hover:bg-[#9333EA] text-white font-bold h-12 uppercase tracking-widest rounded-xl text-sm"
             >
-              Cancel
+              Continue to payment
             </Button>
-            <Button 
-              onClick={handleSaveStoreSelection}
-              className="px-10 h-12 bg-primary hover:bg-primary/90 text-white font-bold rounded-lg transition-all"
-            >
-              Save
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+          </Link>
+        </div>
+      </div>
 
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>{dialogMode === "edit" ? "Edit address" : "Add new address"}</DialogTitle>
-            <DialogDescription>
-              Email and phone stay tied to your logged-in customer account and are not editable here.
-            </DialogDescription>
-          </DialogHeader>
+      {/* POPUPS */}
+      {isDesktop ? (
+        <>
+          {/* STORE PICKUP DIALOG */}
+          <Dialog open={showStoreDialog} onOpenChange={setShowStoreDialog}>
+            <DialogContent className="max-w-2xl p-0 overflow-hidden rounded-2xl border-none">
+              <DialogHeader className="p-6 pb-0">
+                <DialogTitle className="text-xl font-bold text-zinc-900">Pickup locations</DialogTitle>
+              </DialogHeader>
+              <StorePickupContent />
+              <div className="p-4 bg-zinc-50 border-t border-zinc-100 flex items-center justify-end gap-3">
+                <Button variant="outline" onClick={() => setShowStoreDialog(false)} className="px-8 h-12 border-zinc-200 text-zinc-600 font-bold">Cancel</Button>
+                <Button onClick={handleSaveStoreSelection} className="px-10 h-12 bg-primary hover:bg-primary/90 text-white font-bold">Save</Button>
+              </div>
+            </DialogContent>
+          </Dialog>
 
-          <AddressFields
-            form={addressForm}
-            onChange={updateForm}
-            makeDefault={makeDefault}
-            onDefaultChange={setMakeDefault}
-            submitLabel={dialogMode === "edit" ? "Save changes" : "Save address"}
-            onSubmit={dialogMode === "edit" ? handleUpdateAddress : () => handleCreateAddress(true)}
-            saving={dialogSaving}
-          />
-        </DialogContent>
-      </Dialog>
+          {/* ADDRESS FORM DIALOG */}
+          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+            <DialogContent className="max-w-2xl">
+              <DialogHeader>
+                <DialogTitle>{dialogMode === "edit" ? "Edit address" : "Add new address"}</DialogTitle>
+                <DialogDescription>Email and phone stay tied to your account.</DialogDescription>
+              </DialogHeader>
+              <AddressFields
+                form={addressForm}
+                onChange={updateForm}
+                makeDefault={makeDefault}
+                onDefaultChange={setMakeDefault}
+                submitLabel={dialogMode === "edit" ? "Save changes" : "Save address"}
+                onSubmit={dialogMode === "edit" ? handleUpdateAddress : () => handleCreateAddress(true)}
+                saving={dialogSaving}
+              />
+            </DialogContent>
+          </Dialog>
 
-      <Dialog open={addressListOpen} onOpenChange={setAddressListOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>All addresses</DialogTitle>
-            <DialogDescription>
-              Select an address to make it your active default shipping address.
-            </DialogDescription>
-          </DialogHeader>
+          {/* ADDRESS LIST DIALOG */}
+          <Dialog open={addressListOpen} onOpenChange={setAddressListOpen}>
+            <DialogContent className="max-w-2xl">
+              <DialogHeader>
+                <DialogTitle>All addresses</DialogTitle>
+                <DialogDescription>Select a default shipping address.</DialogDescription>
+              </DialogHeader>
+              <AddressListContent />
+            </DialogContent>
+          </Dialog>
+        </>
+      ) : (
+        <>
+          <MobileBottomSheet isOpen={showStoreDialog} onClose={() => setShowStoreDialog(false)} title="Pickup locations" footer={<Button onClick={handleSaveStoreSelection} className="w-full h-14 bg-primary hover:bg-primary/90 text-white font-bold rounded-full uppercase tracking-widest">SAVE LOCATION</Button>}>
+            <StorePickupContent />
+          </MobileBottomSheet>
 
-          <div className="max-h-[60vh] space-y-3 overflow-y-auto pr-1">
-            {addresses.map((address) => {
-              const isSelected = selectedAddressId === address.id;
-              return (
-                <div
-                  key={`all-${address.id}`}
-                  onClick={async () => {
-                    await handleSelectAddress(address.id);
-                    setAddressListOpen(false);
-                  }}
-                  onKeyDown={async (e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      e.preventDefault();
-                      await handleSelectAddress(address.id);
-                      setAddressListOpen(false);
-                    }
-                  }}
-                  role="button"
-                  tabIndex={0}
-                  className={`rounded-xl border p-4 text-left transition-all ${
-                    isSelected ? "border-primary bg-[#FFF8F4]" : "border-zinc-200 bg-white"
-                  }`}
-                >
-                  <div className="flex items-start gap-3">
-                    <input
-                      type="radio"
-                      name="all-shipping-addresses"
-                      checked={isSelected}
-                      onChange={() => {}}
-                      className="mt-1 size-4 accent-black"
-                    />
-                    <div className="flex-1">
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="flex items-center gap-2">
-                          <h3 className="font-semibold text-zinc-900">
-                            {[address.firstName, address.lastName].filter(Boolean).join(" ") || "Saved address"}
-                          </h3>
-                          {address.isDefault && (
-                            <span className="rounded-full bg-zinc-900 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-white">
-                              Default
-                            </span>
-                          )}
-                        </div>
-                        <button
-                          type="button"
-                          onClick={async (e) => {
-                            e.stopPropagation();
-                            await handleDeleteAddress(address.id);
-                          }}
-                          className="rounded-full border border-zinc-200 p-2 text-zinc-600 transition hover:border-red-200 hover:text-red-600"
-                          aria-label="Delete address"
-                        >
-                          <Trash2 className="size-4" />
-                        </button>
-                      </div>
-                      <div className="mt-2 space-y-1 text-sm text-zinc-600">
-                        {formatAddressPreview(address).map((line) => (
-                          <p key={`list-${address.id}-${line}`}>{line}</p>
-                        ))}
-                        {address.gstin && <p className="font-medium text-zinc-800">GSTIN: {address.gstin}</p>}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </DialogContent>
-      </Dialog>
+          <MobileBottomSheet isOpen={dialogOpen} onClose={() => setDialogOpen(false)} title={dialogMode === "edit" ? "Edit address" : "Add new address"}>
+            <AddressFields
+              form={addressForm}
+              onChange={updateForm}
+              makeDefault={makeDefault}
+              onDefaultChange={setMakeDefault}
+              submitLabel={dialogMode === "edit" ? "SAVE CHANGES" : "SAVE ADDRESS"}
+              onSubmit={dialogMode === "edit" ? handleUpdateAddress : () => handleCreateAddress(true)}
+              saving={dialogSaving}
+              isMobile={true}
+            />
+          </MobileBottomSheet>
+
+          <MobileBottomSheet isOpen={addressListOpen} onClose={() => setAddressListOpen(false)} title="All addresses">
+            <AddressListContent />
+          </MobileBottomSheet>
+        </>
+      )}
     </div>
   );
 }

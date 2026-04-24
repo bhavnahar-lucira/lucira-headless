@@ -212,13 +212,13 @@ export default function CustomerReviews({ reviews, productId, productTitle, prod
         )}
 
         {/* Filter Bar */}
-        <div className="flex items-center justify-between py-10 px-2 border-b border-gray-200 mb-10">
+        <div className="flex items-center justify-between py-4 md:py-10 px-2 border-b border-gray-200 mb-10 flex-wrap gap-4">
           <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em]">
             Rating: <span className="text-gray-900 ml-1">All</span>
             <ChevronDown size={14} className="text-gray-400" />
           </div>
           
-          <span className="text-[10px] font-black text-gray-300 uppercase tracking-[0.3em]">{data.count} verified reviews</span>
+          <span className="text-[10px] font-black text-gray-500 uppercase tracking-[0.3em]">{data.count} verified reviews</span>
           
           <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em]">
             Sort by: <span className="text-gray-900 ml-1">Featured</span>
@@ -280,56 +280,67 @@ function ReviewCard({ review, onClick }) {
   };
 
   return (
-    <div 
-        onClick={onClick}
-        className="bg-white p-8 md:p-10 rounded-2xl flex flex-col gap-6 border border-gray-50 shadow-[0_4px_30px_-10px_rgba(0,0,0,0.04)] hover:shadow-md transition-all group cursor-pointer"
-    >
-      <div className="flex justify-between items-start">
-        <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-full bg-[#8D7774] flex items-center justify-center text-white font-bold border-4 border-white uppercase text-xl shadow-sm relative overflow-hidden">
+    <div onClick={onClick} className="bg-white p-4 sm:p-6 md:p-8 lg:p-10 rounded-xl md:rounded-2xl flex flex-col gap-4 md:gap-6 border border-gray-50 shadow-[0_4px_30px_-10px_rgba(0,0,0,0.04)] hover:shadow-md transition-all group cursor-pointer">
+      <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-3">
+        <div className="flex items-start sm:items-center gap-3 sm:gap-4 min-w-0 flex-1">
+          <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-[#8D7774] flex items-center justify-center text-white font-bold border-4 border-white uppercase text-base sm:text-xl shadow-sm relative overflow-hidden shrink-0">
             {review.personImage ? (
-                <Image src={getValidSrc(review.personImage)} alt={name} fill className="object-cover"/>
+              <Image src={getValidSrc(review.personImage)} alt={name} fill className="object-cover" />
             ) : (
-                name.charAt(0)
+              name.charAt(0)
             )}
           </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="font-black text-gray-900 text-sm uppercase tracking-widest">{name}</span>
-              <div className="flex items-center gap-1 text-[#A68966] font-black uppercase tracking-widest text-[9px]">
+
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 min-w-0">
+              <span className="font-black text-gray-900 text-xs sm:text-sm uppercase tracking-wide truncate max-w-full">
+                {name}
+              </span>
+              <div className="flex items-center gap-1 text-[#A68966] font-black uppercase tracking-wide text-[8px] sm:text-[9px] shrink-0">
                 <CheckCircle size={12} className="fill-[#A68966] text-white" />
                 <span>Verified</span>
               </div>
             </div>
-            <div className="flex items-center gap-1 mt-1.5 text-amber-400">
-                {[...Array(5)].map((_, i) => (
-                  <Star 
-                    key={`card-star-${i}`} 
-                    size={14} 
-                    fill={i < Math.round(rating) ? "currentColor" : "none"}
-                    className={`${i < Math.round(rating) ? '' : 'text-zinc-200'}`} 
-                  />
-                ))}
-                <span className="text-[11px] font-black text-gray-900 ml-1.5 uppercase tracking-tighter">({rating}.0)</span>
+            
+            <div className="flex items-center gap-1 mt-1.5 text-amber-400 flex-wrap">
+              {[...Array(5)].map((_, i) => (
+                <Star 
+                  key={`card-star-${i}`} 
+                  size={14}
+                  fill={i < Math.round(rating) ? "currentColor" : "none"}
+                  className={`${i < Math.round(rating) ? "" : "text-zinc-200"}`}
+                />
+              ))}
+
+              <span className="text-[10px] sm:text-[11px] font-black text-gray-900 ml-1 uppercase tracking-tighter">
+                ({rating}.0)
+              </span>
             </div>
+            
+            <span className="block lg:hidden mt-2 text-[9px] sm:text-[10px] font-black text-gray-300 uppercase tracking-wide">
+              {formatDate(review.date)}
+            </span>
           </div>
         </div>
-        <span className="text-[10px] font-black text-gray-300 uppercase tracking-widest">{formatDate(review.date)}</span>
+        
+        <span className="hidden lg:block shrink-0 text-[10px] font-black text-gray-300 uppercase tracking-wide">
+          {formatDate(review.date)}
+        </span>
       </div>
-
-      <div className="space-y-3 flex-grow">
-        <h4 className="text-lg font-black text-gray-900 leading-tight tracking-tight uppercase group-hover:text-primary transition-colors">
-            {review.title || "Brilliant Purchase"}
+      
+      <div className="space-y-2 md:space-y-3 flex-grow">
+        <h4 className="text-base sm:text-lg font-black text-gray-900 leading-tight tracking-tight uppercase group-hover:text-primary transition-colors">
+          {review.title || "Brilliant Purchase"}
         </h4>
-        <p className="text-gray-500 leading-relaxed text-sm italic line-clamp-4">
+        <p className="text-gray-500 leading-relaxed text-xs sm:text-sm italic line-clamp-4">
           "{text}"
         </p>
       </div>
-
+      
       {images.length > 0 && (
-        <div className="flex flex-wrap gap-3 mt-2">
+        <div className="grid grid-cols-3 gap-2 sm:gap-3 mt-1 sm:mt-2">
           {images.slice(0, 3).map((img, idx) => (
-            <div key={`card-img-${idx}`} className="w-20 h-20 bg-gray-50 rounded-xl overflow-hidden relative border border-gray-100 shadow-sm">
+            <div key={`card-img-${idx}`} className="aspect-square w-full bg-gray-50 rounded-lg sm:rounded-xl overflow-hidden relative border border-gray-100 shadow-sm">
               <Image src={getValidSrc(img)} alt={`Review image ${idx}`} fill className="object-cover group-hover:scale-110 transition-transform duration-500" />
             </div>
           ))}

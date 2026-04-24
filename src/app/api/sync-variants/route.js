@@ -88,6 +88,16 @@ export async function POST(req) {
                     node {
                       id title price compareAtPrice inventoryQuantity sku selectedOptions { name value }
                       image { url }
+                      inventoryItem {
+                        inventoryLevels(first: 15) {
+                          edges {
+                            node {
+                              location { id name }
+                              quantities(names: ["available"]) { name quantity }
+                            }
+                          }
+                        }
+                      }
                       in_store: metafield(namespace: "custom", key: "in_store_available") { value }
                       ring_size: metafield(namespace: "custom", key: "ring_size_inventory") { value }
                       diamond_shape: metafield(namespace: "custom", key: "diamond_1_shape") { value }
@@ -214,6 +224,16 @@ export async function POST(req) {
             const variantId = v.id.split("/").pop();
             const existingV = existingVariants.find(ev => ev.id === variantId);
 
+            const inventoryLevels = v.inventoryItem?.inventoryLevels?.edges?.map(({ node: inv }) => ({
+              locationId: inv.location.id,
+              locationName: inv.location.name,
+              available: inv.quantities?.find(q => q.name === "available")?.quantity || 0
+            })) || [];
+
+            const inStoreAvailable = inventoryLevels
+              .filter(inv => inv.available > 0)
+              .map(inv => inv.locationId);
+
             return {
               id: variantId,
               title: v.title,
@@ -222,13 +242,14 @@ export async function POST(req) {
               compare_price: v.compareAtPrice ? parseFloat(v.compareAtPrice) : null,
               inventory: v.inventoryQuantity,
               inStock: v.inventoryQuantity > 0,
+              inventoryLevels,
               options: v.selectedOptions.reduce((acc, opt) => ({ ...acc, [opt.name.toLowerCase()]: opt.value }), {}),
               color: v.selectedOptions.find(o => o.name.toLowerCase().includes("color") || o.name.toLowerCase().includes("metal"))?.value,
               size: v.selectedOptions.find(o => o.name.toLowerCase().includes("size"))?.value,
               image: v.image?.url || p.image,
               price_breakup: priceBreakup || existingV?.price_breakup,
               metafields: {
-                in_store_available: v.in_store?.value ? JSON.parse(v.in_store.value) : [],
+                in_store_available: inStoreAvailable,
                 diamond_1_shape: v.diamond_shape?.value || v.d1_shape?.value,
                 ring_size_inventory: v.ring_size?.value,
                 metal_purity: v.metal_purity?.value || config?.purity,

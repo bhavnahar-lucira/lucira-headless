@@ -16,8 +16,9 @@ export default function DashboardHeader() {
             <Link href="/dashboard/pages" className="hover:text-white transition-colors">Pages</Link>
             <Link href="/dashboard/blogs" className="hover:text-white transition-colors">Blogs</Link>
             <Link href="/dashboard/reviews" className="hover:text-white transition-colors">Reviews</Link>
-            <Link href="/dashboard/sync" className="hover:text-white transition-colors">Sync</Link>
+            <Link href="/dashboard/stores" className="hover:text-white transition-colors">Stores</Link>
             <Link href="/dashboard/pincodes" className="hover:text-white transition-colors">Pincodes</Link>
+            <Link href="/dashboard/sync" className="hover:text-white transition-colors">Sync</Link>
           </nav>
         </div>
         <div className="flex items-center gap-4">

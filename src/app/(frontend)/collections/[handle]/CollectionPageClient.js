@@ -26,10 +26,10 @@ import { pushProductImpression, formatGtmPrice } from "@/lib/gtm";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 
 const SORT_OPTIONS = [
-  { value: "best_selling", label: "Best Selling" },
-  { value: "price_low_high", label: "Price: Low to High" },
-  { value: "price_high_low", label: "Price: High to Low" },
-  { value: "az", label: "A to Z" },
+  { value: "best_selling", label: "Best selling" },
+  { value: "price_low_high", label: "Price, low to high" },
+  { value: "price_high_low", label: "Price, high to low" },
+  { value: "az", label: "Alphabetically, A-Z" },
 ];
 
 const FilterSidebarSkeleton = () => (
@@ -71,7 +71,7 @@ export default function CollectionPage({ params: paramsPromise }) {
   const [expandedFilters, setExpandedFilters] = useState({ "In Store Available": true });
   const loadMoreRef = useRef(null);
 
-  const isMobile = useMediaQuery("(max-width: 1024px)");
+  const isMobile = useMediaQuery("(max-width: 1023px)");
   const [activeMobileGroup, setActiveMobileGroup] = useState(null);
   const [isFilterSheetOpen, setIsFilterSheetOpen] = useState(false);
   const [isSortSheetOpen, setIsSortSheetOpen] = useState(false);
@@ -451,7 +451,7 @@ export default function CollectionPage({ params: paramsPromise }) {
         </div>
       )}
 
-      <div className={isMobile ? "" : "flex xl:gap-12 lg:gap-6 py-6 max-w-350 mx-auto"}>
+      <div className={isMobile ? "" : "flex xl:gap-12 lg:gap-6 py-6 max-w-350 mx-auto px-2 xl:px-0"}>
         {/* ================= FILTERS SIDEBAR ================= */}
         <div className="hidden lg:block xl:w-78 lg:w-60 shrink-0">
           <div className="sticky top-19 self-start h-fit">

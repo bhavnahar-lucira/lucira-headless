@@ -35,8 +35,8 @@ export default function CheckoutFooter() {
   ];
 
   return (
-    <footer className="mt-auto border-t bg-[#F9F9FB] py-8">
-      <div className="container-main flex flex-col lg:flex-row items-center justify-between gap-8">
+    <footer className="mt-auto border-t bg-[#F9F9FB] py-8 mb-[80px] lg:mb-0">
+      <div className="container-main flex flex-col xl:flex-row items-center justify-between gap-8">
         
         {/* Left: Trust Badges */}
         <div className="flex flex-wrap items-center justify-center lg:justify-start gap-8 md:gap-12">
@@ -55,7 +55,7 @@ export default function CheckoutFooter() {
         </div>
 
         {/* Right: Payment Icons */}
-        <div className="flex items-center gap-6 opacity-60 grayscale hover:grayscale-0 transition-all duration-300">
+        <div className="flex items-center gap-6 opacity-60 grayscale hover:grayscale-0 transition-all duration-300 flex-wrap justify-center">
           {paymentIcons.map((icon) => (
             <Image 
               key={icon.name} 

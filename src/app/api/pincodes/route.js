@@ -46,3 +46,48 @@ export async function GET(request) {
     );
   }
 }
+
+export async function PUT(request) {
+  try {
+    const body = await request.json();
+    const { pincode, latitude, longitude, cod, upi } = body;
+
+    if (!pincode) {
+      return NextResponse.json(
+        { success: false, error: "Pincode is required" },
+        { status: 400 }
+      );
+    }
+
+    const client = await clientPromise;
+    const db = client.db();
+    const collection = db.collection("pincodes");
+
+    const updateData = {
+      updatedAt: new Date(),
+    };
+
+    if (latitude !== undefined) updateData.latitude = parseFloat(latitude);
+    if (longitude !== undefined) updateData.longitude = parseFloat(longitude);
+    if (cod !== undefined) updateData.cod = !!cod;
+    if (upi !== undefined) updateData.upi = !!upi;
+
+    const result = await collection.updateOne(
+      { pincode: pincode },
+      { $set: updateData },
+      { upsert: true }
+    );
+
+    return NextResponse.json({
+      success: true,
+      message: "Pincode updated successfully",
+      result,
+    });
+  } catch (error) {
+    console.error("Update pincode error:", error);
+    return NextResponse.json(
+      { success: false, error: error.message },
+      { status: 500 }
+    );
+  }
+}
