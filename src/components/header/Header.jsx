@@ -8,11 +8,13 @@ import MainHeader from "./MainHeader";
 import Navbar from "./Navbar";
 import MobileHeader from "./MobileHeader";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { usePathname } from "next/navigation";
 
 const TOP_HEIGHT = 40;
 const HEADER_HEIGHT = 88;
 
 export default function Header() {
+  const pathname = usePathname();
   const [hideTop, setHideTop] = useState(false);
   const { scrollY } = useScroll();
   const isMobile = useMediaQuery("(max-width: 1023px)");
@@ -21,7 +23,9 @@ export default function Header() {
     setHideTop(y > 120);
   });
 
-    if (isMobile) {
+  if (pathname?.startsWith("/dashboard")) return null;
+
+  if (isMobile) {
       return (
         <header 
           className="w-full z-[100] bg-white sticky"

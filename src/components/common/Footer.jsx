@@ -19,9 +19,13 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { usePathname } from "next/navigation";
 
 export default function Footer() {
+  const pathname = usePathname();
   const isMobile = useMediaQuery("(max-width: 1024px)");
+
+  if (pathname?.startsWith("/dashboard")) return null;
 
   if (isMobile) {
     return (
@@ -265,6 +269,7 @@ export default function Footer() {
                 <li><Link href="/pages/craftmanship">Craftsmanship</Link></li>
                 <li><Link href="/pages/mordern-slavery-policy">Modern Slavery Policy</Link></li>
                 <li><Link href="/pages/supplier-code-of-conduct">Supplier Code of Conduct</Link></li>
+                <li><Link href="/pages/accessibility-statement">Accessibility Statement</Link></li>
               </ul>
             </div>
 
@@ -281,7 +286,7 @@ export default function Footer() {
                 <li><Link href="/pages/old-gold-exchange">Old Gold Exchange</Link></li>
                 <li><Link href="/pages/shipping-policy-1">Shipping Policy</Link></li>
                 <li><Link href="/pages/privacy-policy">Privacy Policy</Link></li>
-                <li><Link href="#">Offers T&C</Link></li>
+                <li><Link href="/pages/exclusive-promotions-page">Offers T&C</Link></li>
                 <li><Link href="/pages/terms-condition">Terms & Conditions</Link></li>
               </ul>
             </div>
