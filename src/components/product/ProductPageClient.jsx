@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, Suspense } from "react";
+import { useState, useEffect, useRef, Suspense, useCallback } from "react";
 import Image from "next/image";
 import {
   Breadcrumb,
@@ -50,7 +50,7 @@ import {
 import { SizeGuideSheet } from "@/components/product/SizeGuideSheet";
 import { useDispatch, useSelector } from "react-redux";
 import { addToCart } from "@/redux/features/cart/cartSlice";
-import { selectUser } from "@/redux/features/user/userSlice";
+import { selectUser, setPincode as setGlobalPincode } from "@/redux/features/user/userSlice";
 import {
   addWishlistItem,
   removeWishlistItem,
@@ -161,6 +161,113 @@ export default function ProductPageClient({ product, complementaryProducts = [],
   const [similarProducts, setSimilarProducts] = useState([]);
   const [loadingSimilar, setLoadingSimilar] = useState(false);
 
+  // Initialize with the first in-stock variant if available, otherwise first variant
+  const initialVariant = product.variants?.find(v => v.inStock) || (product.variants && product.variants.length > 0 ? product.variants[0] : null);
+  const initialSelection = getVariantSelection(initialVariant);
+  const initialColor = initialSelection.color;
+  const initialKarat = initialSelection.karat;
+  const initialSize = initialVariant ? initialVariant.size : "12";
+
+  const [activeColor, setActiveColor] = useState(initialColor);
+  const [activeKarat, setActiveKarat] = useState(initialKarat);
+  const [selectedSize, setSelectedSize] = useState(initialSize);
+  const [activeVariant, setActiveVariant] = useState(initialVariant);
+  const [priceBreakup, setPriceBreakup] = useState(null);
+  const shouldToastVariantChange = useRef(false);
+  
+  // Pincode & Dispatch Logic
+  const globalPincode = useSelector((state) => state.user.pincode);
+  const [pincode, setPincode] = useState(globalPincode || "");
+  const [checkingPincode, setCheckingPincode] = useState(false);
+  const [deliveryInfo, setDeliveryInfo] = useState({
+    status: "idle", // idle, loading, deliverable, undeliverable
+    message: ""
+  });
+
+  const calculateDispatchDate = useCallback(() => {
+    // 1. Check if product is in stock or made to order
+    const isInStock = activeVariant?.inStock === true || activeVariant?.inStock === "true";
+    
+    const today = new Date();
+    const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    
+    if (isInStock) {
+      // Estimated free dispatch by 48hrs
+      const dispatchDate = new Date(today);
+      dispatchDate.setDate(today.getDate() + 2);
+      return `Estimated free dispatch by ${months[dispatchDate.getMonth()]} ${dispatchDate.getDate()}, ${dispatchDate.getFullYear()}`;
+    } else {
+      // Made to order - use lead_time from metafields (default to 7 if missing)
+      const leadTimeValue = parseInt(product.productMetafields?.lead_time) || 12;
+      const totalDays = leadTimeValue + 3; // Lead time + 3 days buffer
+      
+      const dispatchDate = new Date(today);
+      dispatchDate.setDate(today.getDate() + totalDays);
+      return `Estimated free dispatch by ${months[dispatchDate.getMonth()]} ${dispatchDate.getDate()}, ${dispatchDate.getFullYear()}`;
+    }
+  }, [activeVariant, product.productMetafields]);
+
+  const handlePincodeCheck = useCallback(async (val) => {
+    // If val is a string (like from useEffect), use it. 
+    // Otherwise (from button click/event), use the current 'pincode' state.
+    const pincodeToCheck = (typeof val === 'string' ? val : pincode).trim();
+    
+    if (pincodeToCheck.length !== 6) {
+      if (pincodeToCheck) toast.error("Please enter a valid 6-digit pincode");
+      return;
+    }
+
+    setCheckingPincode(true);
+    setDeliveryInfo({ status: "loading", message: "Checking..." });
+
+    try {
+      const res = await fetch(`/api/pincodes/check?pincode=${pincodeToCheck}`);
+      const data = await res.json();
+
+      if (data.success && data.deliverable) {
+        const dispatchMsg = calculateDispatchDate();
+        setDeliveryInfo({
+          status: "deliverable",
+          message: dispatchMsg
+        });
+        // Store in global Redux for persistence
+        dispatch(setGlobalPincode(pincodeToCheck));
+      } else {
+        setDeliveryInfo({
+          status: "undeliverable",
+          message: "Sorry, we do not deliver to this pincode yet."
+        });
+      }
+    } catch (err) {
+      console.error("Pincode check error:", err);
+      setDeliveryInfo({ status: "idle", message: "" });
+      // Don't show toast on initial mount load
+      if (typeof val !== 'string') toast.error("Error checking pincode. Please try again.");
+    } finally {
+      setCheckingPincode(false);
+    }
+  }, [pincode, calculateDispatchDate, dispatch]);
+
+  // Initial check for persisted pincode - ONLY ON MOUNT
+  useEffect(() => {
+    if (globalPincode && globalPincode.length === 6) {
+      handlePincodeCheck(globalPincode);
+    }
+    // We only want this to run once when the page loads
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Update dispatch message when variant changes (size/color)
+  useEffect(() => {
+    if (deliveryInfo.status === "deliverable") {
+      const dispatchMsg = calculateDispatchDate();
+      setDeliveryInfo(prev => ({
+        ...prev,
+        message: dispatchMsg
+      }));
+    }
+  }, [activeVariant, calculateDispatchDate, deliveryInfo.status]);
+
   const hasEngraving = product.tags?.some(tag => tag.toLowerCase() === "engraving available");
   const isGoldCoin = product.tags?.some(tag => tag.toLowerCase() === "gold coin");
 
@@ -242,20 +349,6 @@ export default function ProductPageClient({ product, complementaryProducts = [],
   }, [product, dispatch]);
 
   const hasSimilarItems = product.hasSimilar || (product.matchingProductIds && product.matchingProductIds.length > 0);
-
-  // Initialize with the first in-stock variant if available, otherwise first variant
-  const initialVariant = product.variants?.find(v => v.inStock) || (product.variants && product.variants.length > 0 ? product.variants[0] : null);
-  const initialSelection = getVariantSelection(initialVariant);
-  const initialColor = initialSelection.color;
-  const initialKarat = initialSelection.karat;
-  const initialSize = initialVariant ? initialVariant.size : "12";
-
-  const [activeColor, setActiveColor] = useState(initialColor);
-  const [activeKarat, setActiveKarat] = useState(initialKarat);
-  const [selectedSize, setSelectedSize] = useState(initialSize);
-  const [activeVariant, setActiveVariant] = useState(initialVariant);
-  const [priceBreakup, setPriceBreakup] = useState(null);
-  const shouldToastVariantChange = useRef(false);
 
   const handleAddToCart = async () => {
     if (!activeVariant) {
@@ -865,7 +958,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                   {activeVariant?.inStock ? (
                     <div className="bg-[#ECF7F2] border border-[#B3E1CD] text-black  rounded-lg px-4 py-3 flex items-center gap-1">
                       <span className="w-2.5 h-2.5 bg-[#189351] rounded-full"></span>
-                      This combination is <span className="font-semibold">in-stock & ready to ship in 24 hrs</span>
+                      This combination is <span className="font-semibold">in-stock & ready to ship in 48 hrs</span>
                     </div>
                   ) : (
                     <div className="bg-amber-50 border border-amber-200 text-black rounded-lg px-4 py-3 flex items-center gap-1">
@@ -1144,17 +1237,32 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                 <div className="relative">
                   <Input
                     placeholder="Enter Pincode"
-                    defaultValue="411005"
+                    value={pincode}
+                    onChange={(e) => setPincode(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handlePincodeCheck()}
                     className="h-14 bg-white border-gray-200 rounded-md text-sm font-medium pr-40"
                   />
-                  <Button className="h-12 px-10 font-bold rounded-md absolute right-1 top-1/2 transform -translate-y-1/2 hover:cursor-pointer">
-                    CHECK
+                  <Button 
+                    onClick={handlePincodeCheck}
+                    disabled={checkingPincode}
+                    className="h-12 px-10 font-bold rounded-md absolute right-1 top-1/2 transform -translate-y-1/2 hover:cursor-pointer"
+                  >
+                    {checkingPincode ? <Loader2 className="animate-spin" size={18} /> : "CHECK"}
                   </Button>
                 </div>
-                <div className="text-sm text-black flex items-center gap-2">
-                  <Info size={16} className="text-black" />
-                  Estimated free dispatch by <span className="font-semibold text-black">January 21, 2026</span>
-                </div>
+                
+                {deliveryInfo.status !== "idle" && (
+                  <div className={`text-sm flex items-center gap-2 ${deliveryInfo.status === "undeliverable" ? "text-red-500" : "text-black"}`}>
+                    {deliveryInfo.status === "undeliverable" ? (
+                      <X size={16} />
+                    ) : (
+                      <Info size={16} className={deliveryInfo.status === "loading" ? "animate-pulse" : "text-black"} />
+                    )}
+                    <span className={deliveryInfo.status === "deliverable" ? "font-normal" : "font-medium"}>
+                      {deliveryInfo.message}
+                    </span>
+                  </div>
+                )}
               </div>
 
               {/* Nearest Store */}
