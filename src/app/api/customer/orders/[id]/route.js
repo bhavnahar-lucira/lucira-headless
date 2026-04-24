@@ -58,7 +58,10 @@ export async function GET(request, { params }) {
           ids: productIds.join(',') 
         });
         (productsData.products || []).forEach(p => {
-          productImages[p.id] = p.image?.src;
+          productImages[p.id] = {
+            image: p.image?.src,
+            handle: p.handle
+          };
         });
       } catch (e) {
         console.error("Failed to fetch product images for order details", e);
@@ -88,15 +91,25 @@ export async function GET(request, { params }) {
         currencyCode: restOrder.currency
       },
       shippingAddress: restOrder.shipping_address,
-      lineItems: restOrder.line_items.map((li) => ({
-        title: li.name,
-        quantity: li.quantity,
-        price: {
-          amount: li.price,
-          currencyCode: restOrder.currency
-        },
-        image: productImages[li.product_id] || "/images/product/1.jpg"
-      }))
+      lineItems: restOrder.line_items.map((li) => {
+        const prodData = productImages[li.product_id] || {};
+        return {
+          title: li.name,
+          quantity: li.quantity,
+          price: {
+            amount: li.price,
+            currencyCode: restOrder.currency
+          },
+          image: prodData.image || "/images/product/1.jpg",
+          handle: prodData.handle || ""
+        };
+      }).sort((a, b) => {
+        const aIsInsurance = a.title.toLowerCase().includes('insurance');
+        const bIsInsurance = b.title.toLowerCase().includes('insurance');
+        if (aIsInsurance && !bIsInsurance) return 1;
+        if (!aIsInsurance && bIsInsurance) return -1;
+        return parseFloat(b.price.amount || 0) - parseFloat(a.price.amount || 0);
+      })
     };
 
     return NextResponse.json({ order });

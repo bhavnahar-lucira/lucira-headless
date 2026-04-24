@@ -33,6 +33,9 @@ export async function GET() {
           lastName
           email
           phone
+          defaultAddress {
+            phone
+          }
         }
       }
     `, { customerAccessToken });
@@ -41,7 +44,13 @@ export async function GET() {
       return NextResponse.json({ error: "Customer not found" }, { status: 404 });
     }
 
-    return NextResponse.json({ customer: data.customer });
+    // Fallback to default address phone if main phone is null
+    const customerData = {
+      ...data.customer,
+      phone: data.customer.phone || data.customer.defaultAddress?.phone || null
+    };
+
+    return NextResponse.json({ customer: customerData });
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

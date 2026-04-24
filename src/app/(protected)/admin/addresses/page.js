@@ -248,9 +248,10 @@ export default function SavedAddressesPage() {
 
       {/* Address Dialog - Matching Shipping Page Style */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-2xl p-0 overflow-hidden rounded-[2.5rem] border-none shadow-2xl">
-          <div className="p-8 space-y-8">
-            <div className="flex items-center justify-between">
+        <DialogContent className="max-w-2xl p-0 rounded-[1.5rem] sm:rounded-[2.5rem] border-none shadow-2xl flex flex-col max-h-[90vh] lg:max-h-[85vh] overflow-hidden w-[95vw] sm:w-full mx-auto">
+          {/* Scrollable Form Body */}
+          <div className="p-6 sm:p-8 space-y-6 sm:space-y-8 overflow-y-auto flex-1 custom-scrollbar">
+            <div className="flex items-center justify-between shrink-0">
               <div>
                 <DialogTitle className="text-2xl font-black text-zinc-900 tracking-tight">
                   {dialogMode === "edit" ? "Edit Address" : "Add New Address"}
@@ -259,12 +260,12 @@ export default function SavedAddressesPage() {
                   Provide your address details below for accurate delivery.
                 </DialogDescription>
               </div>
-              <button onClick={() => setDialogOpen(false)} className="size-10 bg-zinc-50 rounded-2xl flex items-center justify-center text-zinc-400 hover:text-zinc-900 transition-colors">
+              <button onClick={() => setDialogOpen(false)} className="size-10 bg-zinc-50 rounded-2xl flex items-center justify-center text-zinc-400 hover:text-zinc-900 transition-colors shrink-0">
                 <X size={20} />
               </button>
             </div>
 
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Input 
                   placeholder="First name" 
@@ -317,29 +318,30 @@ export default function SavedAddressesPage() {
                   id="make-default" 
                   checked={makeDefault} 
                   onCheckedChange={(checked) => setMakeDefault(Boolean(checked))} 
-                  className="border-zinc-300 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                  className="border-zinc-300 data-[state=checked]:bg-primary data-[state=checked]:border-primary shrink-0"
                 />
-                <label htmlFor="make-default" className="text-xs font-black text-zinc-600 uppercase tracking-widest cursor-pointer">
+                <label htmlFor="make-default" className="text-xs font-black text-zinc-600 uppercase tracking-widest cursor-pointer leading-relaxed">
                   Set as my default address
                 </label>
               </div>
             </div>
           </div>
 
-          <div className="p-6 bg-zinc-50 border-t border-zinc-100 flex items-center justify-end gap-3">
+          {/* Sticky Footer */}
+          <div className="px-6 py-5 sm:p-6 bg-zinc-50 border-t border-zinc-100 flex items-center justify-end gap-3 shrink-0">
             <Button 
               variant="outline" 
               onClick={() => setDialogOpen(false)}
-              className="px-8 h-14 border-zinc-200 text-zinc-600 font-bold rounded-2xl"
+              className="w-full sm:w-auto px-8 h-12 sm:h-14 border-zinc-200 text-zinc-600 font-bold rounded-2xl"
             >
               Cancel
             </Button>
             <Button 
               onClick={handleSaveAddress}
               disabled={saving}
-              className="px-12 h-14 bg-primary hover:opacity-90 text-white font-bold rounded-2xl transition-all shadow-xl shadow-primary/20"
+              className="w-full sm:w-auto px-12 h-12 sm:h-14 bg-primary hover:opacity-90 text-white font-bold rounded-2xl transition-all shadow-xl shadow-primary/20"
             >
-              {saving ? <Loader2 className="size-5 animate-spin" /> : "Save Address"}
+              {saving ? <Loader2 className="size-5 animate-spin" /> : "Save"}
             </Button>
           </div>
         </DialogContent>

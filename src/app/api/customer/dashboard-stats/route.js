@@ -9,14 +9,37 @@ async function getCustomerAccessToken() {
 }
 
 async function getCustomerId(customerAccessToken) {
-  const data = await shopifyStorefrontFetch(`
-    query($customerAccessToken: String!) {
-      customer(customerAccessToken: $customerAccessToken) {
-        id
-      }
-    }
-  `, { customerAccessToken });
+  const data = await shopifyStorefrontFetch(
+    `query($customerAccessToken: String!) {
+      customer(customerAccessToken: $customerAccessToken) { id }
+    }`,
+    { customerAccessToken }
+  );
   return data?.customer?.id;
+}
+
+const NECTOR_ENDPOINT = "https://refer-earn-385594025448.asia-south1.run.app";
+
+async function fetchNectorCoins(simpleId) {
+  try {
+    const res = await fetch(
+      `${NECTOR_ENDPOINT}?customer_id=shopify-${simpleId}`,
+      { cache: "no-store" }
+    );
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (data?.status) {
+      return {
+        points        : (data.coins_balance ?? 0).toString(),
+        tier          : data.tier_name || "Member",
+        nextTierPoints: (data.next_tier_points ?? 0).toString(),
+        progress      : data.tier_progress ?? 0,
+      };
+    }
+  } catch (e) {
+    console.warn("Nector live fetch failed:", e.message);
+  }
+  return null;
 }
 
 export async function GET() {
@@ -28,69 +51,66 @@ export async function GET() {
 
     const customerId = await getCustomerId(customerAccessToken);
     if (!customerId) {
-        return NextResponse.json({ error: "Customer not found" }, { status: 404 });
+      return NextResponse.json({ error: "Customer not found" }, { status: 404 });
     }
     const simpleId = customerId.split("/").pop();
 
-    // Fetch Metafields for Loyalty Points via Admin API (internal fetch)
+    // Shopify metafield query (fallback)
     const metafieldQuery = `
       query getCustomerMetafields($id: ID!) {
         customer(id: $id) {
-          metafield(namespace: "nector", key: "custom_properties") {
-            value
-          }
+          metafield(namespace: "nector", key: "custom_properties") { value }
         }
       }
     `;
 
-    const [metafieldRes, wishlistClient] = await Promise.all([
+    // Run all three in parallel
+    const [nectorLive, metafieldRes, wishlistClient] = await Promise.all([
+      fetchNectorCoins(simpleId),
       fetch(`https://${process.env.SHOPIFY_STORE}/admin/api/2024-01/graphql.json`, {
-        method: "POST",
+        method : "POST",
         headers: {
-          "Content-Type": "application/json",
-          "X-Shopify-Access-Token": process.env.ADMIN_TOKEN
+          "Content-Type"          : "application/json",
+          "X-Shopify-Access-Token": process.env.ADMIN_TOKEN,
         },
-        body: JSON.stringify({
-          query: metafieldQuery,
-          variables: { id: customerId }
-        })
+        body: JSON.stringify({ query: metafieldQuery, variables: { id: customerId } }),
       }),
-      clientPromise
+      clientPromise,
     ]);
 
-    const metafieldData = await metafieldRes.json();
-    const rawJson = metafieldData?.data?.customer?.metafield?.value;
-    let points = "0";
-    let tier = "Member";
+    // Defaults (Shopify metafield)
+    let points         = "0";
+    let tier           = "Member";
     let nextTierPoints = "0";
-    let progress = 0;
+    let progress       = 0;
 
-    if (rawJson) {
-      const parsed = JSON.parse(rawJson);
-      points = parsed.nector_user_points?.toString() || "0";
-      tier = parsed.nector_user_tier_name || "Member";
-      // We can also extract more info if needed
-      // nector_user_next_tier_remaining_points
-      nextTierPoints = parsed.nector_user_next_tier_remaining_points?.toString() || "0";
-      
-      // Calculate progress if possible (dummy calculation or from data)
-      progress = 75; // Default for now if not in data
+    try {
+      const metafieldData = await metafieldRes.json();
+      const rawJson = metafieldData?.data?.customer?.metafield?.value;
+      if (rawJson) {
+        const parsed = JSON.parse(rawJson);
+        points         = parsed.nector_user_points?.toString() || "0";
+        tier           = parsed.nector_user_tier_name || "Member";
+        nextTierPoints = parsed.nector_user_next_tier_remaining_points?.toString() || "0";
+        progress       = 75;
+      }
+    } catch (_) {}
+
+    // Live Nector data takes priority over metafield snapshot
+    if (nectorLive) {
+      points         = nectorLive.points;
+      tier           = nectorLive.tier;
+      nextTierPoints = nectorLive.nextTierPoints;
+      progress       = nectorLive.progress;
     }
 
-    // Fetch Wishlist count from MongoDB
-    const db = wishlistClient.db();
+    // Wishlist count from MongoDB
+    const db           = wishlistClient.db();
     const wishlistCount = await db.collection("wishlist").countDocuments({ customerId });
 
-    return NextResponse.json({
-      points,
-      tier,
-      nextTierPoints,
-      progress,
-      wishlistCount
-    });
-
+    return NextResponse.json({ points, tier, nextTierPoints, progress, wishlistCount });
   } catch (error) {
-    console.error("Dashboard stats API error:", error);
+    console.error("Dashboard stats error:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

@@ -182,7 +182,7 @@ export default function OrderDetailsPage() {
                     </p>
                   </div>
                   <div className="hidden sm:block">
-                    <Link href={`/products/all`} className="px-6 py-2 border-2 border-zinc-100 text-zinc-900 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-zinc-50 transition-colors">
+                    <Link href={item.handle ? `/products/${item.handle}` : "/products/all"} className="px-6 py-2 border-2 border-zinc-100 text-zinc-900 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-zinc-50 transition-colors">
                       View Product
                     </Link>
                   </div>
@@ -275,12 +275,12 @@ export default function OrderDetailsPage() {
               <p className="text-sm text-zinc-400 font-medium">Have questions about your order or our delivery process?</p>
               <div className="space-y-3">
                 <a href="https://wa.me/919004435760" target="_blank" className="flex items-center justify-between p-4 bg-white/5 rounded-2xl hover:bg-white/10 transition-colors border border-white/5">
-                  <span className="text-xs font-bold">Chat with Support</span>
-                  <ChevronLeft className="rotate-180 size-16" />
+                  <span className="text-xl font-bold">Chat with Support</span>
+                  <ChevronLeft className="rotate-180 size-6" />
                 </a>
                 <Link href="/pages/shipping-policy" className="flex items-center justify-between p-4 bg-white/5 rounded-2xl hover:bg-white/10 transition-colors border border-white/5">
-                  <span className="text-xs font-bold">Shipping Policy</span>
-                  <ChevronLeft className="rotate-180 size-16" />
+                  <span className="text-xl font-bold">Shipping Policy</span>
+                  <ChevronLeft className="rotate-180 size-6" />
                 </Link>
               </div>
             </div>

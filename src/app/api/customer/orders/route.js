@@ -38,25 +38,57 @@ export async function GET() {
       limit: 20
     });
 
-    const orders = (data.orders || []).map((order) => ({
-      id: order.admin_graphql_api_id,
-      orderNumber: order.order_number.toString(),
-      date: new Date(order.processed_at).toLocaleDateString('en-IN', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      }),
-      status: order.fulfillment_status === 'fulfilled' ? 'Delivered' : 
-              order.fulfillment_status === 'partial' ? 'In Transit' : 'Processing',
-      amount: new Intl.NumberFormat('en-IN', {
-        style: 'currency',
-        currency: order.currency,
-      }).format(order.total_price),
-      product: order.line_items[0]?.name || "Jewelry Item",
-      // Note: Admin REST API orders endpoint doesn't return line item images directly.
-      // Using a fallback or the product_id to fetch if needed, but for now fallback.
-      image: "/images/product/1.jpg" 
-    }));
+    const ordersRaw = data.orders || [];
+
+    // Find representative items
+    const representativeItems = ordersRaw.map(order => {
+      // Sort items by price descending, push insurance to the end
+      const sortedItems = [...(order.line_items || [])].sort((a, b) => {
+        const aIsInsurance = a.name.toLowerCase().includes('insurance');
+        const bIsInsurance = b.name.toLowerCase().includes('insurance');
+        if (aIsInsurance && !bIsInsurance) return 1;
+        if (!aIsInsurance && bIsInsurance) return -1;
+        return parseFloat(b.price || 0) - parseFloat(a.price || 0);
+      });
+      return sortedItems[0];
+    });
+
+    // Fetch product images for representative items
+    const productIds = [...new Set(representativeItems.map(item => item?.product_id).filter(id => id))];
+    let productImages = {};
+    if (productIds.length > 0) {
+      try {
+        const { data: productsData } = await shopifyAdminRestFetch('products.json', {
+          ids: productIds.join(',')
+        });
+        (productsData.products || []).forEach(p => {
+          productImages[p.id] = p.image?.src;
+        });
+      } catch (e) {
+        console.error("Failed to fetch product images", e);
+      }
+    }
+
+    const orders = ordersRaw.map((order, index) => {
+      const repItem = representativeItems[index];
+      return {
+        id: order.admin_graphql_api_id,
+        orderNumber: order.order_number.toString(),
+        date: new Date(order.processed_at).toLocaleDateString('en-IN', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        }),
+        status: order.fulfillment_status === 'fulfilled' ? 'Delivered' : 
+                order.fulfillment_status === 'partial' ? 'In Transit' : 'Processing',
+        amount: new Intl.NumberFormat('en-IN', {
+          style: 'currency',
+          currency: order.currency,
+        }).format(order.total_price),
+        product: repItem?.name || "Jewelry Item",
+        image: (repItem?.product_id && productImages[repItem.product_id]) ? productImages[repItem.product_id] : "/images/product/1.jpg"
+      };
+    });
 
     return NextResponse.json({ orders });
   } catch (error) {

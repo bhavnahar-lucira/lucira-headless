@@ -140,12 +140,9 @@ export default function MyOrdersPage() {
                 </div>
 
                 <div className="flex flex-col gap-3 w-full md:w-auto shrink-0">
-                  <button className="w-full md:px-8 py-3.5 bg-primary text-white text-xs font-black uppercase tracking-[0.2em] rounded-2xl hover:opacity-90 transition-colors shadow-xl shadow-primary/20">
-                    Track Order
-                  </button>
                   <Link 
                     href={`/admin/orders/${order.id.split('/').pop()}`}
-                    className="w-full md:px-8 py-3.5 bg-white border-2 border-zinc-100 text-zinc-900 text-xs text-center font-black uppercase tracking-[0.2em] rounded-2xl hover:bg-zinc-50 hover:border-zinc-200 transition-all"
+                    className="w-full md:px-8 py-3.5 bg-primary text-white text-xs text-center font-black uppercase tracking-[0.2em] rounded-2xl hover:opacity-90 transition-colors shadow-xl shadow-primary/20"
                   >
                     View Details
                   </Link>

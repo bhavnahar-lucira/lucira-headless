@@ -67,8 +67,8 @@ export default function CustomerDashboard() {
       value: loading ? "..." : orders.length.toString(),
       subtitle: "Total history",
       icon: ShoppingBag,
-      color: "from-blue-500 to-blue-600",
-      shadow: "shadow-blue-500/20",
+      color: "from-[#b76f79] to-[#9a5b65]",
+      shadow: "shadow-[#b76f79]/20",
       link: "/admin/orders"
     },
     {
@@ -76,8 +76,8 @@ export default function CustomerDashboard() {
       value: loading ? "..." : stats.wishlistCount.toString(),
       subtitle: "Saved for later",
       icon: Heart,
-      color: "from-rose-500 to-rose-600",
-      shadow: "shadow-rose-500/20",
+      color: "from-[#b76f79] to-[#9a5b65]",
+      shadow: "shadow-[#b76f79]/20",
       link: "/admin/wishlist"
     },
     {
@@ -85,8 +85,8 @@ export default function CustomerDashboard() {
       value: loading ? "..." : stats.points,
       subtitle: stats.tier,
       icon: Star,
-      color: "from-amber-500 to-amber-600",
-      shadow: "shadow-amber-500/20",
+      color: "from-[#b76f79] to-[#9a5b65]",
+      shadow: "shadow-[#b76f79]/20",
       link: "/pages/rewards"
     },
     {
@@ -94,8 +94,8 @@ export default function CustomerDashboard() {
       value: "00",
       subtitle: "In progress",
       icon: Clock,
-      color: "from-emerald-500 to-emerald-600",
-      shadow: "shadow-emerald-500/20",
+      color: "from-[#b76f79] to-[#9a5b65]",
+      shadow: "shadow-[#b76f79]/20",
       link: "/admin/orders"
     }
   ];
@@ -134,7 +134,7 @@ export default function CustomerDashboard() {
         })}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-1">
         {/* Recent Activity */}
         <div className="lg:col-span-2 space-y-6">
           <div className="flex items-center justify-between">
@@ -182,64 +182,6 @@ export default function CustomerDashboard() {
                 </Link>
               </div>
             )}
-          </div>
-        </div>
-
-        {/* Exclusive Benefits - Glassmorphism */}
-        <div className="space-y-6">
-          <h3 className="text-xl font-black text-zinc-900">Your Privileges</h3>
-          <div className="relative group">
-            {/* Animated Background Orbs */}
-            <div className="absolute -inset-1 bg-gradient-to-r from-primary to-accent rounded-[2.5rem] blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
-            
-            <div className="relative bg-white/40 backdrop-blur-xl border border-white/40 rounded-[2.5rem] p-8 shadow-2xl overflow-hidden">
-              {/* Decorative elements */}
-              <div className="absolute -right-4 -top-4 size-24 bg-primary/10 rounded-full blur-2xl" />
-              <div className="absolute -left-4 -bottom-4 size-24 bg-accent/10 rounded-full blur-2xl" />
-              
-              <div className="relative z-10 space-y-6">
-                <div className="flex justify-between items-start">
-                  <div className="size-12 rounded-2xl bg-primary text-white flex items-center justify-center shadow-lg shadow-primary/20">
-                    <ShieldCheck size={24} />
-                  </div>
-                  <div className="px-3 py-1 bg-amber-100 text-amber-700 text-[10px] font-black uppercase tracking-widest rounded-full flex items-center gap-1">
-                    <Sparkles size={10} />
-                    {loading ? "..." : stats.tier}
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <h4 className="text-xl font-black text-zinc-900 leading-tight">Lifetime Warranty<br/>Activated</h4>
-                  <p className="text-xs text-zinc-500 font-medium leading-relaxed">As a {stats.tier}, all your jewelry pieces are covered by our premium protection plan.</p>
-                </div>
-
-                <div className="space-y-3">
-                  <div className="flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-zinc-400">
-                    <Zap size={14} className="text-primary" />
-                    {loading ? "Calculating..." : Number(stats.nextTierPoints) > 0 ? `${stats.nextTierPoints} coins to next tier` : "You've reached top tier!"}
-                  </div>
-                  <div className="h-2 w-full bg-zinc-100 rounded-full overflow-hidden">
-                    <div className="h-full bg-primary rounded-full shadow-sm transition-all duration-1000" style={{ width: `${stats.progress}%` }} />
-                  </div>
-                </div>
-
-                <Link href="/pages/rewards" className="w-full py-4 bg-primary text-white text-xs font-black uppercase tracking-[0.2em] rounded-2xl hover:opacity-90 transition-all shadow-xl shadow-primary/20 block text-center">
-                  View Rewards
-                </Link>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-3xl border border-zinc-100 p-6 shadow-sm space-y-4">
-            <div className="flex items-center gap-4">
-              <div className="size-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-600">
-                <Truck size={20} />
-              </div>
-              <div>
-                <p className="text-xs font-black text-zinc-900 uppercase tracking-wider">Free Express Shipping</p>
-                <p className="text-[10px] text-zinc-500 font-medium">Valid on all future orders</p>
-              </div>
-            </div>
           </div>
         </div>
       </div>

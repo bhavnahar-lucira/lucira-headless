@@ -10,10 +10,24 @@ import { Button } from "@/components/ui/button";
 import { toast } from "react-toastify";
 import { logout } from "@/redux/features/user/userSlice";
 
+const avatarColors = [
+  "bg-blue-500", "bg-rose-500", "bg-emerald-500", "bg-violet-500", 
+  "bg-amber-500", "bg-pink-500", "bg-cyan-500", "bg-indigo-500"
+];
+
+const getAvatarColor = (name) => {
+  if (!name) return avatarColors[0];
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return avatarColors[Math.abs(hash) % avatarColors.length];
+};
+
 export default function MyProfilePage() {
   const dispatch = useDispatch();
   const router = useRouter();
-  const [profileImage, setProfileImage] = useState("/images/signature.png"); // Fallback
+  const [profileImage, setProfileImage] = useState(null); // Default to initials
   const [isUploading, setIsUploading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -203,50 +217,23 @@ export default function MyProfilePage() {
             </div>
           </div>
 
-          {/* Member Rewards */}
-          <div className="bg-white rounded-[2.5rem] border border-zinc-100 p-10 space-y-8 shadow-sm">
-            <div className="flex items-center gap-4">
-              <div className="size-12 rounded-2xl bg-amber-500/10 flex items-center justify-center text-amber-600">
-                <Star size={24} />
-              </div>
-              <h3 className="text-xl font-black text-zinc-900">Member Rewards & Perks</h3>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="p-6 rounded-3xl border border-zinc-50 bg-zinc-50/30 space-y-3">
-                <p className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">Available Voucher</p>
-                <h4 className="text-lg font-black text-zinc-900 leading-tight">₹2,000 OFF</h4>
-                <p className="text-xs text-zinc-400 font-medium">Valid on orders above ₹20,000</p>
-                <button className="text-[10px] font-black uppercase text-primary hover:underline flex items-center gap-1 pt-2">
-                  Copy Code: GOLD20 <ChevronRight size={12} />
-                </button>
-              </div>
-
-              <div className="p-6 rounded-3xl border border-zinc-50 bg-zinc-50/30 space-y-3">
-                <p className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">Next Gift</p>
-                <h4 className="text-lg font-black text-zinc-900 leading-tight">Jewelry Box</h4>
-                <p className="text-xs text-zinc-400 font-medium">Unlocked at 1,500 points</p>
-                <div className="h-1.5 w-full bg-zinc-200 rounded-full mt-2 overflow-hidden">
-                  <div className="h-full w-[83%] bg-amber-500 rounded-full" />
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
 
         <div className="space-y-8">
           {/* Avatar Card */}
           <div className="bg-white rounded-[2.5rem] border border-zinc-100 p-8 text-center space-y-6 shadow-sm">
             <div className="relative size-32 mx-auto">
-              <div className="size-32 rounded-[2.5rem] bg-zinc-50 border-2 border-dashed border-zinc-200 flex items-center justify-center overflow-hidden relative">
+              <div className={`size-32 rounded-[2.5rem] flex items-center justify-center overflow-hidden relative shadow-md transition-all ${profileImage ? 'bg-zinc-50 border-2 border-dashed border-zinc-200' : getAvatarColor(formData.firstName)}`}>
                 {profileImage ? (
                   <Image src={profileImage} alt="Profile" fill className="object-cover" />
                 ) : (
-                  <span className="text-4xl font-black text-zinc-200">{formData.firstName?.[0]}{formData.lastName?.[0]}</span>
+                  <span className="text-[3.5rem] font-black text-white/95 uppercase drop-shadow-sm">
+                    {formData.firstName?.[0] || ""}{formData.lastName?.[0] || ""}
+                  </span>
                 )}
                 {isUploading && (
-                  <div className="absolute inset-0 bg-white/60 backdrop-blur-sm flex items-center justify-center">
-                    <Loader2 className="size-6 animate-spin text-primary" />
+                  <div className={`absolute inset-0 backdrop-blur-sm flex items-center justify-center ${profileImage ? 'bg-white/60' : 'bg-black/20'}`}>
+                    <Loader2 className={`size-8 animate-spin ${profileImage ? 'text-primary' : 'text-white'}`} />
                   </div>
                 )}
               </div>
@@ -257,7 +244,6 @@ export default function MyProfilePage() {
             </div>
             <div>
               <h4 className="text-xl font-black text-zinc-900">{formData.firstName} {formData.lastName}</h4>
-              <p className="text-xs font-bold text-primary uppercase tracking-widest mt-1">Gold Member Since 2024</p>
             </div>
             <div className="pt-6 border-t border-zinc-50 grid grid-cols-2 gap-4">
               <div>
@@ -271,24 +257,6 @@ export default function MyProfilePage() {
             </div>
           </div>
 
-          {/* Preferences */}
-          <div className="bg-white rounded-[2.5rem] border border-zinc-100 p-8 space-y-6 shadow-sm">
-            <h3 className="text-lg font-black text-zinc-900">Communication</h3>
-            <div className="space-y-4">
-              {[
-                { label: "Email Notifications", active: true },
-                { label: "SMS Alerts", active: true },
-                { label: "WhatsApp Updates", active: false },
-              ].map((pref, i) => (
-                <div key={i} className="flex items-center justify-between">
-                  <span className="text-sm font-bold text-zinc-600">{pref.label}</span>
-                  <div className={`w-10 h-6 rounded-full transition-colors relative cursor-pointer ${pref.active ? 'bg-primary' : 'bg-zinc-200'}`}>
-                    <div className={`absolute top-1 size-4 bg-white rounded-full transition-all ${pref.active ? 'left-5' : 'left-1'}`} />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
         </div>
       </div>
     </div>
