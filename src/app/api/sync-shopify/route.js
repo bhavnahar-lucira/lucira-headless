@@ -89,6 +89,7 @@ export async function POST(req) {
                     fit: metafield(namespace: "custom", key: "fit") { value }
                     matching_products: metafield(namespace: "custom", key: "matching_product") { value }
                     complementary_products: metafield(namespace: "shopify--discovery--product_recommendation", key: "complementary_products") { value }
+                    lead_time: metafield(namespace: "custom", key: "lead_time") { value }
                     variants(first: 250) {
                       edges {
                         node {
@@ -276,7 +277,8 @@ export async function POST(req) {
                   material_type: p.material_type?.value,
                   components: p.components?.value,
                   finishing: p.finishing?.value,
-                  fit: p.fit?.value
+                  fit: p.fit?.value,
+                  lead_time: p.lead_time?.value
                 },
                 lastUpdated: new Date(),
                 lastReviewsUpdated: new Date()

@@ -39,7 +39,8 @@ export const GET_BLOGS_QUERY = `
 `;
 
 export const GET_ARTICLES_QUERY = `
-  query GetArticles($first: Int!, $after: String) {
+  query GetArticles($first: Int!, $after: String, $blogHandle: String) {
+    blog(handle: $blogHandle) {
     articles(first: $first, after: $after) {
       edges {
         node {
@@ -50,6 +51,7 @@ export const GET_ARTICLES_QUERY = `
           contentHtml
           excerpt
           excerptHtml
+          publishedAt
           authorV2 {
             name
           }
@@ -66,6 +68,45 @@ export const GET_ARTICLES_QUERY = `
       }
       pageInfo {
         hasNextPage
+        endCursor
+      }
+    }
+  }
+`;
+
+export const GET_COLLECTIONS_QUERY = `
+  query GetCollections($first: Int!, $after: String) {
+    collections(first: $first, after: $after) {
+      edges {
+        node {
+          id
+          title
+          handle
+        }
+        cursor
+      }
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+    }
+  }
+`;
+
+export const GET_ALL_PRODUCTS_QUERY = `
+  query GetAllProducts($first: Int!, $after: String) {
+    products(first: $first, after: $after) {
+      edges {
+        node {
+          id
+          title
+          handle
+        }
+        cursor
+      }
+      pageInfo {
+        hasNextPage
+        endCursor
       }
     }
   }
