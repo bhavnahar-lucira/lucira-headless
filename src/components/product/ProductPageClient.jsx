@@ -1560,17 +1560,17 @@ function DiamondDetail({ img, shape, pcs, carat, quality }) {
 
 function ExploreCard({ title, description, action, img }) {
   return (
-    <div className="bg-[#F9F9F9] border border-gray-100 rounded-lg p-3 flex items-center justify-between gap-3">
-      <div className="w-24 h-16 rounded-md bg-gray-200 shrink-0 relative overflow-hidden shadow-sm">
-        {img && <Image src={getValidSrc(img)} alt={title} fill className="object-cover" />}
+    <div className="bg-[#F9F9F9] border border-gray-100 rounded-lg p-3 md:p-4 flex items-start gap-3 md:gap-4">
+      <div className="w-20 h-20 sm:w-24 sm:h-24 md:w-24 md:h-16 shrink-0 rounded-md bg-gray-200 relative overflow-hidden shadow-sm">
+        {img && ( <Image src={getValidSrc(img)} alt={title} fill className="object-cover" /> )}
       </div>
-      <div className="flex-1 space-y-1">
-        <p className="text-sm font-semibold leading-tight">{title}</p>
-        <p className="text-12px font-medium leading-[1.3]">{description}</p>
+      <div className="flex-1 min-w-0 flex flex-col gap-2">
+        <p className="text-sm md:text-base font-semibold leading-tight"> {title} </p>
+        <p className="text-xs md:text-sm font-medium leading-[1.5] text-gray-700"> {description} </p>
+        <Button variant="link" className=" p-0 m-0 h-auto w-fit text-sm font-bold underline underline-offset-4 justify-start">
+          {action}
+        </Button>
       </div>
-      <Button variant="link" className="text-sm p-0 m-0 font-bold underline underline-offset-4 whitespace-nowrap">
-        {action}
-      </Button>
     </div>
   );
 }

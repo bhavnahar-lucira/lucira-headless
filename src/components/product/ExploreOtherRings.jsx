@@ -174,7 +174,7 @@ export default function ExploreOtherRings() {
 
   return (
     <section className="w-full mt-15 bg-white overflow-hidden">
-      <div className="max-w-480 mx-auto px-17 min-[1440px]:px-17">
+      <div className="max-w-480 mx-auto px-5 md:px-17 min-[1440px]:px-17">
         <h2 className="text-28px font-bold text-center mb-5">Explore Other Rings</h2>
 
         {/* Toggle Tabs */}

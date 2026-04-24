@@ -6,7 +6,7 @@ export default function ProductStory() {
   return (
     <section className="w-full py-15">
 
-      <div className="max-w-480 mx-auto px-17 min-[1440px]:px-17 grid lg:grid-cols-2 gap-12 items-center">
+      <div className="max-w-480 mx-auto px-5 md:px-17 min-[1440px]:px-17 grid lg:grid-cols-2 gap-12 items-center">
 
         {/* LEFT CONTENT */}
 

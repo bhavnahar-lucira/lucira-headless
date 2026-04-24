@@ -451,7 +451,7 @@ export default function CollectionPage({ params: paramsPromise }) {
         </div>
       )}
 
-      <div className={isMobile ? "" : "flex xl:gap-12 lg:gap-6 py-6 max-w-350 mx-auto"}>
+      <div className={isMobile ? "" : "flex xl:gap-12 lg:gap-6 py-6 max-w-350 mx-auto px-2 xl:px-0"}>
         {/* ================= FILTERS SIDEBAR ================= */}
         <div className="hidden lg:block xl:w-78 lg:w-60 shrink-0">
           <div className="sticky top-19 self-start h-fit">
