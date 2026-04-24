@@ -56,7 +56,7 @@ export default function GoldCoinOption() {
   if (eligibleQuantity <= 0 && !isApplied) return null;
 
   return (
-    <div className="bg-gradient-to-br from-[#fffdf7] to-[#fdf5e4] border border-yellow-200 rounded-xl p-4 flex items-center justify-between gap-4 transition-all hover:bg-[#fdf5e4]">
+    <div className="bg-gradient-to-br from-[#fffdf7] to-[#fdf5e4] border border-yellow-200 rounded-lg p-4 flex items-center justify-between gap-4 transition-all hover:bg-[#fdf5e4]">
       <div className="flex items-center gap-3">
         <div className="flex items-center justify-center w-11 h-11 rounded-full bg-gradient-to-br from-[#f9e8b8] to-[#e8c97a] shadow-[0_2px_10px_rgba(184,146,74,0.25),inset_0_1px_2px_rgba(255,255,255,0.6)] shrink-0">
           <Coins size={18} className="text-[#7a5020]" />

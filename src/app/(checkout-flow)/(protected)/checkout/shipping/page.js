@@ -627,7 +627,7 @@ export default function ShippingPage() {
           </Button>
         </div>
 
-        <button onClick={handleUseMyLocation} className="flex items-center gap-2 text-sm font-medium text-[#005BD3] hover:underline">
+        <button onClick={handleUseMyLocation} className="flex items-center gap-2 text-sm font-medium text-zinc-700 hover:underline">
           <Navigation size={16} />
           Use my location
         </button>
@@ -645,12 +645,12 @@ export default function ShippingPage() {
               <div
                 key={store.id}
                 onClick={() => setTempSelectedStoreId(store.id)}
-                className={`relative flex items-start gap-4 p-5 rounded-xl border-2 transition-all cursor-pointer ${
-                  isSelected ? "border-primary bg-primary/5 shadow-sm" : "border-zinc-100 hover:border-zinc-200"
+                className={`relative flex items-start gap-4 p-5 rounded-lg border-2 transition-all cursor-pointer ${
+                  isSelected ? "border-accent bg-accent/10 shadow-sm" : "border-zinc-100 hover:border-zinc-200"
                 }`}
               >
                 <div className={`mt-1 size-5 rounded-full border-2 flex items-center justify-center shrink-0 ${
-                  isSelected ? "border-primary bg-primary" : "border-zinc-300"
+                  isSelected ? "border-accent bg-accent/10" : "border-zinc-300"
                 }`}>
                   {isSelected && <div className="size-2 rounded-full bg-white" />}
                 </div>
@@ -689,7 +689,7 @@ export default function ShippingPage() {
             }}
             role="button"
             tabIndex={0}
-            className={`rounded-xl border p-4 text-left transition-all ${
+            className={`rounded-lg border p-4 text-left transition-all ${
               isSelected ? "border-primary bg-[#FFF8F4]" : "border-zinc-200 bg-white"
             }`}
           >
@@ -741,12 +741,12 @@ export default function ShippingPage() {
   const isContinueDisabled = deliveryMethod === "ship" ? !selectedAddress : !selectedStoreId;
 
   return (
-    <div className="bg-white min-h-screen overflow-x-hidden pb-32 lg:pb-0">
+    <div className="bg-white min-h-screen overflow-x-hidden">
       <div className="max-w-7xl w-full mx-auto relative z-10 px-4">
         <div className="flex flex-col lg:flex-row min-h-[calc(100vh-80px)]">
           <div className="grow lg:basis-[60%] lg:shrink-0 py-10 px-4 lg:pr-12 space-y-10 bg-white">
             <div className="space-y-4">
-              <h2 className="text-xl font-bold text-zinc-900">Delivery method</h2>
+              <h2 className="text-2xl font-bold text-zinc-900 font-abhaya">Delivery method</h2>
               <div className="flex p-1 bg-zinc-100 rounded-lg w-full max-w-md">
                 <button
                   onClick={() => setDeliveryMethod("ship")}
@@ -780,10 +780,10 @@ export default function ShippingPage() {
                   <>
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                       <div>
-                        <h2 className="text-xl font-bold text-zinc-900">Shipping address</h2>
-                        <p className="text-sm text-zinc-500">Select one of your saved addresses below.</p>
+                        <h2 className="font-abhaya text-xl font-bold text-zinc-900">Shipping address</h2>
+                        <p className="font-figtree text-sm text-zinc-500">Select one of your saved addresses below.</p>
                       </div>
-                      <Button type="button" variant="outline" onClick={openCreateDialog} className="h-11 border-zinc-200">
+                      <Button type="button" variant="outline" onClick={openCreateDialog} className="h-11 bg-accent border-accent text-white hover:shadow-lg">
                         <Plus className="size-4" />
                         Add new address
                       </Button>
@@ -798,8 +798,8 @@ export default function ShippingPage() {
                             onClick={() => handleSelectAddress(address.id)}
                             role="button"
                             tabIndex={0}
-                            className={`w-full rounded-2xl border p-5 text-left transition-all ${
-                              isSelected ? "border-primary bg-[#FFF8F4]" : "border-zinc-200 bg-white"
+                            className={`w-full rounded-lg border p-5 text-left transition-all ${
+                              isSelected ? "border-accent bg-accent/10" : "border-zinc-200 bg-white"
                             }`}
                           >
                             <div className="flex items-start gap-4">
@@ -829,13 +829,13 @@ export default function ShippingPage() {
                                     <button type="button" onClick={(e) => {
                                       e.stopPropagation();
                                       openEditDialog(address);
-                                    }} className="rounded-full border border-zinc-200 p-2 text-zinc-600 transition hover:border-zinc-300 hover:text-zinc-900">
+                                    }} className="rounded-full bg-white shadow border border-zinc-100 p-2 text-zinc-600 transition hover:border-zinc-300 hover:text-zinc-900">
                                       <Pencil className="size-4" />
                                     </button>
                                     <button type="button" onClick={(e) => {
                                       e.stopPropagation();
                                       handleDeleteAddress(address.id);
-                                    }} className="rounded-full border border-zinc-200 p-2 text-zinc-600 transition hover:border-red-200 hover:text-red-600">
+                                    }} className="rounded-full bg-white shadow border border-zinc-100 p-2 text-zinc-600 transition hover:border-red-200 hover:text-red-600">
                                       <Trash2 className="size-4" />
                                     </button>
                                   </div>
@@ -882,7 +882,7 @@ export default function ShippingPage() {
                 )}
 
                 <div className="hidden lg:flex flex-col md:flex-row items-center justify-between gap-6 pt-4">
-                  <Link href="/checkout/cart" className="flex items-center gap-2 text-sm font-medium text-[#005BD3] hover:underline">
+                  <Link href="/checkout/cart" className="flex items-center gap-2 text-sm font-bold text-accent hover:underline">
                     <ChevronLeft size={16} />
                     Return to cart
                   </Link>
@@ -900,14 +900,14 @@ export default function ShippingPage() {
                     <p className="text-sm text-zinc-500">
                       There are {sortedStores.length} locations with your item
                     </p>
-                    <button onClick={handleOpenStoreDialog} className="flex items-center gap-1.5 text-sm font-medium text-[#005BD3] hover:underline">
+                    <button onClick={handleOpenStoreDialog} className="flex items-center gap-1.5 text-sm text-primary font-bold hover:underline">
                       <Navigation size={14} />
                       India
                     </button>
                   </div>
                 </div>
 
-                <div className="border border-zinc-200 rounded-xl overflow-hidden bg-white shadow-sm">
+                <div className="border border-zinc-200 rounded-lg overflow-hidden bg-white shadow-sm">
                   {selectedStore && (
                     <div className="p-6">
                       <div className="flex justify-between items-start mb-2">
@@ -930,15 +930,15 @@ export default function ShippingPage() {
                     onClick={handleOpenStoreDialog}
                     className="w-full flex items-center justify-between px-6 py-4 border-t border-zinc-100 hover:bg-zinc-50 transition-colors"
                   >
-                    <span className="text-sm font-medium text-[#005BD3]">
+                    <span className="text-sm font-medium text-zinc-700">
                       {sortedStores.length - 1} more locations
                     </span>
-                    <ChevronRight size={16} className="text-[#005BD3]" />
+                    <ChevronRight size={16} className="text-zinc-700" />
                   </button>
                 </div>
 
                 <div className="hidden lg:flex flex-col md:flex-row items-center justify-between gap-6 pt-4">
-                  <Link href="/checkout/cart" className="flex items-center gap-2 text-sm font-medium text-[#005BD3] hover:underline">
+                  <Link href="/checkout/cart" className="flex items-center gap-2 text-sm font-bold text-accent hover:underline">
                     <ChevronLeft size={16} />
                     Return to cart
                   </Link>
@@ -968,14 +968,14 @@ export default function ShippingPage() {
         <div className="flex items-center justify-between gap-4">
           <div className="flex flex-col">
             <span className="text-lg font-bold text-zinc-900 leading-none">₹ {totalAmount.toLocaleString('en-IN')}</span>
-            <button className="text-[11px] font-bold text-[#A855F7] uppercase tracking-tight mt-1 text-left">
+            <button className="text-[11px] font-bold text-accent uppercase tracking-tight mt-1 text-left">
               View Order Summary
             </button>
           </div>
           <Link href="/checkout/payment" className="grow" onClick={handleContinueToPayment}>
              <Button 
               disabled={isContinueDisabled}
-              className="w-full bg-[#A855F7] hover:bg-[#9333EA] text-white font-bold h-12 uppercase tracking-widest rounded-xl text-sm"
+              className="w-full bg-primary hover:bg-accent text-white font-bold h-12 uppercase tracking-widest rounded-lg text-sm"
             >
               Continue to payment
             </Button>
@@ -988,7 +988,7 @@ export default function ShippingPage() {
         <>
           {/* STORE PICKUP DIALOG */}
           <Dialog open={showStoreDialog} onOpenChange={setShowStoreDialog}>
-            <DialogContent className="max-w-2xl p-0 overflow-hidden rounded-2xl border-none">
+            <DialogContent className="max-w-2xl p-0 overflow-hidden rounded-lg border-none">
               <DialogHeader className="p-6 pb-0">
                 <DialogTitle className="text-xl font-bold text-zinc-900">Pickup locations</DialogTitle>
               </DialogHeader>
