@@ -208,9 +208,14 @@ export function LoginForm({ onSuccess, initialMobile = "" }) {
 
       {step === "register" && (
         <>
-          <div className="text-sm text-gray-600">
-            <p className="font-medium">Mobile Number</p>
-            <p className="text-base font-semibold">{mobile}</p>
+          <div>
+            <p className="text-sm font-medium text-gray-600 mb-1">Mobile Number</p>
+            <Input
+              placeholder="Mobile"
+              value={mobile}
+              onChange={(e) => setMobile(e.target.value.replace(/\D/g, ""))}
+              className="h-11"
+            />
           </div>
 
           <Input
