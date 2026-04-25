@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import ContactSection from "@/components/common/ContactSection";
 import SitemapPage from "@/components/sitemap/SitemapPage";
 import FooterPageContent from "@/components/FooterPageContent";
+import GoldRatePage from "@/components/pages/gold-rate/GoldRatePage";
 
 export default async function Page({ params }) {
   const { handle } = await params;
@@ -22,6 +23,13 @@ export default async function Page({ params }) {
   }
 
   if (!page) return notFound();
+
+  // Handle Gold Rate pages (using handle pattern or presence of city/state metafields)
+  const isGoldRatePage = handle.includes("gold-rate-today") || (page.city && page.state);
+
+  if (isGoldRatePage) {
+    return <GoldRatePage page={page} />;
+  }
 
   const hasBody = typeof page.body === "string" && page.body.trim() !== "";
 
