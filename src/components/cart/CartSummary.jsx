@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useState, useEffect } from "react";
-import { Tag, Phone, MessageSquare, Gift, Truck, MessageCircle, ChevronRight, X, Loader2, CircleChevronRight, BadgePercent } from "lucide-react";
+import { Tag, Phone, MessageSquare, Gift, Truck, MessageCircle, ChevronRight, X, Loader2, CircleChevronRight, BadgePercent, Check } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import Image from "next/image";
@@ -13,6 +13,7 @@ import GoldCoinOption, { GOLDCOIN_VARIANT_ID } from "./GoldCoinOption";
 import { useCart } from "@/hooks/useCart";
 import { applyCoupon, removeCoupon } from "@/redux/features/cart/cartSlice";
 import { toast } from "react-toastify";
+import CartContact from "./CartContact";
 
 const INSURANCE_VARIANT_ID = "gid://shopify/ProductVariant/47709366026458";
 
@@ -157,7 +158,7 @@ export default function CartSummary({ onPlaceOrder }) {
   return (
     <div className="space-y-6">
       {/* Desktop Pricing Breakdown (LG) */}
-      <div className="hidden lg:block space-y-3 px-1 pt-2">
+      <div className="hidden lg:block bg-white rounded-lg p-6 space-y-3 border-zinc-50 shadow-sm">
         <div className="flex justify-between text-sm text-zinc-600">
           <span>Subtotal</span>
           <span className="font-medium text-zinc-900">₹ {subtotal.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
@@ -177,7 +178,7 @@ export default function CartSummary({ onPlaceOrder }) {
           </div>
         )}
         {goldCoinItem && (
-          <div className="flex justify-between text-sm text-green-600">
+          <div className="flex justify-between text-sm text-[#189351]">
             <span>Free Gold Coin ({goldCoinItem.quantity})</span>
             <span className="font-bold">₹ 0</span>
           </div>
@@ -193,7 +194,7 @@ export default function CartSummary({ onPlaceOrder }) {
           <span className="font-bold">Free</span>
         </div>
         
-        <div className="border-t border-zinc-100 my-4 pt-4 flex justify-between items-center">
+        <div className="border-t border-zinc-100 mt-4 pt-4 flex justify-between items-center">
           <span className="text-base font-bold text-[#443360] uppercase tracking-wider">GRAND TOTAL</span>
           <span className="text-lg font-bold text-[#443360]">₹ {grandTotal.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
         </div>
@@ -202,7 +203,7 @@ export default function CartSummary({ onPlaceOrder }) {
       {/* Mobile Order Summary (LG Hidden) */}
       <div className="lg:hidden space-y-4">
         <h3 className="text-[14px] font-bold text-[#443360] uppercase tracking-wider ml-1">Order Summary</h3>
-        <div className="bg-[#F9F9F9] rounded-3xl p-6 space-y-4 border border-zinc-50 shadow-sm">
+        <div className="bg-white rounded-lg p-6 space-y-4 border border-zinc-50 shadow-sm">
           <div className="space-y-3">
             <div className="flex justify-between text-[14px] text-zinc-500 font-medium">
               <span>Subtotal</span>
@@ -210,9 +211,9 @@ export default function CartSummary({ onPlaceOrder }) {
             </div>
             
             {appliedCoupon && (
-              <div className="flex justify-between text-[14px] font-medium items-center">
+              <div className="flex justify-between text-[14px] font-medium items-center text-[#189351]">
                 <div className="flex items-center gap-2">
-                  <span className="text-zinc-500">Coupon ({couponDetails.code})</span>
+                  <span className="uppercase">Coupon ({couponDetails.code})</span>
                   <button 
                     onClick={handleRemoveCoupon}
                     className="text-[10px] font-bold text-red-500 hover:underline uppercase"
@@ -220,33 +221,33 @@ export default function CartSummary({ onPlaceOrder }) {
                     (Remove)
                   </button>
                 </div>
-                <span className="text-[#A855F7] font-bold">- ₹ {couponDiscountAmount.toLocaleString('en-IN')}</span>
+                <span className="font-bold">- ₹ {couponDiscountAmount.toLocaleString('en-IN')}</span>
               </div>
             )}
 
             {goldCoinItem && (
-              <div className="flex justify-between text-[14px] text-[#189351] font-medium">
+              <div className="flex justify-between text-sm text-[#189351]">
                 <span>Free Gold Coin ({goldCoinItem.quantity})</span>
                 <span className="font-bold">₹ 0</span>
               </div>
             )}
 
             {insuranceItem && (
-              <div className="flex justify-between text-[14px] text-zinc-500 font-medium">
+              <div className="flex justify-between text-[14px] text-zinc-500">
                 <span>Insurance</span>
                 <span className="text-zinc-900">₹ {insuranceAmount.toLocaleString('en-IN')}</span>
               </div>
             )}
 
-            <div className="flex justify-between text-[14px] text-zinc-500 font-medium">
+            <div className="flex justify-between text-[14px] text-[#189351]">
               <span>Shipping (Standard)</span>
-              <span className="text-[#A855F7] font-bold">Free</span>
+              <span className="font-bold">Free</span>
             </div>
           </div>
 
           <div className="border-t border-zinc-200 pt-4 flex justify-between items-center">
             <span className="text-base font-bold text-[#443360] uppercase tracking-wider">GRAND TOTAL</span>
-            <span className="text-lg font-bold text-[#443360]">₹ {grandTotal.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
+            <span className="text-lg font-bold text-[#443360]">₹ {grandTotal  .toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
           </div>
         </div>
       </div>
@@ -254,27 +255,24 @@ export default function CartSummary({ onPlaceOrder }) {
       {/* Mobile Offers Group (Coupon, Gold Coin, Insurance) - ALL BELOW SUMMARY */}
       <div className="lg:hidden space-y-6">
         <div className="space-y-4">
-          <h3 className="text-[14px] font-bold text-[#443360] uppercase tracking-wider ml-1">Lucira Offers</h3>
+          <h3 className="text-[14px] font-bold text-[#443360] uppercase tracking-wider ml-1">Lucira Offers</h3>          
+          <GoldCoinOption />
           <button 
             onClick={() => setIsCouponDialogOpen(true)}
-            className="flex items-center justify-between w-full p-4 bg-[#F0E6FF] border border-[#E9D5FF] rounded-2xl group transition-all"
+            className="flex items-center justify-between w-full p-4 bg-white border border-accent/30 rounded-lg group transition-all"
           >
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-white rounded-xl shadow-sm">
-                <BadgePercent size={20} className="text-[#A855F7]" />
+              <div className="p-2 bg-primary/10 rounded-full shadow-sm">
+                <Tag size={20} className="text-primary" />
               </div>
-              <span className="text-[15px] font-bold text-[#443360]">
+              <span className="text-[15px] font-bold text-[#443360] uppercase font-figtree">
                 {appliedCoupon ? `Applied: ${couponDetails.code}` : "Apply Coupon"}
               </span>
             </div>
-            <div className="bg-[#A855F7] p-1.5 rounded-full">
+            <div className="bg-accent p-1.5 rounded-full">
               <ChevronRight size={18} className="text-white" />
             </div>
           </button>
-        </div>
-
-        <div className="space-y-4 px-1">
-          <GoldCoinOption />
           <InsuranceOption />
         </div>
       </div>
@@ -293,16 +291,18 @@ export default function CartSummary({ onPlaceOrder }) {
         <div className="space-y-3">
           <Dialog open={isCouponDialogOpen} onOpenChange={setIsCouponDialogOpen}>
             <DialogTrigger asChild>
-              <button className="flex items-center justify-between w-full p-4 bg-white border border-accent/30 rounded-xl hover:border-accent transition-all group cursor-pointer">
+              <button className="flex items-center justify-between w-full p-4 bg-white border border-accent/30 rounded-lg hover:border-accent transition-all group cursor-pointer">
                 <div className="flex items-center gap-3">
-                  <div className="size-8 rounded-full bg-[#f3ede3] flex items-center justify-center transition-colors">
-                    <Tag size={16} color="#b8924a" />
+                  <div className="p-2 bg-primary/10 rounded-full shadow-sm">
+                    <Tag size={20} className="text-primary" />
                   </div>
-                  <span className="text-sm font-bold text-[#8b7d72] uppercase tracking-widest font-figtree">
+                  <span className="text-[15px] font-bold text-[#443360] uppercase font-figtree">
                     {appliedCoupon ? `Applied: ${couponDetails.code}` : "Apply Coupon"}
                   </span>
                 </div>
-                <ChevronRight size={20} className="text-gray-400 group-hover:text-primary transition-colors" />
+                <div className="bg-accent p-1.5 rounded-full">
+                  <ChevronRight size={18} className="text-white" />
+                </div>
               </button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-md">
@@ -338,23 +338,7 @@ export default function CartSummary({ onPlaceOrder }) {
       </div>
 
       {/* Desktop Only Contact Section */}
-      <div className="bg-white border border-zinc-50 rounded-2xl p-6 shadow-sm text-center space-y-4 hidden lg:block">
-        <h4 className="text-[11px] font-bold text-[#443360] uppercase tracking-[0.2em]">CONTACT US FOR ASSISTANCE</h4>
-        <div className="flex justify-around items-center pt-2">
-          <Link href="tel:+918976773659" className="flex items-center gap-2 bg-zinc-50 px-3 py-2.5 rounded-xl hover:bg-zinc-100 transition-colors">
-            <Phone size={18} className="text-[#443360]" />
-            <span className="text-xs font-bold text-[#443360]">Call</span>
-          </Link>
-          <Link href="https://wa.me/919004435760?text=Hi%2C+I+want+to+get+more+information+about+Lucira" target="_blank" className="flex items-center gap-2 bg-zinc-50 px-3 py-2.5 rounded-xl hover:bg-zinc-100 transition-colors">
-            <MessageCircle size={18} className="text-[#443360]" />
-            <span className="text-xs font-bold text-[#443360]">Whatsapp</span>
-          </Link>
-          <button className="flex items-center gap-2 bg-zinc-50 px-3 py-2.5 rounded-xl hover:bg-zinc-100 transition-colors">
-            <MessageSquare size={18} className="text-[#443360]" />
-            <span className="text-xs font-bold text-[#443360]">Chat</span>
-          </button>
-        </div>
-      </div>
+      <CartContact />
     </div>
   );
 }

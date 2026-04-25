@@ -177,7 +177,7 @@ export default function CartItem({ item, onAuthRequired }) {
   return (
     <>
       {/* DESKTOP DESIGN (Original) */}
-      <div className="hidden lg:block mb-6 overflow-hidden rounded-sm border border-zinc-100 bg-white shadow-sm">
+      <div className="hidden lg:block mb-6 overflow-hidden rounded-lg border border-zinc-100 bg-white shadow-sm">
         <div className="relative flex flex-col gap-6 p-4 md:flex-row md:p-6">
           {updating && (
             <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/50">
@@ -202,7 +202,7 @@ export default function CartItem({ item, onAuthRequired }) {
             <div className="flex items-start justify-between">
               <div className="space-y-1">
                 <Link href={productLink}>
-                  <h3 className="font-abhaya text-lg font-bold text-zinc-800 hover:text-primary transition-colors">
+                  <h3 className="font-abhaya text-lg font-bold text-black hover:text-primary transition-colors">
                     {item.title}
                   </h3>
                 </Link>
@@ -317,7 +317,7 @@ export default function CartItem({ item, onAuthRequired }) {
       </div>
 
       {/* MOBILE DESIGN (< 1024px) */}
-      <div className="lg:hidden mb-4 overflow-hidden rounded-[24px] border border-zinc-100 bg-white shadow-[0_4px_20px_rgba(0,0,0,0.05)]">
+      <div className="lg:hidden mb-4 overflow-hidden rounded-lg border border-zinc-100 bg-white shadow-[0_4px_20px_rgba(0,0,0,0.05)]">
         <div className="relative p-4">
           {updating && (
             <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/50">
@@ -327,7 +327,7 @@ export default function CartItem({ item, onAuthRequired }) {
 
           <div className="flex gap-4">
             {/* Image Container */}
-            <div className="relative aspect-square w-32 shrink-0 overflow-hidden rounded-2xl border border-zinc-100 bg-[#F9F9F9]">
+            <div className="relative aspect-square w-32 shrink-0 overflow-hidden rounded-sm border border-zinc-100 bg-[#F9F9F9]">
               <Link href={productLink} className="block h-full w-full p-2">
                 <Image
                   src={item.image || "/images/product/1.jpg"}
@@ -341,7 +341,7 @@ export default function CartItem({ item, onAuthRequired }) {
 
             {/* Info Content */}
             <div className="flex-1 space-y-1 min-w-0 pt-1">
-              <h3 className="text-[13px] font-medium text-zinc-600 truncate leading-snug">
+              <h3 className="text-base font-medium text-black truncate leading-snug font-abhaya">
                 {item.title}
               </h3>
               <div className="flex items-center gap-1.5 flex-wrap">
@@ -404,10 +404,6 @@ export default function CartItem({ item, onAuthRequired }) {
                   </Select>
                 </div>
               </div>
-
-              <p className="text-[13px] text-[#A855F7] font-medium pt-1">
-                Delivery by - <span className="font-bold">25th Apr</span>
-              </p>
             </div>
           </div>
           
