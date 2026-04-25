@@ -8,7 +8,7 @@ import { Check, ArrowRight, Loader2, Gift } from "lucide-react";
 ───────────────────────────────────────────────────────── */
 const CONFIG = {
   storageKey   : "lucira_profile_data",
-  apiBase      : "https://api.lucirajewelry.com/earn-rewards",
+  apiBase      : "/api/proxy/earn-rewards",
   totalSteps   : 4,
   pointsPerStep: 100,
 };

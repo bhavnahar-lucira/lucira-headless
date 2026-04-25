@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { shopifyStorefrontFetch } from "@/lib/shopify";
+import { shopifyStorefrontFetch, shopifyAdminFetch } from "@/lib/shopify";
 import clientPromise from "@/lib/mongodb";
 
 async function getCustomerAccessToken() {
@@ -65,16 +65,9 @@ export async function GET() {
     `;
 
     // Run all three in parallel
-    const [nectorLive, metafieldRes, wishlistClient] = await Promise.all([
+    const [nectorLive, metafieldData, wishlistClient] = await Promise.all([
       fetchNectorCoins(simpleId),
-      fetch(`https://${process.env.SHOPIFY_STORE}/admin/api/2024-01/graphql.json`, {
-        method : "POST",
-        headers: {
-          "Content-Type"          : "application/json",
-          "X-Shopify-Access-Token": process.env.ADMIN_TOKEN,
-        },
-        body: JSON.stringify({ query: metafieldQuery, variables: { id: customerId } }),
-      }),
+      shopifyAdminFetch(metafieldQuery, { id: customerId }),
       clientPromise,
     ]);
 
@@ -85,8 +78,7 @@ export async function GET() {
     let progress       = 0;
 
     try {
-      const metafieldData = await metafieldRes.json();
-      const rawJson = metafieldData?.data?.customer?.metafield?.value;
+      const rawJson = metafieldData?.customer?.metafield?.value;
       if (rawJson) {
         const parsed = JSON.parse(rawJson);
         points         = parsed.nector_user_points?.toString() || "0";

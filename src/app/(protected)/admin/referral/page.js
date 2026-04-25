@@ -6,7 +6,7 @@ import { selectUser } from "@/redux/features/user/userSlice";
 import { setReferralLink, setReferralLoading, setReferralError } from "@/redux/features/user/userSlice";
 import Image from "next/image";
 import { toast } from "react-toastify";
-import { Copy, Share2, Facebook, Linkedin, Users, Gift, CheckCircle2, XCircle } from "lucide-react";
+import { Copy, Share2, Facebook, Twitter, Linkedin, Users, Gift, CheckCircle2, XCircle, Instagram } from "lucide-react";
 import { Loader2 } from "lucide-react";
 
 export default function ReferralPage() {
@@ -57,9 +57,8 @@ export default function ReferralPage() {
   async function fetchHistory() {
     try {
       setLoadingStats(true);
-      const numericId = user.id.split('/').pop();
-      const endpoint = `https://refer-earn-385594025448.asia-south1.run.app?customer_id=shopify-${numericId}`;
-      const res = await fetch(endpoint);
+      const numericId = user.id.toString().split("/").pop();
+      const res = await fetch(`/api/customer/referral/history?customer_id=shopify-${numericId}`);
       const data = await res.json();
       if (data.status) {
         setStats({
@@ -100,6 +99,11 @@ export default function ReferralPage() {
     window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(referralLink)}`, '_blank', 'width=600,height=800');
   };
 
+  const shareOnInstagram = () => {
+    handleCopyLink();
+    window.open('https://www.instagram.com/', '_blank', 'width=600,height=800');
+  };
+
   const shareNative = () => {
     if (navigator.share) {
       navigator.share({
@@ -132,13 +136,6 @@ export default function ReferralPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="relative bg-[#F3E0CF] rounded-[2.5rem] p-8 min-h-[220px] flex flex-col justify-center text-left overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300">
-          <Image
-            alt="They Get"
-            width={300}
-            height={300}
-            src="https://cdn.shopify.com/s/files/1/0739/8516/3482/files/They_Get_img_2.png?v=1751354604"
-            className="absolute bottom-0 right-0 h-[90%] w-auto object-contain opacity-90 transition-transform duration-500 hover:scale-105"
-          />
           <p className="text-sm font-bold uppercase tracking-widest text-[#A68380] mb-2 relative z-10">
             They Get
           </p>
@@ -151,14 +148,7 @@ export default function ReferralPage() {
         </div>
         
         <div className="relative bg-zinc-900 rounded-[2.5rem] p-8 min-h-[220px] flex flex-col justify-center text-left overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300">
-          <Image
-            alt="You Get"
-            width={300}
-            height={300}
-            src="https://cdn.shopify.com/s/files/1/0739/8516/3482/files/7d93784d-d99f-4716-8c45-779b911938f6_2.png?v=1751352893"
-            className="absolute bottom-0 right-0 h-[90%] w-auto object-contain opacity-50 transition-transform duration-500 hover:scale-105"
-          />
-          <p className="text-sm font-bold uppercase tracking-widest text-primary mb-2 relative z-10">
+          <p className="text-sm font-bold uppercase tracking-widest text-white mb-2 relative z-10">
             You Get
           </p>
           <p className="text-4xl font-black text-white relative z-10 leading-tight">
@@ -213,6 +203,9 @@ export default function ReferralPage() {
             <button onClick={shareOnTwitter} className="size-14 bg-sky-50 text-sky-500 rounded-2xl flex items-center justify-center hover:bg-sky-500 hover:text-white transition-colors cursor-pointer group">
               <Twitter size={24} className="group-hover:scale-110 transition-transform" />
             </button>
+            <button onClick={shareOnInstagram} className="size-14 bg-pink-50 text-pink-600 rounded-2xl flex items-center justify-center hover:bg-pink-600 hover:text-white transition-colors cursor-pointer group">
+              <Instagram size={24} className="group-hover:scale-110 transition-transform" />
+            </button>
             <button onClick={shareOnLinkedIn} className="size-14 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center hover:bg-indigo-600 hover:text-white transition-colors cursor-pointer group">
               <Linkedin size={24} className="group-hover:scale-110 transition-transform" />
             </button>
@@ -227,19 +220,23 @@ export default function ReferralPage() {
               <Gift size={24} />
             </div>
             <div>
-              <h3 className="text-xl font-black text-zinc-900">Referral History</h3>
+              <h3 className="text-xl font-black text-zinc-900">Referral & Transactional History</h3>
               <p className="text-sm text-zinc-500 font-medium mt-1">Track your successful referrals and earned coins.</p>
             </div>
           </div>
           
-          <div className="flex gap-4">
-            <div className="bg-zinc-50 border border-zinc-100 rounded-2xl px-6 py-3 text-center">
-              <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-1">Total Invites</p>
+          <div className="flex flex-wrap gap-4">
+            <div className="bg-zinc-50 border border-zinc-100 rounded-2xl px-4 md:px-6 py-3 text-center flex-1 min-w-[120px]">
+              <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-1">Total Transactions</p>
               <p className="text-xl font-black text-zinc-900">{stats.total_referrals}</p>
             </div>
-            <div className="bg-primary/5 border border-primary/10 rounded-2xl px-6 py-3 text-center">
-              <p className="text-[10px] font-black uppercase tracking-widest text-primary mb-1">Coins Earned</p>
+            <div className="bg-primary/5 border border-primary/10 rounded-2xl px-4 md:px-6 py-3 text-center flex-1 min-w-[120px]">
+              <p className="text-[10px] font-black uppercase tracking-widest text-primary mb-1">Lucira Coins Earned</p>
               <p className="text-xl font-black text-primary">{stats.coins_earned}</p>
+            </div>
+            <div className="bg-amber-50 border border-amber-100 rounded-2xl px-4 md:px-6 py-3 text-center flex-1 min-w-[120px]">
+              <p className="text-[10px] font-black uppercase tracking-widest text-amber-500 mb-1">Lucira Coins Balance</p>
+              <p className="text-xl font-black text-amber-600">{stats.coins_balance}</p>
             </div>
           </div>
         </div>
