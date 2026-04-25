@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 
 export default function CollectionSection ({ title, subtitle, tabs = [], children, page, colCat, onTabChange, loading }) {
@@ -46,11 +47,11 @@ export default function CollectionSection ({ title, subtitle, tabs = [], childre
         </div>
 
         {page === "home" && colCat && (
-          <div className="flex justify-center mt-10 md:mt-12">
-            <Button className="w-full md:w-auto px-10 py-4 h-auto text-sm md:text-base font-bold uppercase tracking-[0.2em] rounded-sm bg-[#5B4740] hover:bg-[#4A3934] text-white transition-colors">
+          <Link href="/collections/bestsellers" className="flex justify-center mt-10 md:mt-12">
+            <Button className="w-full md:w-auto px-10 py-4 h-auto text-sm md:text-base font-bold uppercase tracking-[0.2em] rounded-sm transition-colors hover:cursor-pointer">
               {colCat}
             </Button>
-          </div>
+          </Link>
         )}
       </div>
     </section>
