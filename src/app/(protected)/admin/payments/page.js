@@ -36,10 +36,10 @@ export default function PaymentMethodsPage() {
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-black text-zinc-900 tracking-tight mb-1">Payment Methods</h2>
+          <h2 className="font-figtree text-2xl md:text-3xl font-bold text-zinc-900 tracking-tight mb-1">Payment Methods</h2>
           <p className="text-zinc-500 font-medium">Securely manage your cards and digital wallets.</p>
         </div>
-        <button className="px-6 py-3 bg-zinc-900 text-white text-xs font-black uppercase tracking-[0.2em] rounded-2xl hover:bg-zinc-800 transition-colors shadow-lg shadow-zinc-900/20 flex items-center gap-2">
+        <button className="font-figtree px-6 py-3 bg-primary text-white text-xs font-semibold uppercase tracking-[0.15em] rounded-2xl hover:opacity-90 transition-colors shadow-lg shadow-primary/20 flex items-center gap-2 w-fit">
           <Plus size={16} />
           Add New Card
         </button>
