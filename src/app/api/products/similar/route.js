@@ -30,7 +30,12 @@ export async function GET(request) {
       .find({ $or: idFilters })
       .toArray();
 
-    return NextResponse.json({ products: similarProducts });
+    return NextResponse.json({ 
+      products: similarProducts.map(p => ({
+        ...p,
+        reviews: p.reviews || p.reviewStats || null
+      }))
+    });
   } catch (error) {
     console.error("Similar Products Error:", error);
     return NextResponse.json({ error: "Failed to fetch similar products", message: error.message }, { status: 500 });

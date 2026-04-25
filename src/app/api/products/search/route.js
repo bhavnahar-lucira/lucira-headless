@@ -9,7 +9,8 @@ export async function GET(request) {
     const limit = parseInt(searchParams.get("limit") || "20");
     const page = parseInt(searchParams.get("page") || "1");
     const query = searchParams.get("q");
-    const sort = searchParams.get("sort") || "featured";
+    // If q is present and no sort is specified, default to relevance
+    const sort = searchParams.get("sort") || (query ? "relevance" : "featured");
 
     const SORT_MAP = {
       featured: { diamondDiscount: -1, "reviewStats.count": -1, title: 1, _id: 1 },
@@ -96,6 +97,20 @@ export async function GET(request) {
     const variantFilters = {};
     const productFilters = {};
 
+    // Fetch store mappings to resolve store names back to GIDs
+    const storesCollection = db.collection("stores");
+    const stores = await storesCollection.find({}).toArray();
+    const nameToGidMap = {};
+    stores.forEach(s => {
+      let displayName = s.name;
+      if (displayName.includes("Divinecarat")) displayName = "Malad";
+      if (displayName === "BO1") displayName = "Borivali";
+      if (displayName === "CS1") displayName = "Chembur";
+      if (displayName === "PS1") displayName = "Pune";
+      if (displayName === "NOS18") displayName = "Noida";
+      nameToGidMap[displayName] = s.shopifyId;
+    });
+
     searchParams.forEach((value, key) => {
       if (!value || key === "handle" || key === "page" || key === "limit" || key === "sort" || key === "q") return;
       
@@ -113,13 +128,19 @@ export async function GET(request) {
       }
 
       if (mongoKey) {
+        // Resolve store name to GID if it's the in_store_available filter
+        let finalValue = value;
+        if (mongoKey === "variants.metafields.in_store_available" && nameToGidMap[value]) {
+          finalValue = nameToGidMap[value];
+        }
+
         if (mongoKey.startsWith("variants.")) {
           const vKey = mongoKey.replace("variants.", "");
           if (!variantFilters[vKey]) variantFilters[vKey] = [];
-          variantFilters[vKey].push(value);
+          variantFilters[vKey].push(finalValue);
         } else {
           if (!productFilters[mongoKey]) productFilters[mongoKey] = [];
-          productFilters[mongoKey].push(value);
+          productFilters[mongoKey].push(finalValue);
         }
       }
     });
@@ -159,7 +180,7 @@ export async function GET(request) {
       if (maxPrice) filter.price.$lte = Number(maxPrice);
     }
 
-    const { filter: resolvedFilter, strategy } = await resolveSearchMatch(productsCollection, filter, query || "");
+    const { filter: resolvedFilter, fallbackFilter, strategy } = await resolveSearchMatch(productsCollection, filter, query || "");
 
     let finalSort = sortConfig;
     const projection = {
@@ -179,7 +200,7 @@ export async function GET(request) {
 
     console.log(`Applying sort: ${JSON.stringify(finalSort)} to collection: ${handle}`);
 
-    const products = await productsCollection
+    let products = await productsCollection
       .find(resolvedFilter)
       .project(projection)
       .sort(finalSort)
@@ -187,10 +208,26 @@ export async function GET(request) {
       .limit(limit)
       .toArray();
 
-    const total = await productsCollection.countDocuments(resolvedFilter);
+    let total = await productsCollection.countDocuments(resolvedFilter);
+
+    // If no products found and we have a query, try fallback broad search
+    if (products.length === 0 && query && fallbackFilter) {
+      console.log(`No results for primary search "${query}", trying fallback...`);
+      products = await productsCollection
+        .find(fallbackFilter)
+        .project(projection)
+        .sort(sort === "relevance" ? { title: 1 } : finalSort)
+        .skip((page - 1) * limit)
+        .limit(limit)
+        .toArray();
+      total = await productsCollection.countDocuments(fallbackFilter);
+    }
 
     return NextResponse.json({
-      products,
+      products: products.map(p => ({
+        ...p,
+        reviews: p.reviews || p.reviewStats || null
+      })),
       pagination: { total, page, limit, totalPages: Math.ceil(total / limit) }
     });
 

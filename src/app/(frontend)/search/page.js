@@ -122,6 +122,7 @@ export default function SearchPage() {
     },
     initialPageParam: 1,
     getNextPageParam: (lastPage) => {
+      if (!lastPage || !lastPage.pagination) return undefined;
       const { page, totalPages } = lastPage.pagination;
       if (page < totalPages) return page + 1;
       return undefined;
@@ -148,12 +149,13 @@ export default function SearchPage() {
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const products = useMemo(() => {
-    const allProducts = data?.pages.flatMap((page) => page.products) || [];
+    const allProducts = data?.pages.flatMap((page) => page.products || []) || [];
     // Deduplicate by shopifyId or id
     const uniqueMap = new Map();
     allProducts.forEach(p => {
+      if (!p) return;
       const key = p.shopifyId || p.id;
-      if (!uniqueMap.has(key)) {
+      if (key && !uniqueMap.has(key)) {
         uniqueMap.set(key, p);
       }
     });
@@ -206,8 +208,8 @@ export default function SearchPage() {
 
 
 
-  const totalCount = data?.pages[0]?.pagination.total || 0;
-  const reachedEnd = products.length >= totalCount && totalCount > 0;
+  const totalCount = data?.pages?.[0]?.pagination?.total || 0;
+  const reachedEnd = totalCount > 0 && products.length >= totalCount;
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -314,197 +316,203 @@ export default function SearchPage() {
 
       <div className="flex gap-12 py-6 max-w-350 mx-auto">
         {/* ================= FILTERS SIDEBAR ================= */}
-        <div className="hidden lg:block w-78 shrink-0">
-          <div className="sticky top-5 self-start h-fit">
-            <ScrollArea className="w-full h-[calc(100vh-5rem)]">
-              {filtersLoading && Object.keys(availableFilters).length === 0 ? (
-                <FilterSidebarSkeleton />
-              ) : (
-                <div className={`space-y-3 px-4 ${isFiltersUpdating ? "opacity-50 pointer-events-none" : ""}`}>
-                  <div className="flex justify-between items-center border-b">
-                    <h3 className="font-semibold mb-3 font-black uppercase tracking-widest text-sm">Filters</h3>
-                    <button 
-                      onClick={clearAllFilters} 
-                      className="text-[10px] font-bold uppercase text-zinc-400 hover:text-black mb-3"
-                    >
-                      Clear All
-                    </button>
+        {products.length > 0 && (
+          <div className="hidden lg:block w-78 shrink-0">
+            <div className="sticky top-5 self-start h-fit">
+              <ScrollArea className="w-full h-[calc(100vh-5rem)]">
+                {filtersLoading && Object.keys(availableFilters).length === 0 ? (
+                  <FilterSidebarSkeleton />
+                ) : (
+                  <div className={`space-y-3 px-4 ${isFiltersUpdating ? "opacity-50 pointer-events-none" : ""}`}>
+                    <div className="flex justify-between items-center border-b">
+                      <h3 className="font-semibold mb-3 font-black uppercase tracking-widest text-sm">Filters</h3>
+                      <button 
+                        onClick={clearAllFilters} 
+                        className="text-[10px] font-bold uppercase text-zinc-400 hover:text-black mb-3"
+                      >
+                        Clear All
+                      </button>
+                    </div>
+
+                    {Object.entries(availableFilters || {}).map(([groupKey, options]) => {
+                      const isExpanded = expandedFilters[groupKey] ?? false;
+                      return (
+                        <div key={groupKey} className="border-b mb-0">                     
+                            <button
+                              onClick={() => toggleFilterExpand(groupKey)}
+                              className="w-full flex items-center justify-between py-5 hover:opacity-70 transition-opacity hover:cursor-pointe"
+                            >
+                              <h4 className="font-medium text-sm capitalize">{groupKey}</h4>
+                              <ChevronDown
+                                size={18}
+                                className={`transition-transform duration-300 ${
+                                  isExpanded ? "rotate-0" : "rotate-180"
+                                }`}
+                              />
+                            </button>
+
+                          {isExpanded && (
+                            <div className="space-y-4 my-2 pb-5">
+                              {Array.isArray(options) &&
+                                options.map((option) => {
+                                  const isSelected = searchParams.getAll(option.urlKey).includes(option.value);
+                                  return (
+                                    <div key={option.value} className="flex items-start gap-3 text-sm">
+                                      <input
+                                        type="checkbox"
+                                        id={`${groupKey}-${option.value}`}
+                                        checked={!!isSelected}
+                                        onChange={() => toggleFilter(option.urlKey, option.value)}
+                                        className="h-4 w-4 rounded border-gray-300 text-black focus:ring-black cursor-pointer"
+                                      />
+
+                                      <label
+                                        htmlFor={`${groupKey}-${option.value}`}
+                                        className="flex-1 cursor-pointer flex justify-between"
+                                      >
+                                        <span>{option.label}</span>
+                                        <span className="text-gray-400 text-xs">
+                                          ({option.count})
+                                        </span>
+                                      </label>
+                                    </div>
+                                  );
+                                })}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
-
-                  {Object.entries(availableFilters || {}).map(([groupKey, options]) => {
-                    const isExpanded = expandedFilters[groupKey] ?? false;
-                    return (
-                      <div key={groupKey} className="border-b mb-0">                     
-                          <button
-                            onClick={() => toggleFilterExpand(groupKey)}
-                            className="w-full flex items-center justify-between py-5 hover:opacity-70 transition-opacity hover:cursor-pointe"
-                          >
-                            <h4 className="font-medium text-sm capitalize">{groupKey}</h4>
-                            <ChevronDown
-                              size={18}
-                              className={`transition-transform duration-300 ${
-                                isExpanded ? "rotate-0" : "rotate-180"
-                              }`}
-                            />
-                          </button>
-
-                        {isExpanded && (
-                          <div className="space-y-4 my-2 pb-5">
-                            {Array.isArray(options) &&
-                              options.map((option) => {
-                                const isSelected = searchParams.getAll(option.urlKey).includes(option.value);
-                                return (
-                                  <div key={option.value} className="flex items-start gap-3 text-sm">
-                                    <input
-                                      type="checkbox"
-                                      id={`${groupKey}-${option.value}`}
-                                      checked={!!isSelected}
-                                      onChange={() => toggleFilter(option.urlKey, option.value)}
-                                      className="h-4 w-4 rounded border-gray-300 text-black focus:ring-black cursor-pointer"
-                                    />
-
-                                    <label
-                                      htmlFor={`${groupKey}-${option.value}`}
-                                      className="flex-1 cursor-pointer flex justify-between"
-                                    >
-                                      <span>{option.label}</span>
-                                      <span className="text-gray-400 text-xs">
-                                        ({option.count})
-                                      </span>
-                                    </label>
-                                  </div>
-                                );
-                              })}
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </ScrollArea>
+                )}
+              </ScrollArea>
+            </div>
           </div>
-        </div>
+        )}
 
         {/* ================= PRODUCTS SECTION ================= */}
         <div className="flex-1">
           {/* Toolbar */}
-          <div className="flex gap-4 items-center justify-between sticky top-0 bg-white z-20 py-4">
-            <div className="flex gap-3 items-center">
-              {/* Mobile Filter Sheet */}
-              <Sheet>
-                <SheetTrigger asChild>
-                  <Button variant="outline" size="sm" className="lg:hidden">
-                    <FilterIcon size={16} className="mr-2" /> Filters
-                  </Button>
-                </SheetTrigger>
-                <SheetContent side="left" className="w-80">
-                  <SheetHeader>
-                    <SheetTitle>Filters</SheetTitle>
-                  </SheetHeader>
-                  <ScrollArea className="h-[calc(100vh-8rem)] mt-6">
-                    {filtersLoading && Object.keys(availableFilters).length === 0 ? (
-                      <FilterSidebarSkeleton />
-                    ) : (
-                      <div className={`space-y-4 ${isFiltersUpdating ? "opacity-50 pointer-events-none" : ""}`}>
-                        <Button variant="ghost" size="sm" onClick={clearAllFilters} className="text-xs w-full">
-                          Clear All
-                        </Button>
-                        {Object.entries(availableFilters).map(([groupKey, options]) => {
-                          const isExpanded = expandedFilters[groupKey] ?? false;
+          {products.length > 0 && (
+            <div className="flex gap-4 items-center justify-between sticky top-0 bg-white z-20 py-4">
+              <div className="flex gap-3 items-center">
+                {/* Mobile Filter Sheet */}
+                <Sheet>
+                  <SheetTrigger asChild>
+                    <Button variant="outline" size="sm" className="lg:hidden">
+                      <FilterIcon size={16} className="mr-2" /> Filters
+                    </Button>
+                  </SheetTrigger>
+                  <SheetContent side="left" className="w-80">
+                    <SheetHeader>
+                      <SheetTitle>Filters</SheetTitle>
+                    </SheetHeader>
+                    <ScrollArea className="h-[calc(100vh-8rem)] mt-6">
+                      {filtersLoading && Object.keys(availableFilters).length === 0 ? (
+                        <FilterSidebarSkeleton />
+                      ) : (
+                        <div className={`space-y-4 ${isFiltersUpdating ? "opacity-50 pointer-events-none" : ""}`}>
+                          <Button variant="ghost" size="sm" onClick={clearAllFilters} className="text-xs w-full">
+                            Clear All
+                          </Button>
+                          {Object.entries(availableFilters).map(([groupKey, options]) => {
+                            const isExpanded = expandedFilters[groupKey] ?? false;
 
-                          return (
-                            <div key={groupKey} className="border-b pb-4">
-                              <div className="flex items-center justify-between py-2">
-                                <button
-                                  onClick={() => toggleFilterExpand(groupKey)}
-                                  className="flex items-center gap-2 hover:opacity-70 transition-opacity"
-                                >
-                                  <h4 className="font-medium text-sm capitalize">{groupKey}</h4>
-                                  <ChevronDown
-                                    size={18}
-                                    className={`transition-transform duration-300 ${
-                                      isExpanded ? "rotate-0" : "rotate-180"
-                                    }`}
-                                  />
-                                </button>
-                              </div>
-
-                              {isExpanded && (
-                                <div className="space-y-2 mt-3">
-                                  {Array.isArray(options) &&
-                                    options.map((option) => {
-                                      const isSelected = searchParams.getAll(option.urlKey).includes(option.value);
-
-                                      return (
-                                        <div key={option.value} className="flex items-center gap-2">
-                                          <input
-                                            type="checkbox"
-                                            id={`m-${groupKey}-${option.value}`}
-                                            checked={!!isSelected}
-                                            onChange={() => toggleFilter(option.urlKey, option.value)}
-                                            className="h-4 w-4 rounded border-gray-300 text-black focus:ring-black cursor-pointer"
-                                          />
-                                          <label
-                                            htmlFor={`m-${groupKey}-${option.value}`}
-                                            className="text-sm cursor-pointer flex-1 flex justify-between"
-                                          >
-                                            <span>{option.label}</span>
-                                            <span className="text-xs text-gray-500">{option.count}</span>
-                                          </label>
-                                        </div>
-                                      );
-                                    })}
+                            return (
+                              <div key={groupKey} className="border-b pb-4">
+                                <div className="flex items-center justify-between py-2">
+                                  <button
+                                    onClick={() => toggleFilterExpand(groupKey)}
+                                    className="flex items-center gap-2 hover:opacity-70 transition-opacity"
+                                  >
+                                    <h4 className="font-medium text-sm capitalize">{groupKey}</h4>
+                                    <ChevronDown
+                                      size={18}
+                                      className={`transition-transform duration-300 ${
+                                        isExpanded ? "rotate-0" : "rotate-180"
+                                      }`}
+                                    />
+                                  </button>
                                 </div>
-                              )}
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </ScrollArea>
-                </SheetContent>
-              </Sheet>
 
-              <span className="text-sm text-gray-500">
-                {products.length}/{totalCount} products
-              </span>
-            </div>
+                                {isExpanded && (
+                                  <div className="space-y-2 mt-3">
+                                    {Array.isArray(options) &&
+                                      options.map((option) => {
+                                        const isSelected = searchParams.getAll(option.urlKey).includes(option.value);
 
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-600">Sort:</span>
-                <select 
-                  value={activeSort} 
-                  onChange={(e) => handleSort(e.target.value)} 
-                  className="text-sm border rounded-md px-3 py-2 bg-white outline-none focus:ring-1 focus:ring-black"
-                >
-                  {SORT_OPTIONS.map((opt) => (
-                    <option key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </option>
-                  ))}
-                </select>
+                                        return (
+                                          <div key={option.value} className="flex items-center gap-2">
+                                            <input
+                                              type="checkbox"
+                                              id={`m-${groupKey}-${option.value}`}
+                                              checked={!!isSelected}
+                                              onChange={() => toggleFilter(option.urlKey, option.value)}
+                                              className="h-4 w-4 rounded border-gray-300 text-black focus:ring-black cursor-pointer"
+                                            />
+                                            <label
+                                              htmlFor={`m-${groupKey}-${option.value}`}
+                                              className="text-sm cursor-pointer flex-1 flex justify-between"
+                                            >
+                                              <span>{option.label}</span>
+                                              <span className="text-xs text-gray-500">{option.count}</span>
+                                            </label>
+                                          </div>
+                                        );
+                                      })}
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </ScrollArea>
+                  </SheetContent>
+                </Sheet>
+
+                <span className="text-sm text-gray-500">
+                  {products.length}/{totalCount} products
+                </span>
+              </div>
+
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-gray-600">Sort:</span>
+                  <select 
+                    value={activeSort} 
+                    onChange={(e) => handleSort(e.target.value)} 
+                    className="text-sm border rounded-md px-3 py-2 bg-white outline-none focus:ring-1 focus:ring-black"
+                  >
+                    {SORT_OPTIONS.map((opt) => (
+                      <option key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
           {/* Applied Filters Badges */}
-          <div className="flex flex-wrap items-center gap-2 mb-4">
-            {Object.entries(availableFilters).map(([groupKey, options]) => 
-              options.filter(opt => searchParams.getAll(opt.urlKey).includes(opt.value)).map((opt) => (
-                <Badge
-                  key={`${groupKey}-${opt.value}`}
-                  variant="secondary"
-                  className="bg-[#FFF5F1] text-black hover:bg-[#FFE4D9] border-none px-3 py-1 rounded-full flex items-center gap-2 cursor-pointer"
-                  onClick={() => toggleFilter(opt.urlKey, opt.value)}
-                >
-                  <span className="text-xs font-medium">{opt.label.split(" (")[0]}</span>
-                  <XIcon className="size-3" />
-                </Badge>
-              ))
-            )}
-          </div>
+          {products.length > 0 && (
+            <div className="flex flex-wrap items-center gap-2 mb-4">
+              {Object.entries(availableFilters).map(([groupKey, options]) => 
+                options.filter(opt => searchParams.getAll(opt.urlKey).includes(opt.value)).map((opt) => (
+                  <Badge
+                    key={`${groupKey}-${opt.value}`}
+                    variant="secondary"
+                    className="bg-[#FFF5F1] text-black hover:bg-[#FFE4D9] border-none px-3 py-1 rounded-full flex items-center gap-2 cursor-pointer"
+                    onClick={() => toggleFilter(opt.urlKey, opt.value)}
+                  >
+                    <span className="text-xs font-medium">{opt.label.split(" (")[0]}</span>
+                    <XIcon className="size-3" />
+                  </Badge>
+                ))
+              )}
+            </div>
+          )}
 
           {/* Products Grid */}
           {showInitialSkeleton ? (
@@ -535,14 +543,48 @@ export default function SearchPage() {
               </div>
             </>
           ) : !productsLoading && (
-            <div className="flex flex-col items-center justify-center py-20 text-center">
-              <div className="bg-gray-50 p-6 rounded-full mb-6">
-                <Search size={48} className="text-gray-300" strokeWidth={1} />
+            <div className="flex flex-col items-center justify-center py-24 text-center">
+              <div className="mb-8">
+                <Image 
+                  src="/images/icons/search-empty.svg" 
+                  alt="No Gems Found" 
+                  width={120} 
+                  height={120}
+                  className="opacity-80"
+                  onError={(e) => {
+                    // Fallback if SVG doesn't exist
+                    e.target.style.display = 'none';
+                  }}
+                />
               </div>
-              <h2 className="text-xl font-medium mb-2">No products found</h2>
-              <p className="text-gray-500 max-w-md">
-                We couldn't find any products matching your search. Try adjusting your keywords or filters.
-              </p>
+              
+              <h2 className="text-3xl md:text-5xl font-serif tracking-widest uppercase mb-6 text-[#1A1A1A]">
+                No Gems Found
+              </h2>
+              
+              <div className="space-y-1 mb-10">
+                <p className="text-gray-500 text-lg">
+                  We couldn't find anything for "{query}".
+                </p>
+                <p className="text-gray-500 text-lg font-light italic">
+                  But beauty is never far.
+                </p>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-4 w-full max-w-lg justify-center">
+                <Link 
+                  href="/collections/all" 
+                  className="flex-1 bg-primary text-white py-4 px-8 rounded-full uppercase tracking-wider text-sm font-bold transition-all shadow-sm"
+                >
+                  Browse Our Collections
+                </Link>
+                <Link 
+                  href="/" 
+                  className="flex-1 border border-[#A1636A] text-[#A1636A] hover:bg-[#A1636A]/5 py-4 px-8 rounded-full uppercase tracking-wider text-sm font-bold transition-all"
+                >
+                  Go to Homepage
+                </Link>
+              </div>
             </div>
           )}
         </div>

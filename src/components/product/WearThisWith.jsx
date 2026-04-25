@@ -29,6 +29,7 @@ export default function WearThisWith({ products = [] }) {
           modules={[Pagination]}
           spaceBetween={20}
           slidesPerView={1.2}
+          loop={products.length > 2}
           onSwiper={setSwiper}
           onSlideChange={(s) => setActiveSlide(s.realIndex)}
           breakpoints={{
@@ -73,16 +74,21 @@ export default function WearThisWith({ products = [] }) {
                   {/* Info */}
                   <div className="space-y-1.5">
                     <h3 className="text-[14px] font-bold text-black leading-tight line-clamp-1">{product.title}</h3>
-                    {product.reviews && (
-                      <div className="flex items-center gap-1">
-                        <div className="flex items-center text-amber-400">
-                          {[1,2,3,4,5].map(i => (
-                            <Star key={i} size={12} fill={i <= Math.floor(product.reviews.average) ? "currentColor" : "none"} className={i <= Math.floor(product.reviews.average) ? "" : "text-zinc-200"} />
-                          ))}
-                        </div>
-                        <span className="text-[12px] font-bold text-black ml-1">{product.reviews.average}</span>
-                      </div>
-                    )}
+                    {(() => {
+                        const average = product.reviews?.average || product.reviewStats?.average || 0;
+                        if (average < 3) return null;
+                        
+                        return (
+                          <div className="flex items-center gap-1">
+                            <div className="flex items-center text-amber-400">
+                              {[1,2,3,4,5].map(i => (
+                                <Star key={i} size={12} fill={i <= Math.floor(average) ? "currentColor" : "none"} className={i <= Math.floor(average) ? "" : "text-zinc-200"} />
+                              ))}
+                            </div>
+                            <span className="text-[12px] font-bold text-black ml-1">{average}</span>
+                          </div>
+                        );
+                    })()}
                     <p className="text-[12px] text-gray-500 font-medium line-clamp-2 leading-snug">
                       {product.productMetafields?.carat_range || "Diamond"} · {product.productMetafields?.material_type || "Jewellery"}
                     </p>
