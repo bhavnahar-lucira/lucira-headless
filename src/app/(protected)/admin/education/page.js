@@ -139,7 +139,7 @@ export default function EducationPage() {
               <div className="size-10 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-600 shrink-0">
                  <GraduationCap size={24} />
               </div>
-              <h2 className="text-2xl md:text-3xl font-black text-zinc-900 tracking-tight uppercase">
+              <h2 className="text-xl md:text-2xl font-bold text-zinc-900 tracking-tight uppercase">
                 Education
               </h2>
             </div>
@@ -159,7 +159,7 @@ export default function EducationPage() {
               pagination={{ clickable: true }}
               navigation
               autoplay={{ delay: 5000 }}
-              className="w-full aspect-[16/9] md:aspect-[21/9] edu-swiper"
+              className="w-full h-[300px] edu-swiper"
             >
               {educationSlides.map((slide, idx) => (
                 <SwiperSlide key={idx}>
@@ -190,12 +190,12 @@ export default function EducationPage() {
               className={`${guide.bgClass} rounded-[2rem] md:rounded-[2.5rem] p-8 md:p-12 flex flex-col justify-between group hover:shadow-2xl transition-all duration-500 border border-zinc-100 w-full`}
             >
               <div>
-                <h3 className="text-2xl md:text-3xl font-black text-zinc-900 mb-4 uppercase">{guide.title}</h3>
+                <h3 className="text-xl md:text-2xl font-bold text-zinc-900 mb-4 uppercase tracking-tight">{guide.title}</h3>
                 <p className="text-zinc-600 font-medium leading-relaxed max-w-sm">
                   {guide.desc}
                 </p>
               </div>
-              <div className="mt-8 flex items-center gap-3 text-zinc-900 font-black uppercase tracking-widest text-xs group-hover:translate-x-2 transition-transform">
+              <div className="mt-8 flex items-center gap-3 text-zinc-900 font-bold uppercase tracking-widest text-[10px] group-hover:translate-x-2 transition-transform">
                 View Guide <ChevronRight size={16} />
               </div>
             </Link>
@@ -204,7 +204,7 @@ export default function EducationPage() {
 
         {/* Size Guide Section */}
         <div className="bg-white rounded-[2rem] md:rounded-[2.5rem] border border-zinc-100 p-8 md:p-14 text-center shadow-sm mx-1">
-          <h2 className="text-2xl md:text-3xl font-black text-zinc-900 mb-4 uppercase tracking-tight">Size Guide</h2>
+          <h2 className="text-xl md:text-2xl font-bold text-zinc-900 mb-4 uppercase tracking-tight">Size Guide</h2>
           <p className="text-zinc-500 font-medium max-w-2xl mx-auto mb-12 text-sm md:text-base">
             Find the perfect fit with our easy sizing guide. Learn how to measure rings, bracelets, and necklaces accurately for comfort and everyday wear.
           </p>
@@ -213,7 +213,7 @@ export default function EducationPage() {
               <Link
                 key={idx}
                 href={guide.href}
-                className="bg-zinc-50 border border-zinc-100 rounded-2xl p-4 md:p-6 font-black text-[10px] md:text-xs uppercase tracking-widest text-zinc-900 hover:bg-zinc-900 hover:text-white transition-all duration-300"
+                className="bg-zinc-50 border border-zinc-100 rounded-2xl p-4 md:p-6 font-bold text-[10px] md:text-xs uppercase tracking-widest text-zinc-900 hover:bg-zinc-900 hover:text-white transition-all duration-300"
               >
                 {guide.title}
               </Link>
@@ -236,7 +236,7 @@ export default function EducationPage() {
                  />
               </div>
               <div className="w-full md:w-1/2 p-8 md:p-16 text-left flex flex-col justify-center space-y-4 md:space-y-6">
-                 <h2 className="text-2xl md:text-3xl font-black text-zinc-900 uppercase tracking-tight leading-tight">
+                 <h2 className="text-xl md:text-2xl font-bold text-zinc-900 uppercase tracking-tight leading-tight">
                    {section.title}
                  </h2>
                  <p className="text-zinc-500 font-medium leading-relaxed text-sm md:text-base">
@@ -244,7 +244,7 @@ export default function EducationPage() {
                  </p>
                  <Link 
                    href={section.href}
-                   className="inline-flex items-center gap-2 px-6 md:px-8 py-3 bg-zinc-900 text-white text-[10px] md:text-xs font-black uppercase tracking-widest rounded-xl hover:bg-primary transition-colors w-fit"
+                   className="inline-flex items-center gap-2 px-6 md:px-8 py-3 bg-zinc-900 text-white text-[10px] md:text-xs font-bold uppercase tracking-widest rounded-xl hover:bg-primary transition-colors w-fit"
                  >
                    Know More
                  </Link>
