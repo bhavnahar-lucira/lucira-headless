@@ -16,7 +16,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { ChevronLeft, Trash2, Plus, Loader2 } from "lucide-react";
+import { ChevronLeft, Trash2, Plus, Loader2, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import Link from "next/link";
@@ -37,6 +37,8 @@ import { selectUser } from "@/redux/features/user/userSlice";
 import { useCart } from "@/hooks/useCart";
 import { toast } from "react-toastify";
 import { pushAddPaymentInfo } from "@/lib/gtm";
+import { MobileBottomSheet } from "@/components/common/MobileBottomSheet";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 
 
 const INSURANCE_VARIANT_ID = "gid://shopify/ProductVariant/47709366026458";
@@ -75,7 +77,7 @@ function normalizeAddressForm(address = {}, customer = {}) {
   };
 }
 
-function AddressFields({ form, onChange, makeDefault, onDefaultChange, submitLabel, onSubmit, saving, children }) {
+function AddressFields({ form, onChange, makeDefault, onDefaultChange, submitLabel, onSubmit, saving, children, isMobile = false }) {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -114,14 +116,14 @@ function AddressFields({ form, onChange, makeDefault, onDefaultChange, submitLab
       </div>
 
       <div className="flex items-center space-x-2">
-        <Checkbox id="make-default-address" checked={makeDefault} onCheckedChange={(checked) => onDefaultChange(Boolean(checked))} />
-        <label htmlFor="make-default-address" className="text-sm font-medium text-zinc-700 cursor-pointer">
+        <Checkbox id={`make-default-${isMobile ? 'mobile' : 'desktop'}`} checked={makeDefault} onCheckedChange={(checked) => onDefaultChange(Boolean(checked))} />
+        <label htmlFor={`make-default-${isMobile ? 'mobile' : 'desktop'}`} className="text-sm font-medium text-zinc-700 cursor-pointer">
           Use this as my default shipping address
         </label>
       </div>
 
       <div className="flex items-center justify-between gap-4">
-        <Button type="button" onClick={onSubmit} disabled={saving} className="w-full md:w-auto h-12 bg-primary hover:bg-primary/90 text-white font-bold">
+        <Button type="button" onClick={onSubmit} disabled={saving} className={`grow md:grow-0 md:w-auto h-14 md:h-12 bg-primary hover:bg-primary/90 text-white font-bold ${isMobile ? 'rounded-full uppercase tracking-widest' : ''}`}>
           {saving ? <Loader2 className="size-4 animate-spin" /> : submitLabel}
         </Button>
         {children}
@@ -232,6 +234,7 @@ function loadRazorpayScript() {
 }
 
 export default function PaymentPage() {
+  const isDesktop = useMediaQuery("(min-width: 1024px)");
   const router = useRouter();
   const dispatch = useDispatch();
   const paymentGateways = [
@@ -285,16 +288,13 @@ export default function PaymentPage() {
         makeDefault,
       });
       
-      // Update local addresses list
       setAddresses(payload.addresses || []);
       
-      // Find the newly created address
       const newAddress = payload.addresses.find(a => 
         a.address1 === addressForm.address1 && a.zip === addressForm.zip
       ) || payload.addresses[payload.addresses.length - 1];
 
       if (newAddress) {
-        // Automatically select it for billing
         handleSelectBillingAddress(newAddress.id);
       }
 
@@ -329,7 +329,7 @@ export default function PaymentPage() {
       if (!hasDiamondJewellery) {
         dispatch(removePoints());
         toast.info("Loyalty points removed as diamond jewellery is no longer in cart.", {
-          toastId: "points-removed-safety" // Prevent duplicates
+          toastId: "points-removed-safety"
         });
       }
     }
@@ -520,7 +520,6 @@ export default function PaymentPage() {
     try {
       setPaymentLoading(true);
 
-      // Trigger GTM add_payment_info
       const getNumericId = (gid) => {
         if (!gid) return 0;
         if (typeof gid === 'number') return gid;
@@ -543,10 +542,7 @@ export default function PaymentPage() {
       }
 
       const pointsDiscountAmount = nectorPoints?.fiat_value || 0;
-
-      // Final Grand Total calculation consistent with Summary
       const grandTotalValue = subtotalValue + insuranceValue - couponDiscountAmount - pointsDiscountAmount;
-
       const loyaltyPoints = appliedCoupon?.loyaltyPoints || ""; 
 
       const purchaseDataForLater = {
@@ -555,7 +551,7 @@ export default function PaymentPage() {
         tax: Number((grandTotalValue * 0.03).toFixed(2)),
         shipping: 0,
         affiliation: "Lucira Jewelry",
-        transaction_id: `temp_${Date.now()}`, // Will be updated on success
+        transaction_id: `temp_${Date.now()}`,
         coupon: couponDetails?.code || "NA",
         items: (items || []).map((item, idx) => {
           const lowerTitle = (item.title || "").toLowerCase();
@@ -616,8 +612,6 @@ export default function PaymentPage() {
         })
       });
 
-
-
       const scriptLoaded = await loadRazorpayScript();
       if (!scriptLoaded || !window.Razorpay) {
         throw new Error("Unable to load Razorpay checkout");
@@ -651,7 +645,6 @@ export default function PaymentPage() {
           try {
             setPaymentLoading(true);
 
-            // Prepare purchase data for Success Page
             const getNumericId = (gid) => {
               if (!gid) return 0;
               if (typeof gid === 'number') return gid;
@@ -678,7 +671,7 @@ export default function PaymentPage() {
             const purchaseData = {
               currency: "INR",
               value: grandTotalValue,
-              tax: Number((grandTotalValue * 0.03).toFixed(2)), // Assuming 3% GST for jewelry
+              tax: Number((grandTotalValue * 0.03).toFixed(2)),
               shipping: 0,
               affiliation: "Lucira Jewelry",
               transaction_id: response.razorpay_payment_id,
@@ -708,7 +701,6 @@ export default function PaymentPage() {
               })
             };
 
-            // Store for Success Page to pick up
             window.localStorage.setItem("gtm_purchase_data", JSON.stringify(purchaseData));
 
             const completion = await completeRazorpayPayment({
@@ -728,7 +720,6 @@ export default function PaymentPage() {
               billingAddress: selectedBillingAddress,
             });
 
-            // Call Nector Perform API if points were applied
             if (nectorPoints) {
               try {
                 const getNectorCustomerId = (gid) => {
@@ -740,9 +731,7 @@ export default function PaymentPage() {
 
                 await fetch('/api/nector/checkout', {
                   method: 'POST',
-                  headers: { 
-                    'Content-Type': 'application/json' 
-                  },
+                  headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({
                     customer_id: getNectorCustomerId(user?.id),
                     country: "ind",
@@ -815,7 +804,6 @@ export default function PaymentPage() {
           response?.error?.reason ||
           "Payment failed. Please try again.";
         
-        // Prepare failure data
         const getNumericId = (gid) => {
           if (!gid) return 0;
           if (typeof gid === 'number') return gid;
@@ -882,6 +870,75 @@ export default function PaymentPage() {
 
   const isPickup = checkoutSelection?.deliveryMethod === "pickup";
 
+  const AddressListContent = ({ type }) => (
+    <div className="max-h-[60vh] space-y-3 overflow-y-auto pr-1 custom-scrollbar">
+      {addresses.map((address) => {
+        const isSelected = type === "shipping" ? selectedAddressId === address.id : selectedBillingAddress?.id === address.id;
+        return (
+          <div
+            key={`${type}-${address.id}`}
+            onClick={() => type === "shipping" ? handleSelectAddress(address.id) : handleSelectBillingAddress(address.id)}
+            role="button"
+            tabIndex={0}
+            className={`rounded-xl border p-4 text-left transition-all ${
+              isSelected ? "border-accent bg-accent/10" : "border-zinc-200 bg-white"
+            }`}
+          >
+            <div className="flex items-start gap-3">
+              <input
+                type="radio"
+                name={`${type}-addresses`}
+                checked={isSelected}
+                onChange={() => {}}
+                className="mt-1 size-4 accent-black"
+              />
+              <div className="flex-1">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-semibold text-zinc-900">
+                      {[address.firstName, address.lastName].filter(Boolean).join(" ") || "Saved address"}
+                    </h3>
+                    {address.isDefault && (
+                      <span className="rounded-full bg-zinc-900 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-white">
+                        Default
+                      </span>
+                    )}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={async (e) => {
+                      e.stopPropagation();
+                      await handleDeleteAddress(address.id);
+                    }}
+                    className="rounded-full bg-white shadow border border-zinc-200 p-2 text-zinc-600 transition hover:border-red-200 hover:text-red-600"
+                  >
+                    <Trash2 className="size-4" />
+                  </button>
+                </div>
+                <div className="mt-2 space-y-1 text-sm text-zinc-600">
+                  {formatAddressLines(address).map((line) => (
+                    <p key={`line-${address.id}-${line}`}>{line}</p>
+                  ))}
+                  {address.gstin && <p className="font-medium text-zinc-800">GSTIN: {address.gstin}</p>}
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })}
+      {type === "billing" && (
+        <Button
+          variant="outline"
+          onClick={openAddNewAddress}
+          className="w-full h-12 border-dashed border-2 border-zinc-200 text-zinc-500 hover:text-primary hover:border-primary transition-all flex items-center justify-center gap-2 font-bold"
+        >
+          <Plus size={18} />
+          Add new address
+        </Button>
+      )}
+    </div>
+  );
+
   return (
     <div className="bg-white min-h-screen overflow-x-hidden">
       <div className="max-w-7xl w-full mx-auto relative z-10 px-4">
@@ -890,14 +947,13 @@ export default function PaymentPage() {
             <div className="border border-zinc-200 rounded-xl overflow-hidden bg-white">
               <div className="p-4 grid grid-cols-[140px_1fr_60px] items-center gap-4 text-sm border-b border-zinc-100">
                 <span className="text-zinc-500 whitespace-nowrap">Contact</span>
-                <span className="text-zinc-900 font-medium">{customer?.email || checkoutSelection?.customerEmail || "techamitjha@gmail.com"}</span>
+                <span className="text-zinc-900 font-medium truncate">{customer?.email || checkoutSelection?.customerEmail || "techamitjha@gmail.com"}</span>
                 <Link
                   href="/checkout/shipping?method=ship"
-                  className="text-[#005BD3] text-right hover:underline"
+                  className="text-black font-semibold text-right underline"
                 >
                   Change
                 </Link>
-
               </div>
 
               <div className="p-4 grid grid-cols-[140px_1fr_60px] items-center gap-4 text-sm border-b border-zinc-100">
@@ -919,7 +975,7 @@ export default function PaymentPage() {
                 </div>
                 <Link
                   href={`/checkout/shipping?method=${isPickup ? "pickup" : "ship"}`}
-                  className="text-[#005BD3] text-right hover:underline"
+                  className="text-black font-semibold text-right underline"
                 >
                   Change
                 </Link>
@@ -941,7 +997,7 @@ export default function PaymentPage() {
                   <button
                     type="button"
                     onClick={() => setBillingDialogOpen(true)}
-                    className="text-[#005BD3] text-right hover:underline"
+                    className="text-black font-semibold text-right underline"
                   >
                     Change
                   </button>
@@ -958,12 +1014,12 @@ export default function PaymentPage() {
 
             <div className="space-y-4">
               <div className="space-y-1">
-                <h2 className="text-xl font-bold text-zinc-900">Billing address</h2>
-                <p className="text-sm text-zinc-500">Select the address that matches your card or payment method.</p>
+                <h2 className="text-2xl font-bold text-zinc-900 font-abhaya">Billing address</h2>
+                <p className="text-sm font-figtree text-zinc-500">Select the address that matches your card or payment method.</p>
               </div>
 
               {isPickup ? (
-                <div className="border border-zinc-200 rounded-xl overflow-hidden bg-white">
+                <div className="border border-zinc-100 rounded-xl overflow-hidden bg-white">
                   <div className="p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div className="space-y-1">
                       {selectedBillingAddress ? (
@@ -980,7 +1036,7 @@ export default function PaymentPage() {
                     <Button
                       variant="outline"
                       onClick={() => setBillingDialogOpen(true)}
-                      className="border-zinc-200 text-[#005BD3] font-bold"
+                      className="border-zinc-200 text-zinc-800 font-bold"
                     >
                       Select billing address
                     </Button>
@@ -990,14 +1046,14 @@ export default function PaymentPage() {
                 <RadioGroup
                   value={billingAddressMode}
                   onValueChange={handleBillingModeChange}
-                  className="grid gap-0 border border-zinc-200 rounded-xl overflow-hidden bg-white"
+                  className="grid gap-0 border border-zinc-100 rounded-lg overflow-hidden bg-white"
                 >
-                  <div className={`p-5 flex items-center gap-3 border-b border-zinc-200 ${billingAddressMode === "same" ? "bg-[#F0F7FF]" : ""}`}>
-                    <RadioGroupItem value="same" id="same" className="text-[#005BD3] border-zinc-300" />
+                  <div className={`p-5 flex items-center gap-3 border-b border-zinc-100 ${billingAddressMode === "same" ? "bg-accent/15" : ""}`}>
+                    <RadioGroupItem value="same" id="same" className="text-black border-zinc-300" />
                     <Label htmlFor="same" className="font-medium text-zinc-900 cursor-pointer">Same as shipping address</Label>
                   </div>
-                  <div className={`p-5 flex items-center gap-3 transition-all hover:bg-zinc-50/50 cursor-pointer ${billingAddressMode === "different" ? "bg-[#F0F7FF]" : ""}`}>
-                    <RadioGroupItem value="different" id="different" className="text-[#005BD3] border-zinc-300" />
+                  <div className={`p-5 flex items-center gap-3 transition-all hover:bg-zinc-50/50 cursor-pointer ${billingAddressMode === "different" ? "bg-accent/15" : ""}`}>
+                    <RadioGroupItem value="different" id="different" className="text-black border-zinc-300" />
                     <Label htmlFor="different" className="font-medium text-zinc-900 cursor-pointer">Use a different billing address</Label>
                   </div>
                 </RadioGroup>
@@ -1006,37 +1062,37 @@ export default function PaymentPage() {
 
             <div className="space-y-4">
               <div className="space-y-1">
-                <h2 className="text-xl font-bold text-zinc-900">Payment</h2>
-                <p className="text-sm text-zinc-500">All transactions are secure and encrypted.</p>
+                <h2 className="text-2xl font-abhaya font-bold text-zinc-900">Payment</h2>
+                <p className="text-sm font-figtree text-zinc-500">All transactions are secure and encrypted.</p>
               </div>
 
               <RadioGroup
                 value={selectedPaymentGateway}
                 onValueChange={setSelectedPaymentGateway}
-                className="grid gap-0 border border-zinc-200 rounded-xl overflow-hidden bg-white"
+                className="grid gap-0 border border-zinc-200 rounded-lg overflow-hidden bg-white"
               >
                 {paymentGateways.map((gateway, index) => (
-                  <div key={gateway.id} className={`flex flex-col ${index === 0 ? "border-b border-zinc-200" : ""}`}>
-                    <div className={`p-5 flex items-center justify-between transition-all cursor-pointer ${index === 0 ? "bg-[#F0F7FF]" : ""}`}>
+                  <div key={gateway.id} className={`flex flex-col ${index === 0 ? "border-b border-zinc-100" : ""}`}>
+                    <div className={`p-5 flex flex-col md:flex-row gap-4 md:gap-0 items-center justify-between transition-all cursor-pointer ${index === 0 ? "bg-accent/15" : ""}`}>
                       <div className="flex items-center gap-3">
                         <RadioGroupItem value={gateway.id} id={gateway.id} className="text-[#005BD3] border-zinc-300" />
                         <Label htmlFor={gateway.id} className="font-medium text-zinc-900 cursor-pointer">{gateway.name}</Label>
                       </div>
                       <div className="flex items-center gap-2">
                         <div className="flex gap-1 items-center bg-white px-2 py-1 rounded border border-zinc-100">
-                          <Image src="https://upload.wikimedia.org/wikipedia/commons/e/e1/UPI-Logo.png" className="h-3 w-auto opacity-70" alt="UPI" width={36} height={12} unoptimized />
+                          <Image src="/images/icons/upi.svg" className="h-3 w-auto opacity-70" alt="UPI" width={36} height={12} unoptimized />
                         </div>
                         <div className="flex gap-1 items-center bg-white px-2 py-1 rounded border border-zinc-100">
-                          <Image src="https://upload.wikimedia.org/wikipedia/commons/d/d6/Visa_2021.svg" className="h-2 w-auto opacity-70" alt="VISA" width={36} height={8} unoptimized />
+                          <Image src="/images/icons/visa.svg" className="h-2 w-auto opacity-70" alt="VISA" width={36} height={8} unoptimized />
                         </div>
                         <div className="flex gap-1 items-center bg-white px-2 py-1 rounded border border-zinc-100">
-                          <Image src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" className="h-3 w-auto opacity-70" alt="MASTERCARD" width={36} height={12} unoptimized />
+                          <Image src="/images/icons/mastercard.svg" className="h-3 w-auto opacity-70" alt="MASTERCARD" width={36} height={12} unoptimized />
                         </div>
                         <span className="text-[10px] text-zinc-400 font-bold">+{index === 0 ? "18" : "4"}</span>
                       </div>
                     </div>
                     {gateway.description && (
-                      <div className="px-14 pb-5 pt-0 bg-[#F0F7FF] text-center">
+                      <div className="px-10 md:px-14 pb-5 pt-0 bg-accent/15 text-center">
                         <div className="p-4 bg-zinc-50/50 rounded-lg text-sm text-zinc-600 border border-zinc-100">
                           {gateway.description}
                         </div>
@@ -1047,8 +1103,8 @@ export default function PaymentPage() {
               </RadioGroup>
             </div>
 
-            <div className="flex flex-col md:flex-row items-center justify-between gap-6 pt-4">
-              <Link href="/checkout/shipping" className="flex items-center gap-2 text-sm font-medium text-[#005BD3] hover:underline">
+            <div className="hidden lg:flex items-center justify-between gap-6 pt-4">
+              <Link href="/checkout/shipping" className="flex items-center gap-2 text-sm font-bold text-accent hover:underline">
                 <ChevronLeft size={16} />
                 Return to shipping
               </Link>
@@ -1056,7 +1112,7 @@ export default function PaymentPage() {
                 type="button"
                 onClick={handlePayNow}
                 disabled={paymentLoading || !totalAmount}
-                className="w-full md:w-max md:px-14 h-14 bg-primary hover:bg-primary/90 text-white font-bold rounded-lg transition-all text-lg uppercase tracking-widest disabled:cursor-not-allowed disabled:opacity-60"
+                className="px-14 h-14 bg-primary hover:bg-primary/90 text-white font-bold rounded-lg transition-all text-lg uppercase tracking-widest disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {paymentLoading ? "Processing..." : "Pay now"}
               </Button>
@@ -1074,193 +1130,94 @@ export default function PaymentPage() {
         </div>
       </div>
 
-      <Dialog open={addressDialogOpen} onOpenChange={setAddressDialogOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>All addresses</DialogTitle>
-            <DialogDescription>
-              Select an address to use for shipping and keep it as your default.
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="max-h-[60vh] space-y-3 overflow-y-auto pr-1">
-            {addresses.map((address) => {
-              const isSelected = selectedAddressId === address.id;
-              return (
-                <div
-                  key={`payment-${address.id}`}
-                  onClick={() => handleSelectAddress(address.id)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      e.preventDefault();
-                      handleSelectAddress(address.id);
-                    }
-                  }}
-                  role="button"
-                  tabIndex={0}
-                  className={`rounded-xl border p-4 text-left transition-all ${
-                    isSelected ? "border-primary bg-[#FFF8F4]" : "border-zinc-200 bg-white"
-                  }`}
-                >
-                  <div className="flex items-start gap-3">
-                    <input
-                      type="radio"
-                      name="payment-shipping-addresses"
-                      checked={isSelected}
-                      onChange={() => {}}
-                      className="mt-1 size-4 accent-black"
-                    />
-                    <div className="flex-1">
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="flex items-center gap-2">
-                          <h3 className="font-semibold text-zinc-900">
-                            {[address.firstName, address.lastName].filter(Boolean).join(" ") || "Saved address"}
-                          </h3>
-                          {address.isDefault && (
-                            <span className="rounded-full bg-zinc-900 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-white">
-                              Default
-                            </span>
-                          )}
-                        </div>
-                        <button
-                          type="button"
-                          onClick={async (e) => {
-                            e.stopPropagation();
-                            await handleDeleteAddress(address.id);
-                          }}
-                          className="rounded-full border border-zinc-200 p-2 text-zinc-600 transition hover:border-red-200 hover:text-red-600"
-                          aria-label="Delete address"
-                        >
-                          <Trash2 className="size-4" />
-                        </button>
-                      </div>
-                      <div className="mt-2 space-y-1 text-sm text-zinc-600">
-                        {formatAddressLines(address).map((line) => (
-                          <p key={`payment-line-${address.id}-${line}`}>{line}</p>
-                        ))}
-                        {address.gstin && <p className="font-medium text-zinc-800">GSTIN: {address.gstin}</p>}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
+      {/* Mobile Sticky Footer */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-zinc-100 p-4 shadow-[0_-4px_15px_rgba(0,0,0,0.08)] z-[60]">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex flex-col">
+            <span className="text-lg font-bold text-zinc-900 leading-none">₹ {totalAmount.toLocaleString('en-IN')}</span>
+            <button className="text-[11px] font-bold text-accent uppercase tracking-tight mt-1 text-left">
+              View Order Summary
+            </button>
           </div>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={billingDialogOpen} onOpenChange={setBillingDialogOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Billing address</DialogTitle>
-            <DialogDescription>
-              Select the billing address to use for this payment.
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="max-h-[60vh] space-y-3 overflow-y-auto pr-1">
-            {addresses.map((address) => {
-              const isSelected = selectedBillingAddress?.id === address.id;
-              return (
-                <div
-                  key={`billing-${address.id}`}
-                  onClick={() => handleSelectBillingAddress(address.id)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      e.preventDefault();
-                      handleSelectBillingAddress(address.id);
-                    }
-                  }}
-                  role="button"
-                  tabIndex={0}
-                  className={`rounded-xl border p-4 text-left transition-all ${
-                    isSelected ? "border-primary bg-[#FFF8F4]" : "border-zinc-200 bg-white"
-                  }`}
-                >
-                  <div className="flex items-start gap-3">
-                    <input
-                      type="radio"
-                      name="payment-billing-addresses"
-                      checked={isSelected}
-                      onChange={() => {}}
-                      className="mt-1 size-4 accent-black"
-                    />
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-semibold text-zinc-900">
-                          {[address.firstName, address.lastName].filter(Boolean).join(" ") || "Saved address"}
-                        </h3>
-                        {address.isDefault && (
-                          <span className="rounded-full bg-zinc-900 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-white">
-                            Default
-                          </span>
-                        )}
-                      </div>
-                      <div className="mt-2 space-y-1 text-sm text-zinc-600">
-                        {formatAddressLines(address).map((line) => (
-                          <p key={`billing-line-${address.id}-${line}`}>{line}</p>
-                        ))}
-                        {address.gstin && <p className="font-medium text-zinc-800">GSTIN: {address.gstin}</p>}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-            
-            <Button
-              variant="outline"
-              onClick={openAddNewAddress}
-              className="w-full h-12 border-dashed border-2 border-zinc-200 text-zinc-500 hover:text-primary hover:border-primary transition-all flex items-center justify-center gap-2 font-bold"
-            >
-              <Plus size={18} />
-              Add new address
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog 
-        open={addAddressDialogOpen} 
-        onOpenChange={(open) => {
-          setAddAddressDialogOpen(open);
-          // If closing manually (e.g. clicking X or backdrop) and we haven't confirmed a different address selection yet,
-          // revert the radio selection back to "same" as requested.
-          if (!open && !billingDialogOpen && billingAddressMode === "different") {
-            handleBillingModeChange("same");
-          }
-        }}
-      >
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Add new address</DialogTitle>
-            <DialogDescription>
-              Email and phone stay tied to your logged-in customer account and are not editable here.
-            </DialogDescription>
-          </DialogHeader>
-
-          <AddressFields
-            form={addressForm}
-            onChange={updateAddressForm}
-            makeDefault={makeDefault}
-            onDefaultChange={setMakeDefault}
-            submitLabel="Save address"
-            onSubmit={handleCreateNewAddress}
-            saving={addressSaving}
+          <Button 
+            onClick={handlePayNow}
+            disabled={paymentLoading || !totalAmount}
+            className="grow bg-primary hover:bg-accent text-white font-bold h-12 uppercase tracking-widest rounded-lg text-sm"
           >
-            <Button
-              variant="link"
-              onClick={() => {
-                setAddAddressDialogOpen(false);
-                setBillingDialogOpen(true);
-              }}
-              className="font-bold underline px-0"
+            {paymentLoading ? "Processing..." : "Pay Now"}
+          </Button>
+        </div>
+      </div>
+
+      {/* POPUPS */}
+      {isDesktop ? (
+        <>
+          <Dialog open={addressDialogOpen} onOpenChange={setAddressDialogOpen}>
+            <DialogContent className="max-w-2xl">
+              <DialogHeader>
+                <DialogTitle>All addresses</DialogTitle>
+                <DialogDescription>Select an address to use for shipping.</DialogDescription>
+              </DialogHeader>
+              <AddressListContent type="shipping" />
+            </DialogContent>
+          </Dialog>
+
+          <Dialog open={billingDialogOpen} onOpenChange={setBillingDialogOpen}>
+            <DialogContent className="max-w-2xl">
+              <DialogHeader>
+                <DialogTitle>Billing address</DialogTitle>
+                <DialogDescription>Select the billing address to use for this payment.</DialogDescription>
+              </DialogHeader>
+              <AddressListContent type="billing" />
+            </DialogContent>
+          </Dialog>
+
+          <Dialog open={addAddressDialogOpen} onOpenChange={setAddAddressDialogOpen}>
+            <DialogContent className="max-w-2xl">
+              <DialogHeader>
+                <DialogTitle>Add new address</DialogTitle>
+                <DialogDescription>Email and phone stay tied to your account.</DialogDescription>
+              </DialogHeader>
+              <AddressFields
+                form={addressForm}
+                onChange={updateAddressForm}
+                makeDefault={makeDefault}
+                onDefaultChange={setMakeDefault}
+                submitLabel="Save address"
+                onSubmit={handleCreateNewAddress}
+                saving={addressSaving}
+              >
+                <Button variant="link" onClick={() => { setAddAddressDialogOpen(false); setBillingDialogOpen(true); }} className="font-bold underline px-0">Choose existing</Button>
+              </AddressFields>
+            </DialogContent>
+          </Dialog>
+        </>
+      ) : (
+        <>
+          <MobileBottomSheet isOpen={addressDialogOpen} onClose={() => setAddressDialogOpen(false)} title="All addresses">
+            <AddressListContent type="shipping" />
+          </MobileBottomSheet>
+
+          <MobileBottomSheet isOpen={billingDialogOpen} onClose={() => setBillingDialogOpen(false)} title="Billing address">
+            <AddressListContent type="billing" />
+          </MobileBottomSheet>
+
+          <MobileBottomSheet isOpen={addAddressDialogOpen} onClose={() => setAddAddressDialogOpen(false)} title="Add new address">
+            <AddressFields
+              form={addressForm}
+              onChange={updateAddressForm}
+              makeDefault={makeDefault}
+              onDefaultChange={setMakeDefault}
+              submitLabel="SAVE ADDRESS"
+              onSubmit={handleCreateNewAddress}
+              saving={addressSaving}
+              isMobile={true}
             >
-              Choose existing
-            </Button>
-          </AddressFields>
-        </DialogContent>
-      </Dialog>
+              <Button variant="link" onClick={() => { setAddAddressDialogOpen(false); setBillingDialogOpen(true); }} className="font-bold underline px-0">Choose existing</Button>
+            </AddressFields>
+          </MobileBottomSheet>
+        </>
+      )}
     </div>
   );
 }

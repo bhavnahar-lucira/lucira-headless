@@ -2,14 +2,11 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Trash2, Heart, BadgePercent, Loader2 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { removeFromCart, updateCartItem } from "@/redux/features/cart/cartSlice";
 import { 
   addWishlistItem, 
-  addGuestWishlistItem,
   removeWishlistItem,
-  removeGuestWishlistItem
 } from "@/redux/features/wishlist/wishlistSlice";
 import { useState, useMemo } from "react";
 import { toast } from "react-toastify";
@@ -21,6 +18,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+
+import { Trash2, Heart, Loader2, X, ChevronDown, Store, ChevronRight } from "lucide-react";
 
 export default function CartItem({ item, onAuthRequired }) {
   const dispatch = useDispatch();
@@ -60,7 +59,6 @@ export default function CartItem({ item, onAuthRequired }) {
   const handleRemove = async () => {
     setRemoving(true);
     try {
-      // 1. Prepare GTM Data
       const getNumericId = (gid) => {
         if (!gid) return 0;
         if (typeof gid === 'number') return gid;
@@ -90,8 +88,6 @@ export default function CartItem({ item, onAuthRequired }) {
         thumbnail_image: item.image
       });
 
-      // 2. Perform Removal
-
       await dispatch(removeFromCart({ userId: user?.id, variantId: item.variantId })).unwrap();
       toast.success("Removed from cart");
     } catch (err) {
@@ -111,7 +107,6 @@ export default function CartItem({ item, onAuthRequired }) {
 
     setMovingToWishlist(true);
     try {
-      // 1. Add to wishlist if not already there (updates MongoDB because user is logged in)
       if (!isWishlisted) {
         const payload = {
           productId: productId,
@@ -124,11 +119,9 @@ export default function CartItem({ item, onAuthRequired }) {
           hasVideo: Boolean(item.hasVideo),
           hasSimilar: Boolean(item.handle),
         };
-
         await dispatch(addWishlistItem(payload)).unwrap();
       }
 
-      // 2. Push to GTM
       const currentOrigin = typeof window !== 'undefined' ? window.location.origin : "";
       pushAddToWishlist({
         productName: item.title,
@@ -138,11 +131,7 @@ export default function CartItem({ item, onAuthRequired }) {
         thumbnail_image: item.image || "",
         currency: "INR"
       });
-
-      
-      // 2. Remove from cart (updates MongoDB/Session)
       await dispatch(removeFromCart({ userId: user?.id, variantId: item.variantId })).unwrap();
-      
       toast.success("Moved to wishlist");
     } catch (err) {
       console.error("Move to wishlist failed:", err);
@@ -164,11 +153,7 @@ export default function CartItem({ item, onAuthRequired }) {
         const selectedVariant = variantOptions.find(
           (variant) => String(variant.size) === String(value)
         );
-
-        if (!selectedVariant) {
-          throw new Error("Selected size is unavailable");
-        }
-
+        if (!selectedVariant) throw new Error("Selected size is unavailable");
         payload.nextVariantId = selectedVariant.variantId;
         payload.size = selectedVariant.size;
         payload.price = selectedVariant.price;
@@ -178,7 +163,6 @@ export default function CartItem({ item, onAuthRequired }) {
       } else {
         payload.quantity = parseInt(value, 10);
       }
-
       await dispatch(updateCartItem(payload)).unwrap();
     } catch (err) {
       console.error("Update failed:", err);
@@ -191,143 +175,262 @@ export default function CartItem({ item, onAuthRequired }) {
   const productLink = item.handle ? `/products/${item.handle}${item.variantId ? `?variant=${item.variantId}` : ""}` : "#";
 
   return (
-    <div className="mb-6 overflow-hidden rounded-sm border border-zinc-100 bg-white shadow-sm">
-      <div className="relative flex flex-col gap-6 p-4 md:flex-row md:p-6">
-        {updating && (
-          <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/50">
-            <Loader2 className="animate-spin text-primary" size={24} />
-          </div>
-        )}
+    <>
+      {/* DESKTOP DESIGN (Original) */}
+      <div className="hidden lg:block mb-6 overflow-hidden rounded-lg border border-zinc-100 bg-white shadow-sm">
+        <div className="relative flex flex-col gap-6 p-4 md:flex-row md:p-6">
+          {updating && (
+            <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/50">
+              <Loader2 className="animate-spin text-primary" size={24} />
+            </div>
+          )}
 
-        <Link 
-          href={productLink}
-          className="aspect-square w-full shrink-0 overflow-hidden rounded-sm border border-zinc-100/50 bg-zinc-50 md:w-48 block transition-opacity hover:opacity-90"
-        >
-          <Image
-            src={item.image || "/images/product/1.jpg"}
-            alt={item.title}
-            width={200}
-            height={200}
-            className="h-full w-full object-contain mix-blend-multiply"
-          />
-        </Link>
+          <Link 
+            href={productLink}
+            className="aspect-square w-full shrink-0 overflow-hidden rounded-sm border border-zinc-100/50 bg-zinc-50 md:w-48 block transition-opacity hover:opacity-90"
+          >
+            <Image
+              src={item.image || "/images/product/1.jpg"}
+              alt={item.title}
+              width={200}
+              height={200}
+              className="h-full w-full object-contain mix-blend-multiply"
+            />
+          </Link>
 
-        <div className="grow space-y-4">
-          <div className="flex items-start justify-between">
-            <div className="space-y-1">
-              <Link href={productLink}>
-                <h3 className="font-abhaya text-lg font-bold text-zinc-800 hover:text-primary transition-colors">
-                  {item.title}
-                </h3>
-              </Link>
-              <p className="text-[10px] font-medium uppercase tracking-wider text-zinc-400">
-                SKU: {currentVariant?.sku || item.sku || "N/A"}
-              </p>
-              {item.engraving && (
-                <p className="text-[10px] font-bold uppercase tracking-wider text-primary">
-                  Engraving: &quot;{item.engraving}&quot;
+          <div className="grow space-y-4">
+            <div className="flex items-start justify-between">
+              <div className="space-y-1">
+                <Link href={productLink}>
+                  <h3 className="font-abhaya text-lg font-bold text-black hover:text-primary transition-colors">
+                    {item.title}
+                  </h3>
+                </Link>
+                <p className="text-[10px] font-medium uppercase tracking-wider text-zinc-400">
+                  SKU: {currentVariant?.sku || item.sku || "N/A"}
                 </p>
-              )}
-            </div>
-            <div className="flex flex-col items-end whitespace-nowrap">
-              <div className="text-xl font-bold text-zinc-900">
-                ₹ {lineAmount.toLocaleString("en-IN", { maximumFractionDigits: 0 })}
+                {item.engraving && (
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-primary">
+                    Engraving: &quot;{item.engraving}&quot;
+                  </p>
+                )}
               </div>
-              {hasDiscount && (
-                <div className="text-sm text-zinc-400 line-through">
-                  ₹ {lineCompareAmount.toLocaleString("en-IN", { maximumFractionDigits: 0 })}
+              <div className="flex flex-col items-end whitespace-nowrap">
+                <div className="text-xl font-bold text-zinc-900">
+                  ₹ {lineAmount.toLocaleString("en-IN", { maximumFractionDigits: 0 })}
                 </div>
-              )}
+                {hasDiscount && (
+                  <div className="text-sm text-zinc-400 line-through">
+                    ₹ {lineCompareAmount.toLocaleString("en-IN", { maximumFractionDigits: 0 })}
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
 
-          <div className="grid grid-cols-1 divide-y rounded-sm border border-zinc-100 md:grid-cols-[1.2fr_2fr] md:divide-x md:divide-y-0 divide-zinc-100">
-            <div className={`grid ${item.size ? "grid-cols-2" : "grid-cols-1"} divide-x divide-zinc-100 bg-zinc-50/30`}>
-              {item.size && (
+            <div className="grid grid-cols-1 divide-y rounded-sm border border-zinc-100 md:grid-cols-[1.2fr_2fr] md:divide-x md:divide-y-0 divide-zinc-100">
+              <div className={`grid ${item.size ? "grid-cols-2" : "grid-cols-1"} divide-x divide-zinc-100 bg-zinc-50/30`}>
+                {item.size && (
+                  <div className="flex flex-col justify-center p-2">
+                    <span className="mb-1 text-[10px] font-bold uppercase tracking-tighter text-zinc-400">
+                      Ring Size
+                    </span>
+                    <Select
+                      value={String(item.size)}
+                      onValueChange={(val) => handleUpdate("size", val)}
+                      disabled={!canEditSelection || updating}
+                    >
+                      <SelectTrigger className="h-6 border-none bg-transparent p-0 text-xs font-bold text-zinc-800 shadow-none focus:ring-0">
+                        <SelectValue placeholder={item.size} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {sizeOptions.map((variant) => (
+                          <SelectItem key={variant.variantId || variant.size} value={String(variant.size)}>
+                            {variant.size}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+
                 <div className="flex flex-col justify-center p-2">
                   <span className="mb-1 text-[10px] font-bold uppercase tracking-tighter text-zinc-400">
-                    Ring Size
+                    Quantity
                   </span>
                   <Select
-                    value={String(item.size)}
-                    onValueChange={(val) => handleUpdate("size", val)}
+                    value={String(item.quantity)}
+                    onValueChange={(val) => handleUpdate("quantity", val)}
                     disabled={!canEditSelection || updating}
                   >
                     <SelectTrigger className="h-6 border-none bg-transparent p-0 text-xs font-bold text-zinc-800 shadow-none focus:ring-0">
-                      <SelectValue placeholder={item.size} />
+                      <SelectValue placeholder={item.quantity} />
                     </SelectTrigger>
                     <SelectContent>
-                      {sizeOptions.map((variant) => (
-                        <SelectItem key={variant.variantId || variant.size} value={String(variant.size)}>
-                          {variant.size}
+                      {[...Array(10)].map((_, i) => (
+                        <SelectItem key={i + 1} value={String(i + 1)}>
+                          {i + 1}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
-              )}
-
-              <div className="flex flex-col justify-center p-2">
-                <span className="mb-1 text-[10px] font-bold uppercase tracking-tighter text-zinc-400">
-                  Quantity
-                </span>
-                <Select
-                  value={String(item.quantity)}
-                  onValueChange={(val) => handleUpdate("quantity", val)}
-                  disabled={!canEditSelection || updating}
-                >
-                  <SelectTrigger className="h-6 border-none bg-transparent p-0 text-xs font-bold text-zinc-800 shadow-none focus:ring-0">
-                    <SelectValue placeholder={item.quantity} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {[...Array(10)].map((_, i) => (
-                      <SelectItem key={i + 1} value={String(i + 1)}>
-                        {i + 1}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
               </div>
-            </div>
 
-            <div className="divide-y divide-zinc-100">
-              <div className="grid grid-cols-[80px_1fr] items-center p-2">
-                <span className="text-[10px] font-bold uppercase tracking-tighter text-zinc-400">
-                  Metal
-                </span>
-                <span className="text-xs font-medium text-zinc-800">
-                  {item.karat} {item.color}
-                </span>
-              </div>
-              <div className="grid grid-cols-[80px_1fr] items-center p-2">
-                <span className="text-[10px] font-bold uppercase tracking-tighter text-zinc-400">
-                  Status
-                </span>
-                <span className={`text-xs font-bold uppercase ${statusClass}`}>{statusLabel}</span>
+              <div className="divide-y divide-zinc-100">
+                <div className="grid grid-cols-[80px_1fr] items-center p-2">
+                  <span className="text-[10px] font-bold uppercase tracking-tighter text-zinc-400">
+                    Metal
+                  </span>
+                  <span className="text-xs font-medium text-zinc-800">
+                    {item.karat} {item.color}
+                  </span>
+                </div>
+                <div className="grid grid-cols-[80px_1fr] items-center p-2">
+                  <span className="text-[10px] font-bold uppercase tracking-tighter text-zinc-400">
+                    Status
+                  </span>
+                  <span className={`text-xs font-bold uppercase ${statusClass}`}>{statusLabel}</span>
+                </div>
               </div>
             </div>
           </div>
         </div>
+
+        <div className="flex divide-x divide-zinc-100 border-t border-zinc-100 bg-white">
+          <button
+            onClick={handleRemove}
+            disabled={removing}
+            className="flex flex-1 items-center justify-center gap-2 py-4 text-[10px] font-bold uppercase tracking-widest text-zinc-500 transition-all hover:bg-zinc-50 hover:text-red-500 disabled:opacity-50"
+          >
+            {removing ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
+            Remove
+          </button>
+          <button
+            onClick={handleMoveToWishlist}
+            disabled={movingToWishlist}
+            className="flex flex-1 items-center justify-center gap-2 py-4 text-[10px] font-bold uppercase tracking-widest text-zinc-500 transition-all hover:bg-zinc-50 hover:text-primary disabled:opacity-50"
+          >
+            {movingToWishlist ? <Loader2 size={14} className="animate-spin" /> : <Heart size={14} />}
+            Move to Wishlist
+          </button>
+        </div>
       </div>
 
-      <div className="flex divide-x divide-zinc-100 border-t border-zinc-100 bg-white">
-        <button
-          onClick={handleRemove}
-          disabled={removing}
-          className="flex flex-1 items-center justify-center gap-2 py-4 text-[10px] font-bold uppercase tracking-widest text-zinc-500 transition-all hover:bg-zinc-50 hover:text-red-500 disabled:opacity-50"
-        >
-          {removing ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
-          Remove
-        </button>
-        <button
-          onClick={handleMoveToWishlist}
-          disabled={movingToWishlist}
-          className="flex flex-1 items-center justify-center gap-2 py-4 text-[10px] font-bold uppercase tracking-widest text-zinc-500 transition-all hover:bg-zinc-50 hover:text-primary disabled:opacity-50"
-        >
-          {movingToWishlist ? <Loader2 size={14} className="animate-spin" /> : <Heart size={14} />}
-          Move to Wishlist
-        </button>
+      {/* MOBILE DESIGN (< 1024px) */}
+      <div className="lg:hidden mb-4 overflow-hidden rounded-lg border border-zinc-100 bg-white shadow-[0_4px_20px_rgba(0,0,0,0.05)]">
+        <div className="relative p-4">
+          {updating && (
+            <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/50">
+              <Loader2 className="animate-spin text-primary" size={24} />
+            </div>
+          )}
+
+          <div className="flex gap-4">
+            {/* Image Container */}
+            <div className="relative aspect-square w-32 shrink-0 overflow-hidden rounded-sm border border-zinc-100 bg-[#F9F9F9]">
+              <Link href={productLink} className="block h-full w-full p-2">
+                <Image
+                  src={item.image || "/images/product/1.jpg"}
+                  alt={item.title}
+                  width={150}
+                  height={150}
+                  className="h-full w-full object-contain mix-blend-multiply"
+                />
+              </Link>
+            </div>
+
+            {/* Info Content */}
+            <div className="flex-1 space-y-1 min-w-0 pt-1">
+              <h3 className="text-base font-medium text-black truncate leading-snug font-abhaya">
+                {item.title}
+              </h3>
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span className="text-[15px] font-bold text-zinc-900">
+                  ₹ {lineAmount.toLocaleString("en-IN", { maximumFractionDigits: 0 })}
+                </span>
+                {hasDiscount && (
+                  <>
+                    <span className="text-[12px] text-zinc-400 line-through">
+                      ₹ {lineCompareAmount.toLocaleString("en-IN", { maximumFractionDigits: 0 })}
+                    </span>
+                  </>
+                )}
+              </div>
+              <p className="text-[10px] text-zinc-400 font-medium uppercase tracking-tight">
+                {currentVariant?.sku || item.sku || "N/A"}
+              </p>
+
+              {/* Selectors */}
+              <div className="flex items-center gap-3 pt-1">
+                {item.size && (
+                  <div className="flex items-center gap-0.5">
+                    <span className="text-[13px] text-zinc-800 font-medium">Size:</span>
+                    <Select
+                      value={String(item.size)}
+                      onValueChange={(val) => handleUpdate("size", val)}
+                      disabled={!canEditSelection || updating}
+                    >
+                      <SelectTrigger className="h-auto border-none bg-transparent p-0 text-[13px] font-bold text-zinc-800 shadow-none focus:ring-0 gap-0.5 min-w-0 w-auto">
+                        <SelectValue placeholder={item.size} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {sizeOptions.map((variant) => (
+                          <SelectItem key={variant.variantId || variant.size} value={String(variant.size)}>
+                            {variant.size}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+                
+                <div className="flex items-center gap-0.5">
+                  <span className="text-[13px] text-zinc-800 font-medium">Quantity:</span>
+                  <Select
+                    value={String(item.quantity)}
+                    onValueChange={(val) => handleUpdate("quantity", val)}
+                    disabled={updating}
+                  >
+                    <SelectTrigger className="h-auto border-none bg-transparent p-0 text-[13px] font-bold text-zinc-800 shadow-none focus:ring-0 gap-0.5 min-w-0 w-auto">
+                      <SelectValue placeholder={item.quantity} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {[...Array(10)].map((_, i) => (
+                        <SelectItem key={i + 1} value={String(i + 1)}>
+                          {i + 1}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          {/* Mobile Actions - JUSTIFY BETWEEN */}
+          <div className="mt-4 pt-4 border-t border-zinc-50 flex items-center justify-between px-2">
+            <button
+              onClick={handleRemove}
+              disabled={removing}
+              className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-zinc-400 transition-all active:scale-95 disabled:opacity-50"
+            >
+              {removing ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
+              Remove
+            </button>
+            
+            <div className="w-px h-4 bg-zinc-100" />
+
+            <button
+              onClick={handleMoveToWishlist}
+              disabled={movingToWishlist}
+              className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-[#443360] transition-all active:scale-95 disabled:opacity-50"
+            >
+              {movingToWishlist ? <Loader2 size={14} className="animate-spin" /> : <Heart size={14} className={isWishlisted ? "fill-primary text-primary" : ""} />}
+              Move to Wishlist
+            </button>
+          </div>
+        </div>
       </div>
-    </div>
+    </>
   );
 }

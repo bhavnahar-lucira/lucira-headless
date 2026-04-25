@@ -27,7 +27,7 @@ export default function CategorySlider() {
 
   return (
     <section className="w-full py-16 bg-linear-to-b from-[#FEF5F1] to-white overflow-hidden mt-15">
-      <div className="max-w-480 mx-auto px-17 min-[1440px]:px-17">
+      <div className="max-w-480 mx-auto px-5 md:px-17 min-[1440px]:px-17">
         <div className="text-center mb-10">
           <h2 className="main-title font-extrabold font-abhaya mb-2">Explore Our Categories</h2>
           <p className="text-black text-base italic">Jewelry for life&apos;s most cherished moments.</p>
@@ -97,10 +97,10 @@ export default function CategorySlider() {
             
             {/* Arrows on the right */}
             <div className="flex items-center gap-4">
-              <button className={`${prevElClass} w-12 h-12 rounded-full border border-black flex items-center justify-center hover:bg-black hover:text-white transition-all disabled:opacity-20 disabled:cursor-not-allowed`}>
+              <button className={`${prevElClass} w-9 h-9 md:w-12 md:h-12 rounded-full border border-black flex items-center justify-center hover:bg-black hover:text-white transition-all disabled:opacity-20 disabled:cursor-not-allowed`}>
                 <ChevronLeft size={24} />
               </button>
-              <button className={`${nextElClass} w-12 h-12 rounded-full border border-black flex items-center justify-center hover:bg-black hover:text-white transition-all disabled:opacity-20 disabled:cursor-not-allowed`}>
+              <button className={`${nextElClass} w-9 h-9 md:w-12 md:h-12 rounded-full border border-black flex items-center justify-center hover:bg-black hover:text-white transition-all disabled:opacity-20 disabled:cursor-not-allowed`}>
                 <ChevronRight size={24} />
               </button>
             </div>

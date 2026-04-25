@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { applyPoints, removePoints } from "@/redux/features/cart/cartSlice";
 import { toast } from "react-toastify";
+import CartContact from "./CartContact";
 
 const INSURANCE_VARIANT_ID = "gid://shopify/ProductVariant/47709366026458";
 const GOLDCOIN_VARIANT_ID = "gid://shopify/ProductVariant/47661824082138";
@@ -204,9 +205,9 @@ export default function CheckoutSummary() {
                 </div>
                 
                 {!isInsurance && (
-                  <div className="bg-[#F3E8FF]/30 p-2 rounded-md flex items-center gap-2">
-                    <Truck size={14} className="text-[#7C3AED]" />
-                    <span className="text-[10px] font-medium text-[#7C3AED]">Est. Delivery by {item.estDelivery || "8-10 Days"}</span>
+                  <div className="bg-zinc-50 p-2 rounded-md flex items-center gap-2">
+                    <Truck size={14} className="text-black" />
+                    <span className="text-[10px] font-medium text-black">Est. Delivery by {item.estDelivery || "8-10 Days"}</span>
                   </div>
                 )}
                 
@@ -218,7 +219,7 @@ export default function CheckoutSummary() {
       </div>
 
       {/* Pricing Breakdown */}
-      <div className="space-y-3 px-1 pt-2">
+      <div className="space-y-3 border-zinc-50 shadow-sm bg-white rounded-lg p-6">
         <div className="flex justify-between text-sm text-zinc-600">
           <span>Subtotal</span>
           <span className="font-medium text-zinc-900">₹{subtotalValue.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
@@ -313,23 +314,7 @@ export default function CheckoutSummary() {
       </div>
 
       {/* Contact Section */}
-      <div className="bg-white border border-zinc-50 rounded-2xl p-6 shadow-sm text-center space-y-4">
-        <h4 className="text-[11px] font-bold text-[#443360] uppercase tracking-[0.2em]">CONTACT US FOR ASSISTANCE</h4>
-        <div className="flex justify-around items-center pt-2">
-          <button className="flex items-center gap-2 bg-zinc-50 px-4 py-2.5 rounded-xl hover:bg-zinc-100 transition-colors">
-            <Phone size={18} className="text-[#443360]" />
-            <span className="text-xs font-bold text-[#443360]">Call</span>
-          </button>
-          <button className="flex items-center gap-2 bg-zinc-50 px-4 py-2.5 rounded-xl hover:bg-zinc-100 transition-colors">
-            <MessageCircle size={18} className="text-[#443360]" />
-            <span className="text-xs font-bold text-[#443360]">Whatsapp</span>
-          </button>
-          <button className="flex items-center gap-2 bg-zinc-50 px-4 py-2.5 rounded-xl hover:bg-zinc-100 transition-colors">
-            <MessageSquare size={18} className="text-[#443360]" />
-            <span className="text-xs font-bold text-[#443360]">Chat</span>
-          </button>
-        </div>
-      </div>
+      <CartContact />
     </div>
   );
 }

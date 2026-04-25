@@ -9,16 +9,21 @@ export async function GET(request) {
     const limit = parseInt(searchParams.get("limit") || "20");
     const page = parseInt(searchParams.get("page") || "1");
     const query = searchParams.get("q");
-    const sort = searchParams.get("sort") || "best_selling";
+    const sort = searchParams.get("sort") || "featured";
 
     const SORT_MAP = {
-      best_selling: { "reviews.count": -1, title: 1, _id: 1 },
+      featured: { diamondDiscount: -1, "reviewStats.count": -1, title: 1, _id: 1 },
+      relevance: { score: { $meta: "textScore" }, _id: 1 },
+      best_selling: { "reviewStats.count": -1, title: 1, _id: 1 },
+      az: { title: 1, _id: 1 },
+      za: { title: -1, _id: 1 },
       price_low_high: { price: 1, _id: 1 },
       price_high_low: { price: -1, _id: 1 },
-      az: { title: 1, _id: 1 },
+      date_new_old: { createdAt: -1, _id: 1 },
+      date_old_new: { createdAt: 1, _id: 1 },
     };
 
-    const sortConfig = SORT_MAP[sort] || SORT_MAP.best_selling;
+    const sortConfig = SORT_MAP[sort] || SORT_MAP.featured;
 
     const client = await clientPromise;
     const db = client.db("next_local_db");
@@ -27,30 +32,33 @@ export async function GET(request) {
 
     let filter = {};
 
-    // 1. Collection filtering (if not overridden by search query or in addition to it)
+    // 1. Collection filtering
     if (handle && handle !== "all") {
       const isRealCollection = await shopifyCollections.findOne({ handle });
 
       if (isRealCollection || !handle.startsWith("all-")) {
         filter.collectionHandles = handle;
       } else {
-        const keywords = handle.replace("all-", "").split("-").map(k => k.replace(/s$/, ""));
-        const handleFilter = keywords.map(kw => {
-          return {
-            $or: [
-              { collectionHandles: { $regex: kw, $options: "i" } },
-              { type: { $regex: kw, $options: "i" } },
-              { tags: { $regex: kw, $options: "i" } },
-              { title: { $regex: kw, $options: "i" } }
-            ]
-          };
-        });
+        // Handle "all-rings", "all-earrings", etc.
+        const typeKeyword = handle.replace("all-", "").replace(/-/g, " ");
+        // singularize (very basic: rings -> ring, earrings -> earring)
+        const singularType = typeKeyword.replace(/s$/, "");
         
-        if (filter.$and) {
-          filter.$and.push(...handleFilter);
-        } else {
-          filter.$and = handleFilter;
+        const handleFilter = {
+          $or: [
+            { type: { $regex: `^${singularType}$`, $options: "i" } }, // Exact type match
+            { type: { $regex: `^${typeKeyword}$`, $options: "i" } },
+            { collectionHandles: handle },
+            { tags: { $regex: `^${singularType}$`, $options: "i" } }
+          ]
+        };
+        
+        // If it's rings, we MUST exclude earrings
+        if (singularType.toLowerCase() === "ring") {
+          filter.type = { $not: /earring/i };
         }
+
+        filter = { ...filter, ...handleFilter };
       }
     }
 
@@ -151,16 +159,30 @@ export async function GET(request) {
       if (maxPrice) filter.price.$lte = Number(maxPrice);
     }
 
-    const { filter: resolvedFilter } = await resolveSearchMatch(productsCollection, filter, query || "");
+    const { filter: resolvedFilter, strategy } = await resolveSearchMatch(productsCollection, filter, query || "");
+
+    let finalSort = sortConfig;
+    const projection = {
+      description: 0,
+      "reviews.list": 0,
+    };
+
+    // If sorting by relevance, check if we actually did a text search
+    if (sort === "relevance") {
+      if (strategy === "text") {
+        projection.score = { $meta: "textScore" };
+      } else {
+        // If no text search was performed, fallback to featured sort
+        finalSort = SORT_MAP.featured;
+      }
+    }
+
+    console.log(`Applying sort: ${JSON.stringify(finalSort)} to collection: ${handle}`);
 
     const products = await productsCollection
       .find(resolvedFilter)
-      .project({
-        description: 0,
-        "reviews.list": 0,
-        // Include productMetafields for dynamic card details
-      })
-      .sort(sortConfig)
+      .project(projection)
+      .sort(finalSort)
       .skip((page - 1) * limit)
       .limit(limit)
       .toArray();

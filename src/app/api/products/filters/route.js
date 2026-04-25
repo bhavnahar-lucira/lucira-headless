@@ -203,6 +203,20 @@ export async function GET(req) {
     const results = {};
     const isCategoryHandle = handle && handle.startsWith("all-");
 
+    // Fetch store names for mapping GIDs to human-readable names
+    const storesCollection = db.collection("stores");
+    const stores = await storesCollection.find({}).toArray();
+    const storeMap = {};
+    stores.forEach(s => {
+      let displayName = s.name;
+      if (displayName.includes("Divinecarat")) displayName = "Malad";
+      if (displayName === "BO1") displayName = "Borivali";
+      if (displayName === "CS1") displayName = "Chembur";
+      if (displayName === "PS1") displayName = "Pune";
+      if (displayName === "NOS18") displayName = "Noida";
+      storeMap[s.shopifyId] = displayName;
+    });
+
     const categories = [
       { name: "In Store Available", field: "variants.metafields.in_store_available", isM: true },
       { name: "Ring Size", field: "variants.metafields.ring_size_inventory", isM: true },
@@ -225,10 +239,29 @@ export async function GET(req) {
       if (cat.hideIfCategory && isCategoryHandle) continue;
       const counts = await getFacetedCounts(cat.field, cat.isM);
       if (counts.length > 0) {
-        results[cat.name] = counts.map(c => ({
-          ...c,
-          urlKey: REVERSE_KEY_MAP[cat.field] || cat.field.split(".").pop(),
-        }));
+        // Group and merge counts by friendly label to prevent duplicates (e.g. ID and Name both mapping to "Borivali")
+        const mergedResults = {};
+        
+        counts.forEach(c => {
+          let label = c.label;
+          let value = c.value;
+          
+          if (cat.name === "In Store Available" && storeMap[value]) {
+            label = storeMap[value];
+          }
+
+          if (!mergedResults[label]) {
+            mergedResults[label] = { 
+                label: label, 
+                value: value, // We keep the first value encountered as the filter key
+                count: 0,
+                urlKey: REVERSE_KEY_MAP[cat.field] || cat.field.split(".").pop()
+            };
+          }
+          mergedResults[label].count += c.count;
+        });
+
+        results[cat.name] = Object.values(mergedResults);
       }
     }
 

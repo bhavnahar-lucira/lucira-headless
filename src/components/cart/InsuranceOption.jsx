@@ -52,8 +52,8 @@ export default function InsuranceOption() {
   if (otherItemsQuantity === 0 && !isAdded) return null;
 
   return (
-    <div className="bg-white border border-accent/30 p-4 rounded-2xl flex items-center gap-4">
-      <div className="relative size-24 shrink-0 rounded-xl overflow-hidden border border-zinc-100">
+    <div className="bg-white border border-accent/30 p-4 rounded-lg flex items-center gap-4 flex-wrap xl:flex-nowrap">
+      <div className="relative size-24 shrink-0 rounded-xl overflow-hidden border border-zinc-100 w-full xl:w-24">
         <Image 
           src="/images/story-ring.jpg" 
           alt="Insurance" 

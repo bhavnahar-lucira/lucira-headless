@@ -16,7 +16,7 @@ export function ProductSlider({ title, subtitle, products = [], preservePriceOnC
 
   return (
     <section className="w-full bg-white overflow-hidden mt-15">
-      <div className="max-w-480 mx-auto px-17 min-[1440px]:px-17">
+      <div className="max-w-480 mx-auto px-5 md:px-17 min-[1440px]:px-17">
         {(title || subtitle) && (
           <div className="mb-6">
             {title && <h2 className="text-28px font-bold mb-2">{title}</h2>}
@@ -52,7 +52,7 @@ export function ProductSlider({ title, subtitle, products = [], preservePriceOnC
           {/* Navigation & Pagination Controls */}
           <div className="flex justify-between items-center mt-12 px-2">
             {/* Custom Pagination (Dots) */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 md:max-w-full max-w-[60%]">
               {products.map((_, i) => (
                 <div 
                   key={i} 
@@ -67,13 +67,13 @@ export function ProductSlider({ title, subtitle, products = [], preservePriceOnC
             <div className="flex items-center gap-4">
               <button 
                 onClick={() => swiper?.slidePrev()}
-                className="w-12 h-12 rounded-full border border-black flex items-center justify-center hover:bg-black hover:text-white transition-all disabled:opacity-30"
+                className="w-9 h-9 md:w-12 md:h-12 rounded-full border border-black flex items-center justify-center hover:bg-black hover:text-white transition-all disabled:opacity-30"
               >
                 <ChevronLeft size={24} />
               </button>
               <button 
                 onClick={() => swiper?.slideNext()}
-                className="w-12 h-12 rounded-full border border-black flex items-center justify-center hover:bg-black hover:text-white transition-all disabled:opacity-30"
+                className="w-9 h-9 md:w-12 md:h-12 rounded-full border border-black flex items-center justify-center hover:bg-black hover:text-white transition-all disabled:opacity-30"
               >
                 <ChevronRight size={24} />
               </button>

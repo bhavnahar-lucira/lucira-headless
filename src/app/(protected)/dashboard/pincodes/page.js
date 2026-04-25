@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import PincodeTable from "./PincodeTable";
-import { MapPin, Search, FileDown, Loader2, Upload, CheckCircle2, AlertCircle } from "lucide-react";
+import { MapPin, Search, FileDown, Loader2, Upload, CheckCircle2, AlertCircle, RefreshCw } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -27,6 +27,7 @@ export default function PincodesDashboard() {
   const [selectedFile, setSelectedFile] = useState(null);
   const [importResult, setImportResult] = useState(null);
   const [importError, setImportError] = useState(null);
+  const [refining, setRefining] = useState(false);
   const fileInputRef = useRef(null);
 
   const fetchPincodes = useCallback(async (page = 1, q = "") => {
@@ -103,6 +104,22 @@ export default function PincodesDashboard() {
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
+  const handleRefine = async () => {
+    setRefining(true);
+    try {
+      const res = await fetch("/api/pincodes/refine", { method: "POST" });
+      const data = await res.json();
+      if (data.success) {
+        alert(data.message);
+        fetchPincodes(pagination.page, query);
+      }
+    } catch (e) {
+      console.error("Refinement failed", e);
+    } finally {
+      setRefining(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-black text-zinc-900 dark:text-zinc-100 p-6 sm:p-10">
       <div className="max-w-6xl mx-auto space-y-10">
@@ -120,6 +137,16 @@ export default function PincodesDashboard() {
           </div>
           
           <div className="flex items-center gap-4">
+            <Button 
+                onClick={handleRefine}
+                disabled={refining}
+                variant="outline"
+                className="flex items-center gap-2 border-zinc-200 dark:border-zinc-800 px-6 py-6 rounded-xl font-bold text-sm uppercase tracking-widest hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors"
+            >
+                <CheckCircle2 size={18} className={refining ? "animate-pulse" : "text-green-500"} />
+                {refining ? "Refining..." : "Refine GPS"}
+            </Button>
+
             <Dialog open={isImportOpen} onOpenChange={(open) => {
               setIsImportOpen(open);
               if (!open) resetImport();
@@ -216,7 +243,7 @@ export default function PincodesDashboard() {
                   placeholder="Search by pincode..."
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-zinc-200 dark:focus:ring-zinc-800 transition-all"
+                  className="w-full pl-10 pr-4 py-2 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-zinc-200 dark:focus:ring-zinc-200 transition-all"
                 />
               </div>
               {loading && <Loader2 size={18} className="text-zinc-400 animate-spin" />}

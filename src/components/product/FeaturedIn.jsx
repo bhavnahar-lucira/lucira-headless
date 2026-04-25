@@ -21,7 +21,7 @@ export default function FeaturedIn() {
     <section className="w-full py-6 bg-gray-50">
 
       <div className="w-full text-center">
-        <div className="max-w-480 mx-auto px-17 min-[1440px]:px-17 space-y-8 mb-5">
+        <div className="max-w-480 mx-auto px-5 md:px-17 min-[1440px]:px-17 space-y-8 mb-5">
           <h2 className="text-28px font-bold">
             Featured In
           </h2>
