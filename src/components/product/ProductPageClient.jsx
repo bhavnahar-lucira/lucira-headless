@@ -786,7 +786,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
           </BreadcrumbList>
         </Breadcrumb>
 
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] xl:grid-cols-[1fr_530px] gap-10 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] xl:grid-cols-[1fr_420px] 2xl:grid-cols-[1fr_530px] gap-10 items-start">
           {/* Left: Product Gallery */}
           <ProductGallery 
             media={product.media || []} 
@@ -1326,11 +1326,11 @@ export default function ProductPageClient({ product, complementaryProducts = [],
            
             {/* Features */}
             <div className="space-y-4">
-              <div className="grid  grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-6 lg:gap-x-10 text-xs sm:text-sm font-medium text-black">
-                <Feature icon={<Image src="/images/product/shipping.svg" alt="Shipping icon" width={20} height={20} />} text="Free and secure shipping" />
-                <Feature icon={ <Image src="/images/product/exchange.svg" alt="Exchange icon" width={20} height={20} />} text="Lifetime exchange and 100% value guarantee" />
-                <Feature icon={<Image src="/images/product/return.svg" alt="Return icon" width={20} height={20} />} text="15-day free returns" />
-                <Feature icon={<BadgeCheck size={20} className="text-black shrink-0" />} text="IGI and Hallmark certified" />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-6 lg:gap-x-6 text-xs sm:text-sm font-medium text-black`">
+                <Feature icon={<Image src="/images/product/shipping.svg" alt="Shipping icon" width={28} height={28} />} text="Free and secure shipping" />
+                <Feature icon={<Image src="/images/product/return.svg" alt="Return icon" width={28} height={28} />} text="15-day free returns" />
+                <Feature icon={<Image src="/images/product/exchange.svg" alt="Exchange icon" width={28} height={28} />} text="Lifetime exchange and 100% value guarantee" />
+                <Feature icon={<Image src="/images/product/certified.svg" alt="Return icon" width={28} height={28} />} text="IGI and Hallmark certified" />
               </div>
 
               <Separator/>
@@ -1631,9 +1631,9 @@ export default function ProductPageClient({ product, complementaryProducts = [],
             <PriceSavingsDetails priceBreakup={priceBreakup?.price_breakup}/>
 
             {priceBreakup?.price_breakup?.total_savings && priceBreakup?.price_breakup?.total_savings !== "₹0" && (
-              <div className="mt-4 flex justify-between items-center bg-[#FDF6F6] border border-[#FADEDE] rounded-xl p-5">
+              <div className="mt-4 flex justify-between items-center bg-success/8 border border-success rounded-xl p-5">
                 <span className="text-base font-bold text-gray-900 uppercase tracking-tight">Save on this jewelry</span>
-                <span className="text-lg font-bold text-[#D93025]">{priceBreakup.price_breakup.total_savings}</span>
+                <span className="text-lg font-bold text-success">{priceBreakup.price_breakup.total_savings}</span>
               </div>
             )}
 
