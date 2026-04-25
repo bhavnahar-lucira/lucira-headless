@@ -62,12 +62,12 @@ export default function WaysToExplore() {
 
   return (
     <section className={`w-full ${isMobile ? "mt-12 bg-[#FEF5F1] py-12" : "mt-16 bg-[#FEF5F1] py-16"} overflow-hidden`}>
-      <div className="container-main">
+      <div className="container-main mx-auto">
         {isMobile ? (
           <>
-            <div className="text-center mb-8">
-              <h2 className="text-3xl font-black font-abhaya mb-3 text-zinc-900 tracking-tight">More Ways To Explore</h2>
-              <p className="text-zinc-600 text-sm">Experience Lucira your way; online, at home or in-store</p>
+            <div className="text-center mb-6 px-1 md:px-0">
+              <h2 className="text-3xl md:text-4xl font-extrabold font-abhaya mb-2 text-black">More Ways To Explore</h2>
+              <p className="text-black text-base md:text-base font-normal">Experience Lucira your way, online or at our showrooms.</p>
             </div>
 
             <div className="relative group px-4">
@@ -105,7 +105,7 @@ export default function WaysToExplore() {
                         <div className="mt-auto w-full">
                           <Button 
                             onClick={() => handleAction(way.buttonText)}
-                            className="w-full h-12 bg-[#5A413F] hover:bg-[#4a3533] text-white font-bold text-xs tracking-widest uppercase transition-all rounded-lg"
+                            className="w-full h-10 px-8 text-sm font-bold uppercase bg-primary hover:bg-primary text-white transition-all rounded-lg"
                           >
                             {way.buttonText}
                           </Button>
@@ -142,14 +142,14 @@ export default function WaysToExplore() {
           </>
         ) : (
           <>
-            <div className="text-center mb-10">
-              <h2 className="main-title font-extrabold font-abhaya mb-3">More Ways To Explore</h2>
-              <p className="text-gray-600 text-base md:text-lg">Experience Lucira your way, online or at our showrooms.</p>
+            <div className="text-center mb-6 px-1 md:px-0">
+              <h2 className="text-3xl md:text-4xl font-extrabold font-abhaya mb-2 text-black">More Ways To Explore</h2>
+              <p className="text-black text-base md:text-base font-normal">Experience Lucira your way, online or at our showrooms.</p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-6 lg:gap-8">
               {WAYS.map((way, index) => (
                 <div key={index} className="flex flex-col h-full bg-white rounded-sm overflow-hidden group p-5 md:p-4 lg:p-5 shadow-sm">
-                  <div className="relative aspect-[395/295] overflow-hidden rounded-sm mb-5">
+                  <div className="relative aspect-[395/295] overflow-hidden rounded-sm mb-3">
                     <LazyImage 
                       src={way.image} 
                       alt={way.title} 
@@ -157,16 +157,16 @@ export default function WaysToExplore() {
                       className="object-cover transition-transform duration-700 group-hover:scale-105"
                     />
                   </div>
-                  <div className="flex flex-col items-start gap-4 flex-grow">
-                    <h3 className="text-xl lg:text-2xl font-bold text-gray-900">{way.title}</h3>
-                    <p className="text-gray-600 text-sm lg:text-base leading-relaxed mb-4">
+                  <div className="flex flex-col items-start gap-2 flex-grow">
+                    <h3 className="text-xl font-bold text-black">{way.title}</h3>
+                    <p className="text-black text-base mb-4">
                       {way.desc}
                     </p>
                     <div className="mt-auto w-full">
                       <Button 
                         variant="outline" 
                         onClick={() => handleAction(way.buttonText)}
-                        className="h-12 px-8 text-xs font-bold tracking-widest uppercase transition-colors hover:cursor-pointer"
+                        className="h-9 px-8 text-sm font-bold uppercase hover:bg-primary hover:text-white hover:border-primary cursor-pointer"
                       >
                         {way.buttonText}
                       </Button>

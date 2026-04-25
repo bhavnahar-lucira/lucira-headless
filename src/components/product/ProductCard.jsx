@@ -632,23 +632,26 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle 
               )}
 
               {/* Rating Section */}
-              {product.reviews?.count > 0 && (
+              {((product.reviews?.count || product.reviewStats?.count) > 0) && (
                 <div className="flex items-center gap-1.5">
                   <div className="flex items-center gap-0.5 text-amber-400">
                     {isMobile ? (
                       <Star size={12} fill="currentColor" />
                     ) : (
-                      [...Array(5)].map((_, i) => (
-                        <Star
-                          key={i}
-                          size={12}
-                          fill={i < i < Math.floor(product.reviews.average) ? "currentColor" : "none"}
-                          className={ i < i < Math.floor(product.reviews.average) ? "" : "text-zinc-200 dark:text-zinc-800"}
-                        />
-                      ))
+                      [...Array(5)].map((_, i) => {
+                        const average = product.reviews?.average || product.reviewStats?.average || 0;
+                        return (
+                          <Star
+                            key={i}
+                            size={12}
+                            fill={i < Math.floor(average) ? "currentColor" : "none"}
+                            className={i < Math.floor(average) ? "" : "text-zinc-200 dark:text-zinc-800"}
+                          />
+                        );
+                      })
                     )}
                   </div>
-                  <span className="text-sm font-semibold text-black mt-0.5">({product.reviews.count})</span>
+                  <span className="text-sm font-semibold text-black mt-0.5">({product.reviews?.count || product.reviewStats?.count})</span>
                 </div>
               )}
             </div>

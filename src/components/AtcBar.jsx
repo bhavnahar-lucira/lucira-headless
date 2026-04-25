@@ -1,12 +1,13 @@
 "use client";
 import React from "react";
-import { Heart, Loader2, MessageCircle } from "lucide-react";
+import { Heart, Loader2, MessageCircle, Home, Store as StoreIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 
 export default function AtcBar({ 
-  isVisible, 
+  isTopVisible,
+  isBottomVisible, 
   product, 
   activeVariant, 
   onAddToCart, 
@@ -21,101 +22,149 @@ export default function AtcBar({
   };
 
   const currentPrice = activeVariant?.price || product?.price || 0;
+  const comparePrice = activeVariant?.compare_price || product?.compare_price || 0;
+  const discount = comparePrice > currentPrice ? Math.round(((comparePrice - currentPrice) / comparePrice) * 100) : 0;
+  
+  // Scheme savings - approximately 10% or from metadata if available
+  const schemeSavings = Math.round(currentPrice * 0.1); 
+
+  const getValidSrc = (src, fallback = "/images/product/1.jpg") => {
+    if (typeof src === 'string' && src.trim() !== '') return src;
+    if (src && typeof src === 'object' && src.url) return src.url;
+    return fallback;
+  };
 
   return (
     <>
-      {/* Desktop Sticky Top Bar */}
+      {/* Sticky Top Bar (atcBar) */}
       <div 
         className={cn(
-          "fixed top-0 left-0 w-full bg-white z-[200] border-b border-gray-100 transition-all duration-500 transform shadow-sm px-4 lg:px-17 py-3 hidden lg:block",
-          isVisible ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0"
+          "atcBar fixed top-0 left-0 w-full bg-white z-[200] border-b border-gray-100 transition-all duration-500 transform shadow-sm px-4 lg:px-17 py-3",
+          isTopVisible ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0"
         )}
       >
         <div className="max-w-480 mx-auto flex items-center justify-between gap-4">
           <div className="flex items-center gap-4 flex-1 min-w-0">
             <div className="relative w-12 h-12 rounded-md overflow-hidden bg-gray-50 shrink-0">
               <Image 
-                src={activeVariant?.image || product?.featuredImage || "/images/product/1.jpg"} 
+                src={getValidSrc(activeVariant?.image || product?.featuredImage || product?.images?.[0])} 
                 alt={product?.title || "Product"} 
                 fill 
-                className="object-contain"
+                className="object-contain p-1"
               />
             </div>
             <div className="min-w-0">
               <h3 className="text-sm font-bold text-black truncate leading-tight">
                 {product?.title}
               </h3>
-              <div className="flex items-center gap-2 mt-0.5">
-                <span className="text-sm font-bold text-black">
+              <div className="flex items-center gap-2 mt-1">
+                <span className="text-base font-bold text-black">
                   ₹{formatPrice(currentPrice)}
                 </span>
+                {comparePrice > currentPrice && (
+                  <span className="text-xs text-gray-400 line-through font-medium">
+                    ₹{formatPrice(comparePrice)}
+                  </span>
+                )}
+                {discount > 0 && (
+                  <span className="text-xs font-bold text-[#2DB36F] flex items-center ml-1">
+                    <span className="mr-0.5">↓</span>{discount}%
+                  </span>
+                )}
               </div>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3 shrink-0">
+            <div className="hidden lg:flex items-center gap-2 mr-2">
+              <button className="h-10 px-6 border border-[#A36E6E] text-[#A36E6E] font-bold text-[12px] rounded-full uppercase tracking-wider whitespace-nowrap hover:bg-[#A36E6E]/5 transition-colors">
+                YOU SAVE ₹{formatPrice(schemeSavings)} WITH SCHEME
+              </button>
+            </div>
+
             <Button 
               onClick={onAddToCart}
               disabled={addingToCart}
-              className="h-11 px-10 text-sm font-bold bg-[#A36E6E] hover:bg-[#8F5D5D] text-white rounded-md transition-colors"
+              className="h-10 px-10 text-sm font-bold bg-[#A36E6E] hover:bg-[#8F5D5D] text-white rounded-full transition-colors uppercase tracking-wider min-w-[160px]"
             >
               {addingToCart ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : "ADD TO CART"}
             </Button>
 
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={onToggleWishlist}
-              disabled={wishlistLoading}
-              className={cn(
-                "h-11 w-11 border-[#E89393] hover:bg-[#FFF5F5] transition-colors",
-                isWishlisted ? "text-rose-500" : "text-[#E89393]"
-              )}
-            >
-              <Heart size={20} fill={isWishlisted ? "currentColor" : "none"} />
-            </Button>
+            <div className="hidden xl:flex items-center gap-2">
+              <button className="h-10 w-10 border border-[#E89393] text-[#E89393] rounded-lg flex items-center justify-center hover:bg-[#FFF5F5] transition-colors">
+                <Home size={18} />
+              </button>
+              <button className="h-10 w-10 border border-[#A193E8] text-[#A193E8] rounded-lg flex items-center justify-center hover:bg-[#F5F5FF] transition-colors">
+                <StoreIcon size={18} />
+              </button>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Mobile Sticky Bottom Bar */}
+      {/* Sticky Bottom Bar (atc-2) */}
       <div 
         className={cn(
-          "fixed bottom-0 left-0 w-full bg-white z-[200] border-t border-gray-100 shadow-[0_-4px_10px_rgba(0,0,0,0.05)] px-4 py-3 lg:hidden"
+          "atc-2 fixed bottom-0 left-0 w-full z-[200] transition-all duration-300 transform pointer-events-none",
+          isBottomVisible ? "translate-y-0 opacity-100" : "translate-y-full opacity-0"
         )}
       >
-        <div className="flex items-center gap-2 w-full h-12">
-          {/* WhatsApp Button */}
-          <a 
-            href="https://wa.me/yournumber" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="h-full aspect-square bg-[#25D366] rounded-xl flex items-center justify-center shrink-0"
-          >
-            <div className="relative w-7 h-7">
-               <Image src="/images/icons/whatsapp.png" alt="WhatsApp" fill className="object-contain invert brightness-200" />
+        <div className="max-w-480 mx-auto px-4 lg:px-17">
+          {/* Desktop Layout: Aligned to Right Column */}
+          <div className="hidden lg:grid lg:grid-cols-[1fr_340px] xl:grid-cols-[1fr_420px] 2xl:grid-cols-[1fr_530px] gap-10">
+            <div className="hidden lg:block"></div> {/* Spacer for Left Column */}
+            <div className="pointer-events-auto bg-white border border-gray-100 rounded-xl p-3 flex items-center gap-2 w-full">
+              <button className="h-14 flex-1 border border-[#A36E6E] text-[#A36E6E] font-bold text-[14px] rounded-lg flex items-center justify-center whitespace-nowrap px-2 hover:bg-[#A36E6E]/5 transition-colors uppercase">
+                9=10 SAVING
+              </button>
+              <button 
+                onClick={onAddToCart}
+                disabled={addingToCart}
+                className="h-14 flex-[1.5] bg-[#A36E6E] text-white font-bold text-[14px] rounded-lg flex items-center justify-center gap-2 disabled:opacity-70 hover:bg-[#8F5D5D] transition-colors"
+              >
+                {addingToCart ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  "ADD TO CART"
+                )}
+              </button>              
             </div>
-          </a>
+          </div>
 
-          {/* 9=10 Saving Button */}
-          <button className="h-full flex-1 border border-[#A36E6E] text-[#A36E6E] font-bold text-[13px] rounded-xl flex items-center justify-center whitespace-nowrap px-2">
-            9=10 SAVING
-          </button>
+          {/* Mobile Layout: Full Width Style */}
+          <div className="lg:hidden pointer-events-auto bg-white border-t border-gray-100 shadow-[0_-4px_10px_rgba(0,0,0,0.05)] -mx-4 px-4 py-3 flex items-center gap-2 w-[100vw]">
+            {/* WhatsApp Button */}
+            <a 
+              href="https://wa.me/919172499912" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="h-14 aspect-square bg-[#25D366] rounded-xl flex items-center justify-center shrink-0"
+            >
+              <div className="relative w-7 h-7">
+                <Image src="/images/icons/whatsapp.png" alt="WhatsApp" fill className="object-contain invert brightness-200" />
+              </div>
+            </a>
 
-          {/* Add to Cart Button */}
-          <button 
-            onClick={onAddToCart}
-            disabled={addingToCart}
-            className="h-full flex-[1.5] bg-[#A36E6E] text-white font-bold text-[13px] rounded-xl flex items-center justify-center gap-2 disabled:opacity-70"
-          >
-            {addingToCart ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              "ADD TO CART"
-            )}
-          </button>
+            {/* 9=10 Saving Button */}
+            <button className="h-14 flex-1 border border-[#A36E6E] text-[#A36E6E] font-bold text-[13px] rounded-xl flex items-center justify-center whitespace-nowrap px-2">
+              9=10 SAVING
+            </button>
+
+            {/* Add to Cart Button */}
+            <button 
+              onClick={onAddToCart}
+              disabled={addingToCart}
+              className="h-14 flex-[1.5] bg-[#A36E6E] text-white font-bold text-[13px] rounded-xl flex items-center justify-center gap-2 disabled:opacity-70"
+            >
+              {addingToCart ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                "ADD TO CART"
+              )}
+            </button>
+          </div>
         </div>
       </div>
     </>

@@ -77,7 +77,23 @@ export async function GET(req) {
       "filter.p.m.custom.fit": "productMetafields.fit"
     };
 
-    // 3. Current Active Filters from URL
+    // 3. Store Mapping for "In Store Available" Filter
+    const storesCollection = db.collection("stores");
+    const stores = await storesCollection.find({}).toArray();
+    const storeMap = {};
+    const nameToGidMap = {};
+    stores.forEach(s => {
+      let displayName = s.name;
+      if (displayName.includes("Divinecarat")) displayName = "Malad";
+      if (displayName === "BO1") displayName = "Borivali";
+      if (displayName === "CS1") displayName = "Chembur";
+      if (displayName === "PS1") displayName = "Pune";
+      if (displayName === "NOS18") displayName = "Noida";
+      storeMap[s.shopifyId] = displayName;
+      nameToGidMap[displayName] = s.shopifyId;
+    });
+
+    // 4. Current Active Filters from URL
     const activeProductFilters = {};
     const activeVariantFilters = {};
 
@@ -104,8 +120,13 @@ export async function GET(req) {
         const uniqueValues = [...new Set(values)];
         const expandedValues = [];
         uniqueValues.forEach(v => {
-          expandedValues.push(v);
-          expandedValues.push(JSON.stringify([v]));
+          // Resolve store name to GID if it's the in_store_available filter
+          const resolvedValue = (mongoKey === "variants.metafields.in_store_available" && nameToGidMap[v]) 
+            ? nameToGidMap[v] 
+            : v;
+            
+          expandedValues.push(resolvedValue);
+          expandedValues.push(JSON.stringify([resolvedValue]));
         });
         const val = expandedValues.length > 1 ? { $in: expandedValues } : expandedValues[0];
 
@@ -117,7 +138,7 @@ export async function GET(req) {
       }
     });
 
-    // 4. Aggregation Helper
+    // 5. Aggregation Helper
     const baseMatch = await buildBaseMatch();
 
     const getFacetedCounts = async (field, isMetafieldArray = false) => {
@@ -203,20 +224,6 @@ export async function GET(req) {
     const results = {};
     const isCategoryHandle = handle && handle.startsWith("all-");
 
-    // Fetch store names for mapping GIDs to human-readable names
-    const storesCollection = db.collection("stores");
-    const stores = await storesCollection.find({}).toArray();
-    const storeMap = {};
-    stores.forEach(s => {
-      let displayName = s.name;
-      if (displayName.includes("Divinecarat")) displayName = "Malad";
-      if (displayName === "BO1") displayName = "Borivali";
-      if (displayName === "CS1") displayName = "Chembur";
-      if (displayName === "PS1") displayName = "Pune";
-      if (displayName === "NOS18") displayName = "Noida";
-      storeMap[s.shopifyId] = displayName;
-    });
-
     const categories = [
       { name: "In Store Available", field: "variants.metafields.in_store_available", isM: true },
       { name: "Ring Size", field: "variants.metafields.ring_size_inventory", isM: true },
@@ -248,12 +255,13 @@ export async function GET(req) {
           
           if (cat.name === "In Store Available" && storeMap[value]) {
             label = storeMap[value];
+            value = storeMap[value]; // Use store name as the value too
           }
 
           if (!mergedResults[label]) {
             mergedResults[label] = { 
                 label: label, 
-                value: value, // We keep the first value encountered as the filter key
+                value: value, 
                 count: 0,
                 urlKey: REVERSE_KEY_MAP[cat.field] || cat.field.split(".").pop()
             };

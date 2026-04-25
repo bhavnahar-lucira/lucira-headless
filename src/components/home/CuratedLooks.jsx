@@ -193,11 +193,11 @@ export default function CuratedLooks() {
   if (isMobile) {
     return (
       <section className="w-full mt-12 bg-[#FEF5F1] py-12 overflow-hidden">
-        <div className="container-main px-4">
-          <div className="text-center mb-8">
-            <h2 className="text-3xl font-black font-abhaya mb-3 text-zinc-900 tracking-tight">Curated Looks For You</h2>
-            <p className="text-zinc-600 text-sm">Explore the jewelry pieces that defines the look</p>
-          </div>
+        <div className="container-main">
+            <div className="text-center mb-6 px-1 md:px-0">
+              <h2 className="text-3xl md:text-4xl font-extrabold font-abhaya mb-2 text-black">Curated Looks For You</h2>
+              <p className="text-black text-base md:text-base font-normal">Explore the jewelry pieces that defines the look</p>
+            </div>
 
           <div className="relative">
             <Swiper

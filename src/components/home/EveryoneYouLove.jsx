@@ -13,12 +13,12 @@ const OCCASIONS = [
 
 export default function EveryoneYouLove() {
   return (
-    <section className="w-full mt-12 md:mt-20 bg-[#FEF5F1] py-12 md:py-20">
-      <div className="container-main px-4">
+    <section className="w-full mt-10 md:mt-15 bg-[#FEF5F1] py-10 md:py-12">
+      <div className="container-main">
 
-        <div className="text-center mb-8 md:mb-12">
-          <h2 className="text-3xl md:text-5xl font-extrabold font-abhaya mb-3 text-zinc-900 tracking-tight">For Everyone You Love</h2>
-          <p className="text-zinc-600 text-sm md:text-lg">Crafted with care, for everyone you hold close.</p>
+        <div className="text-center mb-6 px-1 md:px-0">
+          <h2 className="text-3xl md:text-4xl font-extrabold font-abhaya mb-2 text-black">For Everyone You Love</h2>
+          <p className="text-black text-base md:text-base font-normal">Crafted with care, for everyone you hold close.</p>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
@@ -37,14 +37,14 @@ export default function EveryoneYouLove() {
               <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/5 to-transparent pointer-events-none" />
               <div className="absolute bottom-4 left-4 right-4 md:bottom-6 md:left-6 md:right-6 flex justify-between items-center text-white">
                 <div className="flex flex-col">
-                  <span className="text-[14px] xl:text-2xl lg:text-lg font-semibold leading-tight">{occ.name}</span>
+                  <span className="text-[14px] md:text-2xl font-semibold">{occ.name}</span>
                   {occ.label && (
                     <span className="text-[14px] md:text-2xl lg:text-lg font-medium opacity-90 mt-1 uppercase tracking-wider italic">
                       {occ.label}
                     </span>
                   )}
                 </div>
-                <div className="w-6 h-6 md:w-10 md:h-10 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center transition-all group-hover:bg-white group-hover:text-black mb-1">
+                <div className="w-6 h-6 md:w-10 md:h-10 rounded-full border border-white/40 flex items-center justify-center transition-all group-hover:bg-white group-hover:text-black">
                   <ArrowRight size={16}  className="md:w-5 md:h-5" />
                 </div>
               </div>

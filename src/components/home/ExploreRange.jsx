@@ -34,11 +34,11 @@ export default function ExploreRange() {
   }
 
   return (
-    <section className="w-full mt-10 lg:mt-16 bg-white overflow-hidden">
+    <section className="w-full mt-10 bg-white overflow-hidden">
       <div className="container-main">
         <div className="text-left md:text-center mb-6 px-1 md:px-0">
-          <h2 className="text-3xl md:text-4xl font-black font-abhaya mb-2 text-zinc-900 tracking-tight">Explore Our Range</h2>
-          <p className="text-zinc-600 text-sm md:text-base font-medium">Find diamond jewelry pieces that match your style.</p>
+          <h2 className="text-3xl md:text-4xl font-extrabold font-abhaya mb-2 text-black">Explore Our Range</h2>
+          <p className="text-black text-base md:text-base font-normal">Find diamond jewelry pieces that match your style.</p>
         </div>
 
         {isMobile ? (
@@ -102,8 +102,8 @@ function CategoryCard({ cat }) {
       />
       <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent pointer-events-none" />
       <div className="absolute bottom-4 md:bottom-6 left-3 md:left-4 right-3 md:right-4 flex justify-between items-center text-white">
-        <span className="text-[14px] md:text-xl lg:text-lg font-bold tracking-tight">{cat.name}</span>
-        <div className="w-6 h-6 md:w-10 md:h-10 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center transition-all group-hover:bg-white group-hover:text-black shrink-0">
+        <span className="text-[14px] md:text-2xl font-semibold">{cat.name}</span>
+        <div className="w-6 h-6 md:w-10 md:h-10 rounded-full border border-white/40 flex items-center justify-center transition-all group-hover:bg-white group-hover:text-black">
           <ArrowRight size={16} className="md:w-5 md:h-5" />
         </div>
       </div>

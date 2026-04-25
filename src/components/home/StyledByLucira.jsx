@@ -168,13 +168,13 @@ export default function StyledByLucira() {
   const swiperRef = useRef(null);
 
   return (
-    <section className="w-full mt-12 md:mt-15 bg-white overflow-hidden pb-10">
+    <section className="w-full my-10 md:my-15 bg-white overflow-hidden">
       <div className="container-main">
-        <div className="text-center mb-6 md:mb-8">
-          <h2 className="text-3xl md:text-4xl font-black font-abhaya mb-2 text-zinc-900 tracking-tight">Styled By Lucira</h2>
+        <div className="text-center mb-6">
+          <h2 className="text-3xl md:text-4xl font-extrabold font-abhaya mb-2 text-black">Styled By Lucira</h2>
         </div>
 
-        <div className="relative w-full group/slider px-4 md:px-0">
+        <div className="relative w-full group/slider">
           <Swiper
             modules={[Navigation]}
             onSwiper={(swiper) => {
@@ -192,21 +192,26 @@ export default function StyledByLucira() {
             speed={600}
             grabCursor={true}
             breakpoints={{
+              360: {
+                slidesPerView: 1,
+                spaceBetween: 12,
+                centeredSlides: true,
+              },
               640: {
                 slidesPerView: 3,
                 spaceBetween: 20,
                 centeredSlides: false
               },
-              1024: {
-                slidesPerView: 3,
+              1025: {
+                slidesPerView: 4,
                 spaceBetween: 20,
                 centeredSlides: true
               },
-              1200: {
+              1370: {
                 slidesPerView: 5,
                 spaceBetween: 30,
                 centeredSlides: true
-              }
+              },
             }}
             className="lucira-swiper overflow-visible!"
           >
