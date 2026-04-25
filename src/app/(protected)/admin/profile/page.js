@@ -31,6 +31,7 @@ export default function MyProfilePage() {
   const [isUploading, setIsUploading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [userStats, setUserStats] = useState({ orders: "...", points: "..." });
   
   // Form State
   const [formData, setFormData] = useState({
@@ -69,6 +70,27 @@ export default function MyProfilePage() {
         if (avRes.ok) {
           const avData = await avRes.json();
           if (avData.avatar) setProfileImage(avData.avatar);
+        }
+
+        // Fetch Orders and Points
+        try {
+          const [statsRes, ordersRes] = await Promise.all([
+            fetch("/api/customer/dashboard-stats"),
+            fetch("/api/customer/orders")
+          ]);
+          let oCount = "0", pBal = "0";
+          
+          if (statsRes.ok) {
+            const sData = await statsRes.json();
+            pBal = sData.points !== undefined ? sData.points.toLocaleString() : "0";
+          }
+          if (ordersRes.ok) {
+            const oData = await ordersRes.json();
+            oCount = oData.orders?.length?.toString() || "0";
+          }
+          setUserStats({ orders: oCount, points: pBal });
+        } catch (e) {
+          console.warn("Failed to load stats", e);
         }
       } catch (err) {
         console.error("Failed to load profile", err);
@@ -248,11 +270,11 @@ export default function MyProfilePage() {
             <div className="pt-6 border-t border-zinc-50 grid grid-cols-2 gap-4">
               <div>
                 <p className="text-[10px] font-black text-zinc-300 uppercase mb-1">Orders</p>
-                <p className="text-lg font-black text-zinc-900">12</p>
+                <p className="text-lg font-black text-zinc-900">{userStats.orders}</p>
               </div>
               <div className="border-l border-zinc-50">
                 <p className="text-[10px] font-black text-zinc-300 uppercase mb-1">Points</p>
-                <p className="text-lg font-black text-zinc-900">1,250</p>
+                <p className="text-lg font-black text-zinc-900">{userStats.points}</p>
               </div>
             </div>
           </div>
