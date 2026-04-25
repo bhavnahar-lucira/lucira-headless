@@ -17,6 +17,7 @@ import {
   CreditCard,
   MapPin,
   Gift,
+  GraduationCap,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useDispatch, useSelector } from "react-redux";
@@ -32,6 +33,7 @@ const sidebarLinks = [
   { name: "Earn Rewards", href: "/admin/rewards", icon: Gift, color: "text-amber-500", bg: "bg-amber-500/10" },
   { name: "My Profile", href: "/admin/profile", icon: User, color: "text-zinc-500", bg: "bg-zinc-500/10" },
   { name: "Refer & Earn", href: "/admin/referral", icon: Gem, color: "text-indigo-500", bg: "bg-indigo-500/10" },
+  { name: "Education", href: "/admin/education", icon: GraduationCap, color: "text-amber-600", bg: "bg-amber-600/10" },
 ];
 
 import {
@@ -148,7 +150,7 @@ export default function CustomerDashboardLayout({ children }) {
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 flex flex-col min-h-screen w-full">
+        <main className="flex-1 flex flex-col min-h-screen w-full min-w-0">
           <div className="p-4 sm:p-8 flex-1 bg-[#F8FAFC] overflow-x-hidden">
             {children}
           </div>
