@@ -97,7 +97,7 @@ export default function CartPage() {
   }
 
   return (
-    <div className="bg-white min-h-screen overflow-x-hidden pb-32 lg:pb-0">
+    <div className="bg-white min-h-screen overflow-x-hidden">
       {/* Mobile Header (LG Hidden) */}
       <div className="lg:hidden pt-6 px-4 bg-white">
         <div className="flex items-baseline gap-2">
@@ -147,13 +147,13 @@ export default function CartPage() {
         <div className="flex items-center justify-between gap-4">
           <div className="flex flex-col">
             <span className="text-lg font-bold text-zinc-900 leading-none">₹ {totalAmount.toLocaleString('en-IN')}</span>
-            <button className="text-[11px] font-bold text-[#A855F7] uppercase tracking-tight mt-1 text-left">
+            <button className="text-[11px] font-bold text-accent uppercase tracking-tight mt-1 text-left">
               View Order Summary
             </button>
           </div>
           <Button 
             onClick={handlePlaceOrder}
-            className="grow bg-[#A855F7] hover:bg-[#9333EA] text-white font-bold h-12 uppercase tracking-widest rounded-xl text-sm"
+            className="grow bg-primary hover:bg-accent text-white font-bold h-12 uppercase tracking-widest rounded-lg text-sm"
           >
             Place Order
           </Button>

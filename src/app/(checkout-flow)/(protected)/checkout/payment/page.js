@@ -881,7 +881,7 @@ export default function PaymentPage() {
             role="button"
             tabIndex={0}
             className={`rounded-xl border p-4 text-left transition-all ${
-              isSelected ? "border-primary bg-[#FFF8F4]" : "border-zinc-200 bg-white"
+              isSelected ? "border-accent bg-accent/10" : "border-zinc-200 bg-white"
             }`}
           >
             <div className="flex items-start gap-3">
@@ -910,7 +910,7 @@ export default function PaymentPage() {
                       e.stopPropagation();
                       await handleDeleteAddress(address.id);
                     }}
-                    className="rounded-full border border-zinc-200 p-2 text-zinc-600 transition hover:border-red-200 hover:text-red-600"
+                    className="rounded-full bg-white shadow border border-zinc-200 p-2 text-zinc-600 transition hover:border-red-200 hover:text-red-600"
                   >
                     <Trash2 className="size-4" />
                   </button>
@@ -940,7 +940,7 @@ export default function PaymentPage() {
   );
 
   return (
-    <div className="bg-white min-h-screen overflow-x-hidden pb-32 lg:pb-0">
+    <div className="bg-white min-h-screen overflow-x-hidden">
       <div className="max-w-7xl w-full mx-auto relative z-10 px-4">
         <div className="flex flex-col lg:flex-row min-h-[calc(100vh-80px)]">
           <div className="grow lg:basis-[60%] lg:shrink-0 py-10 px-4 lg:pr-12 space-y-10 bg-white">
@@ -950,7 +950,7 @@ export default function PaymentPage() {
                 <span className="text-zinc-900 font-medium truncate">{customer?.email || checkoutSelection?.customerEmail || "techamitjha@gmail.com"}</span>
                 <Link
                   href="/checkout/shipping?method=ship"
-                  className="text-[#005BD3] text-right hover:underline"
+                  className="text-black font-semibold text-right underline"
                 >
                   Change
                 </Link>
@@ -975,7 +975,7 @@ export default function PaymentPage() {
                 </div>
                 <Link
                   href={`/checkout/shipping?method=${isPickup ? "pickup" : "ship"}`}
-                  className="text-[#005BD3] text-right hover:underline"
+                  className="text-black font-semibold text-right underline"
                 >
                   Change
                 </Link>
@@ -997,7 +997,7 @@ export default function PaymentPage() {
                   <button
                     type="button"
                     onClick={() => setBillingDialogOpen(true)}
-                    className="text-[#005BD3] text-right hover:underline"
+                    className="text-black font-semibold text-right underline"
                   >
                     Change
                   </button>
@@ -1014,12 +1014,12 @@ export default function PaymentPage() {
 
             <div className="space-y-4">
               <div className="space-y-1">
-                <h2 className="text-xl font-bold text-zinc-900">Billing address</h2>
-                <p className="text-sm text-zinc-500">Select the address that matches your card or payment method.</p>
+                <h2 className="text-2xl font-bold text-zinc-900 font-abhaya">Billing address</h2>
+                <p className="text-sm font-figtree text-zinc-500">Select the address that matches your card or payment method.</p>
               </div>
 
               {isPickup ? (
-                <div className="border border-zinc-200 rounded-xl overflow-hidden bg-white">
+                <div className="border border-zinc-100 rounded-xl overflow-hidden bg-white">
                   <div className="p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div className="space-y-1">
                       {selectedBillingAddress ? (
@@ -1036,7 +1036,7 @@ export default function PaymentPage() {
                     <Button
                       variant="outline"
                       onClick={() => setBillingDialogOpen(true)}
-                      className="border-zinc-200 text-[#005BD3] font-bold"
+                      className="border-zinc-200 text-zinc-800 font-bold"
                     >
                       Select billing address
                     </Button>
@@ -1046,14 +1046,14 @@ export default function PaymentPage() {
                 <RadioGroup
                   value={billingAddressMode}
                   onValueChange={handleBillingModeChange}
-                  className="grid gap-0 border border-zinc-200 rounded-xl overflow-hidden bg-white"
+                  className="grid gap-0 border border-zinc-100 rounded-lg overflow-hidden bg-white"
                 >
-                  <div className={`p-5 flex items-center gap-3 border-b border-zinc-200 ${billingAddressMode === "same" ? "bg-[#F0F7FF]" : ""}`}>
-                    <RadioGroupItem value="same" id="same" className="text-[#005BD3] border-zinc-300" />
+                  <div className={`p-5 flex items-center gap-3 border-b border-zinc-100 ${billingAddressMode === "same" ? "bg-accent/15" : ""}`}>
+                    <RadioGroupItem value="same" id="same" className="text-black border-zinc-300" />
                     <Label htmlFor="same" className="font-medium text-zinc-900 cursor-pointer">Same as shipping address</Label>
                   </div>
-                  <div className={`p-5 flex items-center gap-3 transition-all hover:bg-zinc-50/50 cursor-pointer ${billingAddressMode === "different" ? "bg-[#F0F7FF]" : ""}`}>
-                    <RadioGroupItem value="different" id="different" className="text-[#005BD3] border-zinc-300" />
+                  <div className={`p-5 flex items-center gap-3 transition-all hover:bg-zinc-50/50 cursor-pointer ${billingAddressMode === "different" ? "bg-accent/15" : ""}`}>
+                    <RadioGroupItem value="different" id="different" className="text-black border-zinc-300" />
                     <Label htmlFor="different" className="font-medium text-zinc-900 cursor-pointer">Use a different billing address</Label>
                   </div>
                 </RadioGroup>
@@ -1062,37 +1062,37 @@ export default function PaymentPage() {
 
             <div className="space-y-4">
               <div className="space-y-1">
-                <h2 className="text-xl font-bold text-zinc-900">Payment</h2>
-                <p className="text-sm text-zinc-500">All transactions are secure and encrypted.</p>
+                <h2 className="text-2xl font-abhaya font-bold text-zinc-900">Payment</h2>
+                <p className="text-sm font-figtree text-zinc-500">All transactions are secure and encrypted.</p>
               </div>
 
               <RadioGroup
                 value={selectedPaymentGateway}
                 onValueChange={setSelectedPaymentGateway}
-                className="grid gap-0 border border-zinc-200 rounded-xl overflow-hidden bg-white"
+                className="grid gap-0 border border-zinc-200 rounded-lg overflow-hidden bg-white"
               >
                 {paymentGateways.map((gateway, index) => (
-                  <div key={gateway.id} className={`flex flex-col ${index === 0 ? "border-b border-zinc-200" : ""}`}>
-                    <div className={`p-5 flex items-center justify-between transition-all cursor-pointer ${index === 0 ? "bg-[#F0F7FF]" : ""}`}>
+                  <div key={gateway.id} className={`flex flex-col ${index === 0 ? "border-b border-zinc-100" : ""}`}>
+                    <div className={`p-5 flex flex-col md:flex-row gap-4 md:gap-0 items-center justify-between transition-all cursor-pointer ${index === 0 ? "bg-accent/15" : ""}`}>
                       <div className="flex items-center gap-3">
                         <RadioGroupItem value={gateway.id} id={gateway.id} className="text-[#005BD3] border-zinc-300" />
                         <Label htmlFor={gateway.id} className="font-medium text-zinc-900 cursor-pointer">{gateway.name}</Label>
                       </div>
                       <div className="flex items-center gap-2">
                         <div className="flex gap-1 items-center bg-white px-2 py-1 rounded border border-zinc-100">
-                          <Image src="https://upload.wikimedia.org/wikipedia/commons/e/e1/UPI-Logo.png" className="h-3 w-auto opacity-70" alt="UPI" width={36} height={12} unoptimized />
+                          <Image src="/images/icons/upi.svg" className="h-3 w-auto opacity-70" alt="UPI" width={36} height={12} unoptimized />
                         </div>
                         <div className="flex gap-1 items-center bg-white px-2 py-1 rounded border border-zinc-100">
-                          <Image src="https://upload.wikimedia.org/wikipedia/commons/d/d6/Visa_2021.svg" className="h-2 w-auto opacity-70" alt="VISA" width={36} height={8} unoptimized />
+                          <Image src="/images/icons/visa.svg" className="h-2 w-auto opacity-70" alt="VISA" width={36} height={8} unoptimized />
                         </div>
                         <div className="flex gap-1 items-center bg-white px-2 py-1 rounded border border-zinc-100">
-                          <Image src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" className="h-3 w-auto opacity-70" alt="MASTERCARD" width={36} height={12} unoptimized />
+                          <Image src="/images/icons/mastercard.svg" className="h-3 w-auto opacity-70" alt="MASTERCARD" width={36} height={12} unoptimized />
                         </div>
                         <span className="text-[10px] text-zinc-400 font-bold">+{index === 0 ? "18" : "4"}</span>
                       </div>
                     </div>
                     {gateway.description && (
-                      <div className="px-14 pb-5 pt-0 bg-[#F0F7FF] text-center">
+                      <div className="px-10 md:px-14 pb-5 pt-0 bg-accent/15 text-center">
                         <div className="p-4 bg-zinc-50/50 rounded-lg text-sm text-zinc-600 border border-zinc-100">
                           {gateway.description}
                         </div>
@@ -1104,7 +1104,7 @@ export default function PaymentPage() {
             </div>
 
             <div className="hidden lg:flex items-center justify-between gap-6 pt-4">
-              <Link href="/checkout/shipping" className="flex items-center gap-2 text-sm font-medium text-[#005BD3] hover:underline">
+              <Link href="/checkout/shipping" className="flex items-center gap-2 text-sm font-bold text-accent hover:underline">
                 <ChevronLeft size={16} />
                 Return to shipping
               </Link>
@@ -1135,14 +1135,14 @@ export default function PaymentPage() {
         <div className="flex items-center justify-between gap-4">
           <div className="flex flex-col">
             <span className="text-lg font-bold text-zinc-900 leading-none">₹ {totalAmount.toLocaleString('en-IN')}</span>
-            <button className="text-[11px] font-bold text-[#A855F7] uppercase tracking-tight mt-1 text-left">
+            <button className="text-[11px] font-bold text-accent uppercase tracking-tight mt-1 text-left">
               View Order Summary
             </button>
           </div>
           <Button 
             onClick={handlePayNow}
             disabled={paymentLoading || !totalAmount}
-            className="grow bg-[#A855F7] hover:bg-[#9333EA] text-white font-bold h-12 uppercase tracking-widest rounded-xl text-sm"
+            className="grow bg-primary hover:bg-accent text-white font-bold h-12 uppercase tracking-widest rounded-lg text-sm"
           >
             {paymentLoading ? "Processing..." : "Pay Now"}
           </Button>

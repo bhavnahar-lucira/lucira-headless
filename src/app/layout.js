@@ -71,7 +71,7 @@ export default function RootLayout({ children }) {
           </Script>
         )}
       </head>
-      <body className={`${figtree.variable} ${abhaya.variable} ${lobster.variable} ${yellowtail.variable} ${satisfy.variable} ${abeezee.variable} font-sans antialiased`}>
+      <body className={`${figtree.variable} ${abhaya.variable} ${lobster.variable} ${yellowtail.variable} ${satisfy.variable} ${abeezee.variable} font-figtree antialiased`}>
         {isProd && (
           <noscript>
             <iframe 
