@@ -70,7 +70,7 @@ export default function CollectionSlider ({ products = [], loading = false }) {
         </Swiper>
 
         {/* Navigation & Progress Controls (Updated for design) */}
-        <div className="flex justify-between items-center mt-8 md:mt-12 px-1">
+        <div className="flex justify-between items-center mt-8 md:mt-6 px-1">
           {/* Progress Bar (Global) */}
           <div className="flex-1 max-w-[120px] md:max-w-[200px] h-[2px] bg-zinc-100 relative overflow-hidden">
             <div 
