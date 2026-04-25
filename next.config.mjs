@@ -43,6 +43,14 @@ const nextConfig = {
       },
     ],
   },
+  async rewrites() {
+    return [
+      {
+        source: '/api/proxy/earn-rewards/:path*',
+        destination: 'https://api.lucirajewelry.com/earn-rewards/:path*',
+      },
+    ];
+  },
 };
 
 export default nextConfig;
