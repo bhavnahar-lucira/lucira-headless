@@ -120,7 +120,7 @@ export default function ReferralPage() {
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <h2 className="text-3xl font-black text-zinc-900 tracking-tight mb-1">
+          <h2 className="text-2xl font-black text-zinc-900 tracking-tight mb-1">
             Refer & Earn
           </h2>
           <p className="text-zinc-500 font-medium">Invite your friends and earn rewards for every successful referral.</p>
@@ -172,7 +172,7 @@ export default function ReferralPage() {
         </div>
 
         <div className="flex flex-col xl:flex-row gap-6 items-center">
-          <div className="flex-1 w-full bg-zinc-50 rounded-2xl flex items-center p-2 border border-zinc-200">
+          <div className="flex-1 w-full bg-zinc-50 rounded-2xl flex flex-col gap-[17px] items-stretch p-2 border border-zinc-200">
             <input
               type="text"
               readOnly

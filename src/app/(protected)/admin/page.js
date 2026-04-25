@@ -67,8 +67,8 @@ export default function CustomerDashboard() {
       value: loading ? "..." : orders.length.toString(),
       subtitle: "Total history",
       icon: ShoppingBag,
-      color: "from-[#b76f79] to-[#9a5b65]",
-      shadow: "shadow-[#b76f79]/20",
+      color: "from-primary to-primary/80",
+      shadow: "shadow-primary/20",
       link: "/admin/orders"
     },
     {
@@ -76,8 +76,8 @@ export default function CustomerDashboard() {
       value: loading ? "..." : stats.wishlistCount.toString(),
       subtitle: "Saved for later",
       icon: Heart,
-      color: "from-[#b76f79] to-[#9a5b65]",
-      shadow: "shadow-[#b76f79]/20",
+      color: "from-primary to-primary/80",
+      shadow: "shadow-primary/20",
       link: "/admin/wishlist"
     },
     {
@@ -85,8 +85,8 @@ export default function CustomerDashboard() {
       value: loading ? "..." : stats.points,
       subtitle: stats.tier,
       icon: Star,
-      color: "from-[#b76f79] to-[#9a5b65]",
-      shadow: "shadow-[#b76f79]/20",
+      color: "from-primary to-primary/80",
+      shadow: "shadow-primary/20",
       link: "/pages/rewards"
     },
     {
@@ -94,8 +94,8 @@ export default function CustomerDashboard() {
       value: "00",
       subtitle: "In progress",
       icon: Clock,
-      color: "from-[#b76f79] to-[#9a5b65]",
-      shadow: "shadow-[#b76f79]/20",
+      color: "from-primary to-primary/80",
+      shadow: "shadow-primary/20",
       link: "/admin/orders"
     }
   ];
@@ -104,10 +104,10 @@ export default function CustomerDashboard() {
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <h2 className="text-3xl font-black text-zinc-900 tracking-tight mb-1">
+          <h2 className="text-xl md:text-2xl font-bold text-primary tracking-tight mb-1">
             {displayName ? `Hello, ${displayName}` : "Account Overview"}
           </h2>
-          <p className="text-zinc-500 font-medium">Manage your orders, track deliveries, and view your rewards.</p>
+          <p className="text-zinc-500 font-medium text-sm md:text-base">Manage your orders, track deliveries, and view your rewards.</p>
         </div>
       </div>
 
@@ -122,8 +122,8 @@ export default function CustomerDashboard() {
                   <Icon size={22} strokeWidth={2.5} />
                 </div>
                 <div className="text-right">
-                  <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">{stat.title}</p>
-                  <h3 className="text-2xl font-black text-zinc-900">{stat.value}</h3>
+                  <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">{stat.title}</p>
+                  <h3 className="text-2xl font-bold text-primary">{stat.value}</h3>
                 </div>
               </div>
               <p className="text-xs font-bold text-primary flex items-center gap-1 cursor-pointer hover:underline">
@@ -138,8 +138,8 @@ export default function CustomerDashboard() {
         {/* Recent Activity */}
         <div className="lg:col-span-2 space-y-6">
           <div className="flex items-center justify-between">
-            <h3 className="text-xl font-black text-zinc-900">Recent Orders</h3>
-            <Link href="/admin/orders" className="text-xs font-black text-primary uppercase tracking-widest hover:underline flex items-center gap-1">
+            <h3 className="text-lg font-bold text-primary uppercase tracking-tight">Recent Orders</h3>
+            <Link href="/admin/orders" className="text-xs font-bold text-primary uppercase tracking-widest hover:underline flex items-center gap-1">
               View all orders <ArrowRight size={14} />
             </Link>
           </div>
@@ -155,8 +155,8 @@ export default function CustomerDashboard() {
                   </div>
                   <div className="flex-1 space-y-1 text-center md:text-left">
                     <div className="flex flex-col md:flex-row md:items-center gap-2 mb-1">
-                      <span className="text-xs font-black text-primary uppercase tracking-widest">#{order.orderNumber}</span>
-                      <span className={`w-fit mx-auto md:mx-0 px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${
+                      <span className="text-xs font-bold text-primary uppercase tracking-widest">#{order.orderNumber}</span>
+                      <span className={`w-fit mx-auto md:mx-0 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
                         order.status === 'Delivered' ? 'bg-emerald-50 text-emerald-600' : 'bg-blue-50 text-blue-600'
                       }`}>
                         {order.status}
@@ -166,8 +166,8 @@ export default function CustomerDashboard() {
                     <p className="text-xs text-zinc-500 font-medium">{order.date}</p>
                   </div>
                   <div className="text-right flex flex-col items-center md:items-end gap-3">
-                    <p className="text-lg font-black text-zinc-900">{order.amount}</p>
-                    <Link href={`/admin/orders/${order.id.split('/').pop()}`} className="px-5 py-2 bg-primary text-white text-[10px] font-black uppercase tracking-[0.15em] rounded-xl hover:opacity-90 transition-colors shadow-lg shadow-primary/10">
+                    <p className="text-lg font-bold text-primary">{order.amount}</p>
+                    <Link href={`/admin/orders/${order.id.split('/').pop()}`} className="px-5 py-2 bg-primary text-white text-[10px] font-bold uppercase tracking-[0.15em] rounded-xl hover:opacity-90 transition-colors shadow-lg shadow-primary/10">
                       View Details
                     </Link>
                   </div>
@@ -177,7 +177,7 @@ export default function CustomerDashboard() {
               <div className="bg-white rounded-3xl border border-zinc-100 p-10 text-center shadow-sm">
                 <ShoppingBag size={40} className="mx-auto mb-4 text-zinc-200" />
                 <p className="text-zinc-500 font-bold">No orders found yet</p>
-                <Link href="/collections/all" className="text-primary text-xs font-black uppercase tracking-widest mt-2 block hover:underline">
+                <Link href="/collections/all" className="text-primary text-xs font-bold uppercase tracking-widest mt-2 block hover:underline">
                   Start Shopping
                 </Link>
               </div>

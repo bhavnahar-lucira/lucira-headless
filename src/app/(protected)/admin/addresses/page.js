@@ -144,7 +144,7 @@ export default function SavedAddressesPage() {
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-3xl font-black text-zinc-900 tracking-tight mb-1">Saved Addresses</h2>
+          <h2 className="text-2xl font-black text-zinc-900 tracking-tight mb-1">Saved Addresses</h2>
           <p className="text-zinc-500 font-medium">Manage your shipping and billing locations for faster checkout.</p>
         </div>
         <button 

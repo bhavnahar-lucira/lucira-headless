@@ -17,7 +17,7 @@ const STEP_NAMES = { 1: "About You", 2: "Gifting Behaviour", 3: "Your Wishlist",
 
 /* theme colours (mirrors the Shopify liquid CSS vars) */
 const T = {
-  blush : "#b76f79",
+  blush : "#5A413F",
   dark  : "#3d2a1e",
   ivory : "#f4f0f0",
   border: "#e5ddd4",
@@ -56,12 +56,14 @@ function Chip({ label, selected, onToggle }) {
         transition    : "all .2s",
         minHeight     : "44px",
         fontFamily    : "inherit",
+        fontWeight    : "500",
       }}
     >
       {label}
     </button>
   );
 }
+
 
 function RadioOpt({ value, checked, label, onChange }) {
   return (

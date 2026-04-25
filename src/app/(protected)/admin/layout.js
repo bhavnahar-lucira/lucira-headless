@@ -129,7 +129,7 @@ export default function CustomerDashboardLayout({ children }) {
       <Header />
       <div className="min-h-screen bg-[#F8FAFC] flex flex-col lg:flex-row relative">
         {/* Mobile menu bar */}
-        <div className="lg:hidden bg-white border-b border-zinc-200 px-6 py-4 flex items-center justify-between sticky top-[72px] z-20">
+        <div className="lg:hidden bg-white border-b border-zinc-200 px-6 py-4 flex items-center justify-between sticky top-[50px] z-20">
           <span className="font-bold text-zinc-900">Account Menu</span>
           <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
             <SheetTrigger asChild>
