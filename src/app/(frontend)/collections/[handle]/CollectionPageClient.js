@@ -451,7 +451,7 @@ export default function CollectionPage({ params: paramsPromise }) {
         </div>
       )}
 
-      <div className={isMobile ? "" : "flex xl:gap-12 lg:gap-6 py-6 max-w-350 mx-auto px-2 xl:px-0"}>
+      <div className={isMobile ? "" : "flex xl:gap-12 lg:gap-6 py-6 container-main mx-auto"}>
         {/* ================= FILTERS SIDEBAR ================= */}
         <div className="hidden lg:block xl:w-78 lg:w-60 shrink-0">
           <div className="sticky top-19 self-start h-fit">
@@ -607,7 +607,7 @@ export default function CollectionPage({ params: paramsPromise }) {
             </div>
           ) : products.length > 0 ? (
             <>
-              <div className={`grid mt-4 ${isMobile ? "grid-cols-2 gap-4 px-2" : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"}`}>
+              <div className={`grid mt-4 ${isMobile ? "grid-cols-2 gap-4 px-2" : "grid-cols-1 sm:grid-cols-2 2xl:grid-cols-4 lg:grid-cols-3 gap-6"}`}>
                 {renderGridItems()}
               </div>
 
