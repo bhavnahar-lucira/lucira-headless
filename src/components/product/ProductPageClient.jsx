@@ -251,7 +251,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
         setDeliveryInfo({
           status: "deliverable",
           message: dispatchMsg,
-          coords: data.latitude && data.longitude ? { lat: data.latitude, lng: data.longitude } : null
+          coords: data.data?.latitude && data.data?.longitude ? { lat: data.data.latitude, lng: data.data.longitude } : null
         });
         // Store in global Redux for persistence
         dispatch(setGlobalPincode(pincodeToCheck));
@@ -328,8 +328,13 @@ export default function ProductPageClient({ product, complementaryProducts = [],
     // 2. Prepare ALL stores with distance and stock status for the Side Sheet
     const storesWithData = allStores.map(store => {
       let distance = null;
-      if (deliveryInfo.coords && store.latitude && store.longitude) {
-        distance = calculateDistance(deliveryInfo.coords.lat, deliveryInfo.coords.lng, store.latitude, store.longitude);
+      if (deliveryInfo.coords && (store.latitude || store.lat) && (store.longitude || store.lng)) {
+        distance = calculateDistance(
+          deliveryInfo.coords.lat, 
+          deliveryInfo.coords.lng, 
+          store.latitude || store.lat, 
+          store.longitude || store.lng
+        );
       }
       return { 
         ...store, 
@@ -338,20 +343,31 @@ export default function ProductPageClient({ product, complementaryProducts = [],
       };
     });
 
-    // Sort by distance if coords exist, otherwise alphabetical
-    if (deliveryInfo.coords) {
-      storesWithData.sort((a, b) => (a.distance || Infinity) - (b.distance || Infinity));
-    }
+    // Sort: Distance priority if coords exist, then stock status, then alphabetical
+    storesWithData.sort((a, b) => {
+      // 1. Distance priority if coords exist
+      if (deliveryInfo.coords) {
+        if (a.distance !== null && b.distance !== null) {
+          if (a.distance !== b.distance) return a.distance - b.distance;
+        } else if (a.distance !== null) {
+          return -1;
+        } else if (b.distance !== null) {
+          return 1;
+        }
+      }
+      
+      // 2. Stock status priority
+      if (a.isInStock && !b.isInStock) return -1;
+      if (!a.isInStock && b.isInStock) return 1;
+      
+      // 3. Alphabetical fallback
+      return a.name.localeCompare(b.name);
+    });
 
     setAvailableStores(storesWithData);
 
-    // 3. Find the nearest store THAT HAS STOCK for the main display
-    if (stockStoreIds.length > 0) {
-      const stockOnly = storesWithData.filter(s => s.isInStock);
-      setNearestStore(stockOnly.length > 0 ? stockOnly[0] : null);
-    } else {
-      setNearestStore(null);
-    }
+    // 3. Find the nearest store for the main display (Absolute nearest)
+    setNearestStore(storesWithData.length > 0 ? storesWithData[0] : null);
   }, [allStores, activeVariant, deliveryInfo.coords]);
 
   const hasEngraving = product.tags?.some(tag => tag.toLowerCase() === "engraving available");
@@ -435,6 +451,16 @@ export default function ProductPageClient({ product, complementaryProducts = [],
   }, [product, dispatch]);
 
   const hasSimilarItems = product.hasSimilar || (product.matchingProductIds && product.matchingProductIds.length > 0);
+
+  const getStoreDisplayName = (name) => {
+    if (!name) return "";
+    if (name.includes("Divinecarat")) return "Malad";
+    if (name === "BO1") return "Borivali";
+    if (name === "CS1") return "Chembur";
+    if (name === "PS1") return "Pune";
+    if (name === "NOS18") return "Noida";
+    return name;
+  };
 
   const handleAddToCart = async () => {
     if (!activeVariant) {
@@ -1394,7 +1420,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                       <Store size={20} className="text-black" strokeWidth={1.2} />
                       <span className="text-base font-bold">
                         {nearestStore ? (
-                          <>Nearest Store - <span className="italic font-semibold text-black">{nearestStore.name} ({Math.round(nearestStore.distance)}Km)</span></>
+                          <>Nearest Store - <span className="italic font-semibold text-black">{getStoreDisplayName(nearestStore.name)}{nearestStore.distance !== null ? ` (${Math.round(nearestStore.distance)}Km)` : ""}</span></>
                         ) : (
                           <>Available in <span className="italic font-semibold text-black">{availableStoreCount} stores</span></>
                         )}
@@ -1741,7 +1767,16 @@ export default function ProductPageClient({ product, complementaryProducts = [],
       {!isGoldCoin && <DiamondComparison/>}      
       <ExploreOtherRings />
       <CategorySlider />      
-      <FindLuciraStore />
+      <FindLuciraStore 
+        pincode={pincode}
+        setPincode={setPincode}
+        handlePincodeCheck={handlePincodeCheck}
+        checkingPincode={checkingPincode}
+        deliveryInfo={deliveryInfo}
+        availableStores={availableStores}
+        product={product}
+        activeVariant={activeVariant}
+      />
       <JoinLuciraCommunity/>
 
       <Sheet open={isStoreDrawerOpen} onOpenChange={setIsStoreDrawerOpen}>
@@ -1757,18 +1792,25 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                   <div key={store.id || store.shopifyId} className="border border-gray-100 rounded-xl p-5 space-y-4 bg-gray-50/50">
                     <div className="flex justify-between items-start">
                       <div className="space-y-1">
-                        <h3 className="font-bold text-lg">{store.name}</h3>
-                        {store.distance && (
+                        <h3 className="font-bold text-lg">{getStoreDisplayName(store.name)}</h3>
+                        {store.distance !== null && (
                           <div className="flex items-center gap-1.5 text-primary font-semibold text-sm">
                             <MapPin size={14} />
                             {Math.round(store.distance)} Km away
                           </div>
                         )}
                       </div>
-                      <div className="bg-[#E3F5E0] text-black px-3 py-1 rounded-full flex items-center gap-1.5">
-                        <div className="w-2 h-2 bg-[#76D168] rounded-full"></div>
-                        <span className="text-xs font-bold uppercase">In Stock</span>
-                      </div>
+                      {store.isInStock ? (
+                        <div className="bg-[#E3F5E0] text-black px-3 py-1 rounded-full flex items-center gap-1.5">
+                          <div className="w-2 h-2 bg-[#76D168] rounded-full"></div>
+                          <span className="text-xs font-bold uppercase">In Stock</span>
+                        </div>
+                      ) : (
+                        <div className="bg-amber-50 text-amber-700 px-3 py-1 rounded-full flex items-center gap-1.5 border border-amber-100">
+                          <div className="w-2 h-2 bg-amber-400 rounded-full"></div>
+                          <span className="text-xs font-bold uppercase">Ships to Store</span>
+                        </div>
+                      )}
                     </div>
 
                     <div className="space-y-3 pt-2">

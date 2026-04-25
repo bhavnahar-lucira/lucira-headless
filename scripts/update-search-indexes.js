@@ -22,6 +22,9 @@ async function updateIndexes() {
     console.log('Creating index on variants.sku...');
     await collection.createIndex({ "variants.sku": 1 });
 
+    console.log('Creating index on title...');
+    await collection.createIndex({ title: 1 });
+
     console.log('Dropping old text index if exists...');
     try {
       await collection.dropIndex("ProductTextIndex");

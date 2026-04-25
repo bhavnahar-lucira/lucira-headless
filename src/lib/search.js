@@ -119,7 +119,8 @@ export async function resolveSearchMatch(productsCollection, baseFilter = {}, qu
     };
   }
 
-  // Exact match for handle or SKU
+  // 1. Check for exact match for handle or SKU first
+  // This ensures that if a user searches for a specific SKU, they get that exact product first
   const trimmedQuery = query.trim();
   const exactMatchFilter = {
     $or: [
@@ -130,6 +131,17 @@ export async function resolveSearchMatch(productsCollection, baseFilter = {}, qu
     ]
   };
 
+  const exactMatchCount = await productsCollection.countDocuments(mergeMongoFilters(...filters, exactMatchFilter));
+  if (exactMatchCount > 0) {
+    return {
+      filter: mergeMongoFilters(...filters, exactMatchFilter),
+      normalizedQuery,
+      keywords,
+      strategy: "base", // Don't use text score if we have exact matches
+    };
+  }
+
+  // 2. If no exact match, proceed with text search
   // Use MongoDB $text search for relevance scoring
   // If we have an intent filter (like price), we should prioritize the normalizedQuery
   // because the original query contains "noise" like "under 30k"
@@ -150,7 +162,6 @@ export async function resolveSearchMatch(productsCollection, baseFilter = {}, qu
 
   const searchMatch = {
     $or: [
-      exactMatchFilter,
       textFilter,
       keywordOrFilter
     ]
