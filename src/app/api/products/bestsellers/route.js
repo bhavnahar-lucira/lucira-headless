@@ -55,7 +55,12 @@ export async function GET(request) {
       .toArray();
 
     if (products.length > 0) {
-      return NextResponse.json({ products });
+      return NextResponse.json({ 
+        products: products.map(p => ({
+          ...p,
+          reviews: p.reviews || p.reviewStats || null
+        }))
+      });
     }
 
     // 3. Fallback: If "All" is empty, sync from Shopify

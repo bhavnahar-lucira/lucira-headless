@@ -119,13 +119,18 @@ export async function resolveSearchMatch(productsCollection, baseFilter = {}, qu
     };
   }
 
-  // 1. Check for exact match for handle or SKU first
-  // This ensures that if a user searches for a specific SKU, they get that exact product first
+  // 1. Check for exact match for title, handle or SKU first
+  // This ensures that if a user searches for a specific product by its full name or ID, they get it first
   const trimmedQuery = query.trim();
+  const handleFriendlyQuery = normalizedQuery.replace(/\./g, "-").replace(/\s+/g, "-");
+
   const exactMatchFilter = {
     $or: [
+      { title: trimmedQuery },
+      { title: { $regex: new RegExp(`^${escapeRegex(trimmedQuery)}$`, "i") } },
       { handle: trimmedQuery },
       { handle: normalizedQuery },
+      { handle: handleFriendlyQuery },
       { "variants.sku": trimmedQuery },
       { "variants.sku": trimmedQuery.toUpperCase() }
     ]

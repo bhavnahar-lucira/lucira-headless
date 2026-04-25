@@ -31,18 +31,23 @@ export default function CustomerReviews({ reviews, productId, productTitle, prod
   useEffect(() => {
     async function initReviews() {
       setLoading(true);
-      // If product has reviews, use them
-      if (reviews && reviews.count > 0) {
+      
+      const activeReviews = reviews || null;
+      const count = activeReviews?.count || 0;
+      const list = activeReviews?.list || [];
+
+      // If product has reviews with a list, use them
+      if (count > 0 && list.length > 0) {
         setData({
-            count: reviews.count,
-            average: reviews.average,
-            stats: { breakdown: reviews.stats?.reduce((acc, s) => ({ ...acc, [s.rating]: s.count }), {}) || {} },
-            list: reviews.list
+            count: count,
+            average: activeReviews.average || 0,
+            stats: { breakdown: activeReviews.stats?.reduce((acc, s) => ({ ...acc, [s.rating]: s.count }), {}) || {} },
+            list: list
         });
         
         // Extract gallery from product reviews
         const galleryItems = [];
-        reviews.list.forEach((r, idx) => {
+        list.forEach((r, idx) => {
             if (r.images?.length > 0) {
                 r.images.forEach(img => {
                     if (img) galleryItems.push({ url: img, reviewIndex: idx });
@@ -52,8 +57,43 @@ export default function CustomerReviews({ reviews, productId, productTitle, prod
         setGallery(galleryItems);
         setIsGlobal(false);
         setLoading(false);
+      } else if (productId) {
+        // If we have count but no list, try to fetch specific reviews for this product
+        try {
+          const response = await fetch(`/api/reviews?productId=${productId}`);
+          const result = await response.json();
+          if (result && result.count > 0 && result.list?.length > 0) {
+             setData({
+                count: result.count,
+                average: result.average,
+                stats: { breakdown: result.stats?.reduce((acc, s) => ({ ...acc, [s.rating]: s.count }), {}) || {} },
+                list: result.list
+            });
+            const galleryItems = [];
+            result.list.forEach((r, idx) => {
+                if (r.images?.length > 0) {
+                    r.images.forEach(img => {
+                        if (img) galleryItems.push({ url: img, reviewIndex: idx });
+                    });
+                }
+            });
+            setGallery(galleryItems);
+            setIsGlobal(false);
+            setLoading(false);
+            return;
+          }
+        } catch (error) {
+          console.error("Error fetching product specific reviews:", error);
+        }
+        
+        // Fallback to global if still no reviews
+        fetchGlobalFallback();
       } else {
-        // Otherwise fetch global fallback
+        fetchGlobalFallback();
+      }
+    }
+
+    async function fetchGlobalFallback() {
         try {
           const response = await fetch("/api/all-reviews?page=1&limit=10");
           const result = await response.json();
@@ -72,10 +112,10 @@ export default function CustomerReviews({ reviews, productId, productTitle, prod
         } finally {
           setLoading(false);
         }
-      }
     }
+
     initReviews();
-  }, [reviews]);
+  }, [reviews, productId]);
 
   if (loading) return null;
   if (data.count === 0) return null;

@@ -147,9 +147,11 @@ export default function ProductPageClient({ product, complementaryProducts = [],
   const wishlistItems = useSelector((state) => state.wishlist.items);
   const [addingToCart, setAddingToCart] = useState(false);
   const [wishlistLoading, setWishlistLoading] = useState(false);
-  const [showStickyAtc, setShowStickyAtc] = useState(false);
+  const [showTopAtc, setShowTopAtc] = useState(false);
+  const [showBottomAtc, setShowBottomAtc] = useState(true);
   const mainAtcRef = useRef(null);
   const productDetailsRef = useRef(null);
+  const reviewsRef = useRef(null);
 
   const [engraving, setEngraving] = useState("");
   const [engravingFont, setEngravingFont] = useState("Lobster");
@@ -408,8 +410,25 @@ export default function ProductPageClient({ product, complementaryProducts = [],
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
-        // Show sticky bar when main ATC is NOT visible
-        setShowStickyAtc(!entry.isIntersecting);
+        if (isMobile) {
+          // On mobile: Always use bottom sticky bar when main ATC is not in view
+          setShowBottomAtc(!entry.isIntersecting);
+          setShowTopAtc(false);
+        } else {
+          // On desktop: Top bar when scrolled past, Bottom bar when at top
+          if (entry.isIntersecting) {
+            setShowTopAtc(false);
+            setShowBottomAtc(false);
+          } else {
+            if (entry.boundingClientRect.top < 0) {
+              setShowTopAtc(true);
+              setShowBottomAtc(false);
+            } else {
+              setShowTopAtc(false);
+              setShowBottomAtc(true);
+            }
+          }
+        }
       },
       { threshold: 0 }
     );
@@ -419,7 +438,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
     }
 
     return () => observer.disconnect();
-  }, []);
+  }, [isMobile]);
 
   useEffect(() => {
     if (user?.id) {
@@ -785,7 +804,8 @@ export default function ProductPageClient({ product, complementaryProducts = [],
   return (
     <div className="w-full">
       <AtcBar 
-        isVisible={isMobile || showStickyAtc} 
+        isTopVisible={showTopAtc}
+        isBottomVisible={showBottomAtc} 
         product={product} 
         activeVariant={activeVariant}
         onAddToCart={handleAddToCart}
@@ -883,11 +903,14 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                       );
                     })()}
                     {/* Rating */}
-                    {product.reviews && (
-                      <div className="flex items-center gap-1.5">
+                    {(product.reviews || product.reviewStats) && (
+                      <div 
+                        className="flex items-center gap-1.5 cursor-pointer hover:opacity-80 transition-opacity"
+                        onClick={() => reviewsRef.current?.scrollIntoView({ behavior: "smooth" })}
+                      >
                         <Star size={14} fill="currentColor" className="text-amber-400" />
                         <span className="font-figtree text-[10px] lg:text-sm font-semibold text-gray-800 uppercase tracking-tight">
-                          {product.reviews.average} ({product.reviews.count})
+                          {product.reviews?.average || product.reviewStats?.average || 0} ({product.reviews?.count || product.reviewStats?.count || 0})
                         </span>
                       </div>
                     )}
@@ -1280,9 +1303,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                   </div>
                 )}
               </div>
-            )}
-            
-            {/* Action Buttons */}
+            )}  
             <div className="space-y-2 mb-4">
                 <Drawer open={showSimilar} onOpenChange={setShowSimilar}>                  
                   <DrawerContent className="max-h-[90vh] h-[90vh] bg-white rounded-t-[20px] flex flex-col">
@@ -1348,6 +1369,46 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                     </div>
                   </DrawerContent>
                 </Drawer>              
+            </div>
+
+            <div ref={mainAtcRef} className="space-y-2 mb-4">
+              <div className="flex gap-2">
+                <Button 
+                  onClick={handleAddToCart}
+                  disabled={addingToCart}
+                  className="flex-1 h-12 text-lg font-bold rounded-md hover:cursor-pointer"
+                >
+                  {addingToCart ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      ADDING...
+                    </>
+                  ) : "ADD TO CART"}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={handleToggleWishlist}
+                  disabled={wishlistLoading}
+                  className={`h-12 w-12 rounded-md bg-gray-50 hover:cursor-pointer ${isWishlisted ? "text-rose-500" : "text-black"}`}
+                >
+                  <Heart
+                    size={24}
+                    fill={isWishlisted ? "currentColor" : "none"}
+                    className={`${isWishlisted ? "text-rose-500" : "text-black"}`}
+                  />
+                </Button>
+              </div>
+              <div className="grid grid-cols-2 gap-4 mt-2">
+                <Button variant="outline" className="h-auto py-3 font-medium text-lg flex items-center justify-center gap-2 bg-gray-50 hover:cursor-pointer hover:bg-primary hover:text-white transition-all group">
+                  <Image src="/images/icons/whatsapp.png" alt="Whatsapp icon" width={24} height={24} />
+                  <span className="hidden lg:inline text-base uppercase">Whatsapp Us</span>
+                </Button>
+                <Button variant="outline" className="h-auto py-3 font-medium text-lg flex items-center justify-center gap-2 bg-gray-50 hover:cursor-pointer group hover:bg-primary hover:text-white transition-all">
+                  <Video size={30} className="text-black group-hover:text-white transition-all" />
+                  <span className="hidden lg:inline text-base uppercase">Shop Live</span>
+                </Button>
+              </div>
             </div>
            
             {/* Features */}
@@ -1508,21 +1569,30 @@ export default function ProductPageClient({ product, complementaryProducts = [],
             </div>
 
             {/* Product Details Section */}
-            <div ref={productDetailsRef} className="space-y-4 mt-6">
+            <div className="space-y-4 mt-6">
               <div className="flex justify-between items-center">
                 <h2 className="text-base font-bold tracking-tight uppercase">Product Details</h2>
                 {activeVariant?.sku && (
-                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">SKU: {activeVariant.sku}</span>
+                  <div 
+                    className="flex items-center gap-1.5 cursor-pointer group"
+                    title="Click to copy SKU"
+                    onClick={() => {
+                      navigator.clipboard.writeText(activeVariant.sku);
+                      toast.success("SKU Copied!", { 
+                        position: "bottom-center",
+                        autoClose: 1500,
+                        hideProgressBar: true,
+                        theme: "light"
+                      });                    }}
+                  >
+                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest group-hover:text-gray-600 transition-colors">
+                      SKU: {activeVariant.sku}
+                    </span>
+                    <Copy size={12} className="text-gray-400 group-hover:text-gray-600 transition-colors" />
+                  </div>
                 )}
               </div>
 
-              {product.description && (
-                <div 
-                  className="text-sm text-gray-600 leading-relaxed product-description"
-                  dangerouslySetInnerHTML={{ __html: product.description }}
-                />
-              )}
-              
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Metal Card */}
                 <div className="bg-[#F9F9F9] rounded-2xl p-5 space-y-4">
@@ -1580,81 +1650,139 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                   </div>
                 </div>
 
-                {/* Diamond Card */}
-                {!isGoldCoin && activeVariant?.metafields?.diamonds && activeVariant.metafields.diamonds.length > 0 && (
+                {/* Single Diamond Card */}
+                {!isGoldCoin && activeVariant?.metafields?.diamonds && activeVariant.metafields.diamonds.length === 1 && (
                   <div className="bg-[#F9F9F9] rounded-2xl p-5 space-y-4">
                     <div className="flex items-center gap-2 font-bold text-sm uppercase text-gray-700">
                       <Image src="/images/icons/diamond.svg" alt="Diamond" width={18} height={18} />
                       Diamond <Info size={14} className="text-gray-400 cursor-pointer ml-auto" />
                     </div>
-                    {activeVariant.metafields.diamonds.map((d, i) => (
-                      <div key={`diamond-det-${i}`} className="space-y-2 pt-2 first:pt-0 border-t first:border-0 border-gray-100">
-                        {d.quality && (
-                          <div className="flex justify-between text-sm">
-                            <span className="text-gray-500">Quality</span>
-                            <span className="font-medium">{d.quality}</span>
-                          </div>
-                        )}
-                        {d.shape && (
-                          <div className="flex justify-between text-sm">
-                            <span className="text-gray-500">Shape</span>
-                            <span className="font-medium uppercase">{mapShapeCode(d.shape) || d.shape}</span>
-                          </div>
-                        )}
+                    <div className="space-y-2.5">
+                      {activeVariant.metafields.diamonds[0].quality && (
                         <div className="flex justify-between text-sm">
-                          <span className="text-gray-500">Quantity</span>
-                          <span className="font-medium">{d.pieces || "1"}pcs</span>
+                          <span className="text-gray-500">Quality</span>
+                          <span className="font-medium">{activeVariant.metafields.diamonds[0].quality}</span>
                         </div>
+                      )}
+                      {activeVariant.metafields.diamonds[0].shape && (
                         <div className="flex justify-between text-sm">
-                          <span className="text-gray-500">Carat</span>
-                          <span className="font-medium">{d.weight}ct</span>
+                          <span className="text-gray-500">Shape</span>
+                          <span className="font-medium uppercase">{mapShapeCode(activeVariant.metafields.diamonds[0].shape) || activeVariant.metafields.diamonds[0].shape}</span>
                         </div>
+                      )}
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-500">Quantity</span>
+                        <span className="font-medium">{activeVariant.metafields.diamonds[0].pieces || "1"}pcs</span>
                       </div>
-                    ))}
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-500">Carat</span>
+                        <span className="font-medium">{activeVariant.metafields.diamonds[0].weight}ct</span>
+                      </div>
+                    </div>
                   </div>
                 )}
 
-                {/* Gemstone Card */}
-                {activeVariant?.metafields?.gemstones && activeVariant.metafields.gemstones.length > 0 && (
+                {/* Single Gemstone Card */}
+                {activeVariant?.metafields?.gemstones && activeVariant.metafields.gemstones.length === 1 && (
                   <div className="bg-[#F9F9F9] rounded-2xl p-5 space-y-4">
                     <div className="flex items-center gap-2 font-bold text-sm uppercase text-gray-700">
                       <Image src="/images/icons/diamond.svg" alt="Gemstone" width={18} height={18} className="grayscale opacity-70" />
                       Gemstone <Info size={14} className="text-gray-400 cursor-pointer ml-auto" />
                     </div>
-                    {activeVariant.metafields.gemstones.map((g, i) => (
-                      <div key={`gemstone-det-${i}`} className="space-y-2 pt-2 first:pt-0 border-t first:border-0 border-gray-100">
-                        {g.color && (
-                          <div className="flex justify-between text-sm">
-                            <span className="text-gray-500">Color</span>
-                            <span className="font-medium uppercase">{g.color}</span>
-                          </div>
-                        )}
-                        {g.shape && (
-                          <div className="flex justify-between text-sm">
-                            <span className="text-gray-500">Shape</span>
-                            <span className="font-medium uppercase">{mapShapeCode(g.shape) || g.shape}</span>
-                          </div>
-                        )}
+                    <div className="space-y-2.5">
+                      {activeVariant.metafields.gemstones[0].color && (
                         <div className="flex justify-between text-sm">
-                          <span className="text-gray-500">Quantity</span>
-                          <span className="font-medium">{g.pieces || "1"}pcs</span>
+                          <span className="text-gray-500">Color</span>
+                          <span className="font-medium uppercase">{activeVariant.metafields.gemstones[0].color}</span>
                         </div>
+                      )}
+                      {activeVariant.metafields.gemstones[0].shape && (
                         <div className="flex justify-between text-sm">
-                          <span className="text-gray-500">Carat</span>
-                          <span className="font-medium">{g.weight || "0"}ct</span>
+                          <span className="text-gray-500">Shape</span>
+                          <span className="font-medium uppercase">{mapShapeCode(activeVariant.metafields.gemstones[0].shape) || activeVariant.metafields.gemstones[0].shape}</span>
                         </div>
+                      )}
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-500">Quantity</span>
+                        <span className="font-medium">{activeVariant.metafields.gemstones[0].pieces || "1"}pcs</span>
                       </div>
-                    ))}
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-500">Carat</span>
+                        <span className="font-medium">{activeVariant.metafields.gemstones[0].weight || "0"}ct</span>
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>
+
+              {/* Multiple Diamond Card - Full Width */}
+              {!isGoldCoin && activeVariant?.metafields?.diamonds && activeVariant.metafields.diamonds.length > 1 && (
+                <div className="bg-[#F9F9F9] rounded-2xl p-5 space-y-5">
+                  <div className="flex items-center gap-2 font-bold text-sm uppercase text-gray-700">
+                    <Image src="/images/icons/diamond.svg" alt="Diamond" width={18} height={18} />
+                    Diamond <Info size={14} className="text-gray-400 cursor-pointer ml-auto" />
+                  </div>
+                  
+                  <div className="flex gap-4 md:gap-6 overflow-x-auto pb-2 scrollbar-hide">
+                    {/* Labels Column */}
+                    <div className="space-y-1 shrink-0">
+                      <div className="text-sm text-gray-500 font-medium h-5 flex items-center">Quality :</div>
+                      <div className="text-sm text-gray-500 font-medium h-5 flex items-center">Shape :</div>
+                      <div className="text-sm text-gray-500 font-medium h-5 flex items-center">Quantity :</div>
+                      <div className="text-sm text-gray-500 font-medium h-5 flex items-center">Carat :</div>
+                    </div>
+                    
+                    {/* Values Columns */}
+                    {activeVariant.metafields.diamonds.map((d, i) => (
+                      <div key={`dia-col-${i}`} className="space-y-1 shrink-0">
+                        <div className="text-sm font-semibold h-5 flex items-center text-gray-900 whitespace-nowrap">{d.quality || "VVS-VS, EF"}</div>
+                        <div className="text-sm font-semibold h-5 flex items-center uppercase text-gray-900 whitespace-nowrap">{mapShapeCode(d.shape) || d.shape || "-"}</div>
+                        <div className="text-sm font-semibold h-5 flex items-center text-gray-900 whitespace-nowrap">{d.pieces || "1"}pcs</div>
+                        <div className="text-sm font-semibold h-5 flex items-center text-gray-900 whitespace-nowrap">{d.weight}ct</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Multiple Gemstone Card - Full Width */}
+              {activeVariant?.metafields?.gemstones && activeVariant.metafields.gemstones.length > 1 && (
+                <div className="bg-[#F9F9F9] rounded-2xl p-5 space-y-5">
+                  <div className="flex items-center gap-2 font-bold text-sm uppercase text-gray-700">
+                    <Image src="/images/icons/diamond.svg" alt="Gemstone" width={18} height={18} className="grayscale opacity-70" />
+                    Gemstone <Info size={14} className="text-gray-400 cursor-pointer ml-auto" />
+                  </div>
+                  
+                  <div className="flex gap-10 md:gap-16 overflow-x-auto pb-2 scrollbar-hide">
+                    {/* Labels Column */}
+                    <div className="space-y-3 shrink-0">
+                      <div className="text-sm text-gray-500 font-medium h-5 flex items-center">Color :</div>
+                      <div className="text-sm text-gray-500 font-medium h-5 flex items-center">Shape :</div>
+                      <div className="text-sm text-gray-500 font-medium h-5 flex items-center">Quantity :</div>
+                      <div className="text-sm text-gray-500 font-medium h-5 flex items-center">Carat :</div>
+                    </div>
+                    
+                    {/* Values Columns */}
+                    {activeVariant.metafields.gemstones.map((g, i) => (
+                      <div key={`gem-col-${i}`} className="space-y-3 shrink-0">
+                        <div className="text-sm font-semibold h-5 flex items-center text-gray-900 whitespace-nowrap uppercase">{g.color || "-"}</div>
+                        <div className="text-sm font-semibold h-5 flex items-center uppercase text-gray-900 whitespace-nowrap">{mapShapeCode(g.shape) || g.shape || "-"}</div>
+                        <div className="text-sm font-semibold h-5 flex items-center text-gray-900 whitespace-nowrap">{g.pieces || "1"}pcs</div>
+                        <div className="text-sm font-semibold h-5 flex items-center text-gray-900 whitespace-nowrap">{g.weight || "0"}ct</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               <p className="text-[11px] leading-relaxed text-gray-400 italic mt-2">
                 * Our products are handcrafted and personalised for your delight, hence a weight variance is expected.
               </p>
             </div>
 
-            <PriceSavingsDetails priceBreakup={priceBreakup?.price_breakup}/>
+            <div ref={productDetailsRef}>
+              <PriceSavingsDetails priceBreakup={priceBreakup?.price_breakup}/>
+            </div>
 
             {priceBreakup?.price_breakup?.total_savings && priceBreakup?.price_breakup?.total_savings !== "₹0" && (
               <div className="mt-4 flex justify-between items-center bg-success/8 border border-success rounded-xl p-5">
@@ -1693,64 +1821,25 @@ export default function ProductPageClient({ product, complementaryProducts = [],
             <ProductAccordion/>
             {/* Wear This With Slider */}
             {complementaryProducts.length > 0 && <WearThisWith products={complementaryProducts} />}
-            
-            <div ref={mainAtcRef} className="py-2 bg-white sticky bottom-0 z-[90] mt-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] lg:shadow-none hidden lg:block">
-              <div className="flex gap-2">
-                <Button 
-                  onClick={handleAddToCart}
-                  disabled={addingToCart}
-                  className="flex-1 h-12 text-lg font-bold rounded-md hover:cursor-pointer"
-                >
-                  {addingToCart ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      ADDING...
-                    </>
-                  ) : "ADD TO CART"}
-                </Button>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={handleToggleWishlist}
-                  disabled={wishlistLoading}
-                  className={`h-12 w-12 rounded-md bg-gray-50 hover:cursor-pointer ${isWishlisted ? "text-rose-500" : "text-black"}`}
-                >
-                  <Heart
-                    size={24}
-                    fill={isWishlisted ? "currentColor" : "none"}
-                    className={`${isWishlisted ? "text-rose-500" : "text-black"}`}
-                  />
-                </Button>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4 mt-2">
-              <Button variant="outline" className="h-auto py-3 font-medium text-lg flex items-center justify-center gap-2 bg-gray-50 hover:cursor-pointer hover:bg-primary hover:text-white transition-all group">
-                <Image src="/images/icons/whatsapp.png" alt="Whatsapp icon" width={24} height={24} />
-                <span className="hidden lg:inline text-base uppercase">Whatsapp Us</span>
-              </Button>
-              <Button variant="outline" className="h-auto py-3 font-medium text-lg flex items-center justify-center gap-2 bg-gray-50 hover:cursor-pointer group hover:bg-primary hover:text-white transition-all">
-                <Video size={30} className="text-black group-hover:text-white transition-all" />
-                <span className="hidden lg:inline text-base uppercase">Shop Live</span>
-              </Button>
-            </div>
           </div>
         </div>
       </div>
       <LuxuryMarquee prop={["bg-primary", "text-white", "mt-10", "text-md", "font-semibold"]}/>
-      <ProductStory/>  
+      <ProductStory description={product.description}/>  
       <Suspense fallback={<div className="h-20 bg-gray-100 animate-pulse"></div>}>
         <StyledByLucira/>
       </Suspense>
       <FeaturedIn/>
       <OurProcess/>
-      <CustomerReviews 
-        reviews={product.reviews} 
-        productId={product.shopifyId} 
-        productTitle={product.title}
-        productImage={getValidSrc(product.image)}
-        productHandle={product.handle}
-      />
+      <div ref={reviewsRef}>
+        <CustomerReviews 
+          reviews={product.reviews} 
+          productId={product.shopifyId} 
+          productTitle={product.title}
+          productImage={getValidSrc(product.image)}
+          productHandle={product.handle}
+        />
+      </div>
       {matchingProducts.length > 0 && (
         <ProductSlider 
           title="From the Same Collection" 

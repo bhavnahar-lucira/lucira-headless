@@ -13,14 +13,7 @@ import Image from "next/image";
 export default function ProductAccordion() {
   return (
     <div className="mt-6">
-      <Accordion type="single" collapsible defaultValue="package" className="w-full">
-        <Item title="Story Behind The Product">
-          <p className="text-sm leading-relaxed">
-            Our designers crafted this ring to reflect elegance and timeless beauty.
-            Every piece is handcrafted by expert artisans ensuring the highest
-            quality and finish.
-          </p>
-        </Item>
+      <Accordion type="single" collapsible defaultValue="package" className="w-full">        
         <Item title="Warranty & Return Policy">
           <p className="text-sm leading-relaxed">
             Lucira offers lifetime exchange and a 15-day free return policy.

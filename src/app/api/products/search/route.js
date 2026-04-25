@@ -224,7 +224,10 @@ export async function GET(request) {
     }
 
     return NextResponse.json({
-      products,
+      products: products.map(p => ({
+        ...p,
+        reviews: p.reviews || p.reviewStats || null
+      })),
       pagination: { total, page, limit, totalPages: Math.ceil(total / limit) }
     });
 
