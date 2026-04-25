@@ -44,8 +44,6 @@ import {
 } from "@/components/ui/sheet";
 import { Menu } from "lucide-react";
 
-// The sidebar links array remains unchanged (already at top)
-
 function SidebarNav({ pathname, handleSignOut, setSheetOpen }) {
   return (
     <div className="flex flex-col h-full bg-white">
@@ -54,15 +52,15 @@ function SidebarNav({ pathname, handleSignOut, setSheetOpen }) {
         {sidebarLinks.map((link) => {
           const isActive = pathname === link.href;
           const Icon = link.icon;
-          
+
           return (
             <Link
               key={link.name}
               href={link.href}
               onClick={() => setSheetOpen && setSheetOpen(false)}
-              className={`flex items-center gap-4 px-4 py-3.5 rounded-2xl transition-all font-bold text-sm ${
-                isActive 
-                  ? `bg-primary text-white shadow-xl shadow-primary/20 scale-[1.02]` 
+              className={`flex items-center gap-4 px-4 py-3.5 rounded-2xl transition-all font-bold text-sm outline-none focus:outline-none focus-visible:outline-none ${
+                isActive
+                  ? `bg-primary text-white shadow-xl shadow-primary/20 scale-[1.02]`
                   : "text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900"
               }`}
             >
@@ -76,12 +74,12 @@ function SidebarNav({ pathname, handleSignOut, setSheetOpen }) {
       </nav>
 
       <div className="p-6 border-t border-zinc-100 mt-auto">
-        <button 
+        <button
           onClick={() => {
             if (setSheetOpen) setSheetOpen(false);
             handleSignOut();
           }}
-          className="w-full flex items-center gap-3 px-4 py-3 text-red-600 text-sm font-bold hover:bg-red-50 rounded-xl transition-colors cursor-pointer"
+          className="w-full flex items-center gap-3 px-4 py-3 text-red-600 text-sm font-bold hover:bg-red-50 rounded-xl transition-colors cursor-pointer outline-none focus:outline-none focus-visible:outline-none"
         >
           <LogOut size={18} />
           Sign Out
@@ -128,16 +126,20 @@ export default function CustomerDashboardLayout({ children }) {
     <>
       <Header />
       <div className="min-h-screen bg-[#F8FAFC] flex flex-col lg:flex-row relative">
+
         {/* Mobile menu bar */}
         <div className="lg:hidden bg-white border-b border-zinc-200 px-6 py-4 flex items-center justify-between sticky top-[50px] z-20">
           <span className="font-bold text-zinc-900">Account Menu</span>
           <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
             <SheetTrigger asChild>
-              <button className="p-2 -mr-2 text-zinc-500 hover:bg-zinc-50 rounded-xl">
+              <button className="p-2 -mr-2 text-zinc-500 hover:bg-zinc-50 rounded-xl outline-none focus:outline-none focus-visible:outline-none">
                 <Menu size={24} />
               </button>
             </SheetTrigger>
-            <SheetContent side="left" className="p-0 border-r-0 sm:max-w-[300px]">
+            <SheetContent
+              side="left"
+              className="p-0 border-0 outline-none focus:outline-none focus-visible:outline-none sm:max-w-[300px] [&>button]:outline-none [&>button]:focus:outline-none [&>button]:focus-visible:outline-none"
+            >
               <SheetTitle className="sr-only">Account Menu</SheetTitle>
               <SidebarNav pathname={pathname} handleSignOut={handleSignOut} setSheetOpen={setMobileMenuOpen} />
             </SheetContent>
@@ -155,6 +157,7 @@ export default function CustomerDashboardLayout({ children }) {
             {children}
           </div>
         </main>
+
       </div>
       <Footer />
     </>
