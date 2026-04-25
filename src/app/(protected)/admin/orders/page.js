@@ -223,7 +223,7 @@ export default function MyOrdersPage() {
       </div>
 
       {/* ── Continue Shopping Banner ── */}
-      <div className="bg-white rounded-[2rem] md:rounded-[2.5rem] p-8 md:p-10 border border-zinc-100 relative overflow-hidden shadow-sm">
+      <div className="bg-white rounded-[2rem] md:rounded-[4px] p-8 md:p-10 border border-zinc-100 relative overflow-hidden shadow-sm">
         <div className="absolute -right-20 -bottom-20 size-64 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
         <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6 md:gap-8">
           <div className="space-y-3 md:space-y-4 text-center md:text-left">

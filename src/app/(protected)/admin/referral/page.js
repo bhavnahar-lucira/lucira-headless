@@ -215,7 +215,7 @@ export default function ReferralPage() {
       </div>
 
       {/* ── Share Your Link ── */}
-      <div className="bg-white rounded-[2rem] md:rounded-[2.5rem] border border-zinc-100 p-6 md:p-8 lg:p-10 shadow-sm space-y-6 md:space-y-8">
+      <div className="bg-white rounded-[2rem] md:rounded-[4px] border border-zinc-100 p-6 md:p-8 lg:p-10 shadow-sm space-y-6 md:space-y-8">
         <div className="flex items-center gap-4 border-b border-zinc-100 pb-5 md:pb-6">
           <div className="size-11 md:size-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
             <Share2 size={22} />
@@ -308,7 +308,7 @@ export default function ReferralPage() {
       </div>
 
       {/* ── Referral History ── */}
-      <div className="bg-white rounded-[2rem] md:rounded-[2.5rem] border border-zinc-100 p-6 md:p-8 lg:p-10 shadow-sm space-y-6 md:space-y-8">
+      <div className="bg-white rounded-[2rem] md:rounded-[4px] border border-zinc-100 p-6 md:p-8 lg:p-10 shadow-sm space-y-6 md:space-y-8">
         <div className="flex flex-col md:flex-row gap-5 md:gap-6 justify-between items-start md:items-center">
 
           {/* Section title */}

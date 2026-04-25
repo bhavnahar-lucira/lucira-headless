@@ -133,7 +133,7 @@ export default function EducationPage() {
       <div className="space-y-10 md:space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700 max-w-6xl mx-auto pb-16 md:pb-20 px-0.5">
 
         {/* ── Header ── */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-6 px-1">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-6 px-1 mb-4">
           <div>
             <div className="flex items-center gap-3 mb-2">
               <div className="size-9 md:size-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
@@ -151,7 +151,7 @@ export default function EducationPage() {
 
         {/* ── Swiper Slider ── */}
         <div className="px-1 w-full">
-          <div className="rounded-2xl md:rounded-[2.5rem] overflow-hidden shadow-xl shadow-zinc-200/50 bg-white border border-zinc-100 relative w-full">
+          <div className="rounded-2xl md:rounded-[4px] overflow-hidden shadow-xl shadow-zinc-200/50 bg-white border border-zinc-100 relative w-full">
             <Swiper
               modules={[Pagination, Navigation, Autoplay]}
               spaceBetween={0}
@@ -187,7 +187,7 @@ export default function EducationPage() {
             <Link
               key={idx}
               href={guide.href}
-              className={`${guide.bgClass} rounded-[1.75rem] md:rounded-[2.5rem] p-7 md:p-12 flex flex-col justify-between group hover:shadow-2xl transition-all duration-500 border border-zinc-100 w-full`}
+              className={`${guide.bgClass} rounded-[1.75rem] md:rounded-[4px] p-7 md:p-12 flex flex-col justify-between group hover:shadow-2xl transition-all duration-500 border border-zinc-100 w-full`}
             >
               <div>
                 <h3 className="font-figtree text-lg md:text-2xl font-bold text-primary mb-3 md:mb-4 uppercase tracking-[0.03em]">
@@ -205,7 +205,7 @@ export default function EducationPage() {
         </div>
 
         {/* ── Size Guide ── */}
-        <div className="bg-white rounded-[1.75rem] md:rounded-[2.5rem] border border-zinc-100 p-7 md:p-14 text-center shadow-sm mx-1">
+        <div className="bg-white rounded-[1.75rem] md:rounded-[4px] border border-zinc-100 p-7 md:p-14 text-center shadow-sm mx-1">
           <h2 className="font-figtree text-lg md:text-2xl font-bold text-primary mb-3 md:mb-4 uppercase tracking-[0.03em]">
             Size Guide
           </h2>
@@ -232,7 +232,7 @@ export default function EducationPage() {
               key={idx}
               className={`flex flex-col ${
                 section.reverse ? "md:flex-row-reverse" : "md:flex-row"
-              } items-stretch bg-white rounded-[1.75rem] md:rounded-[2.5rem] overflow-hidden border border-zinc-100 shadow-sm w-full`}
+              } items-stretch bg-white rounded-[1.75rem] md:rounded-[4px] overflow-hidden border border-zinc-100 shadow-sm w-full`}
             >
               {/* Image */}
               <div className="w-full md:w-1/2 relative min-h-[220px] md:min-h-full overflow-hidden">

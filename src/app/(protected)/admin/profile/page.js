@@ -198,7 +198,7 @@ export default function MyProfilePage() {
 
         {/* ── Left: Personal Info ── */}
         <div className="lg:col-span-2 space-y-6 md:space-y-8">
-          <div className="bg-white rounded-[2rem] md:rounded-[2.5rem] border border-zinc-100 p-6 md:p-8 lg:p-10 space-y-6 md:space-y-8 shadow-sm">
+          <div className="bg-white rounded-[2rem] md:rounded-[4px] border border-zinc-100 p-6 md:p-8 lg:p-10 space-y-6 md:space-y-8 shadow-sm">
 
             {/* Section header */}
             <div className="flex items-center gap-3 md:gap-4 border-b border-zinc-100 pb-5 md:pb-6">
@@ -284,12 +284,12 @@ export default function MyProfilePage() {
 
         {/* ── Right: Avatar Card ── */}
         <div className="space-y-6 md:space-y-8">
-          <div className="bg-white rounded-[2rem] md:rounded-[2.5rem] border border-zinc-100 p-6 md:p-8 text-center space-y-5 md:space-y-6 shadow-sm">
+          <div className="bg-white rounded-[2rem] md:rounded-[4px] border border-zinc-100 p-6 md:p-8 text-center space-y-5 md:space-y-6 shadow-sm">
 
             {/* Avatar */}
             <div className="relative size-28 md:size-32 mx-auto">
               <div
-                className={`size-28 md:size-32 rounded-[2rem] md:rounded-[2.5rem] flex items-center justify-center overflow-hidden relative shadow-md transition-all ${
+                className={`size-28 md:size-32 rounded-[2rem] md:rounded-[4px] flex items-center justify-center overflow-hidden relative shadow-md transition-all ${
                   profileImage
                     ? "bg-zinc-50 border-2 border-dashed border-zinc-200"
                     : getAvatarColor(formData.firstName)
