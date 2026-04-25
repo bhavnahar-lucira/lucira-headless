@@ -98,11 +98,46 @@ export default function RewardsPage() {
     const isLoggedIn = isAuthenticated;
     const referralLink = useSelector((state) => state.user.referralLink);
 
+    const [stats, setStats] = useState({
+        total_referrals: 0,
+        coins_earned: 0,
+        coins_balance: 0,
+        history: []
+    });
+    const [loadingStats, setLoadingStats] = useState(false);
+
     useEffect(() => {
         if ( isLoggedIn && user?.id && !referralLink) {
             fetchReferralLink();
         }
     }, [isLoggedIn, user, referralLink ]);
+
+    useEffect(() => {
+        if (isLoggedIn && user?.id) {
+            fetchHistory();
+        }
+    }, [isLoggedIn, user?.id]);
+
+    async function fetchHistory() {
+        try {
+            setLoadingStats(true);
+            const numericId = user.id.toString().split("/").pop();
+            const res = await fetch(`/api/customer/referral/history?customer_id=shopify-${numericId}`);
+            const data = await res.json();
+            if (data.status) {
+                setStats({
+                    total_referrals: data.total_referrals || 0,
+                    coins_earned: data.coins_earned || 0,
+                    coins_balance: data.coins_balance || 0,
+                    history: data.history || []
+                });
+            }
+        } catch (err) {
+            console.error("Referral history fetch failed:", err);
+        } finally {
+            setLoadingStats(false);
+        }
+    }
 
     async function fetchReferralLink() {
         try {
@@ -117,7 +152,7 @@ export default function RewardsPage() {
                         "application/json"
                     },
                         body: JSON.stringify({
-                        customerId: user.id
+                        customerId: user.id.toString()
                     })
                 }
             );
@@ -295,13 +330,6 @@ toast.success(
                         </div>
                         
                         <div className="relative bg-[#F3E0CF] rounded-md p-5 md:p-6 min-h-[160px] md:min-h-[180px] flex flex-col justify-center text-right overflow-hidden">
-                            <Image
-                            alt="They Get"
-                            width={300}
-                            height={300}
-                            src="https://cdn.shopify.com/s/files/1/0739/8516/3482/files/They_Get_img_2.png?v=1751354604"
-                            className="absolute bottom-0 left-0 h-[85%] md:h-full w-auto object-contain"
-                            />
                             <p className="text-sm mb-2 relative z-10">
                             They Get
                             </p>
@@ -314,12 +342,6 @@ toast.success(
                         </div>
                         
                         <div className="relative bg-[#F3E0CF] rounded-md p-5 md:p-6 min-h-[160px] md:min-h-[180px] flex flex-col justify-center text-left overflow-hidden">
-                            <Image
-                            alt="You Get"
-                            width={300}
-                            height={300}
-                            src="https://cdn.shopify.com/s/files/1/0739/8516/3482/files/7d93784d-d99f-4716-8c45-779b911938f6_2.png?v=1751352893"
-                            className="absolute bottom-0 right-0 h-[85%] md:h-full w-auto object-contain" />
                             <p className="text-sm mb-2 relative z-10">
                             You Get
                             </p>
@@ -332,6 +354,74 @@ toast.success(
                         </div>
 
                     </div>
+                </div>
+            </section>
+            <section className="py-12 md:py-16 bg-gray-50">
+                <div className="w-full mx-auto px-4 sm:px-6 md:px-8 lg:px-12">
+                    {isLoggedIn && (
+                        <div className="bg-white rounded-[2rem] border border-gray-100 p-6 md:p-10 shadow-sm space-y-8">
+                            <div className="flex flex-col md:flex-row gap-6 justify-between items-start md:items-center">
+                                <div>
+                                    <h3 className="text-xl md:text-2xl font-bold uppercase text-gray-900">Referral & Transactional History</h3>
+                                    <p className="text-sm text-gray-500 mt-1">Track your successful referrals and earned coins.</p>
+                                </div>
+                                
+                                <div className="flex flex-wrap gap-4 w-full md:w-auto">
+                                    <div className="bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-center flex-1 min-w-[100px]">
+                                        <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Total Transactions</p>
+                                        <p className="text-lg font-bold text-gray-900">{stats.total_referrals}</p>
+                                    </div>
+                                    <div className="bg-amber-50/50 border border-amber-100 rounded-xl px-4 py-3 text-center flex-1 min-w-[100px]">
+                                        <p className="text-[10px] font-bold uppercase tracking-widest text-[#A68380] mb-1">Coins Earned</p>
+                                        <p className="text-lg font-bold text-[#A68380]">{stats.coins_earned}</p>
+                                    </div>
+                                    <div className="bg-amber-50 border border-amber-100 rounded-xl px-4 py-3 text-center flex-1 min-w-[100px]">
+                                        <p className="text-[10px] font-bold uppercase tracking-widest text-amber-600 mb-1">Coins Balance</p>
+                                        <p className="text-lg font-bold text-amber-700">{stats.coins_balance}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="overflow-x-auto">
+                                {loadingStats ? (
+                                    <div className="py-12 text-center text-gray-400 font-medium animate-pulse">
+                                        Loading history...
+                                    </div>
+                                ) : stats.history.length > 0 ? (
+                                    <table className="w-full text-left border-collapse min-w-[500px]">
+                                        <thead>
+                                            <tr className="border-b border-gray-100 text-[10px] font-bold uppercase tracking-widest text-gray-400">
+                                                <th className="pb-4 px-4">Name</th>
+                                                <th className="pb-4 px-4">Date</th>
+                                                <th className="pb-4 px-4">Status</th>
+                                                <th className="pb-4 px-4 text-right">Reward</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="text-sm">
+                                            {stats.history.map((row, idx) => (
+                                                <tr key={idx} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
+                                                    <td className="py-4 px-4 font-medium text-gray-900">{row.name}</td>
+                                                    <td className="py-4 px-4 text-gray-500">{row.date}</td>
+                                                    <td className="py-4 px-4">
+                                                        {row.status === 'Earned' ? (
+                                                            <span className="text-emerald-600 font-bold text-xs uppercase tracking-wider">Earned</span>
+                                                        ) : (
+                                                            <span className="text-red-500 font-bold text-xs uppercase tracking-wider">Failed</span>
+                                                        )}
+                                                    </td>
+                                                    <td className="py-4 px-4 text-right font-bold text-[#A68380]">+{row.reward} coins</td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                ) : (
+                                    <div className="py-12 text-center bg-gray-50 rounded-2xl border border-gray-100 border-dashed">
+                                        <p className="text-gray-400 font-medium">No referrals yet. Share your link to start earning!</p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
                 </div>
             </section>
             <Suspense fallback={<div className="h-20 bg-gray-100 animate-pulse"></div>}>

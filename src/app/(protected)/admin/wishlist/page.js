@@ -219,19 +219,19 @@ export default function WishlistPage() {
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-3xl font-black text-zinc-900 tracking-tight mb-1">My Wishlist</h2>
+          <h2 className="font-figtree text-2xl md:text-3xl font-bold text-zinc-900 tracking-tight mb-1">My Wishlist</h2>
           <p className="text-zinc-500 font-medium">Save your favorite pieces and return to them later.</p>
         </div>
         <button
           onClick={loadWishlist}
-          className="px-6 py-3 bg-primary text-white text-xs font-black uppercase tracking-[0.2em] rounded-2xl hover:opacity-90 transition-colors shadow-lg shadow-primary/20 flex items-center gap-2"
+          className="font-figtree px-6 py-3 bg-primary text-white text-xs font-semibold uppercase tracking-[0.15em] rounded-2xl hover:opacity-90 transition-colors shadow-lg shadow-primary/20 flex items-center gap-2 w-fit"
         >
           <ShoppingCart size={16} />
           Refresh
         </button>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-8 gap-y-12">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-2 gap-x-8 gap-y-12">
         {loading ? (
           <div className="col-span-full py-20 text-center text-zinc-500">Loading your wishlist...</div>
         ) : wishlistItems.length > 0 ? (
