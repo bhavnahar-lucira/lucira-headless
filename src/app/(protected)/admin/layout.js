@@ -31,6 +31,7 @@ const sidebarLinks = [
   { name: "Saved Addresses", href: "/admin/addresses", icon: MapPin, color: "text-orange-500", bg: "bg-orange-500/10" },
   { name: "Earn Rewards", href: "/admin/rewards", icon: Gift, color: "text-amber-500", bg: "bg-amber-500/10" },
   { name: "My Profile", href: "/admin/profile", icon: User, color: "text-zinc-500", bg: "bg-zinc-500/10" },
+  { name: "Refer & Earn", href: "/admin/referral", icon: Gem, color: "text-indigo-500", bg: "bg-indigo-500/10" },
 ];
 
 import {
