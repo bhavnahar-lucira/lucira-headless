@@ -39,13 +39,17 @@ const COUPON_MAP = {
   "1500_off": "GRAND1500",
 };
 
-export function OtpSpinAuth({ onSuccess, onClose, initialMobile = "" }) {
+export function OtpSpinAuth({ onSuccess, onClose, initialMobile = "", initialStep = "login", onStepChange }) {
   const router = useRouter();
   const dispatch = useDispatch();
   const controls = useAnimation();
 
-  const [step, setStep] = useState("login"); // login, otp, register, success
+  const [step, setStep] = useState(initialStep); // login, otp, register, success
   const [mobile, setMobile] = useState(initialMobile);
+
+  useEffect(() => {
+    setStep(initialStep);
+  }, [initialStep]);
 
   useEffect(() => {
     if (initialMobile) setMobile(initialMobile);
@@ -346,7 +350,7 @@ export function OtpSpinAuth({ onSuccess, onClose, initialMobile = "" }) {
               {loading ? "SENDING..." : "REQUEST OTP"}
             </button>
             <p className="register-link">
-              New user? <span className="cursor-pointer font-bold underline" onClick={() => setStep("register")}>Register</span>
+              New user? <span className="cursor-pointer font-bold underline" onClick={() => onStepChange ? onStepChange("register") : setStep("register")}>Register</span>
             </p>
           </>
         )}
@@ -481,7 +485,7 @@ export function OtpSpinAuth({ onSuccess, onClose, initialMobile = "" }) {
             Already have an account?{" "}
             <span
               className="cursor-pointer font-bold underline"
-              onClick={() => setStep("login")}
+              onClick={() => onStepChange ? onStepChange("login") : setStep("login")}
             >
               Login
             </span>
