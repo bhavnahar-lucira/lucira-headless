@@ -35,30 +35,26 @@ export function JoinLuciraCommunity() {
         )}
 
         {/* Content Side */}
-        <div className="flex flex-col justify-center py-12 px-6 md:px-16 lg:px-24">
+        <div className="flex flex-col justify-center py-6 px-10">
           <div className="w-full space-y-6">
-            <div className="space-y-3">
-              <h2 className="text-3xl md:text-4xl font-black font-abhaya text-zinc-900 leading-tight">
-                Join the Lucira Community Today
-              </h2>
-              <p className="text-sm md:text-base text-zinc-600 leading-relaxed md:max-w-[90%]">
-                Get early access to jewelry drops, care tips, and exclusive offers, straight to your inbox.
-              </p>
+            <div className="text-left mb-6">
+              <h2 className="text-3xl md:text-4xl font-extrabold font-abhaya mb-2 text-black">Join the Lucira Community Today</h2>
+              <p className="text-black text-base font-normal">Get early access to jewelry drops, care tips, and exclusive offers, straight to your inbox.</p>
             </div>
             
             <div className="space-y-4">
-              <div className="flex flex-col gap-3">
+              <div className="flex flex-row gap-3">
                 <Input 
                   placeholder="Enter your email" 
-                  className="h-14 bg-white/50 border-zinc-300 rounded-lg px-6 text-base placeholder:text-zinc-400 focus-visible:ring-1 focus-visible:ring-zinc-900"
+                  className="h-14 bg-white/50 border-primary rounded-lg px-6 text-base placeholder:text-zinc-400 focus-visible:ring-1 focus-visible:ring-zinc-900"
                 />
-                <Button className="h-14 w-full md:w-fit px-12 bg-[#5A413F] hover:bg-[#4a3533] text-white font-bold text-sm tracking-widest uppercase rounded-lg transition-all">
+                <Button className="h-14 w-full md:w-fit px-12 bg-primary hover:bg-accent text-white font-bold text-sm tracking-widest uppercase rounded-lg transition-all">
                   Subscribe
                 </Button>
               </div>
-              <p className="text-[11px] md:text-xs text-zinc-500 leading-relaxed">
+              <p className="text-xs text-black">
                 You can unsubscribe anytime. For more details read our{" "}
-                <a href="#" className="underline font-bold text-zinc-900 hover:text-black transition-colors">
+                <a href="/pages/privacy-policy" className="underline font-bold text-zinc-900 hover:text-black transition-colors">
                   Privacy Policy
                 </a>
               </p>
