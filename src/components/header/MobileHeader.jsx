@@ -17,6 +17,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { pushLogout, pushViewCart } from "@/lib/gtm";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import LuciraLogo from "./LuciraLogo";
+import SearchPopup from "./SearchPopup";
+import { AnimatePresence } from "framer-motion";
 
 const CATEGORY_IMAGES = {
   "BEST SELLERS": "/images/menu/engagement-ring.jpg",
@@ -74,6 +76,27 @@ export default function MobileHeader() {
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [showSearch, setShowSearch] = useState(!isProductPage);
+  const [searchResults, setSearchResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
+  
+  const isSearchSuggestionsVisible = (isFocused || searchQuery.length > 0) && showSearch;
+
+  // Lock body scroll when search suggestions are active
+  useEffect(() => {
+    if (isSearchSuggestionsVisible) {
+      document.body.style.overflow = "hidden";
+      document.body.style.touchAction = "none"; // Extra prevention for mobile touch scroll
+    } else {
+      document.body.style.overflow = "";
+      document.body.style.touchAction = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+      document.body.style.touchAction = "";
+    };
+  }, [isSearchSuggestionsVisible]);
+
   const { menuData } = useMenu("main-menu-official");
   const MEGA_MENU = menuData || STATIC_MENU;
 
@@ -93,6 +116,26 @@ export default function MobileHeader() {
       setActiveMenuPath([]);
     }
   }, [isMenuOpen]);
+
+  const handleSearchChange = async (e) => {
+    const query = e.target.value;
+    setSearchQuery(query);
+    
+    if (query.length > 1) {
+      setIsSearching(true);
+      try {
+        const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+        const data = await res.json();
+        setSearchResults(data.results || []);
+      } catch (err) {
+        console.error("Search error:", err);
+      } finally {
+        setIsSearching(false);
+      }
+    } else {
+      setSearchResults([]);
+    }
+  };
 
   const handleLogout = async () => {
     try {
@@ -117,7 +160,14 @@ export default function MobileHeader() {
   const handleSearch = (e) => {
     if (e.key === "Enter" && searchQuery.trim()) {
       router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
-      setSearchQuery("");
+      setIsFocused(false);
+    }
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter" && searchQuery.trim().length > 0) {
+      router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+      setIsFocused(false);
     }
   };
 
@@ -459,7 +509,7 @@ export default function MobileHeader() {
 
       {/* Search Bar Row */}
       {showSearch && (
-        <div className="px-4 py-2 bg-white animate-in slide-in-from-top-2 duration-200">
+        <div className="px-4 py-2 bg-white animate-in slide-in-from-top-2 duration-200 relative">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
             <input
@@ -467,11 +517,26 @@ export default function MobileHeader() {
               placeholder="Shop for Solitaire Rings"
               className="w-full bg-gray-50 h-10 pl-10 pr-4 rounded-sm text-sm outline-none focus:ring-1 focus:ring-gray-200"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyDown={handleSearch}
+              onChange={handleSearchChange}
+              onKeyDown={handleKeyDown}
+              onFocus={() => setIsFocused(true)}
+              onBlur={() => {
+                setTimeout(() => setIsFocused(false), 200);
+              }}
               autoFocus={isProductPage}
             />
           </div>
+
+          <AnimatePresence>
+            {(isFocused || searchQuery.length > 0) && (
+              <SearchPopup 
+                onClose={() => setIsFocused(false)} 
+                searchQuery={searchQuery}
+                searchResults={searchResults}
+                isSearching={isSearching}
+              />
+            )}
+          </AnimatePresence>
         </div>
       )}
       <AuthDialog open={isAuthOpen} onOpenChange={setIsAuthOpen} />
