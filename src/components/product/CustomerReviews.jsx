@@ -10,9 +10,16 @@ import 'swiper/css/navigation';
 import 'swiper/css/scrollbar';
 import Image from "next/image";
 import { Separator } from "@/components/ui/separator"
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import ReviewDetailedPopup from "@/components/review/ReviewDetailedPopup";
 import Link from "next/link";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 // Helper to ensure image src is a valid string URL
 const getValidSrc = (src, fallback = "/images/product/1.jpg") => {
@@ -27,17 +34,24 @@ export default function CustomerReviews({ reviews, productId, productTitle, prod
   const [gallery, setGallery] = useState([]);
   const [isGlobal, setIsGlobal] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [filterRating, setFilterRating] = useState("all");
+  const [sortBy, setSortBy] = useState("featured");
 
   useEffect(() => {
     async function initReviews() {
-      setLoading(true);
+      // Don't show global loader if we are just filtering/sorting
+      // unless it's the very first load
+      const isInitialLoad = data.list.length === 0;
+      if (isInitialLoad) {
+        setLoading(true);
+      }
       
       const activeReviews = reviews || null;
       const count = activeReviews?.count || 0;
       const list = activeReviews?.list || [];
 
       // If product has reviews with a list, use them
-      if (count > 0 && list.length > 0) {
+      if (count > 0 && list.length > 0 && !isGlobal) {
         setData({
             count: count,
             average: activeReviews.average || 0,
@@ -57,7 +71,7 @@ export default function CustomerReviews({ reviews, productId, productTitle, prod
         setGallery(galleryItems);
         setIsGlobal(false);
         setLoading(false);
-      } else if (productId) {
+      } else if (productId && !isGlobal) {
         // If we have count but no list, try to fetch specific reviews for this product
         try {
           const response = await fetch(`/api/reviews?productId=${productId}`);
@@ -88,6 +102,8 @@ export default function CustomerReviews({ reviews, productId, productTitle, prod
         
         // Fallback to global if still no reviews
         fetchGlobalFallback();
+      } else if (isGlobal) {
+        fetchGlobalFallback();
       } else {
         fetchGlobalFallback();
       }
@@ -95,7 +111,7 @@ export default function CustomerReviews({ reviews, productId, productTitle, prod
 
     async function fetchGlobalFallback() {
         try {
-          const response = await fetch("/api/all-reviews?page=1&limit=10");
+          const response = await fetch(`/api/all-reviews?page=1&limit=20&rating=${filterRating}&sort=${sortBy === 'featured' ? 'newest' : sortBy}`);
           const result = await response.json();
           if (result.reviews && result.reviews.length > 0) {
             setData({
@@ -115,10 +131,57 @@ export default function CustomerReviews({ reviews, productId, productTitle, prod
     }
 
     initReviews();
-  }, [reviews, productId]);
+  }, [reviews, productId, isGlobal, filterRating, sortBy]);
 
-  if (loading) return null;
+  const filteredAndSortedReviews = useMemo(() => {
+    if (isGlobal) return data.list;
+
+    let result = [...(data.list || [])];
+
+    // Filter by rating
+    if (filterRating !== "all") {
+      result = result.filter(r => Math.round(r.rating) === parseInt(filterRating));
+    }
+
+    // Sort by
+    result.sort((a, b) => {
+      if (sortBy === "newest") {
+        return new Date(b.date) - new Date(a.date);
+      }
+      if (sortBy === "oldest") {
+        return new Date(a.date) - new Date(b.date);
+      }
+      if (sortBy === "highest") {
+        return b.rating - a.rating;
+      }
+      if (sortBy === "lowest") {
+        return a.rating - b.rating;
+      }
+      if (sortBy === "images") {
+        const aImgs = a.images?.length || 0;
+        const bImgs = b.images?.length || 0;
+        return bImgs - aImgs;
+      }
+      return 0; // Default (featured/none)
+    });
+
+    return result;
+  }, [data.list, filterRating, sortBy, isGlobal]);
+
+  if (loading && data.list.length === 0) return (
+    <div className="min-h-[400px] flex items-center justify-center bg-[#FEF5F1]">
+      <div className="w-8 h-8 border-4 border-[#5A413F] border-t-transparent rounded-full animate-spin"></div>
+    </div>
+  );
   if (data.count === 0) return null;
+
+  const handleFilterChange = (val) => {
+    setFilterRating(val);
+  };
+
+  const handleSortChange = (val) => {
+    setSortBy(val);
+  };
 
   const getPercentage = (count) => {
     const total = isGlobal ? data.stats.total : data.count;
@@ -129,7 +192,7 @@ export default function CustomerReviews({ reviews, productId, productTitle, prod
   const openPopup = (reviewIdOrIndex) => {
     let index = -1;
     if (typeof reviewIdOrIndex === 'string') {
-        index = data.list.findIndex(r => r.id === reviewIdOrIndex);
+        index = filteredAndSortedReviews.findIndex(r => r.id === reviewIdOrIndex);
     } else {
         index = reviewIdOrIndex;
     }
@@ -140,7 +203,7 @@ export default function CustomerReviews({ reviews, productId, productTitle, prod
   };
 
   // Prepare mapped reviews for the popup
-  const mappedReviews = data.list?.map(r => ({
+  const mappedReviews = filteredAndSortedReviews?.map(r => ({
     ...r,
     productTitle: r.productTitle || productTitle,
     productImage: getValidSrc(r.productImage || productImage),
@@ -154,7 +217,7 @@ export default function CustomerReviews({ reviews, productId, productTitle, prod
 
   return (
     <section className="w-full py-20 bg-[#FEF5F1] mt-15" id="reviews">
-      <div className="container-main max-w-6xl">
+      <div className="container-main">
         
         {/* Heading */}
         <div className="mb-16 text-center">
@@ -252,23 +315,55 @@ export default function CustomerReviews({ reviews, productId, productTitle, prod
         )}
 
         {/* Filter Bar */}
-        <div className="flex items-center justify-between py-4 md:py-10 px-2 border-b border-gray-200 mb-10 flex-wrap gap-4">
-          <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em]">
-            Rating: <span className="text-gray-900 ml-1">All</span>
-            <ChevronDown size={14} className="text-gray-400" />
+        <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-10 border-b border-gray-200 pb-8 px-2">
+          <div className="flex items-center gap-3">
+            <span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Rating:</span>
+            <Select value={filterRating} onValueChange={handleFilterChange}>
+              <SelectTrigger className="w-auto min-w-[120px] border-none bg-transparent font-black text-sm uppercase tracking-widest focus:ring-0 focus:ring-offset-0 p-0 h-auto cursor-pointer gap-2">
+                <SelectValue placeholder="All Ratings" />
+              </SelectTrigger>
+              <SelectContent className="rounded-xl border-gray-100 shadow-xl">
+                <SelectItem value="all" className="font-bold text-xs uppercase tracking-widest">All Ratings</SelectItem>
+                <SelectItem value="5" className="font-bold text-xs uppercase tracking-widest">5 Stars</SelectItem>
+                <SelectItem value="4" className="font-bold text-xs uppercase tracking-widest">4 Stars</SelectItem>
+                <SelectItem value="3" className="font-bold text-xs uppercase tracking-widest">3 Stars</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="flex-1 text-center hidden md:block">
+            <span className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em]">
+              {data.count} Verified Reviews
+            </span>
           </div>
           
-          <span className="text-[10px] font-black text-gray-500 uppercase tracking-[0.3em]">{data.count} verified reviews</span>
-          
-          <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em]">
-            Sort by: <span className="text-gray-900 ml-1">Featured</span>
-            <ChevronDown size={14} className="text-gray-400" />
+          <div className="md:hidden text-center w-full">
+            <span className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em]">
+              {data.count} Verified Reviews
+            </span>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Sort by:</span>
+            <Select value={sortBy} onValueChange={handleSortChange}>
+                <SelectTrigger className="w-auto min-w-[140px] border-none bg-transparent font-black text-sm uppercase tracking-widest focus:ring-0 focus:ring-offset-0 p-0 h-auto cursor-pointer gap-2">
+                  <SelectValue placeholder="Featured" />
+                </SelectTrigger>
+                <SelectContent className="rounded-xl border-gray-100 shadow-xl">
+                  <SelectItem value="featured" className="font-bold text-xs uppercase tracking-widest">Featured</SelectItem>
+                  <SelectItem value="newest" className="font-bold text-xs uppercase tracking-widest">Newest First</SelectItem>
+                  <SelectItem value="oldest" className="font-bold text-xs uppercase tracking-widest">Oldest First</SelectItem>
+                  <SelectItem value="highest" className="font-bold text-xs uppercase tracking-widest">Highest Rated</SelectItem>
+                  <SelectItem value="lowest" className="font-bold text-xs uppercase tracking-widest">Lowest Rated</SelectItem>
+                  <SelectItem value="images" className="font-bold text-xs uppercase tracking-widest">Images First</SelectItem>
+                </SelectContent>
+              </Select>
           </div>
         </div>
 
         {/* Reviews Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-          {data.list?.map((review, idx) => (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 lg:gap-10">
+          {filteredAndSortedReviews?.map((review, idx) => (
             <ReviewCard 
               key={review.id || `review-${idx}`}
               review={review}
@@ -277,10 +372,20 @@ export default function CustomerReviews({ reviews, productId, productTitle, prod
           ))}
         </div>
 
+        {/* Empty State */}
+        {!loading && filteredAndSortedReviews.length === 0 && (
+          <div className="text-center py-20 bg-white/30 rounded-3xl border-2 border-dashed border-gray-200">
+            <p className="text-gray-400 font-black uppercase tracking-widest mb-4">No reviews found for this criteria.</p>
+            <button onClick={() => { setFilterRating("all"); setSortBy("featured"); }} className="text-[#5A413F] font-black text-xs uppercase tracking-widest border-b-2 border-[#5A413F] pb-1 hover:text-black hover:border-black transition-colors">Reset filters</button>
+          </div>
+        )}
+
         {/* View All Button */}
         <div className="mt-20 text-center">
             <Link 
                 href="/reviews"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="px-14 py-5 bg-[#5A413F] text-white font-black text-xs uppercase tracking-[0.3em] rounded shadow-xl hover:bg-[#4a3533] transition-all active:scale-95 inline-block"
             >
                 View All Reviews

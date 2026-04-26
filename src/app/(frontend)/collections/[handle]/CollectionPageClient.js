@@ -27,6 +27,9 @@ import { useMediaQuery } from "@/hooks/useMediaQuery";
 
 const SORT_OPTIONS = [
   { value: "best_selling", label: "Best selling" },
+  { value: "discount_desc", label: "Discount: High to Low" },
+  { value: "created_at_desc", label: "Date: New to Old" },
+  { value: "created_at_asc", label: "Date: Old to New" },
   { value: "price_low_high", label: "Price, low to high" },
   { value: "price_high_low", label: "Price, high to low" },
   { value: "az", label: "Alphabetically, A-Z" },

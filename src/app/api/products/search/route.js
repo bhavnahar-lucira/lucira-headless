@@ -22,7 +22,10 @@ export async function GET(request) {
       price_high_low: { price: -1, _id: 1 },
       date_new_old: { createdAt: -1, _id: 1 },
       date_old_new: { createdAt: 1, _id: 1 },
-    };
+      created_at_desc: { createdAt: -1, _id: 1 },
+      created_at_asc: { createdAt: 1, _id: 1 },
+      discount_desc: { diamondDiscount: -1, makingDiscount: -1, _id: 1 },
+      };
 
     const sortConfig = SORT_MAP[sort] || SORT_MAP.featured;
 

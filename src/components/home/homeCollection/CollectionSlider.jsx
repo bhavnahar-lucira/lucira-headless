@@ -44,8 +44,8 @@ export default function CollectionSlider ({ products = [], loading = false }) {
       <div className="relative">
         <Swiper
           modules={[Navigation, Pagination]}
-          spaceBetween={16}
-          slidesPerView={1.2}
+          spaceBetween={12}
+          slidesPerView={2}
           onSlideChange={(swiper) => {
             const progress = (swiper.activeIndex / (swiper.slides.length - swiper.params.slidesPerView)) * 100;
             const bar = document.getElementById(`progress-bar-${id}`);

@@ -465,6 +465,13 @@ export default function ProductPageClient({ product, complementaryProducts = [],
         images: product.images || (product.featuredImage ? [{ url: product.featuredImage, altText: product.title }] : []),
         variants: product.variants || [],
         media: product.media || [],
+        reviews: product.reviews,
+        reviewStats: product.reviewStats,
+        matchingProductIds: product.matchingProductIds,
+        hasSimilar: product.hasSimilar,
+        diamondDiscount: product.diamondDiscount,
+        makingDiscount: product.makingDiscount,
+        productMetafields: product.productMetafields,
       })
     );
   }, [product, dispatch]);
