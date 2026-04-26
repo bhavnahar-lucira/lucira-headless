@@ -1,28 +1,42 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { pushPurchase } from "@/lib/gtm";
 
 export default function SuccessPage() {
+  const router = useRouter();
+  const [isVerifying, setIsVerifying] = useState(true);
+
   useEffect(() => {
     // 1. Read purchase data stored from Payment Page
     const storedData = window.localStorage.getItem("gtm_purchase_data");
     
-    if (storedData) {
-      try {
-        const purchaseData = JSON.parse(storedData);
-        
-        // 2. Fire the Purchase Event
-        pushPurchase(purchaseData);
-        
-        // 3. Clear storage to prevent duplicate firing on refresh
-        window.localStorage.removeItem("gtm_purchase_data");
-      } catch (err) {
-        console.error("GTM Purchase tracking failed:", err);
-      }
+    if (!storedData) {
+      // Prevent direct access - redirect to home
+      router.replace("/");
+      return;
     }
-  }, []);
+
+    try {
+      const purchaseData = JSON.parse(storedData);
+      
+      // 2. Fire the Purchase Event
+      pushPurchase(purchaseData);
+      
+      // 3. Clear storage to prevent duplicate firing on refresh
+      window.localStorage.removeItem("gtm_purchase_data");
+      setIsVerifying(false);
+    } catch (err) {
+      console.error("GTM Purchase tracking failed:", err);
+      router.replace("/");
+    }
+  }, [router]);
+
+  if (isVerifying) {
+    return <div className="min-h-screen bg-white" />;
+  }
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center">
