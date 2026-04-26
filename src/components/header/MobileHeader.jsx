@@ -313,6 +313,13 @@ export default function MobileHeader() {
     );
   };
 
+  const isAuthPage = pathname === "/login" || pathname === "/register";
+
+  const handleAuthTrigger = () => {
+    if (isAuthPage) return;
+    setIsAuthOpen(true);
+  };
+
   const renderMainMenu = () => {
     return (
       <div className="flex flex-col pb-8">
@@ -417,7 +424,7 @@ export default function MobileHeader() {
                 <LogOut size={20} /> Logout
               </button>
             ) : (
-              <button onClick={() => { setIsMenuOpen(false); setIsAuthOpen(true); }} className="w-full bg-[#4E3E3E] text-white py-4 rounded font-bold uppercase tracking-widest text-sm flex items-center justify-center gap-2">
+              <button onClick={() => { setIsMenuOpen(false); handleAuthTrigger(); }} className="w-full bg-[#4E3E3E] text-white py-4 rounded font-bold uppercase tracking-widest text-sm flex items-center justify-center gap-2">
                 <UserIcon size={20} /> Log In / Sign Up
               </button>
             )}
@@ -488,7 +495,7 @@ export default function MobileHeader() {
           <Link href="/">
             <Home size={22} strokeWidth={1.5} />
           </Link>
-          <Link href={user ? "/admin/wishlist" : "#"} onClick={!user ? () => setIsAuthOpen(true) : undefined} className="relative">
+          <Link href={user ? "/admin/wishlist" : "#"} onClick={!user ? handleAuthTrigger : undefined} className="relative">
             <Heart size={22} strokeWidth={1.5} className={wishlistItems.length > 0 ? "text-rose-500 fill-rose-500" : ""} />
             {wishlistItems.length > 0 && (
               <span className="absolute -top-1.5 -right-1.5 bg-rose-500 text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center border border-white">
