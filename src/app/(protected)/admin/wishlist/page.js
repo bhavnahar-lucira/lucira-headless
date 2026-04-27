@@ -231,7 +231,7 @@ export default function WishlistPage() {
         </button>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-2 gap-x-8 gap-y-12">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-x-8 gap-y-12">
         {loading ? (
           <div className="col-span-full py-20 text-center text-zinc-500">Loading your wishlist...</div>
         ) : wishlistItems.length > 0 ? (
