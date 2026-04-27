@@ -216,7 +216,7 @@ export default function Navbar({ hideTop }) {
                             <li key={i} className="hover:text-black transition-colors">
                               <Link href={item.href || "#"} onClick={closeMenu} className="flex items-center gap-3 group">
                                 {item.menuIcon && (
-                                   <div className="relative h-7 w-7 shrink-0 flex items-center justify-center bg-gray-50 rounded-full overflow-hidden transition-all group-hover:bg-gray-100">
+                                   <div className="relative h-12 w-12 shrink-0 flex items-center justify-center rounded-full overflow-hidden transition-all">
                                       <Image
                                         src={item.menuIcon}
                                         alt={item.label}
@@ -267,7 +267,7 @@ export default function Navbar({ hideTop }) {
                                     }}
                                   />
                                 ) : item.menuIcon || item.megaMenuImage || (col.type === "icon" && item.icon) ? (
-                                  <div className="relative h-7 w-7 shrink-0 flex items-center justify-center bg-gray-50 rounded-full overflow-hidden transition-all group-hover:bg-gray-100">
+                                  <div className="relative h-12 w-12 shrink-0 flex items-center justify-center rounded-full overflow-hidden transition-all">
                                     <Image
                                       src={item.menuIcon || item.megaMenuImage || item.icon}
                                       alt={item.label}

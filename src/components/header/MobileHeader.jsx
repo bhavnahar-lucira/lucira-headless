@@ -261,7 +261,7 @@ export default function MobileHeader() {
                           onClick={() => setIsMenuOpen(false)}
                           className="flex flex-col items-center gap-2"
                         >
-                          <div className="w-12 h-12 relative flex items-center justify-center bg-gray-50 rounded-full overflow-hidden">
+                          <div className="w-16 h-16 relative flex items-center justify-center bg-gray-50 rounded-full overflow-hidden">
                             <SafeImage 
                               src={iconPath} 
                               alt={item.label} 
