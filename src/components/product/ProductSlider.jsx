@@ -1,16 +1,16 @@
 "use client";
 
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { Pagination } from 'swiper/modules';
+import { Navigation } from 'swiper/modules';
 import 'swiper/css';
-import 'swiper/css/pagination';
+import 'swiper/css/navigation';
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import ProductCard from "./ProductCard";
-import { useState } from "react";
+import { useState, useId } from "react";
 
 export function ProductSlider({ title, subtitle, products = [], preservePriceOnColorChange = false }) {
   const [swiper, setSwiper] = useState(null);
-  const [activeSlide, setActiveSlide] = useState(0);
+  const id = useId().replace(/:/g, "");
 
   if (!Array.isArray(products) || products.length === 0) return null;
 
@@ -26,17 +26,25 @@ export function ProductSlider({ title, subtitle, products = [], preservePriceOnC
 
         <div className="relative">
           <Swiper
-            modules={[Pagination]}
-            spaceBetween={20}
-            slidesPerView={1.2}
+            modules={[Navigation]}
+            spaceBetween={12}
+            slidesPerView={2}
             onSwiper={setSwiper}
-            onSlideChange={(s) => setActiveSlide(s.realIndex)}
+            onSlideChange={(swiper) => {
+                const progress = (swiper.activeIndex / (swiper.slides.length - swiper.params.slidesPerView)) * 100;
+                const bar = document.getElementById(`progress-bar-slider-${id}`);
+                if (bar) bar.style.width = `${Math.min(100, Math.max(0, progress + (100 / swiper.slides.length)))}%`;
+            }}
+            navigation={{
+                nextEl: `.next-${id}`,
+                prevEl: `.prev-${id}`,
+            }}
             breakpoints={{
               640: { slidesPerView: 2, spaceBetween: 24 },
               1024: { slidesPerView: 3, spaceBetween: 30 },
               1280: { slidesPerView: 4, spaceBetween: 30 },
             }}
-            className="w-full overflow-visible!"
+            className="w-full"
           >
             {products.map((product, idx) => (
               <SwiperSlide key={product.shopifyId || product.id || product.handle || idx}>
@@ -49,31 +57,25 @@ export function ProductSlider({ title, subtitle, products = [], preservePriceOnC
             ))}
           </Swiper>
 
-          {/* Navigation & Pagination Controls */}
-          <div className="flex justify-between items-center mt-12 px-2">
-            {/* Custom Pagination (Dots) */}
-            <div className="flex items-center gap-2 md:max-w-full max-w-[60%]">
-              {products.map((_, i) => (
+          {/* Navigation & Progress Controls */}
+          <div className="flex justify-between items-center mt-8 md:mt-12 px-1">
+            {/* Progress Bar */}
+            <div className="flex-1 max-w-[120px] md:max-w-[200px] h-[2px] bg-zinc-100 relative overflow-hidden">
                 <div 
-                  key={i} 
-                  className={`transition-all duration-300 rounded-full h-1 cursor-pointer ${
-                    activeSlide === i ? "w-8 bg-black" : "w-2 bg-gray-200"
-                  }`}
-                  onClick={() => swiper?.slideTo(i)}
+                id={`progress-bar-slider-${id}`}
+                className="absolute top-0 left-0 h-full bg-[#5B4740] transition-all duration-300"
+                style={{ width: `${100 / products.length}%` }}
                 />
-              ))}
             </div>
             
             <div className="flex items-center gap-4">
               <button 
-                onClick={() => swiper?.slidePrev()}
-                className="w-9 h-9 md:w-12 md:h-12 rounded-full border border-black flex items-center justify-center hover:bg-black hover:text-white transition-all disabled:opacity-30"
+                className={`prev-${id} w-9 h-9 md:w-12 md:h-12 rounded-full border border-zinc-200 flex items-center justify-center hover:bg-black hover:text-white transition-all text-zinc-400 hover:border-black hover:text-white disabled:opacity-30`}
               >
                 <ChevronLeft size={24} />
               </button>
               <button 
-                onClick={() => swiper?.slideNext()}
-                className="w-9 h-9 md:w-12 md:h-12 rounded-full border border-black flex items-center justify-center hover:bg-black hover:text-white transition-all disabled:opacity-30"
+                className={`next-${id} w-9 h-9 md:w-12 md:h-12 rounded-full border border-zinc-200 flex items-center justify-center hover:bg-black hover:text-white transition-all text-zinc-400 hover:border-black hover:text-white disabled:opacity-30`}
               >
                 <ChevronRight size={24} />
               </button>

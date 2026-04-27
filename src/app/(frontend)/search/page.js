@@ -4,11 +4,11 @@ import { useState, useEffect, useCallback, useMemo, use, useRef } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
+import { Sheet } from "react-modal-sheet";
 import ProductCard from "@/components/product/ProductCard";
 import ProductCardSkeleton from "@/components/product/ProductCardSkeleton";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { ChevronDown, XIcon, Hammer, Filter as FilterIcon, Loader2, Search } from "lucide-react";
+import { ChevronDown, XIcon, Hammer, Filter as FilterIcon, Loader2, Search, ArrowUpDown, SlidersHorizontal, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area"
 import {
@@ -21,12 +21,16 @@ import {
 } from "@/components/ui/breadcrumb"
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { pushProductImpression, formatGtmPrice } from "@/lib/gtm";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 
 const SORT_OPTIONS = [
-  { value: "best_selling", label: "Best Selling" },
-  { value: "price_low_high", label: "Price: Low to High" },
-  { value: "price_high_low", label: "Price: High to Low" },
-  { value: "az", label: "A to Z" },
+  { value: "best_selling", label: "Best selling" },
+  { value: "discount_desc", label: "Discount: High to Low" },
+  { value: "created_at_desc", label: "Date: New to Old" },
+  { value: "created_at_asc", label: "Date: Old to New" },
+  { value: "price_low_high", label: "Price, low to high" },
+  { value: "price_high_low", label: "Price, high to low" },
+  { value: "az", label: "Alphabetically, A-Z" },
 ];
 
 const FilterSidebarSkeleton = () => (
@@ -66,6 +70,11 @@ export default function SearchPage() {
   const [expandedFilters, setExpandedFilters] = useState({ "In Store Available": true });
   const loadMoreRef = useRef(null);
 
+  const isMobile = useMediaQuery("(max-width: 1023px)");
+  const [activeMobileGroup, setActiveMobileGroup] = useState(null);
+  const [isFilterSheetOpen, setIsFilterSheetOpen] = useState(false);
+  const [isSortSheetOpen, setIsSortSheetOpen] = useState(false);
+
   // Create a memoized version of searchParams without the 'page' for the queryKey
   const filterParamsString = useMemo(() => {
     const p = new URLSearchParams(searchParams.toString());
@@ -96,6 +105,25 @@ export default function SearchPage() {
     placeholderData: (previousData) => previousData,
     enabled: !!query,
   });
+
+  // Set initial active mobile group when filters are loaded
+  useEffect(() => {
+    if (Object.keys(availableFilters).length > 0 && !activeMobileGroup) {
+      setActiveMobileGroup(Object.keys(availableFilters)[0]);
+    }
+  }, [availableFilters, activeMobileGroup]);
+
+  const activeFilterCount = useMemo(() => {
+    let count = 0;
+    Object.values(availableFilters).forEach((options) => {
+      options.forEach((opt) => {
+        if (searchParams.getAll(opt.urlKey).includes(opt.value)) {
+          count++;
+        }
+      });
+    });
+    return count;
+  }, [availableFilters, searchParams]);
 
   // 2. Infinite Query for Products
   const {
@@ -283,18 +311,18 @@ export default function SearchPage() {
   const showInitialSkeleton = isInitialLoading || (initialPage > 1 && products.length < (initialPage - 1) * limit);
 
   return (
-    <div className="min-h-screen bg-white mt-3">
+    <div className="min-h-screen bg-white">
       {/* Search Header */}
       <div className="w-full">
         <div className="container-main mx-auto px-6 py-4">
           <Breadcrumb>
-            <BreadcrumbList>
+            <BreadcrumbList className="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400">
               <BreadcrumbItem>
-                <BreadcrumbLink href="/">Home</BreadcrumbLink>
+                <BreadcrumbLink href="/" className="hover:text-[#35255F] transition-colors">Home</BreadcrumbLink>
               </BreadcrumbItem>
-              <BreadcrumbSeparator />
+              <BreadcrumbSeparator className="scale-75" />
               <BreadcrumbItem>
-                <BreadcrumbPage className="text-gray-400">
+                <BreadcrumbPage className="text-[#35255F]">
                   Search Results
                 </BreadcrumbPage>
               </BreadcrumbItem>
@@ -302,21 +330,23 @@ export default function SearchPage() {
           </Breadcrumb>
         </div>
 
-        <div className="bg-[#F9F9F9] py-12">
-          <div className="container-main mx-auto px-6">
-            <h1 className="text-3xl md:text-4xl font-serif font-bold mb-4">
-              Results for "{query}"
-            </h1>
-            <p className="text-gray-600">
-              {productsLoading ? "Searching..." : `Showing ${totalCount} products found for your request.`}
-            </p>
+        {!isMobile && (
+          <div className="bg-[#F9F9F9] py-12">
+            <div className="container-main mx-auto px-6">
+              <h1 className="text-3xl md:text-4xl font-serif font-bold mb-4">
+                Results for "{query}"
+              </h1>
+              <p className="text-gray-600">
+                {productsLoading ? "Searching..." : `Showing ${totalCount} products found for your request.`}
+              </p>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
-      <div className="flex gap-12 py-6 max-w-350 mx-auto">
+      <div className={isMobile ? "" : "flex gap-12 py-6 container-main mx-auto"}>
         {/* ================= FILTERS SIDEBAR ================= */}
-        {products.length > 0 && (
+        {!isMobile && products.length > 0 && (
           <div className="hidden lg:block w-78 shrink-0">
             <div className="sticky top-5 self-start h-fit">
               <ScrollArea className="w-full h-[calc(100vh-5rem)]">
@@ -394,109 +424,48 @@ export default function SearchPage() {
         <div className="flex-1">
           {/* Toolbar */}
           {products.length > 0 && (
-            <div className="flex gap-4 items-center justify-between sticky top-0 bg-white z-20 py-4">
-              <div className="flex gap-3 items-center">
-                {/* Mobile Filter Sheet */}
-                <Sheet>
-                  <SheetTrigger asChild>
-                    <Button variant="outline" size="sm" className="lg:hidden">
-                      <FilterIcon size={16} className="mr-2" /> Filters
-                    </Button>
-                  </SheetTrigger>
-                  <SheetContent side="left" className="w-80">
-                    <SheetHeader>
-                      <SheetTitle>Filters</SheetTitle>
-                    </SheetHeader>
-                    <ScrollArea className="h-[calc(100vh-8rem)] mt-6">
-                      {filtersLoading && Object.keys(availableFilters).length === 0 ? (
-                        <FilterSidebarSkeleton />
-                      ) : (
-                        <div className={`space-y-4 ${isFiltersUpdating ? "opacity-50 pointer-events-none" : ""}`}>
-                          <Button variant="ghost" size="sm" onClick={clearAllFilters} className="text-xs w-full">
-                            Clear All
-                          </Button>
-                          {Object.entries(availableFilters).map(([groupKey, options]) => {
-                            const isExpanded = expandedFilters[groupKey] ?? false;
-
-                            return (
-                              <div key={groupKey} className="border-b pb-4">
-                                <div className="flex items-center justify-between py-2">
-                                  <button
-                                    onClick={() => toggleFilterExpand(groupKey)}
-                                    className="flex items-center gap-2 hover:opacity-70 transition-opacity"
-                                  >
-                                    <h4 className="font-medium text-sm capitalize">{groupKey}</h4>
-                                    <ChevronDown
-                                      size={18}
-                                      className={`transition-transform duration-300 ${
-                                        isExpanded ? "rotate-0" : "rotate-180"
-                                      }`}
-                                    />
-                                  </button>
-                                </div>
-
-                                {isExpanded && (
-                                  <div className="space-y-2 mt-3">
-                                    {Array.isArray(options) &&
-                                      options.map((option) => {
-                                        const isSelected = searchParams.getAll(option.urlKey).includes(option.value);
-
-                                        return (
-                                          <div key={option.value} className="flex items-center gap-2">
-                                            <input
-                                              type="checkbox"
-                                              id={`m-${groupKey}-${option.value}`}
-                                              checked={!!isSelected}
-                                              onChange={() => toggleFilter(option.urlKey, option.value)}
-                                              className="h-4 w-4 rounded border-gray-300 text-black focus:ring-black cursor-pointer"
-                                            />
-                                            <label
-                                              htmlFor={`m-${groupKey}-${option.value}`}
-                                              className="text-sm cursor-pointer flex-1 flex justify-between"
-                                            >
-                                              <span>{option.label}</span>
-                                              <span className="text-xs text-gray-500">{option.count}</span>
-                                            </label>
-                                          </div>
-                                        );
-                                      })}
-                                  </div>
-                                )}
-                              </div>
-                            );
-                          })}
-                        </div>
-                      )}
-                    </ScrollArea>
-                  </SheetContent>
-                </Sheet>
-
-                <span className="text-sm text-gray-500">
-                  {products.length}/{totalCount} products
-                </span>
+            <div className={`flex gap-4 items-center justify-between sticky top-0 bg-white z-20 ${isMobile ? "py-5 border-b border-gray-50 px-4" : "py-4"}`}>
+              <div className={isMobile ? "flex items-baseline gap-2.5" : "flex gap-3 items-center"}>
+                {isMobile ? (
+                   <>
+                    <h2 className="text-lg font-bold text-[#35255F] capitalize leading-none">
+                      "{query}"
+                    </h2>
+                    <span className="text-xs text-gray-400 font-medium whitespace-nowrap">
+                      {totalCount} Results
+                    </span>
+                  </>
+                ) : (
+                  <span className="text-sm text-gray-500">
+                    {products.length}/{totalCount} products
+                  </span>
+                )}
               </div>
 
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-gray-600">Sort:</span>
-                  <select 
-                    value={activeSort} 
-                    onChange={(e) => handleSort(e.target.value)} 
-                    className="text-sm border rounded-md px-3 py-2 bg-white outline-none focus:ring-1 focus:ring-black"
-                  >
-                    {SORT_OPTIONS.map((opt) => (
-                      <option key={opt.value} value={opt.value}>
-                        {opt.label}
-                      </option>
-                    ))}
-                  </select>
+              {!isMobile && (
+                <div className="flex items-center gap-4">
+                  {/* Sort Dropdown */}
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-gray-600">Sort:</span>
+                    <select 
+                      value={activeSort} 
+                      onChange={(e) => handleSort(e.target.value)} 
+                      className="text-sm border rounded-md px-3 py-2 bg-white outline-none focus:ring-1 focus:ring-black"
+                    >
+                      {SORT_OPTIONS.map((opt) => (
+                        <option key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           )}
 
           {/* Applied Filters Badges */}
-          {products.length > 0 && (
+          {!isMobile && products.length > 0 && (
             <div className="flex flex-wrap items-center gap-2 mb-4">
               {Object.entries(availableFilters).map(([groupKey, options]) => 
                 options.filter(opt => searchParams.getAll(opt.urlKey).includes(opt.value)).map((opt) => (
@@ -516,14 +485,14 @@ export default function SearchPage() {
 
           {/* Products Grid */}
           {showInitialSkeleton ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-4">
-              {Array.from({ length: 6 }).map((_, i) => (
+            <div className={`grid gap-6 mt-4 ${isMobile ? "grid-cols-2 gap-4 px-2" : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"}`}>
+              {Array.from({ length: initialPage > 1 ? initialPage * limit : 6 }).map((_, i) => (
                 <ProductCardSkeleton key={i} />
               ))}
             </div>
           ) : products.length > 0 ? (
             <>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-4">
+              <div className={`grid mt-4 ${isMobile ? "grid-cols-2 gap-4 px-2" : "grid-cols-1 sm:grid-cols-2 2xl:grid-cols-4 lg:grid-cols-3 gap-6"}`}>
                 {renderGridItems()}
               </div>
 
@@ -589,6 +558,170 @@ export default function SearchPage() {
           )}
         </div>
       </div>
+
+      {/* Sticky Mobile Filter Bar */}
+      {isMobile && products.length > 0 && (
+        <div className="fixed bottom-0 left-0 right-0 z-10 bg-primary text-white flex justify-around items-center py-4 border-t border-white/10 px-4 gap-2">          
+          <button 
+            onClick={() => setIsSortSheetOpen(true)}
+            className="flex-1 flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-wider border-r border-white/20"
+          >
+            <ArrowUpDown size={16} /> Sort
+          </button>
+
+          <button 
+            onClick={() => setIsFilterSheetOpen(true)}
+            className="flex-1 flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-wider"
+          >
+            <SlidersHorizontal size={16} /> Filter 
+            {activeFilterCount > 0 && (
+              <span className="bg-[#FF69B4] text-white text-[10px] min-w-4 h-4 rounded-full flex items-center justify-center px-1">
+                {activeFilterCount}
+              </span>
+            )}
+          </button>
+        </div>
+      )}
+
+      {/* Sort Sheet */}
+      <Sheet 
+        isOpen={isSortSheetOpen} 
+        onClose={() => setIsSortSheetOpen(false)}
+        snapPoints={[0, 1]}
+        initialSnap={1}
+      >
+        <Sheet.Container className="!rounded-t-[24px] !h-auto max-h-[60vh] bottom-0">
+          <Sheet.Header className="hidden" />
+          <Sheet.Content className="bg-white">
+            <div className="flex flex-col">
+              <div className="flex items-center gap-4 p-4 border-b border-gray-100">
+                <button onClick={() => setIsSortSheetOpen(false)} className="p-1">
+                  <X size={20} className="text-black" />
+                </button>
+                <h3 className="text-sm font-bold uppercase tracking-widest">Sort By</h3>
+              </div>
+              <div className="p-4 space-y-2 overflow-y-auto pb-10">
+                {SORT_OPTIONS.map((opt) => (
+                  <button
+                    key={opt.value}
+                    onClick={() => {
+                      handleSort(opt.value);
+                      setIsSortSheetOpen(false);
+                    }}
+                    className={`w-full text-left py-4 px-4 rounded-lg transition-colors flex justify-between items-center ${
+                      activeSort === opt.value ? "bg-[#FFF5F1] text-black font-bold" : "hover:bg-gray-50 text-gray-700"
+                    }`}
+                  >
+                    {opt.label}
+                    {activeSort === opt.value && <div className="w-2 h-2 rounded-full bg-[#35255F]" />}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </Sheet.Content>
+        </Sheet.Container>
+        <Sheet.Backdrop onTap={() => setIsSortSheetOpen(false)} />
+      </Sheet>
+
+      {/* Filter Sheet */}
+      <Sheet 
+        isOpen={isFilterSheetOpen} 
+        onClose={() => setIsFilterSheetOpen(false)}
+        snapPoints={[0, 1]}
+        initialSnap={1}
+      >
+        <Sheet.Container className="!rounded-t-none">
+          <Sheet.Header className="hidden" />
+          <Sheet.Content className="bg-white">
+            <div className="flex flex-col h-full">
+              <div className="flex items-center gap-4 p-4 border-b border-gray-100">
+                <button onClick={() => setIsFilterSheetOpen(false)} className="p-1">
+                  <X size={20} className="text-black" />
+                </button>
+                <h3 className="text-sm font-bold uppercase tracking-widest">Filters</h3>
+              </div>
+              
+              <div className="flex-1 flex overflow-hidden">
+                {/* Left Column: Groups */}
+                <div className="w-[45%] bg-[#F8F7FF] border-r border-gray-100 overflow-y-auto">
+                  {Object.entries(availableFilters).map(([groupKey]) => {
+                    const count = availableFilters[groupKey].filter(opt => 
+                      searchParams.getAll(opt.urlKey).includes(opt.value)
+                    ).length;
+                    
+                    return (
+                      <button
+                        key={groupKey}
+                        onClick={() => setActiveMobileGroup(groupKey)}
+                        className={`w-full text-left px-4 py-5 text-[11px] font-figtree font-bold uppercase tracking-tight border-b border-gray-100 relative leading-tight ${
+                          activeMobileGroup === groupKey ? "bg-white text-primary" : "text-gray-500"
+                        }`}
+                      >
+                        {groupKey}
+                        {count > 0 && (
+                          <span className="absolute right-2 top-1/2 -translate-y-1/2 bg-[#35255F] text-white text-[9px] w-5 h-5 rounded-md flex items-center justify-center font-bold">
+                            {count}
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Right Column: Options */}
+                <div className="w-[55%] bg-white overflow-y-auto p-4">
+                  {activeMobileGroup && availableFilters[activeMobileGroup] && (
+                    <div className="space-y-6 pb-20">
+                      {availableFilters[activeMobileGroup].map((option) => {
+                        const isSelected = searchParams.getAll(option.urlKey).includes(option.value);
+                        return (
+                          <div 
+                            key={option.value} 
+                            className="flex items-center justify-between py-1 cursor-pointer group"
+                            onClick={() => toggleFilter(option.urlKey, option.value)}
+                          >
+                            <div className="flex items-center gap-3">
+                              {isSelected ? (
+                                <div className="w-4 h-4 bg-[#8A70FF] rounded flex items-center justify-center">
+                                  <svg width="10" height="8" viewBox="0 0 10 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M1 4L4 7L9 1" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                  </svg>
+                                </div>
+                              ) : (
+                                <div className="w-4 h-4 border border-gray-300 rounded group-hover:border-[#8A70FF]" />
+                              )}
+                              <span className={`text-[13px] ${isSelected ? "text-black font-semibold" : "text-gray-600"}`}>
+                                {option.label}
+                              </span>
+                            </div>
+                            <span className="text-[11px] text-gray-400">({option.count})</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 border-t border-gray-300 bg-white shadow-[0_-4px_10px_rgba(0,0,0,0.05)]">
+                <button 
+                  onClick={clearAllFilters}
+                  className="py-4 px-2 text-[11px] font-black bg-accent text-white font-figtree uppercase tracking-[0.1em]"
+                >
+                  Clear All
+                </button>
+                <button 
+                  onClick={() => setIsFilterSheetOpen(false)}
+                  className="py-4 px-2 text-[11px] font-black bg-primary text-white font-figtree uppercase tracking-[0.1em]"
+                >
+                  APPLY FILTERS
+                </button>
+              </div>
+            </div>
+          </Sheet.Content>
+        </Sheet.Container>
+        <Sheet.Backdrop onTap={() => setIsFilterSheetOpen(false)} />
+      </Sheet>
     </div>
   );
 }

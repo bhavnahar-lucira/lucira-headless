@@ -94,6 +94,34 @@ const stores = [
     address:
       "Shop no. 8, SV Road, Borivali West, Mumbai, Maharashtra 400092",
   },
+  {
+    city: "Noida",
+    name: "Noida Lucira Store",
+    rating: 4.9,
+    image: "/images/store/store.jpg",
+    timings: "Monday - Sunday | 10:00 am - 9:00 pm",
+    openNow: false,
+    mapLink: "https://maps.google.com/?q=Noida+Lucira+Store",
+    callLink: "tel:+917777777777",
+    designLink: "/collections/store-designs/noida",
+    appointmentLink: "/book-appointment?store=noida",
+    facilities: [
+      "Kids Area",
+      "Design Your Ring",
+      "Open Weekends",
+      "Banks Nearby",
+      "Parking Available",
+      "Exclusive Offers",
+    ],
+    services: [
+      { title: "Gold Exchange", icon: "/images/store/gold-exchange.svg" },
+      { title: "Vault of Dreams", icon: "/images/store/vault.svg" },
+      { title: "Carat Tester", icon: "/images/store/carat-tester.svg" },
+      { title: "Jewelry Cleaning", icon: "/images/store/jewelry-cleaning.svg" },
+    ],
+    address:
+      "SCO-17, Wave One Courtyard, Sector 18, Gautam Buddha Nagar, Noida, Uttar Pradesh: 201301",
+  },
 ];
 
 function ServiceCard({ item }) {
@@ -117,9 +145,9 @@ export default function StoreLocatorSection() {
   if (isMobile) {
     return (
       <section className="w-full bg-[#FEF5F1] py-12 mt-12 overflow-hidden">
-        <div className="container-main px-4">
-          <div className="text-center mb-8">
-            <h2 className="text-3xl font-black font-abhaya mb-2 text-zinc-900 tracking-tight">Visit Lucira Store Near You</h2>
+        <div className="container-main">
+          <div className="text-center mb-6 px-1 md:px-0">
+            <h2 className="text-3xl md:text-4xl font-extrabold font-abhaya mb-2 text-black">Visit Lucira Store Near You</h2>
           </div>
 
           <div className="mb-8 flex justify-center border-b border-zinc-200">
@@ -200,18 +228,18 @@ export default function StoreLocatorSection() {
 
             <div className="space-y-3">
                <div className="grid grid-cols-2 gap-3">
-                 <Button asChild variant="outline" className="h-14 rounded-xl border-zinc-200 bg-[#F5EBE9] text-zinc-900 font-black text-xs uppercase tracking-widest shadow-sm">
+                 <Button asChild variant="outline" className="h-14 rounded-sm border-primary bg-transparent text-black font-medium text-lg uppercase shadow-sm">
                    <a href={activeStore.mapLink} target="_blank" rel="noopener noreferrer"><MapPinned className="mr-2 h-4 w-4" /> DIRECT ME</a>
                  </Button>
-                 <Button asChild variant="outline" className="h-14 rounded-xl border-zinc-200 bg-[#F5EBE9] text-zinc-900 font-black text-xs uppercase tracking-widest shadow-sm">
+                 <Button asChild variant="outline" className="h-14 rounded-sm border-primary bg-transparent text-black font-medium text-lg uppercase shadow-sm">
                    <a href={activeStore.callLink}><Phone className="mr-2 h-4 w-4" /> CALL US</a>
                  </Button>
                </div>
-               <Button asChild variant="outline" className="h-14 w-full rounded-xl border-zinc-200 bg-[#F5EBE9] text-zinc-900 font-black text-xs uppercase tracking-widest shadow-sm">
+               <Button asChild variant="outline" className="h-14 w-full rounded-sm border-primary bg-transparent text-black font-medium text-lg uppercase shadow-sm">
                  <a href={activeStore.designLink}>VIEW AVAILABLE DESIGNS</a>
                </Button>
-               <Button asChild className="h-14 w-full rounded-xl bg-[#5A413F] text-white font-black text-xs uppercase tracking-widest shadow-lg">
-                 <a href={activeStore.appointmentLink}><CalendarDays className="mr-2 h-4 w-4" /> BOOK APPOINTMENT</a>
+               <Button asChild className="h-14 w-full rounded-xl bg-[#5A413F] text-white font-medium text-lg uppercase shadow-lg">
+                 <a href={activeStore.appointmentLink}><CalendarDays className="mr-2 h-4 w-4" />BOOK APPOINTMENT</a>
                </Button>
             </div>
           </div>
@@ -244,7 +272,7 @@ export default function StoreLocatorSection() {
           ))}
         </div>
 
-        <div className="grid grid-cols-1 xl:gap-6 lg:gap-4 lg:grid-cols-[minmax(0,42fr)_minmax(0,58fr)]">
+        <div className="grid grid-cols-1 xl:gap-6 lg:gap-4 lg:grid-cols-[minmax(0,45fr)_minmax(0,55fr)]">
           <div className="relative overflow-hidden rounded-sm">
             <div className="relative aspect-[4/4.3] w-full h-full">
               <LazyImage src={activeStore.image} alt={activeStore.name} fill className="object-cover" />
@@ -302,23 +330,23 @@ export default function StoreLocatorSection() {
             </div>
 
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <Button asChild variant="outline" className="h-12 rounded-[3px] border-[#5A413F] bg-transparent text-base font-medium">
-                <a href={activeStore.mapLink} target="_blank" rel="noopener noreferrer"><MapPinned className="mr-2 h-4 w-4" /> DIRECT ME</a>
+              <Button asChild variant="outline" className="h-12 border-primary bg-transparent text-black font-medium text-lg uppercase shadow-sm">
+                <a href={activeStore.mapLink} target="_blank" rel="noopener noreferrer"><MapPinned className="mr-2 h-6 w-6" /> DIRECT ME</a>
               </Button>
-              <Button asChild variant="outline" className="h-12 rounded-[3px] border-[#5A413F] bg-transparent text-base font-medium">
-                <a href={activeStore.callLink}><Phone className="mr-2 h-4 w-4" /> CALL US</a>
+              <Button asChild variant="outline" className="h-12 border-primary bg-transparent text-black font-medium text-lg uppercase shadow-sm">
+                <a href={activeStore.callLink}><Phone className="mr-2 h-6 w-6" /> CALL US</a>
               </Button>
             </div>
 
             <div className="mt-3">
-              <Button asChild variant="outline" className="h-12 w-full rounded-[3px] border-[#5A413F] text-base font-medium uppercase">
+              <Button asChild variant="outline" className="h-12 w-full border-primary bg-transparent text-black font-medium text-lg uppercase shadow-sm">
                 <a href={activeStore.designLink}>VIEW AVAILABLE DESIGNS</a>
               </Button>
             </div>
 
             <div className="mt-3">
-              <Button asChild className="h-12 w-full rounded-[3px] text-base font-bold">
-                <a href={activeStore.appointmentLink}><CalendarDays className="mr-2 h-4 w-4" /> BOOK APPOINTMENT</a>
+              <Button asChild className="h-12 w-full text-white font-medium text-lg uppercase">
+                <a href={activeStore.appointmentLink}><CalendarDays className="mr-2 h-6 w-6" /> BOOK APPOINTMENT</a>
               </Button>
             </div>
           </div>

@@ -85,11 +85,11 @@ export default function LoveStorySlider({
   const paginationElClass = `love-pagination-${id}`;
 
   return (
-    <section className="w-full mt-15 overflow-hidden">
+    <section className="w-full my-15 overflow-hidden">
       <div className="container-main">
         <div className="text-center mb-6">
-          <h2 className="main-title font-extrabold font-abhaya mb-1.5">{title}</h2>
-          <p className="text-black text-base">{subtitle}</p>
+          <h2 className="text-3xl md:text-4xl font-extrabold font-abhaya mb-2 text-black">{title}</h2>
+          <p className="text-black text-base font-normal">{subtitle}</p>
         </div>
 
         <div className="relative">

@@ -207,7 +207,7 @@ export default function StyledByLucira() {
                 spaceBetween: 20,
                 centeredSlides: true
               },
-              1370: {
+              1250: {
                 slidesPerView: 5,
                 spaceBetween: 30,
                 centeredSlides: true
