@@ -34,7 +34,7 @@ export async function GET(request) {
     const productsCollection = db.collection("products");
     const shopifyCollections = db.collection("shopify_collections");
 
-    let filter = {};
+    let filter = { status: "ACTIVE", isPublished: true };
 
     // 1. Collection filtering
     if (handle && handle !== "all") {

@@ -22,7 +22,7 @@ export async function generateMetadata({ params }) {
 async function getProduct(handle) {
   const client = await clientPromise;
   const db = client.db("next_local_db");
-  const product = await db.collection("products").findOne({ handle });
+  const product = await db.collection("products").findOne({ handle, status: "ACTIVE", isPublished: true });
 
   if (product) {
     // Convert MongoDB ObjectId to string for Client Component serialization
@@ -48,7 +48,12 @@ async function getComplementaryProducts(product) {
   }));
 
   const complementaryProducts = await db.collection("products")
-    .find({ $or: idFilters })
+    .find({ 
+      $and: [
+        { $or: idFilters },
+        { status: "ACTIVE", isPublished: true }
+      ]
+    })
     .toArray();
 
   console.log(`Product: ${product.handle}, Found ${complementaryProducts.length} complementary products.`);
@@ -74,7 +79,12 @@ async function getMatchingProducts(product) {
   }));
 
   const matchingProducts = await db.collection("products")
-    .find({ $or: idFilters })
+    .find({ 
+      $and: [
+        { $or: idFilters },
+        { status: "ACTIVE", isPublished: true }
+      ]
+    })
     .toArray();
 
   return matchingProducts.map(p => {
