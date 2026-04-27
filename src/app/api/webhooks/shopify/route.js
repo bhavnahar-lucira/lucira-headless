@@ -130,30 +130,68 @@ async function processWebhook(topic, payload, eventId) {
       const shopifyId = isFromGraphQL ? productData.id : `gid://shopify/Product/${productData.id}`;
       const newUpdate = new Date(productData.updatedAt || productData.updated_at);
 
-      // Map data (omitted for brevity in this replace call, keeping your logic)
-      const status = productData.status;
-      const publishedAt = productData.publishedAt || productData.published_at;
-      const isVisible = status === "active" && publishedAt !== null;
+      // 1. Fetch existing data to perform a merge instead of a full overwrite
+      const existingProduct = await productsCollection.findOne({ shopifyId });
+      const existingVariants = existingProduct?.variants || [];
 
-      // ... mappedVariants logic ...
+      // 2. Map new variant data from webhook
       const mappedVariants = isFromGraphQL 
-        ? productData.variants.edges.map(({ node: v }) => ({
-            id: v.id.split("/").pop(),
-            sku: v.sku || "",
-            price: Number(v.price),
-            compare_price: v.compareAtPrice ? Number(v.compareAtPrice) : null,
-            inventoryQuantity: v.inventoryQuantity,
-            title: v.title,
-            image: v.image?.url
-          }))
-        : productData.variants?.map(v => ({
-            id: String(v.id),
-            sku: v.sku,
-            price: Number(v.price),
-            compare_price: v.compare_at_price ? Number(v.compare_at_price) : null,
-            inventoryQuantity: v.inventory_quantity,
-            title: v.title,
-          }));
+        ? productData.variants.edges.map(({ node: v }) => {
+            const options = {};
+            v.selectedOptions?.forEach(o => { options[o.name.toLowerCase()] = o.value; });
+            return {
+              id: v.id.split("/").pop(),
+              sku: v.sku || "",
+              price: Number(v.price),
+              compare_price: v.compareAtPrice ? Number(v.compareAtPrice) : null,
+              inventoryQuantity: v.inventoryQuantity,
+              inStock: v.inventoryQuantity > 0,
+              title: v.title,
+              image: v.image?.url,
+              options
+            };
+          })
+        : productData.variants?.map(v => {
+            const options = {};
+            v.option_values?.forEach(o => { options[o.option_display_name?.toLowerCase()] = o.label; });
+            return {
+              id: String(v.id),
+              sku: v.sku,
+              price: Number(v.price),
+              compare_price: v.compare_at_price ? Number(v.compare_at_price) : null,
+              inventoryQuantity: v.inventory_quantity,
+              inStock: v.inventory_quantity > 0,
+              title: v.title,
+              options
+            };
+          });
+
+      // 3. Merge Webhook variants with Enriched DB variants
+      const finalVariants = mappedVariants.map(newV => {
+        const existingV = existingVariants.find(ev => ev.id === newV.id);
+        if (existingV) {
+          // Preserve enriched data (gemstones, diamonds, price_breakup) while updating basics
+          return { ...existingV, ...newV };
+        }
+        return newV;
+      });
+
+      // 4. Determine Representative Variant (for top-level price and image)
+      const inStockVariants = finalVariants.filter(v => v.inStock);
+      const isRing = String(productData.productType || productData.product_type || "").toLowerCase().includes("ring");
+      
+      let representativeVariant = null;
+      if (inStockVariants.length > 0) {
+        if (isRing) {
+          representativeVariant = inStockVariants.find(v => 
+            String(v.title || "").includes("Yellow Gold") || 
+            Object.values(v.options || {}).some(val => String(val).includes("Yellow Gold"))
+          );
+        }
+        if (!representativeVariant) representativeVariant = inStockVariants[0];
+      } else {
+        representativeVariant = finalVariants[0];
+      }
 
       // Map Metafields
       const productMetafields = isFromGraphQL ? {
@@ -165,7 +203,15 @@ async function processWebhook(topic, payload, eventId) {
         finishing: productData.finishing?.value,
         fit: productData.fit?.value,
         lead_time: productData.lead_time?.value
-      } : undefined; // We'll use $set only if we have them
+      } : undefined;
+
+      // Normalize Tags (Webhooks send a string, GraphQL sends an array)
+      let finalTags = [];
+      if (Array.isArray(productData.tags)) {
+        finalTags = productData.tags;
+      } else if (typeof productData.tags === 'string') {
+        finalTags = productData.tags.split(',').map(tag => tag.trim()).filter(Boolean);
+      }
 
       const doc = {
         shopifyId,
@@ -177,10 +223,12 @@ async function processWebhook(topic, payload, eventId) {
         status,
         publishedAt,
         updatedAt: newUpdate,
-        tags: productData.tags,
+        tags: finalTags,
         isVisible,
-        variants: mappedVariants,
-        image: isFromGraphQL ? productData.featuredImage?.url : (productData.image?.src || productData.images?.[0]?.src),
+        variants: finalVariants,
+        price: representativeVariant?.price || 0,
+        compare_price: representativeVariant?.compare_price || null,
+        image: representativeVariant?.image || productData.featuredImage?.url || (productData.image?.src || productData.images?.[0]?.src),
         images: isFromGraphQL 
           ? productData.images.edges.map(e => ({ url: e.node.url, alt: e.node.altText || "" }))
           : productData.images?.map(img => ({ url: img.src, alt: img.alt || "" })),

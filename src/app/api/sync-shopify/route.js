@@ -207,7 +207,15 @@ export async function POST(req) {
               const finalVariants = variants.map(newV => {
                 const existingV = existingVariants.find(ev => ev.id === newV.id);
                 if (existingV) {
-                  return { ...existingV, ...newV };
+                  // Deep merge metafields to protect gemstones, diamonds, etc.
+                  return { 
+                    ...existingV, 
+                    ...newV,
+                    metafields: {
+                      ...(existingV.metafields || {}),
+                      ...(newV.metafields || {})
+                    }
+                  };
                 }
                 return newV;
               });
