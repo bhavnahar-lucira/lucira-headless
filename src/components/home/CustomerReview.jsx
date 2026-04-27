@@ -156,7 +156,7 @@ export default function CustomerReview({
           <Swiper
             modules={[Navigation, Pagination]}
             spaceBetween={isMobile ? 12 : 20}
-            slidesPerView={isMobile ? 1.15 : 4.2}
+            slidesPerView={isMobile ? 2 : 4.2}
             loop={false}
             onSwiper={(swiper) => {
               swiperRef.current = swiper;
@@ -280,7 +280,7 @@ function ReviewBottomSheet({ isOpen, onClose, review }) {
       <Sheet.Container className="!rounded-t-[32px] overflow-hidden">
         <Sheet.Header />
         <Sheet.Content className="px-6 pb-12 overflow-y-auto no-scrollbar">
-          <div className="flex flex-col">
+          <div className="flex flex-col lg:pb-0 pb-10">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-xl font-black font-abhaya text-zinc-900 tracking-tight">
                 Why Our Customers Love Us

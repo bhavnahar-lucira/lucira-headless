@@ -2,7 +2,7 @@
 
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, Autoplay } from "swiper/modules";
-import { ChevronLeft, ChevronRight} from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useId } from "react";
 
 import "swiper/css";
@@ -21,7 +21,10 @@ const slideData = [
 export default function HeroBanner() {
   const id = useId().replace(/:/g, "");
   const paginationElClass = `pagination-${id}`;
-//   const isMobile = useMediaQuery("(max-width: 768px)");
+
+  // Explicitly check for desktop view (1024px is standard for Desktop/Large Tab)
+  const isDesktop = useMediaQuery("(min-width: 1025px)");
+
 
   return (
     <div className="w-full bg-white">
@@ -43,21 +46,15 @@ export default function HeroBanner() {
         >
           {slideData.map((slide, index) => (
             <SwiperSlide key={slide.name}>
-              <div className="relative w-full aspect-[4/5] md:aspect-auto md:h-full">
-                <picture className="w-full h-full block">
-                  <source
-                    srcSet={`/images/heroslider/${slide.name}-Desktop.jpg`}
-                    media="(min-width: 1023px)"
-                  />
-                  <Image
-                    src={`/images/heroslider/${slide.name}-Mobile.jpg`}
-                    alt={slide.alt}
-                    fill
-                    priority={index === 0}
-                    className="object-cover object-center"
-                    sizes="100vw"
-                  />
-                </picture>
+              <div className="relative w-full aspect-[4/5] md:aspect-auto md:h-full overflow-hidden">
+                <Image
+                  src={`/images/heroslider/${slide.name}-${isDesktop ? "Desktop" : "Mobile"}.jpg`}
+                  alt={slide.alt}
+                  fill
+                  priority={index === 0}
+                  className="object-cover object-center"
+                  sizes="100vw"
+                />
               </div>
             </SwiperSlide>
           ))}
