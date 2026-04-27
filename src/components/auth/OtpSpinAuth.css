@@ -1,7 +1,30 @@
 @import "tailwindcss";
 
+.custom-scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.custom-scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 .otp-spin-auth-wrapper {
-  @apply relative flex flex-col items-center w-full mx-auto overflow-hidden transition-all duration-300 bg-[#FFFEFC] shadow-[0_0_10px_rgba(0,0,0,0.3)] max-w-[400px]; border-radius: 4px;
+  @apply relative flex flex-col items-center w-full mx-auto overflow-hidden transition-all duration-300 bg-[#FFFEFC];
+}
+
+@media (max-width: 767px) {
+  .otp-spin-auth-wrapper {
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    max-width: 100% !important;
+  }
+}
+
+@media (min-width: 768px) {
+  .otp-spin-auth-wrapper {
+    @apply shadow-[0_0_10px_rgba(0,0,0,0.3)] max-w-[400px];
+    border-radius: 4px;
+  }
 }
 
 .otp-heading img {
