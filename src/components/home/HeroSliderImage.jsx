@@ -21,8 +21,6 @@ const slideData = [
 export default function HeroBanner() {
   const id = useId().replace(/:/g, "");
   const paginationElClass = `pagination-${id}`;
-
-  // Explicitly check for desktop view (1024px is standard for Desktop/Large Tab)
   const isDesktop = useMediaQuery("(min-width: 1025px)");
 
 
