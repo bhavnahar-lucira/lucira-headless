@@ -4,13 +4,11 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, Autoplay } from "swiper/modules";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useId } from "react";
+import Image from "next/image";
 
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
-import { Button } from "../ui/button";
-import LazyImage from "../common/LazyImage";
-import Image from "next/image";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 
 const slideData = [
@@ -21,8 +19,7 @@ const slideData = [
 export default function HeroBanner() {
   const id = useId().replace(/:/g, "");
   const paginationElClass = `pagination-${id}`;
-  const isDesktop = useMediaQuery("(min-width: 1025px)");
-
+  const isMobile = useMediaQuery("(min-width: 1025px)");
 
   return (
     <div className="w-full bg-white">
@@ -45,12 +42,12 @@ export default function HeroBanner() {
           {slideData.map((slide, index) => (
             <SwiperSlide key={slide.name}>
               <div className="relative w-full aspect-[4/5] md:aspect-auto md:h-full overflow-hidden">
-                <Image
-                  src={`/images/heroslider/${slide.name}-${isDesktop ? "Desktop" : "Mobile"}.jpg`}
+                <Image key={`${slide.name}-${isMobile ? "desktop" : "mobile"}`}                  
+                  src={`/images/heroslider/${slide.name}-${isMobile ? "Desktop" : "Mobile"}.jpg`}
                   alt={slide.alt}
                   fill
                   priority={index === 0}
-                  className="object-cover object-center"
+                  className="object-cover object-center transition-none"
                   sizes="100vw"
                 />
               </div>

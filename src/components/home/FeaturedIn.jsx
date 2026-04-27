@@ -79,7 +79,7 @@ export default function FeaturedIn() {
 
           <div className="flex items-center gap-16 px-8">
             {logos.map((logo, index) => (
-              <Link href={logo.url} key={index}>
+              <Link href={logo.url} key={index} target="_blank">
                 <LazyImage
                   src={logo.image}
                   alt="media logo"
@@ -91,7 +91,7 @@ export default function FeaturedIn() {
             ))}
 
             {logos.map((logo, index) => (
-              <Link href={logo.url} key={index}>
+              <Link href={logo.url} key={index} target="_blank">
                 <LazyImage
                   src={logo.image}
                   alt="media logo"
@@ -103,7 +103,7 @@ export default function FeaturedIn() {
             ))}
 
             {logos.map((logo, index) => (
-              <Link href={logo.url} key={index}>
+              <Link href={logo.url} key={index} target="_blank">
                 <LazyImage
                   src={logo.image}
                   alt="media logo"
