@@ -398,13 +398,13 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle 
                           fill
                           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                           priority={index === 0}
-                          className={`object-contain p-4 lg:p-6 grayscale-[0.2] group-hover/card:grayscale-0 transition-all duration-300`}
+                          className={`object-contain p-0 lg:p-6 grayscale-[0.2] group-hover/card:grayscale-0 transition-all duration-300`}
                         />
                       </div>
                     </SwiperSlide>
                   ))}
                   {galleryImages.length > 1 && (
-                    <div className={`pagination-${swiperId} swiper-pagination !bottom-2 lg:!hidden`} />
+                    <div className={`pagination-${swiperId} swiper-pagination bottom-0! lg:!hidden`} />
                   )}
                 </Swiper>
               ) : (
@@ -628,7 +628,7 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle 
                           aria-label={`Show ${base} color`}
                           onClick={() => setActiveBase(base)}
                           className={`w-5 h-5 lg:w-7 lg:h-7 rounded-full border transition-all flex items-center justify-center hover:scale-110 ${
-                            isActive ? "border-black dark:border-white p-0.5" : "border-transparent"
+                            isActive ? "border-black dark:border-white" : "border-transparent"
                           }`}
                         >
                           <span

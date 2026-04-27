@@ -206,7 +206,7 @@ export default function StyledByLucira() {
             grabCursor={true}
             breakpoints={{
               360: {
-                slidesPerView: 1,
+                slidesPerView: 2,
                 spaceBetween: 12,
                 centeredSlides: true,
               },

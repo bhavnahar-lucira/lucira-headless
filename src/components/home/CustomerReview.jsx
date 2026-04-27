@@ -156,7 +156,7 @@ export default function CustomerReview({
           <Swiper
             modules={[Navigation, Pagination]}
             spaceBetween={isMobile ? 12 : 20}
-            slidesPerView={isMobile ? 2 : 4.2}
+            slidesPerView={isMobile ? 1.5 : 4.2}
             loop={false}
             onSwiper={(swiper) => {
               swiperRef.current = swiper;
