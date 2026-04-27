@@ -11,7 +11,7 @@ import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { usePathname } from "next/navigation";
 
 const TOP_HEIGHT = 40;
-const HEADER_HEIGHT = 88;
+const HEADER_HEIGHT = 96;
 
 export default function Header() {
   const pathname = usePathname();
@@ -42,14 +42,14 @@ export default function Header() {
   return (
     <>
       {/* Placeholder to prevent layout jump */}
-      <div style={{ height: TOP_HEIGHT + HEADER_HEIGHT + 56 }} />
+      <div style={{ height: 147 }} />
 
       <header className="fixed top-0 left-0 w-full z-100 bg-white border-b border-gray-100">
 
         {/* Announcement Bar */}
         <motion.div
           animate={{
-            height: hideTop ? 0 : TOP_HEIGHT,
+            height: hideTop ? 0 : "auto",
             opacity: hideTop ? 0 : 1,
           }}
           transition={{ duration: 0.25 }}
@@ -61,7 +61,7 @@ export default function Header() {
         {/* Main Header */}
         <motion.div
           animate={{
-            height: hideTop ? 0 : HEADER_HEIGHT,
+            height: hideTop ? 0 : "auto",
             opacity: hideTop ? 0 : 1,
             visibility: hideTop ? "hidden" : "visible",
           }}

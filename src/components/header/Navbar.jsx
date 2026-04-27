@@ -54,8 +54,8 @@ export default function Navbar({ hideTop }) {
         activeMenuPath;
 
   return (
-    <nav className="relative border-t border-gray-100 bg-white">
-      <div className="max-w-screen-xl mx-auto px-4 lg:px-6 relative">
+    <nav className="relative bg-white">
+      <div className="container-main relative">
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{
@@ -75,7 +75,7 @@ export default function Navbar({ hideTop }) {
             />
           </Link>
         </motion.div>
-        <ul className="flex justify-center gap-6 xl:gap-10 2xl:gap-12 lg:text-xs xl:text-sm uppercase">
+        <ul className="flex flex-start gap-6 xl:gap-8 2xl:gap-8 lg:text-xs xl:text-sm uppercase">
           {MEGA_MENU.map((menu, index) => {
             const isActive =
               pathname === menu.href ||
@@ -94,7 +94,7 @@ export default function Navbar({ hideTop }) {
                   href={menu.href}
                   onClick={closeMenu}
                   className={cn(
-                    "block py-6 tracking-wide transition-all duration-200",
+                    "block py-4 tracking-normal transition-all duration-200 uppercase text-[14px] leading-none font-medium font-figtree",
                     isActive || isHovered
                       ? "text-primary"
                       : "text-gray-700 hover:text-primary",
@@ -107,7 +107,7 @@ export default function Navbar({ hideTop }) {
                 {(isHovered || (isActive && activeMenu === null)) && (
                   <motion.div
                     layoutId="nav-underline"
-                    className="absolute bottom-3 left-0 right-0 h-0.5 bg-primary"
+                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"
                   />
                 )}
               </li>
@@ -214,8 +214,18 @@ export default function Navbar({ hideTop }) {
                         <ul className="space-y-4 text-[13px] font-medium text-zinc-500">
                           {menu.featured.items?.map((item, i) => (
                             <li key={i} className="hover:text-black transition-colors">
-                              <Link href={item.href || "#"} onClick={closeMenu}>
-                                {item.label}
+                              <Link href={item.href || "#"} onClick={closeMenu} className="flex items-center gap-3 group">
+                                {item.menuIcon && (
+                                   <div className="relative h-7 w-7 shrink-0 flex items-center justify-center bg-gray-50 rounded-full overflow-hidden transition-all group-hover:bg-gray-100">
+                                      <Image
+                                        src={item.menuIcon}
+                                        alt={item.label}
+                                        fill
+                                        className="object-contain p-1"
+                                      />
+                                   </div>
+                                )}
+                                <span>{item.label}</span>
                               </Link>
                             </li>
                           ))}
@@ -256,18 +266,13 @@ export default function Navbar({ hideTop }) {
                                         : "#ddd",
                                     }}
                                   />
-                                ) : item.svgSprite ? (
-                                  <span
-                                    className="w-4.5 h-4.5 shrink-0 grayscale group-hover:grayscale-0 transition-all flex items-center justify-center [&_svg]:w-full [&_svg]:h-full"
-                                    dangerouslySetInnerHTML={{ __html: item.svgSprite }}
-                                  />
-                                ) : item.megaMenuImage || (col.type === "icon" && item.icon) ? (
-                                  <div className="relative h-4.5 w-4.5 shrink-0 grayscale group-hover:grayscale-0 transition-all">
+                                ) : item.menuIcon || item.megaMenuImage || (col.type === "icon" && item.icon) ? (
+                                  <div className="relative h-7 w-7 shrink-0 flex items-center justify-center bg-gray-50 rounded-full overflow-hidden transition-all group-hover:bg-gray-100">
                                     <Image
-                                      src={item.megaMenuImage || item.icon}
+                                      src={item.menuIcon || item.megaMenuImage || item.icon}
                                       alt={item.label}
                                       fill
-                                      className="object-contain"
+                                      className="object-contain p-1"
                                     />
                                   </div>
                                 ) : null}
@@ -277,16 +282,7 @@ export default function Navbar({ hideTop }) {
                             </li>
                           ))}
 
-                          {/* SHOP ALL */}
-                          <li className="pt-2">
-                            <Link
-                              href={menu.href || "#"}
-                              onClick={closeMenu}
-                              className="text-[11px] font-bold uppercase tracking-widest text-zinc-400 hover:text-black transition-colors"
-                            >
-                              {col.title.replace("Shop By", "Shop All")}
-                            </Link>
-                          </li>
+                          
                         </ul>
                       </div>
                     ))}

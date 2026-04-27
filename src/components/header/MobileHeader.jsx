@@ -253,7 +253,7 @@ export default function MobileHeader() {
                         );
                       }
 
-                      const iconPath = isShape ? SHAPE_ICON_FALLBACK(item.label) : STYLE_ICON_FALLBACK(item.label);
+                      const iconPath = item.menuIcon || (isShape ? SHAPE_ICON_FALLBACK(item.label) : STYLE_ICON_FALLBACK(item.label));
                       return (
                         <Link 
                           key={i} 
@@ -300,7 +300,16 @@ export default function MobileHeader() {
               <AccordionContent>
                 <div className="flex flex-col space-y-3 pt-2">
                   {activeItem.featured.map((f, i) => (
-                    <Link key={i} href={f.href || "#"} onClick={() => setIsMenuOpen(false)} className="text-sm font-medium text-gray-700">
+                    <Link key={i} href={f.href || "#"} onClick={() => setIsMenuOpen(false)} className="text-sm font-medium text-gray-700 flex items-center gap-3">
+                      {f.menuIcon && (
+                        <div className="w-8 h-8 relative flex items-center justify-center bg-gray-50 rounded-full overflow-hidden shrink-0">
+                          <SafeImage 
+                            src={f.menuIcon} 
+                            alt={f.label} 
+                            className="w-6 h-6 object-contain"
+                          />
+                        </div>
+                      )}
                       {f.label}
                     </Link>
                   ))}
@@ -326,12 +335,12 @@ export default function MobileHeader() {
         <div className="grid grid-cols-2 gap-3 px-4 py-4">
           {MEGA_MENU.map((item, index) => {
             const label = item.label || item.title;
-            const image = CATEGORY_IMAGES[label] || "/images/menu/engagement-ring.jpg";
+            const image = item.mobileBanner || CATEGORY_IMAGES[label] || "/images/menu/engagement-ring.jpg";
             return (
               <button
                 key={index}
                 onClick={() => handleItemClick(item, index)}
-                className="relative aspect-[4/5] overflow-hidden rounded-lg group"
+                className="relative aspect-[4/4] overflow-hidden rounded-lg group"
               >
                 <Image
                   src={image}
@@ -339,9 +348,9 @@ export default function MobileHeader() {
                   fill
                   className="object-cover transition-transform group-active:scale-105"
                 />
-                <div className="absolute inset-0 bg-black/10 group-active:bg-black/20 transition-colors" />
+                <div className="drawer-menu-image absolute inset-0 bg-black/10 group-active:bg-black/20 transition-colors" />
                 <div className="absolute bottom-4 left-4 right-4">
-                  <span className="text-black text-sm font-medium capitalize tracking-wider font-figtree">
+                  <span className="absolute bottom-0 left-0 text-white text-[14px] leading-none tracking-normal font-medium capitalize font-figtree sm:static sm:text-base sm:leading-normal sm:tracking-wide">
                     {label}
                   </span>
                 </div>
@@ -439,50 +448,51 @@ export default function MobileHeader() {
   return (
     <div className="bg-white border-b border-gray-100 lg:hidden">
       <div className="flex items-center justify-between px-4 py-3">
-        {/* Left: Hamburger */}
-        <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
-          <SheetTrigger asChild>
-            <button className="p-1">
-              <Menu size={24} strokeWidth={1.5} />
-            </button>
-          </SheetTrigger>
-          <SheetContent side="left" className="w-full p-0 border-none" showCloseButton={false}>
-            <div className="flex flex-col h-screen bg-[#F1F1F1] overflow-hidden">
-              <SheetHeader className="px-4 py-4 border-b border-gray-200 flex flex-row items-center justify-between sticky top-0 bg-white z-10 shrink-0">
-                <div className="flex items-center gap-2">
-                  {activeMenuPath.length > 0 && (
-                    <button onClick={handleBack} className="p-1 mr-1">
-                      <ChevronLeft size={20} />
+        <div className="flex items-center gap-4">
+          <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
+            <SheetTrigger asChild>
+              <button className="p-1">
+                <Menu size={24} strokeWidth={1.5} />
+              </button>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-full p-0 border-none" showCloseButton={false}>
+              <div className="flex flex-col h-screen bg-[#fff] overflow-hidden">
+                <SheetHeader className="px-4 py-4 border-b border-gray-200 flex flex-row items-center justify-between sticky top-0 bg-white z-10 shrink-0">
+                  <div className="flex items-center gap-2">
+                    {activeMenuPath.length > 0 && (
+                      <button onClick={handleBack} className="p-1 mr-1">
+                        <ChevronLeft size={20} />
+                      </button>
+                    )}
+                    <SheetTitle className="text-sm font-semibold capitalize font-figtree tracking-widest">
+                      {getMenuTitle()}
+                    </SheetTitle>
+                  </div>
+                  <SheetClose asChild>
+                    <button className="p-1">
+                      <X size={24} />
                     </button>
-                  )}
-                  <SheetTitle className="text-sm font-semibold capitalize font-figtree tracking-widest">
-                    {getMenuTitle()}
-                  </SheetTitle>
-                </div>
-                <SheetClose asChild>
-                  <button className="p-1">
-                    <X size={24} />
-                  </button>
-                </SheetClose>
-              </SheetHeader>
+                  </SheetClose>
+                </SheetHeader>
 
-              <ScrollArea className="flex-grow h-full overflow-y-auto">
-                {activeMenuPath.length === 0 ? renderMainMenu() : renderSubMenu(activeItem)}
-              </ScrollArea>
-            </div>
-          </SheetContent>
-        </Sheet>
+                <ScrollArea className="flex-grow h-full overflow-y-auto">
+                  {activeMenuPath.length === 0 ? renderMainMenu() : renderSubMenu(activeItem)}
+                </ScrollArea>
+              </div>
+            </SheetContent>
+          </Sheet>
 
-        {/* Center: Logo */}
-        <Link href="/" className="flex items-center">
-          <Image
-            src="/images/logo.svg"
-            alt="Lucira Jewelry"
-            width={100}
-            height={40}
-            priority
-          />
-        </Link>
+          {/* Center: Logo */}
+          <Link href="/" className="flex items-center">
+            <Image
+              src="/images/logo.svg"
+              alt="Lucira Jewelry"
+              width={100}
+              height={40}
+              priority
+            />
+          </Link>
+        </div>
 
         {/* Right: Icons */}
         <div className="flex items-center gap-4">
