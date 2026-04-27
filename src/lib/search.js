@@ -158,19 +158,9 @@ export async function resolveSearchMatch(productsCollection, baseFilter = {}, qu
   
   const textFilter = { $text: { $search: searchString } };
   
-  // Combine exact matches with text search results and broad keyword matches
-  // We add a broad keyword match to ensure that even if the phrase doesn't match exactly,
-  // we still get results that match at least some keywords.
-  const keywordOrFilter = {
-    $or: keywords.map(kw => ({ title: { $regex: escapeRegex(kw), $options: "i" } }))
-  };
-
-  const searchMatch = {
-    $or: [
-      textFilter,
-      keywordOrFilter
-    ]
-  };
+  // Use text filter directly to avoid MongoDB $or restriction with $text
+  // $text index already covers title, type, tags, and description.
+  const searchMatch = textFilter;
 
   const finalFilter = mergeMongoFilters(...filters, searchMatch);
 
