@@ -19,15 +19,13 @@ export default function NoteFromFounder() {
 
           {/* Right Column: Text Content */}
           <div className="p-8 md:p-12 lg:p-20 flex flex-col justify-center relative bg-[#FAF5F2]">
-            <h2 className="text-2xl md:text-3xl font-extrabold font-abhaya text-gray-900 mb-8">
-              A Note from Our Founder
-            </h2>
+            <h2 className="text-3xl md:text-4xl font-extrabold font-abhaya mb-6 text-black">A Note from Our Founder</h2>
             
-            <p className="text-sm md:text-base lg:text-lg text-gray-800 leading-relaxed mb-10 italic font-light tracking-wide">"Jewelry runs in my blood—it's who I am. After building brands in India, I created Lucira to go beyond tradition and craft pieces that reflect elegance and meaning. For me, jewelry isn’t just adornment—it’s a celebration of moments, love, and legacy. Every piece we make is a promise."</p>
+            <p className="text-sm md:text-base lg:text-lg text-black mb-3 italic font-normal">"Jewelry runs in my blood—it's who I am. After building brands in India, I created Lucira to go beyond tradition and craft pieces that reflect elegance and meaning. For me, jewelry isn’t just adornment—it’s a celebration of moments, love, and legacy. Every piece we make is a promise."</p>
 
             <div className="flex flex-col">
-              <span className="text-base md:text-lg font-bold text-gray-900">-Rupesh Jain</span>
-              <span className="text-xs md:text-sm text-gray-500 font-medium tracking-wide uppercase mt-1">
+              <span className="text-base font-bold text-black">-Rupesh Jain</span>
+              <span className="text-sm text-gray-500 font-medium mt-1">
                 Founder & CEO
               </span>
             </div>

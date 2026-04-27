@@ -79,27 +79,22 @@ export default function InstagramFeed() {
   }
 
   return (
-    <section className="w-full mt-15 bg-white overflow-hidden pb-10">
-      <div className="container-main mb-12 text-center animate-in fade-in slide-in-from-bottom-4 duration-1000">
-        <div className="flex items-center justify-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-600 flex items-center justify-center text-white">
-                <Instagram size={24} />
-            </div>
-            <h2 className="text-3xl md:text-4xl font-extrabold font-abhaya text-gray-900 tracking-tight">
-                Follow Our Journey
-            </h2>
+    <section className="w-full my-15 bg-white overflow-hidden">
+      <div className="container-main text-center animate-in fade-in slide-in-from-bottom-4 duration-1000">
+        <div className="text-center mb-6">
+          <h2 className="text-3xl md:text-4xl font-extrabold font-abhaya mb-2 text-black">Follow Our Journey</h2>
+          <p className="text-black text-base font-normal">
+            Tag us{" "}
+            <Link
+              href="https://www.instagram.com/lucirajewelry"
+              target="_blank"
+              className="text-accent underline hover:no-underline underline-offset-2 decoration-2"
+            >
+              @lucirajewelry
+            </Link>{" "}
+            to be part of our story
+          </p>
         </div>
-        <p className="text-gray-500 text-sm md:text-base tracking-widest font-black uppercase leading-relaxed">
-          Tag us{" "}
-          <Link
-            href="https://www.instagram.com/lucirajewelry"
-            target="_blank"
-            className="text-black font-black underline hover:no-underline underline-offset-4 decoration-2"
-          >
-            @lucirajewelry
-          </Link>{" "}
-          to be part of our story
-        </p>
       </div>
 
       <div className="w-full pl-4 md:pl-[4.5%]">
