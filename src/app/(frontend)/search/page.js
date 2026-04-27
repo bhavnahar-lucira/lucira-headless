@@ -428,7 +428,7 @@ export default function SearchPage() {
               <div className={isMobile ? "flex items-baseline gap-2.5" : "flex gap-3 items-center"}>
                 {isMobile ? (
                    <>
-                    <h2 className="text-lg font-bold text-[#35255F] capitalize leading-none">
+                    <h2 className="text-lg font-bold text-black capitalize leading-none">
                       "{query}"
                     </h2>
                     <span className="text-xs text-gray-400 font-medium whitespace-nowrap">

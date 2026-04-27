@@ -12,19 +12,19 @@ import {
 } from "@/components/ui/sheet";
 
 const sizeData = [
-  { ind: 5, us: "3", uk: "F", diaIn: 0.56, cirIn: 1.74 },
-  { ind: 6, us: "3.5", uk: "G", diaIn: 0.57, cirIn: 1.80 },
-  { ind: 7, us: "4", uk: "H", diaIn: 0.59, cirIn: 1.84 },
-  { ind: 8, us: "4.5", uk: "I", diaIn: 0.60, cirIn: 1.89 },
-  { ind: 9, us: "5", uk: "J", diaIn: 0.62, cirIn: 1.94 },
-  { ind: 10, us: "5.5", uk: "K", diaIn: 0.63, cirIn: 1.99 },
-  { ind: 11, us: "6", uk: "L", diaIn: 0.65, cirIn: 2.04 },
-  { ind: 12, us: "6.5", uk: "M", diaIn: 0.67, cirIn: 2.09 },
-  { ind: 13, us: "7", uk: "N", diaIn: 0.68, cirIn: 2.14 },
-  { ind: 14, us: "7.5", uk: "O", diaIn: 0.70, cirIn: 2.19 },
-  { ind: 15, us: "8", uk: "P", diaIn: 0.71, cirIn: 2.24 },
-  { ind: 16, us: "8.5", uk: "Q", diaIn: 0.73, cirIn: 2.29 },
-  { ind: 17, us: "9", uk: "R", diaIn: 0.74, cirIn: 2.34 },
+  { ind: 5, us: "3", diaIn: 0.56, cirIn: 1.74 },
+  { ind: 6, us: "3.5", diaIn: 0.57, cirIn: 1.80 },
+  { ind: 7, us: "4", diaIn: 0.59, cirIn: 1.84 },
+  { ind: 8, us: "4.5", diaIn: 0.60, cirIn: 1.89 },
+  { ind: 9, us: "5", diaIn: 0.62, cirIn: 1.94 },
+  { ind: 10, us: "5.5", diaIn: 0.63, cirIn: 1.99 },
+  { ind: 11, us: "6", diaIn: 0.65, cirIn: 2.04 },
+  { ind: 12, us: "6.5", diaIn: 0.67, cirIn: 2.09 },
+  { ind: 13, us: "7", diaIn: 0.68, cirIn: 2.14 },
+  { ind: 14, us: "7.5", diaIn: 0.70, cirIn: 2.19 },
+  { ind: 15, us: "8", diaIn: 0.71, cirIn: 2.24 },
+  { ind: 16, us: "8.5", diaIn: 0.73, cirIn: 2.29 },
+  { ind: 17, us: "9", diaIn: 0.74, cirIn: 2.34 },
 ];
 
 export function SizeGuideSheet({ children }) {
@@ -114,7 +114,6 @@ export function SizeGuideSheet({ children }) {
                     <th className="py-4 font-bold align-top border-l border-gray-100 pl-4">Circumference ({unit === 'inch' ? 'in' : 'cm'})</th>
                     <th className="py-4 font-bold align-top border-l border-gray-100 pl-4">IND</th>
                     <th className="py-4 font-bold align-top border-l border-gray-100 pl-4">US</th>
-                    <th className="py-4 font-bold align-top border-l border-gray-100 pl-4">UK</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-50">
@@ -124,7 +123,6 @@ export function SizeGuideSheet({ children }) {
                       <td className="py-4 border-l border-gray-100 pl-4">{convert(row.cirIn)}</td>
                       <td className="py-4 border-l border-gray-100 pl-4">{row.ind}</td>
                       <td className="py-4 border-l border-gray-100 pl-4">{row.us}</td>
-                      <td className="py-4 border-l border-gray-100 pl-4">{row.uk}</td>
                     </tr>
                   ))}
                 </tbody>

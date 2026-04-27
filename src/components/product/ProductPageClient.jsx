@@ -73,6 +73,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import StyledByLucira from "../home/StyledByLucira";
+import { Sheet as MobileSheet } from "react-modal-sheet";
 
 // Force en-IN formatting to be consistent across environments
 const formatPrice = (num) => {
@@ -855,7 +856,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
               {/* Title */}
               <div className="w-full">
                 <div className="space-y-3">
-                  <h1 className="text-28px font-bold leading-[1.2] tracking-tight">
+                  <h1 className="text-xl font-bold leading-[1.2] tracking-tight">
                     {product.title}
                   </h1>
                   <div className="flex justify-between gap-2 items-center">
@@ -1420,7 +1421,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
            
             {/* Features */}
             <div className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-6 lg:gap-x-6 text-xs sm:text-sm font-medium text-black`">
+              <div className="grid grid-cols-2 md:grid-cols-2 gap-y-4 gap-x-6 lg:gap-x-6 text-xs sm:text-sm font-medium text-black`">
                 <Feature icon={<Image src="/images/product/shipping.svg" alt="Shipping icon" width={28} height={28} />} text="Free and secure shipping" />
                 <Feature icon={<Image src="/images/product/return.svg" alt="Return icon" width={28} height={28} />} text="15-day free returns" />
                 <Feature icon={<Image src="/images/product/exchange.svg" alt="Exchange icon" width={28} height={28} />} text="Lifetime exchange and 100% value guarantee" />
@@ -1564,6 +1565,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                 description="Explore and try your favorite designs in person, with expert guidance from our in-store team."
                 action="BOOK APPOINTMENT"
                 img="/images/store.jpg"
+                url="https://wa.me/919004435760?text=Hi,%20I%20want%20to%20book%20an%20appointment"
               />
               <ExploreCard
                 key="try-at-home"
@@ -1571,6 +1573,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                 description="Try your selected pieces from the comfort of your home. Available in all major cities"
                 action="BOOK HOME TRIAL"
                 img="/images/subscribe-2.jpg"
+                url="https://wa.me/919004435760?text=Hi,%20I%20want%20to%20try%20this%20at%20home"
               />
               <Separator/>
             </div>
@@ -1600,7 +1603,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                 )}
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-2 gap-4">
                 {/* Metal Card */}
                 <div className="bg-[#F9F9F9] rounded-2xl p-5 space-y-4">
                   <div className="flex items-center gap-2 font-bold text-sm uppercase text-gray-700">
@@ -1971,7 +1974,7 @@ function DiamondDetail({ img, shape, pcs, carat, quality }) {
   );
 }
 
-function ExploreCard({ title, description, action, img }) {
+function ExploreCard({ title, description, action, img, url }) {
   return (
     <div className="bg-[#F9F9F9] border border-gray-100 rounded-lg p-3 md:p-4 flex items-start gap-3 md:gap-4">
       <div className="w-20 h-20 sm:w-24 sm:h-24 md:w-24 md:h-16 shrink-0 rounded-md bg-gray-200 relative overflow-hidden shadow-sm">
@@ -1980,8 +1983,10 @@ function ExploreCard({ title, description, action, img }) {
       <div className="flex-1 min-w-0 flex flex-col gap-2">
         <p className="text-sm md:text-base font-semibold leading-tight"> {title} </p>
         <p className="text-xs md:text-sm font-medium leading-[1.5] text-gray-700"> {description} </p>
-        <Button variant="link" className=" p-0 m-0 h-auto w-fit text-sm font-bold underline underline-offset-4 justify-start">
-          {action}
+        <Button variant="link" className=" p-0 m-0 h-auto w-fit text-sm font-bold underline underline-offset-4 justify-start" asChild>
+          <a href={url} target="_blank" rel="noopener noreferrer"> 
+            {action}
+          </a>
         </Button>
       </div>
     </div>

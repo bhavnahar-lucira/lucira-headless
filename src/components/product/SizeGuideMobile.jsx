@@ -6,19 +6,19 @@ import { X, Play } from "lucide-react";
 import { Sheet } from "react-modal-sheet";
 
 const sizeData = [
-  { ind: 5, us: "3", uk: "F", diaIn: 0.56, cirIn: 1.74 },
-  { ind: 6, us: "3.5", uk: "G", diaIn: 0.57, cirIn: 1.80 },
-  { ind: 7, us: "4", uk: "H", diaIn: 0.59, cirIn: 1.84 },
-  { ind: 8, us: "4.5", uk: "I", diaIn: 0.60, cirIn: 1.89 },
-  { ind: 9, us: "5", uk: "J", diaIn: 0.62, cirIn: 1.94 },
-  { ind: 10, us: "5.5", uk: "K", diaIn: 0.63, cirIn: 1.99 },
-  { ind: 11, us: "6", uk: "L", diaIn: 0.65, cirIn: 2.04 },
-  { ind: 12, us: "6.5", uk: "M", diaIn: 0.67, cirIn: 2.09 },
-  { ind: 13, us: "7", uk: "N", diaIn: 0.68, cirIn: 2.14 },
-  { ind: 14, us: "7.5", uk: "O", diaIn: 0.70, cirIn: 2.19 },
-  { ind: 15, us: "8", uk: "P", diaIn: 0.71, cirIn: 2.24 },
-  { ind: 16, us: "8.5", uk: "Q", diaIn: 0.73, cirIn: 2.29 },
-  { ind: 17, us: "9", uk: "R", diaIn: 0.74, cirIn: 2.34 },
+  { ind: 5, us: "3", diaIn: 0.56, cirIn: 1.74 },
+  { ind: 6, us: "3.5", diaIn: 0.57, cirIn: 1.80 },
+  { ind: 7, us: "4", diaIn: 0.59, cirIn: 1.84 },
+  { ind: 8, us: "4.5", diaIn: 0.60, cirIn: 1.89 },
+  { ind: 9, us: "5", diaIn: 0.62, cirIn: 1.94 },
+  { ind: 10, us: "5.5", diaIn: 0.63, cirIn: 1.99 },
+  { ind: 11, us: "6", diaIn: 0.65, cirIn: 2.04 },
+  { ind: 12, us: "6.5", diaIn: 0.67, cirIn: 2.09 },
+  { ind: 13, us: "7", diaIn: 0.68, cirIn: 2.14 },
+  { ind: 14, us: "7.5", diaIn: 0.70, cirIn: 2.19 },
+  { ind: 15, us: "8", diaIn: 0.71, cirIn: 2.24 },
+  { ind: 16, us: "8.5", diaIn: 0.73, cirIn: 2.29 },
+  { ind: 17, us: "9", diaIn: 0.74, cirIn: 2.34 },
 ];
 
 export function SizeGuideMobile({ children }) {
@@ -56,7 +56,7 @@ export function SizeGuideMobile({ children }) {
 
               <div className="flex-1 overflow-y-auto mt-6 space-y-8 custom-scrollbar pr-1">
                 {/* Ring Sizer Promo */}
-                <div className="bg-white rounded-2xl flex items-center gap-4 p-4 border border-gray-100 shadow-sm">
+                <div className="bg-white rounded-2xl flex items-center gap-4 p-4 border border-gray-100 shadow-sm hidden">
                   <div className="relative w-16 h-16 rounded-xl overflow-hidden shrink-0">
                      <Image src="/images/product/product-1.jpg" alt="Ring sizer" fill className="object-cover" />
                   </div>
@@ -90,24 +90,22 @@ export function SizeGuideMobile({ children }) {
 
                   {/* Table */}
                   <div className="w-full overflow-x-auto pb-4">
-                    <table className="w-full text-left border-collapse min-w-[400px]">
+                    <table className="w-full text-center border-collapse table-fixed">
                       <thead>
                         <tr className="text-xs font-bold text-gray-400 uppercase tracking-widest border-b border-gray-100">
-                          <th className="py-4 font-bold">DIA ({unit === 'inch' ? 'IN' : 'CM'})</th>
-                          <th className="py-4 font-bold pl-4">CIR ({unit === 'inch' ? 'IN' : 'CM'})</th>
-                          <th className="py-4 font-bold pl-4">IND</th>
-                          <th className="py-4 font-bold pl-4">US</th>
-                          <th className="py-4 font-bold pl-4">UK</th>
+                          <th className="py-4 px-2 font-bold">DIA ({unit === 'inch' ? 'IN' : 'CM'})</th>
+                          <th className="py-4 px-2 font-bold">CIR ({unit === 'inch' ? 'IN' : 'CM'})</th>
+                          <th className="py-4 px-2 font-bold">IND</th>
+                          <th className="py-4 px-2 font-bold">US</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-50">
                         {sizeData.map((row, idx) => (
                           <tr key={idx} className="text-sm text-gray-700 font-medium">
-                            <td className="py-4">{convert(row.diaIn)}</td>
-                            <td className="py-4 pl-4">{convert(row.cirIn)}</td>
-                            <td className="py-4 pl-4 text-black font-bold">{row.ind}</td>
-                            <td className="py-4 pl-4">{row.us}</td>
-                            <td className="py-4 pl-4">{row.uk}</td>
+                            <td className="py-4 px-2">{convert(row.diaIn)}</td>
+                            <td className="py-4 px-2">{convert(row.cirIn)}</td>
+                            <td className="py-4 px-2 text-black font-bold">{row.ind}</td>
+                            <td className="py-4 px-2">{row.us}</td>
                           </tr>
                         ))}
                       </tbody>
