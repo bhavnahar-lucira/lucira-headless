@@ -372,8 +372,11 @@ export default function ProductPageClient({ product, complementaryProducts = [],
     setNearestStore(storesWithData.length > 0 ? storesWithData[0] : null);
   }, [allStores, activeVariant, deliveryInfo.coords]);
 
-  const hasEngraving = product.tags?.some(tag => tag.toLowerCase() === "engraving available");
-  const isGoldCoin = product.tags?.some(tag => tag.toLowerCase() === "gold coin");
+  const rawTags = product.tags || [];
+  const tags = Array.isArray(rawTags) ? rawTags : (typeof rawTags === 'string' ? rawTags.split(',').map(t => t.trim()) : []);
+
+  const hasEngraving = tags?.some(tag => tag.toLowerCase() === "engraving available");
+  const isGoldCoin = tags?.some(tag => tag.toLowerCase() === "gold coin");
 
   const slugify = (text) => text?.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '') || "";
 
