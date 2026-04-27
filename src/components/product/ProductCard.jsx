@@ -236,11 +236,8 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle 
     const labels = [];
     if (product.label) labels.push(product.label);
     
-    // Defensive check: tags could be a string from webhook or an array from sync
-    const rawTags = product.tags || [];
-    const tags = Array.isArray(rawTags) ? rawTags : (typeof rawTags === 'string' ? rawTags.split(',').map(t => t.trim()) : []);
-    
-    const lowerTags = tags.map(t => t.toLowerCase());
+    const tags = Array.isArray(product.tags) ? product.tags : [];
+    const lowerTags = tags.map(t => String(t).toLowerCase());
     
     // Priority order: Fast Shipping > Best Seller > New Arrival > Trending
     if (lowerTags.some(t => t.includes("fast shipping") || t.includes("fastshipping"))) labels.push("Fast Shipping");
