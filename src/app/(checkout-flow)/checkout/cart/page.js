@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSelector } from "react-redux";
 import Link from "next/link";
 import CartItem from "@/components/cart/CartItem";
@@ -19,6 +19,13 @@ export default function CartPage() {
   const { items, totalQuantity, totalAmount, appliedCoupon } = useSelector((state) => state.cart);  
   const { isAuthenticated } = useSelector((state) => state.user);
   const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
+  const summaryRef = useRef(null);
+
+  const scrollToSummary = () => {
+    if (summaryRef.current) {
+      summaryRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
 
   const filteredItems = items.filter(
     (item) => 
@@ -130,7 +137,7 @@ export default function CartPage() {
           </div>
 
           {/* Right Column: Order Summary (40%) */}
-          <div className="w-full lg:basis-[40%] lg:shrink-0 lg:self-start relative">
+          <div className="w-full lg:basis-[40%] lg:shrink-0 lg:self-start relative" ref={summaryRef}>
             <div className="hidden lg:block absolute inset-y-0 left-0 w-screen bg-[#FAFAFA] border-l border-zinc-100 z-0" />
             
             <div className="relative z-10 py-6 lg:py-10 lg:pl-12 bg-[#FAFAFA] lg:bg-transparent min-h-full rounded-3xl lg:rounded-none">
@@ -147,7 +154,10 @@ export default function CartPage() {
         <div className="flex items-center justify-between gap-4">
           <div className="flex flex-col">
             <span className="text-lg font-bold text-zinc-900 leading-none">₹ {totalAmount.toLocaleString('en-IN')}</span>
-            <button className="text-[11px] font-bold text-accent uppercase tracking-tight mt-1 text-left">
+            <button 
+              onClick={scrollToSummary}
+              className="text-[11px] font-bold text-accent uppercase tracking-tight mt-1 text-left"
+            >
               View Order Summary
             </button>
           </div>

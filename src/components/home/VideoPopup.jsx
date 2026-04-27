@@ -93,9 +93,6 @@ export default function VideoPopup({ isOpen, onClose, videoData, initialIndex })
                                     </span>
                                  </div>
                               </div>
-                              <button className="bg-[#5B4740] text-white px-5 py-2 rounded-lg text-[11px] font-bold uppercase tracking-wider active:scale-95 transition-transform">
-                                 ADD
-                              </button>
                            </div>
                          ))}
                       </div>
@@ -208,18 +205,9 @@ export default function VideoPopup({ isOpen, onClose, videoData, initialIndex })
                                 {product.discount && <span className="text-[10px] md:text-xs font-bold bg-[#F5E6E4] text-[#8B4513] px-2 py-1 rounded tracking-wide uppercase">{product.discount}</span>}
                             </div>
                             </div>
-                            <button className="flex-shrink-0 bg-[#5A413F] text-white px-6 py-2.5 rounded text-xs font-black hover:bg-[#4a3533] transition-all uppercase tracking-widest shadow-sm">
-                            Add
-                            </button>
                         </div>
                         ))}
                     </div>
-                  </div>
-
-                  <div className="mt-10">
-                    <button className="w-full border-2 border-[#5A413F] text-[#5A413F] py-4 px-6 rounded text-sm font-black hover:bg-[#5A413F] hover:text-white transition-all uppercase tracking-[0.1em] flex items-center justify-center">
-                        Add All Products To Cart - {item.totalPrice}
-                    </button>
                   </div>
                 </div>
               </div>

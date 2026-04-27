@@ -172,6 +172,11 @@ export default function CartItem({ item, onAuthRequired }) {
     }
   };
 
+  const lowerTitle = (item.title || "").toLowerCase();
+  const sizeLabel = lowerTitle.includes("ring") ? "Ring Size" : 
+                   (lowerTitle.includes("bracelet") || lowerTitle.includes("bangle")) ? "Wrist Size" : 
+                   lowerTitle.includes("necklace") ? "Length" : "Size";
+
   const productLink = item.handle ? `/products/${item.handle}${item.variantId ? `?variant=${item.variantId}` : ""}` : "#";
 
   return (
@@ -232,24 +237,28 @@ export default function CartItem({ item, onAuthRequired }) {
                 {item.size && (
                   <div className="flex flex-col justify-center p-2">
                     <span className="mb-1 text-[10px] font-bold uppercase tracking-tighter text-zinc-400">
-                      Ring Size
+                      {sizeLabel}
                     </span>
-                    <Select
-                      value={String(item.size)}
-                      onValueChange={(val) => handleUpdate("size", val)}
-                      disabled={!canEditSelection || updating}
-                    >
-                      <SelectTrigger className="h-6 border-none bg-transparent p-0 text-xs font-bold text-zinc-800 shadow-none focus:ring-0">
-                        <SelectValue placeholder={item.size} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {sizeOptions.map((variant) => (
-                          <SelectItem key={variant.variantId || variant.size} value={String(variant.size)}>
-                            {variant.size}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    {canEditSelection ? (
+                      <Select
+                        value={String(item.size)}
+                        onValueChange={(val) => handleUpdate("size", val)}
+                        disabled={updating}
+                      >
+                        <SelectTrigger className="h-6 border-none bg-transparent p-0 text-xs font-bold text-zinc-800 shadow-none focus:ring-0">
+                          <SelectValue placeholder={item.size} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {sizeOptions.map((variant) => (
+                            <SelectItem key={variant.variantId || variant.size} value={String(variant.size)}>
+                              {variant.size}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    ) : (
+                      <span className="text-xs font-bold text-zinc-800">{item.size}</span>
+                    )}
                   </div>
                 )}
 
@@ -257,22 +266,26 @@ export default function CartItem({ item, onAuthRequired }) {
                   <span className="mb-1 text-[10px] font-bold uppercase tracking-tighter text-zinc-400">
                     Quantity
                   </span>
-                  <Select
-                    value={String(item.quantity)}
-                    onValueChange={(val) => handleUpdate("quantity", val)}
-                    disabled={!canEditSelection || updating}
-                  >
-                    <SelectTrigger className="h-6 border-none bg-transparent p-0 text-xs font-bold text-zinc-800 shadow-none focus:ring-0">
-                      <SelectValue placeholder={item.quantity} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {[...Array(10)].map((_, i) => (
-                        <SelectItem key={i + 1} value={String(i + 1)}>
-                          {i + 1}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  {canEditSelection ? (
+                    <Select
+                      value={String(item.quantity)}
+                      onValueChange={(val) => handleUpdate("quantity", val)}
+                      disabled={updating}
+                    >
+                      <SelectTrigger className="h-6 border-none bg-transparent p-0 text-xs font-bold text-zinc-800 shadow-none focus:ring-0">
+                        <SelectValue placeholder={item.quantity} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {[...Array(10)].map((_, i) => (
+                          <SelectItem key={i + 1} value={String(i + 1)}>
+                            {i + 1}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    <span className="text-xs font-bold text-zinc-800">{item.quantity}</span>
+                  )}
                 </div>
               </div>
 
@@ -364,23 +377,29 @@ export default function CartItem({ item, onAuthRequired }) {
               <div className="flex items-center gap-3 pt-1">
                 {item.size && (
                   <div className="flex items-center gap-0.5">
-                    <span className="text-[13px] text-zinc-800 font-medium">Size:</span>
-                    <Select
-                      value={String(item.size)}
-                      onValueChange={(val) => handleUpdate("size", val)}
-                      disabled={!canEditSelection || updating}
-                    >
-                      <SelectTrigger className="h-auto border-none bg-transparent p-0 text-[13px] font-bold text-zinc-800 shadow-none focus:ring-0 gap-0.5 min-w-0 w-auto">
-                        <SelectValue placeholder={item.size} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {sizeOptions.map((variant) => (
-                          <SelectItem key={variant.variantId || variant.size} value={String(variant.size)}>
-                            {variant.size}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <span className="text-[13px] text-zinc-800 font-medium">
+                      {sizeLabel.replace(" Size", "")}:
+                    </span>
+                    {canEditSelection ? (
+                      <Select
+                        value={String(item.size)}
+                        onValueChange={(val) => handleUpdate("size", val)}
+                        disabled={updating}
+                      >
+                        <SelectTrigger className="h-auto border-none bg-transparent p-0 text-[13px] font-bold text-zinc-800 shadow-none focus:ring-0 gap-0.5 min-w-0 w-auto">
+                          <SelectValue placeholder={item.size} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {sizeOptions.map((variant) => (
+                            <SelectItem key={variant.variantId || variant.size} value={String(variant.size)}>
+                              {variant.size}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    ) : (
+                      <span className="text-[13px] font-bold text-zinc-800">{item.size}</span>
+                    )}
                   </div>
                 )}
                 

@@ -51,18 +51,18 @@ export default function ReviewDetailedPopup({ isOpen, onClose, reviews, activeIn
   const currentImage = getValidSrc(currentImageRaw);
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 md:p-10 transition-all duration-300">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 md:p-10 transition-all duration-300">
       
       {/* Navigation - Hidden on very small mobile */}
       <button 
         onClick={handlePrev}
-        className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 z-[110] text-white hover:text-gray-300 transition-colors cursor-pointer outline-none bg-black/20 hover:bg-black/40 rounded-full p-2"
+        className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 z-[10000] text-white hover:text-gray-300 transition-colors cursor-pointer outline-none bg-black/20 hover:bg-black/40 rounded-full p-2"
       >
         <ChevronLeft size={48} strokeWidth={1} />
       </button>
       <button 
         onClick={handleNext}
-        className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 z-[110] text-white hover:text-gray-300 transition-colors cursor-pointer outline-none bg-black/20 hover:bg-black/40 rounded-full p-2"
+        className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 z-[10000] text-white hover:text-gray-300 transition-colors cursor-pointer outline-none bg-black/20 hover:bg-black/40 rounded-full p-2"
       >
         <ChevronRight size={48} strokeWidth={1} />
       </button>
@@ -73,7 +73,7 @@ export default function ReviewDetailedPopup({ isOpen, onClose, reviews, activeIn
         {/* Close Button */}
         <button
             onClick={onClose}
-            className="absolute top-4 right-4 z-[120] text-gray-500 hover:text-black transition-colors cursor-pointer bg-white/80 hover:bg-white rounded-full p-1 shadow-sm"
+            className="absolute top-4 right-4 z-[10010] text-gray-500 hover:text-black transition-colors cursor-pointer bg-white/80 hover:bg-white rounded-full p-1 shadow-sm"
         >
             <X size={24} />
         </button>

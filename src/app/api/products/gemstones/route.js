@@ -65,7 +65,12 @@ export async function GET(request) {
       .limit(10) // User requested max 10
       .toArray();
 
-    return NextResponse.json({ products });
+    return NextResponse.json({ 
+      products: products.map(p => ({
+        ...p,
+        reviews: p.reviews || p.reviewStats || null
+      }))
+    });
 
   } catch (error) {
     console.error("Gemstones API Error:", error);

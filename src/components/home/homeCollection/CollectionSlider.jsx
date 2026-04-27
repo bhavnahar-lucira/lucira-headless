@@ -44,8 +44,8 @@ export default function CollectionSlider ({ products = [], loading = false }) {
       <div className="relative">
         <Swiper
           modules={[Navigation, Pagination]}
-          spaceBetween={16}
-          slidesPerView={1.2}
+          spaceBetween={12}
+          slidesPerView={2}
           onSlideChange={(swiper) => {
             const progress = (swiper.activeIndex / (swiper.slides.length - swiper.params.slidesPerView)) * 100;
             const bar = document.getElementById(`progress-bar-${id}`);
@@ -70,7 +70,7 @@ export default function CollectionSlider ({ products = [], loading = false }) {
         </Swiper>
 
         {/* Navigation & Progress Controls (Updated for design) */}
-        <div className="flex justify-between items-center mt-8 md:mt-12 px-1">
+        <div className="flex justify-between items-center mt-8 md:mt-6 px-1">
           {/* Progress Bar (Global) */}
           <div className="flex-1 max-w-[120px] md:max-w-[200px] h-[2px] bg-zinc-100 relative overflow-hidden">
             <div 

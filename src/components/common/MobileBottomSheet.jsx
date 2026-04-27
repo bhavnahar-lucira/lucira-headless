@@ -9,27 +9,28 @@ export function MobileBottomSheet({
   onClose, 
   title, 
   children, 
-  detents = [0.9, 0.5],
+  snapPoints = [0, 0.95, 1],
   footer 
 }) {
   return (
     <Sheet 
       isOpen={isOpen} 
       onClose={onClose}
-      detents={detents}
+      snapPoints={snapPoints}
+      initialSnap={1}
     >
-      <Sheet.Container>
+      <Sheet.Container className="!rounded-t-[32px]">
         <Sheet.Header />
-        <Sheet.Content>
-          <div className="px-6 pb-8 flex flex-col h-full bg-white rounded-t-[32px]">
+        <Sheet.Content className="!h-auto max-h-screen">
+          <div className="px-6 pb-8 flex flex-col max-h-[85vh] bg-white rounded-t-[32px]">
             <div className="flex items-center justify-between pb-6 border-b border-gray-100">
-              <h2 className="text-lg font-bold text-[#443360]">{title}</h2>
-              <button onClick={onClose} className="p-2">
+              <h2 className="text-lg font-bold text-[#443360] uppercase tracking-wider">{title}</h2>
+              <button onClick={onClose} className="p-2 hover:bg-gray-50 rounded-full transition-colors">
                 <X size={20} className="text-gray-400" />
               </button>
             </div>
 
-            <div className="mt-6 flex-1 overflow-y-auto custom-scrollbar pr-1">
+            <div className="mt-6 flex-1 overflow-y-auto custom-scrollbar pr-1 custom-scrollbar-hide">
               {children}
             </div>
             
@@ -41,7 +42,7 @@ export function MobileBottomSheet({
           </div>
         </Sheet.Content>
       </Sheet.Container>
-      <Sheet.Backdrop onClick={onClose} />
+      <Sheet.Backdrop onTap={onClose} />
     </Sheet>
   );
 }

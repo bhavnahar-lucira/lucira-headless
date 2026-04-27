@@ -6,7 +6,8 @@ import LazyImage from "../common/LazyImage";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/navigation";
-import { Navigation } from "swiper/modules";
+import "swiper/css/pagination";
+import { Navigation, Pagination } from "swiper/modules";
 import { motion, AnimatePresence } from "framer-motion";
 import { Star, ChevronLeft, ChevronRight, ArrowRight, Copy, X, Loader2, Play, ShieldCheck, Heart } from "lucide-react";
 import { toast } from "react-toastify";
@@ -271,6 +272,8 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle 
   const prevImageBtnRef = useRef(null);
   const nextImageBtnRef = useRef(null);
 
+  const hasSimilar = (product.matchingProductIds && product.matchingProductIds.length > 0) || product.hasSimilar;
+
   const handleBeforeInit = (swiper) => {
     if (galleryImages.length <= 1 || !swiper.params.navigation) return;
     if (prevImageBtnRef.current) swiper.params.navigation.prevEl = prevImageBtnRef.current;
@@ -362,7 +365,11 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle 
                   spaceBetween={0}
                   loop={galleryImages.length > 1}
                   slidesPerView={1}
-                  modules={[Navigation]}
+                  modules={[Navigation, Pagination]}
+                  pagination={galleryImages.length > 1 ? {
+                    type: 'progressbar',
+                    el: `.pagination-${swiperId}`
+                  } : false}
                   navigation={galleryImages.length > 1 ? {
                     prevEl: prevImageBtnRef.current,
                     nextEl: nextImageBtnRef.current,
@@ -396,6 +403,9 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle 
                       </div>
                     </SwiperSlide>
                   ))}
+                  {galleryImages.length > 1 && (
+                    <div className={`pagination-${swiperId} swiper-pagination !bottom-2 lg:!hidden`} />
+                  )}
                 </Swiper>
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-zinc-400">No Image</div>
@@ -503,7 +513,7 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle 
             )}
 
             {/* View Similar Button */}
-            {product.matchingProductIds && product.matchingProductIds.length > 0 && (
+            {hasSimilar && (
               <Drawer open={showSimilar} onOpenChange={setShowSimilar}>
                 <DrawerTrigger asChild>
                   <button 
@@ -632,38 +642,41 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle 
               )}
 
               {/* Rating Section */}
-              {product.reviews?.count > 0 && (
+              {((product.reviews?.count || product.reviewStats?.count) > 0) && (
                 <div className="flex items-center gap-1.5">
                   <div className="flex items-center gap-0.5 text-amber-400">
                     {isMobile ? (
                       <Star size={12} fill="currentColor" />
                     ) : (
-                      [...Array(5)].map((_, i) => (
-                        <Star
-                          key={i}
-                          size={12}
-                          fill={i < i < Math.floor(product.reviews.average) ? "currentColor" : "none"}
-                          className={ i < i < Math.floor(product.reviews.average) ? "" : "text-zinc-200 dark:text-zinc-800"}
-                        />
-                      ))
+                      [...Array(5)].map((_, i) => {
+                        const average = product.reviews?.average || product.reviewStats?.average || 0;
+                        return (
+                          <Star
+                            key={i}
+                            size={12}
+                            fill={i < Math.floor(average) ? "currentColor" : "none"}
+                            className={i < Math.floor(average) ? "" : "text-zinc-200 dark:text-zinc-800"}
+                          />
+                        );
+                      })
                     )}
                   </div>
-                  <span className="text-sm font-semibold text-black mt-0.5">({product.reviews.count})</span>
+                  <span className="text-sm font-semibold text-black mt-0.5">({product.reviews?.count || product.reviewStats?.count})</span>
                 </div>
               )}
             </div>
 
             {/* Price Section */}
-            <div className="flex items-center gap-2 mt-2 font-figtree">
+            <div className="flex items-center flex-wrap gap-x-2 gap-y-1 mt-2 font-figtree">
               <p className="text-base lg:text-xl font-bold">₹{formatPrice(displayPrice)}</p>
               {displayComparePrice > displayPrice && (
                 <p className="text-[14px] lg:text-base text-gray-400 line-through">₹{formatPrice(displayComparePrice)}</p>
               )}
-              {/* {displayComparePrice > displayPrice && discountPercent > 0 && (
-                <span className="bg-[#E5E7EB] text-black px-2 py-0.5 rounded-full text-xs font-bold">
+              {displayComparePrice > displayPrice && discountPercent > 0 && (
+                <span className="hidden lg:inline-block bg-[#F2F2F2] text-black px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider whitespace-nowrap">
                   {discountPercent}% OFF
                 </span>
-              )} */}
+              )}
             </div>
 
             <div className="flex flex-col items-start gap-0.5">
@@ -795,6 +808,23 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle 
         .custom-product-swiper .swiper-button-prev,
         .custom-product-swiper .swiper-button-next {
           display: none !important;
+        }
+        
+        .custom-product-swiper .swiper-pagination-progressbar {
+          background: rgba(0,0,0,0.05) !important;
+          height: 2px !important;
+          bottom: 0 !important;
+          top: auto !important;
+        }
+        
+        .custom-product-swiper .swiper-pagination-progressbar-fill {
+          background: #5A413F !important;
+        }
+
+        @media (min-width: 1024px) {
+          .custom-product-swiper .swiper-pagination {
+            display: none !important;
+          }
         }
       ` }} />
 

@@ -15,18 +15,32 @@ export async function GET(req) {
     const db = client.db("next_local_db");
     const productsCollection = db.collection("products");
 
-    const { filter } = await resolveSearchMatch(productsCollection, {}, query);
+    const { filter, fallbackFilter, strategy } = await resolveSearchMatch(productsCollection, {}, query);
 
-    const products = await productsCollection
-      .find(filter)
-      .limit(10)
-      .project({
-        title: 1,
-        handle: 1,
-        price: 1,
-        images: 1,
-      })
-      .toArray();
+    const projection = {
+      title: 1,
+      handle: 1,
+      price: 1,
+      images: 1,
+    };
+
+    const queryOptions = productsCollection.find(filter).limit(10).project(projection);
+
+    if (strategy === "text") {
+      queryOptions.sort({ score: { $meta: "textScore" } });
+    }
+
+    let products = await queryOptions.toArray();
+
+    // Fallback if no products found
+    if (products.length === 0 && fallbackFilter) {
+      products = await productsCollection
+        .find(fallbackFilter)
+        .limit(10)
+        .project(projection)
+        .sort({ title: 1 })
+        .toArray();
+    }
 
     const results = products.map((p) => {
       const firstImage = p.images && p.images.length > 0 ? p.images[0].url : null;
