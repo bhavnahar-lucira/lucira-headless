@@ -39,8 +39,7 @@ export const GET_BLOGS_QUERY = `
 `;
 
 export const GET_ARTICLES_QUERY = `
-  query GetArticles($first: Int!, $after: String, $blogHandle: String) {
-    blog(handle: $blogHandle) {
+  query GetArticles($first: Int!, $after: String) {
     articles(first: $first, after: $after) {
       edges {
         node {
@@ -58,7 +57,6 @@ export const GET_ARTICLES_QUERY = `
           image {
             url
           }
-          publishedAt
           blog {
             id
             handle
