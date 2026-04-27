@@ -3,7 +3,7 @@
 import { useMemo } from "react";
 import { Phone, Mail, MapPin } from "lucide-react";
 
-export default function InformationContent({ cityName, stateName, sectionData, currentDate, todayRate }) {
+export default function PlatinumInformationContent({ cityName, stateName, sectionData, currentDate, todayRate }) {
   const { settings, blocks, block_order } = sectionData || {};
 
   const replaceShortcodes = (text) => {
@@ -19,10 +19,23 @@ export default function InformationContent({ cityName, stateName, sectionData, c
     }
 
     if (todayRate) {
-        const rate24_10 = todayRate;
-        const rate22_10 = Math.round(todayRate * (22 / 24));
-        processed = processed.replaceAll('[gold_rate_24kt_10gm]', `₹${rate24_10.toLocaleString('en-IN')}`);
-        processed = processed.replaceAll('[gold_rate_22kt_10gm]', `₹${rate22_10.toLocaleString('en-IN')}`);
+        const ratePerGram = todayRate / 10;
+        
+        // Shortcodes defined in liquid
+        processed = processed.replaceAll('[platinum_rate_999]', `₹${Math.round(ratePerGram).toLocaleString('en-IN')}`);
+        processed = processed.replaceAll('[platinum_rate_950]', `₹${Math.round(ratePerGram * (950 / 1000)).toLocaleString('en-IN')}`);
+        processed = processed.replaceAll('[platinum_rate_900]', `₹${Math.round(ratePerGram * (900 / 1000)).toLocaleString('en-IN')}`);
+        
+        processed = processed.replaceAll('[platinum_rate_999_10gm]', `₹${Math.round(ratePerGram * 10).toLocaleString('en-IN')}`);
+        processed = processed.replaceAll('[platinum_rate_950_10gm]', `₹${Math.round(ratePerGram * 10 * (950 / 1000)).toLocaleString('en-IN')}`);
+        processed = processed.replaceAll('[platinum_rate_900_10gm]', `₹${Math.round(ratePerGram * 10 * (900 / 1000)).toLocaleString('en-IN')}`);
+        
+        // Placeholder replacements from JSON
+        processed = processed.replaceAll('<platinum rate>', `₹${Math.round(ratePerGram).toLocaleString('en-IN')}`);
+        processed = processed.replaceAll('&lt;platinum rate&gt;', `₹${Math.round(ratePerGram).toLocaleString('en-IN')}`);
+        processed = processed.replaceAll('<10* platinum rate>', `₹${Math.round(ratePerGram * 10).toLocaleString('en-IN')}`);
+        processed = processed.replaceAll('&lt;10* platinum rate&gt;', `₹${Math.round(ratePerGram * 10).toLocaleString('en-IN')}`);
+        processed = processed.replaceAll('[platinum_price_1g]', `₹${Math.round(ratePerGram).toLocaleString('en-IN')}`);
     }
 
     return processed;

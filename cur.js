@@ -1,4 +1,4 @@
-export const GOLD_RATE_TEMPLATE = {
+module.exports = {
   "sections": {
     "main": {
       "type": "main-page",

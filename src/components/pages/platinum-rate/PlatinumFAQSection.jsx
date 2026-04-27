@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Plus, Minus } from "lucide-react";
 
-export default function FAQSection({ cityName, stateName, todayRate, sectionData }) {
+export default function PlatinumFAQSection({ cityName, stateName, todayRate, sectionData }) {
   const [openIndex, setOpenIndex] = useState(null);
 
   const { settings, blocks, block_order } = sectionData || {};
@@ -17,15 +17,17 @@ export default function FAQSection({ cityName, stateName, todayRate, sectionData
       .replaceAll('{cityName}', cityName)
       .replaceAll('{stateName}', stateName);
 
-    const rate24_10 = todayRate;
-    const rate22_10 = Math.round(todayRate * (22 / 24));
-    const rate24_1 = Math.round(todayRate / 10);
-    const rate22_1 = Math.round((todayRate / 10) * (22 / 24));
-
-    processed = processed.replaceAll('[gold_rate_24kt_10gm]', `₹${rate24_10.toLocaleString('en-IN')}`);
-    processed = processed.replaceAll('[gold_rate_22kt_10gm]', `₹${rate22_10.toLocaleString('en-IN')}`);
-    processed = processed.replaceAll('[gold_rate_24kt]', `₹${rate24_1.toLocaleString('en-IN')}`);
-    processed = processed.replaceAll('[gold_rate_22kt]', `₹${rate22_1.toLocaleString('en-IN')}`);
+    if (todayRate) {
+        const ratePerGram = todayRate / 10;
+        processed = processed.replaceAll('[platinum_rate_999]', `₹${Math.round(ratePerGram).toLocaleString('en-IN')}`);
+        processed = processed.replaceAll('[platinum_rate_950]', `₹${Math.round(ratePerGram * (950 / 1000)).toLocaleString('en-IN')}`);
+        processed = processed.replaceAll('[platinum_rate_900]', `₹${Math.round(ratePerGram * (900 / 1000)).toLocaleString('en-IN')}`);
+        
+        // JSON specific ones
+        processed = processed.replaceAll('[platinum_price_1g]', `₹${Math.round(ratePerGram).toLocaleString('en-IN')}`);
+        processed = processed.replaceAll('[current_date_timestamp]', new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }));
+        processed = processed.replaceAll('[current_date]', new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }));
+    }
 
     return processed;
   };

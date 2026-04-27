@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Plus, Minus } from "lucide-react";
 
-export default function FAQSection({ cityName, stateName, todayRate, sectionData }) {
+export default function SilverFAQSection({ cityName, stateName, todayRate, sectionData }) {
   const [openIndex, setOpenIndex] = useState(null);
 
   const { settings, blocks, block_order } = sectionData || {};
@@ -17,15 +17,20 @@ export default function FAQSection({ cityName, stateName, todayRate, sectionData
       .replaceAll('{cityName}', cityName)
       .replaceAll('{stateName}', stateName);
 
-    const rate24_10 = todayRate;
-    const rate22_10 = Math.round(todayRate * (22 / 24));
-    const rate24_1 = Math.round(todayRate / 10);
-    const rate22_1 = Math.round((todayRate / 10) * (22 / 24));
+    const ratePerGram = todayRate / 10;
 
-    processed = processed.replaceAll('[gold_rate_24kt_10gm]', `₹${rate24_10.toLocaleString('en-IN')}`);
-    processed = processed.replaceAll('[gold_rate_22kt_10gm]', `₹${rate22_10.toLocaleString('en-IN')}`);
-    processed = processed.replaceAll('[gold_rate_24kt]', `₹${rate24_1.toLocaleString('en-IN')}`);
-    processed = processed.replaceAll('[gold_rate_22kt]', `₹${rate22_1.toLocaleString('en-IN')}`);
+    processed = processed.replaceAll('[silver_rate_999]', `₹${Math.round(ratePerGram).toLocaleString('en-IN')}`);
+    processed = processed.replaceAll('[silver_rate_958]', `₹${Math.round(ratePerGram * (958 / 999)).toLocaleString('en-IN')}`);
+    processed = processed.replaceAll('[silver_rate_925]', `₹${Math.round(ratePerGram * (925 / 999)).toLocaleString('en-IN')}`);
+    processed = processed.replaceAll('[silver_rate_999_10gm]', `₹${Math.round(ratePerGram * 10).toLocaleString('en-IN')}`);
+    processed = processed.replaceAll('[silver_rate_958_10gm]', `₹${Math.round(ratePerGram * 10 * (958 / 999)).toLocaleString('en-IN')}`);
+    processed = processed.replaceAll('[silver_rate_925_10gm]', `₹${Math.round(ratePerGram * 10 * (925 / 999)).toLocaleString('en-IN')}`);
+    
+    // Extra variables found in JSON
+    processed = processed.replaceAll('[silver_price_10g]', `₹${Math.round(ratePerGram * 10).toLocaleString('en-IN')}`);
+    processed = processed.replaceAll('[silver_rate_10g]', `₹${Math.round(ratePerGram * 10).toLocaleString('en-IN')}`);
+    processed = processed.replaceAll('[silver_price_100g]', `₹${Math.round(ratePerGram * 100).toLocaleString('en-IN')}`);
+    processed = processed.replaceAll('[silver_rate_1kg]', `₹${Math.round(ratePerGram * 1000).toLocaleString('en-IN')}`);
 
     return processed;
   };

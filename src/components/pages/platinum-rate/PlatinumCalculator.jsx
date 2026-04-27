@@ -2,38 +2,36 @@
 
 import { useState, useMemo } from "react";
 
-const KARATS = [
-  { label: "9kt", value: 9 },
-  { label: "14kt", value: 14 },
-  { label: "18kt", value: 18 },
-  { label: "22kt", value: 22 },
-  { label: "24kt", value: 24 },
+const PURITIES = [
+  { label: "Pt999", value: 999 },
+  { label: "Pt950", value: 950 },
+  { label: "Pt900", value: 900 },
 ];
 
-export default function GoldCalculator({ cityName, baseRate }) {
-  const [activeKarat, setActiveKarat] = useState(24);
+export default function PlatinumCalculator({ cityName, baseRate }) {
+  const [activePurity, setActivePurity] = useState(999);
   const [weight, setWeight] = useState(1);
   const [includeGST, setIncludeGST] = useState(true);
   const [showResults, setShowResults] = useState(false);
 
   const perGramRate = useMemo(() => {
-    const rate24 = baseRate / 10;
-    if (activeKarat === 24) return rate24;
-    return rate24 * (activeKarat / 24);
-  }, [baseRate, activeKarat]);
+    const rate999 = baseRate / 10;
+    if (activePurity === 999) return rate999;
+    return rate999 * (activePurity / 1000);
+  }, [baseRate, activePurity]);
 
-  const goldPrice = perGramRate * weight;
-  const cgst = goldPrice * 0.015;
-  const sgst = goldPrice * 0.015;
+  const platinumPrice = perGramRate * weight;
+  const cgst = platinumPrice * 0.015;
+  const sgst = platinumPrice * 0.015;
   const totalGST = cgst + sgst;
-  const finalAmount = includeGST ? goldPrice + totalGST : goldPrice;
+  const finalAmount = includeGST ? platinumPrice + totalGST : platinumPrice;
 
   return (
     <section className="py-8 md:py-10 bg-[#FAF3EC]/30">
       <div className="container-main px-4">
         <div className="max-w-4xl mx-auto text-center mb-16 space-y-4">
           <h2 className="text-[18px] md:text-[28px] font-medium text-zinc-900 uppercase tracking-tight font-abhaya">
-            Gold Price Calculator
+            Platinum Price Calculator
           </h2>
           <p className="text-zinc-500 font-figtree tracking-wider uppercase text-[14px] md:text-[18px]">
             Real-time Estimates for {cityName}
@@ -42,13 +40,13 @@ export default function GoldCalculator({ cityName, baseRate }) {
 
         <div className="flex flex-col lg:flex-row gap-10 items-stretch">
           <div className="flex-1 w-full bg-white p-6 md:p-12 rounded-[2rem] shadow-sm border border-zinc-100">
-            <p className="text-[10px] uppercase tracking-[0.2em] font-bold text-zinc-400 mb-4 md:mb-6 font-figtree">1. Choose Karatage</p>
+            <p className="text-[10px] uppercase tracking-[0.2em] font-bold text-zinc-400 mb-4 md:mb-6 font-figtree">1. Choose Purity</p>
             <div className="flex bg-zinc-50 p-1 rounded-2xl gap-1 mb-8 md:mb-10">
-              {KARATS.map((k) => (
+              {PURITIES.map((k) => (
                 <button
                   key={k.value}
-                  onClick={() => setActiveKarat(k.value)}
-                  className={`flex-1 py-3 md:py-4 text-[10px] md:text-sm rounded-xl transition-all font-figtree tracking-widest uppercase ${activeKarat === k.value
+                  onClick={() => setActivePurity(k.value)}
+                  className={`flex-1 py-3 md:py-4 text-[10px] md:text-sm rounded-xl transition-all font-figtree tracking-widest uppercase ${activePurity === k.value
                       ? "bg-primary text-white shadow-md font-bold"
                       : "text-zinc-400 hover:text-zinc-600"
                     }`}
@@ -72,7 +70,7 @@ export default function GoldCalculator({ cityName, baseRate }) {
                 </div>
               </div>
               <div className="space-y-4">
-                <label className="text-[10px] uppercase tracking-[0.2em] font-bold text-zinc-400 font-figtree">Current {activeKarat}KT Rate</label>
+                <label className="text-[10px] uppercase tracking-[0.2em] font-bold text-zinc-400 font-figtree">Current {activePurity === 999 ? 'Pt999' : `Pt${activePurity}`} Rate</label>
                 <div className="w-full h-16 bg-zinc-50 border-2 border-zinc-50 rounded-2xl px-6 flex items-center text-zinc-500 font-bold font-figtree text-xl tracking-tight">
                   ₹ {perGramRate.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                 </div>
@@ -117,8 +115,8 @@ export default function GoldCalculator({ cityName, baseRate }) {
 
               <div className="space-y-5">
                 <div className="flex justify-between items-center">
-                  <span className="text-zinc-400 text-xs uppercase tracking-widest font-bold font-figtree">Gold Value</span>
-                  <span className="font-bold text-zinc-900 font-figtree text-lg tracking-tight">₹{goldPrice.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+                  <span className="text-zinc-400 text-xs uppercase tracking-widest font-bold font-figtree">Platinum Value</span>
+                  <span className="font-bold text-zinc-900 font-figtree text-lg tracking-tight">₹{platinumPrice.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
                 </div>
                 {includeGST && (
                   <div className="space-y-4">

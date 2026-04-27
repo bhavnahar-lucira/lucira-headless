@@ -4,6 +4,8 @@ import ContactSection from "@/components/common/ContactSection";
 import SitemapPage from "@/components/sitemap/SitemapPage";
 import FooterPageContent from "@/components/FooterPageContent";
 import GoldRatePage from "@/components/pages/gold-rate/GoldRatePage";
+import SilverRatePage from "@/components/pages/silver-rate/SilverRatePage";
+import PlatinumRatePage from "@/components/pages/platinum-rate/PlatinumRatePage";
 
 export default async function Page({ params }) {
   const { handle } = await params;
@@ -24,8 +26,18 @@ export default async function Page({ params }) {
 
   if (!page) return notFound();
 
-  // Handle Gold Rate pages (using handle pattern or presence of city/state metafields)
-  const isGoldRatePage = handle.includes("gold-rate-today") || (page.city && page.state);
+  // Handle Gold, Silver, and Platinum Rate pages
+  const isSilverRatePage = handle.includes("silver-rate-today");
+  const isPlatinumRatePage = handle.includes("platinum-rate-today");
+  const isGoldRatePage = handle.includes("gold-rate-today") || (page.city && page.state && !isSilverRatePage && !isPlatinumRatePage);
+
+  if (isSilverRatePage) {
+    return <SilverRatePage page={page} />;
+  }
+
+  if (isPlatinumRatePage) {
+    return <PlatinumRatePage page={page} />;
+  }
 
   if (isGoldRatePage) {
     return <GoldRatePage page={page} />;
