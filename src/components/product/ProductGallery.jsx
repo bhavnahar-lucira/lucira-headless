@@ -14,7 +14,9 @@ import "swiper/css/free-mode";
 import "swiper/css/navigation";
 import "swiper/css/thumbs";
 
-export default function ProductGallery({ media = [], title = "", activeColor = "", onViewSimilar, hasSimilar = false }) {
+import TryOnButton from "../common/TryOnButton";
+
+export default function ProductGallery({ media = [], title = "", activeColor = "", onViewSimilar, hasSimilar = false, product, activeVariant }) {
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [zoomLevel, setZoomLevel] = useState(1);
@@ -234,10 +236,18 @@ export default function ProductGallery({ media = [], title = "", activeColor = "
               )}
               
               {isFirst && (
-                <div className="absolute top-4 left-4 flex flex-col gap-2">
-                  <span className="bg-white/95 px-3 py-1.5 rounded-sm text-[10px] font-bold uppercase tracking-[0.05em] shadow-sm">Best Seller</span>
-                  <span className="bg-white/95 px-3 py-1.5 rounded-sm text-[10px] font-bold uppercase tracking-[0.05em] shadow-sm">Fast Shipping</span>
-                </div>
+                <>
+                  <div className="absolute top-4 left-4 flex flex-col gap-2 z-10">
+                    <span className="bg-white/95 px-3 py-1.5 rounded-sm text-[10px] font-bold uppercase tracking-[0.05em] shadow-sm w-fit">Best Seller</span>
+                    <span className="bg-white/95 px-3 py-1.5 rounded-sm text-[10px] font-bold uppercase tracking-[0.05em] shadow-sm w-fit">Fast Shipping</span>
+                  </div>
+                  <TryOnButton 
+                    product={product} 
+                    activeVariant={activeVariant}
+                    id="tryonbutton-desktop"
+                    className="absolute bottom-4 left-4 bg-white/95 backdrop-blur-sm px-4 py-2.5 rounded-full text-[12px] font-bold flex items-center gap-2 shadow-sm border border-gray-100 uppercase tracking-wider hover:bg-gray-50 transition-colors cursor-pointer z-10"
+                  />
+                </>
               )}
 
               {isVideo && (
@@ -318,9 +328,14 @@ export default function ProductGallery({ media = [], title = "", activeColor = "
 
           {/* Action Buttons Overlay */}
           <div className="absolute bottom-4 left-2 right-2 flex justify-between items-center z-10">
-             <button className="bg-white/95 backdrop-blur-sm px-4 py-2.5 rounded-full text-[12px] font-bold flex items-center gap-2 shadow-sm border border-gray-100 uppercase tracking-wider">
-               <Eye size={16} /> Virtual try on
-             </button>
+             <div onClick={(e) => e.stopPropagation()} className="data-no-swiping">
+               <TryOnButton 
+                 product={product} 
+                 activeVariant={activeVariant}
+                 id="tryonbutton-mobile"
+                 className="bg-white/95 backdrop-blur-sm px-4 py-2.5 rounded-full text-[12px] font-bold flex items-center gap-2 shadow-sm border border-gray-100 uppercase tracking-wider cursor-pointer"
+               />
+             </div>
              <button 
                onClick={(e) => {
                  e.stopPropagation();

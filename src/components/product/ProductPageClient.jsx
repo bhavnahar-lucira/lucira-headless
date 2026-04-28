@@ -73,6 +73,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import StyledByLucira from "../home/StyledByLucira";
+import TryOnButton from "@/components/common/TryOnButton";
 
 // Force en-IN formatting to be consistent across environments
 const formatPrice = (num) => {
@@ -788,14 +789,15 @@ export default function ProductPageClient({ product, complementaryProducts = [],
 
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] xl:grid-cols-[1fr_530px] gap-10 items-start">
           {/* Left: Product Gallery */}
-          <ProductGallery 
-            media={product.media || []} 
-            title={product.title} 
-            activeColor={activeColor} 
+          <ProductGallery
+            media={product.media || []}
+            title={product.title}
+            activeColor={activeColor}
             onViewSimilar={fetchSimilar}
             hasSimilar={hasSimilarItems}
+            product={product}
+            activeVariant={activeVariant}
           />
-
           {/* Right: Product Info */}
           <div className="w-full">
             <div className="space-y-4">
