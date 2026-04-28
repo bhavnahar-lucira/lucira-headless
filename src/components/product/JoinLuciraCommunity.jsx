@@ -55,7 +55,7 @@ export function JoinLuciraCommunity() {
 
   return (
     <section className="w-full bg-[#FEF5F1] overflow-hidden mt-12 md:mt-20">
-      <div className="max-w-480 mx-auto grid md:grid-cols-2 items-stretch">
+      <div className="max-w-480 mx-auto grid lg:grid-cols-2 items-stretch">
         
         {/* Mobile: Top Content | Desktop: Left Side (Images) */}
         {!isMobile && (
@@ -88,19 +88,19 @@ export function JoinLuciraCommunity() {
             </div>
             
             <div className="space-y-4">
-              <form onSubmit={handleSubscribe} className="flex flex-col gap-3">
+              <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-3">
                 <Input 
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Enter your email" 
-                  className="h-14 bg-white/50 border-zinc-300 rounded-lg px-6 text-base placeholder:text-zinc-400 focus-visible:ring-1 focus-visible:ring-zinc-900"
+                  className="h-14 bg-white/50 border-primary rounded-lg px-6 text-base placeholder:text-zinc-400 focus-visible:ring-1 focus-visible:ring-zinc-900"
                   disabled={loading}
                 />
                 <Button 
                   type="submit"
                   disabled={loading}
-                  className="h-14 w-full md:w-fit px-12 bg-[#5A413F] hover:bg-[#4a3533] text-white font-bold text-sm tracking-widest uppercase rounded-lg transition-all flex items-center justify-center gap-2"
+                  className="h-14 w-full md:w-fit px-12 bg-primary hover:accent text-white font-bold text-base uppercase rounded-lg transition-all flex items-center justify-center gap-2"
                 >
                   {loading ? (
                     <>
@@ -112,7 +112,7 @@ export function JoinLuciraCommunity() {
                   )}
                 </Button>
               </form>
-              <p className="text-[11px] md:text-xs text-zinc-500 leading-relaxed">
+              <p className="text-xs text-black">
                 You can unsubscribe anytime. For more details read our{" "}
                 <a href="/pages/privacy-policy" className="underline font-bold text-zinc-900 hover:text-black transition-colors">
                   Privacy Policy

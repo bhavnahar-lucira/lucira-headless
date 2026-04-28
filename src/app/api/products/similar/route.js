@@ -27,7 +27,12 @@ export async function GET(request) {
     }));
 
     const similarProducts = await productsCollection
-      .find({ $or: idFilters })
+      .find({ 
+        $and: [
+          { $or: idFilters },
+          { status: "ACTIVE", isPublished: true }
+        ]
+      })
       .toArray();
 
     return NextResponse.json({ 

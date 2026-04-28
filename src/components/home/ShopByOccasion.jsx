@@ -21,7 +21,7 @@ export default function ShopByOccasion() {
           <p className="text-black text-base md:text-base font-normal">Jewelry for life's most meaningful moments</p>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
           {OCCASIONS.map((occ, index) => (
             <Link 
               key={index} 

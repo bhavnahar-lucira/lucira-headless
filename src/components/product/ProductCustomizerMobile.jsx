@@ -16,6 +16,11 @@ export function ProductCustomizerMobile({
   product,
   isColorInStock,
   isSizeInStock,
+  nearestStore,
+  availableStores,
+  availableStoreCount,
+  deliveryInfo,
+  getStoreDisplayName,
 }) {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -49,7 +54,7 @@ export function ProductCustomizerMobile({
         <h3 className="text-sm font-medium text-gray-900 uppercase tracking-wider">
           SIZE & CUSTOMIZATION
         </h3>
-        <SizeGuideMobile>
+        <SizeGuideMobile nearestStore={nearestStore} availableStores={availableStores} availableStoreCount={availableStoreCount} deliveryInfo={deliveryInfo} getStoreDisplayName={getStoreDisplayName}>
           <button className="text-sm font-medium text-[#A67C7C] hover:cursor-pointer">
             Size Guide
           </button>

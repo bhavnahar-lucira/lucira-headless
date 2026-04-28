@@ -398,13 +398,13 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle 
                           fill
                           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                           priority={index === 0}
-                          className={`object-contain p-4 lg:p-6 grayscale-[0.2] group-hover/card:grayscale-0 transition-all duration-300`}
+                          className={`object-contain p-0 lg:p-6 grayscale-[0.2] group-hover/card:grayscale-0 transition-all duration-300`}
                         />
                       </div>
                     </SwiperSlide>
                   ))}
                   {galleryImages.length > 1 && (
-                    <div className={`pagination-${swiperId} swiper-pagination !bottom-2 lg:!hidden`} />
+                    <div className={`pagination-${swiperId} swiper-pagination bottom-0! lg:!hidden`} />
                   )}
                 </Swiper>
               ) : (
@@ -416,7 +416,7 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle 
             {videoMedia && (
               <button 
                 onClick={(e) => { e.preventDefault(); setShowVideoPopup(true); }}
-                className="absolute bottom-2 left-2 lg:bottom-4 lg:left-4 z-10 w-7 h-7 lg:w-9 lg:h-9 flex items-center justify-center rounded-full bg-white/90 backdrop-blur-sm border border-zinc-200 text-zinc-900 shadow-sm hover:bg-black hover:text-white transition-all duration-300"
+                className="absolute bottom-4 left-2 lg:left-4 z-10 w-7 h-7 lg:w-9 lg:h-9 flex items-center justify-center rounded-full bg-white/90 backdrop-blur-sm border border-zinc-200 text-zinc-900 shadow-sm hover:bg-black hover:text-white transition-all duration-300"
               >
                 <Play fill="currentColor" className="w-3 lg:w-4" />
               </button>
@@ -518,15 +518,15 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle 
                 <DrawerTrigger asChild>
                   <button 
                     onClick={(e) => { e.preventDefault(); fetchSimilar(); }}
-                    className="absolute bottom-2 right-2 lg:bottom-4 lg:right-4 z-10 w-7 h-7 lg:w-9 lg:h-9 flex items-center justify-center rounded-full bg-white/90 backdrop-blur-sm border border-zinc-200 text-zinc-900 shadow-sm hover:bg-black hover:text-white transition-all duration-300"
+                    className="absolute bottom-4 right-2 lg:right-4 z-10 w-7 h-7 lg:w-9 lg:h-9 flex items-center justify-center rounded-full bg-white/90 backdrop-blur-sm border border-zinc-200 text-zinc-900 shadow-sm hover:bg-black hover:text-white transition-all duration-300"
                   >
                     <Copy className="w-3 lg:w-4" />
                   </button>
                 </DrawerTrigger>
                 <DrawerContent className="max-h-[90vh] h-[90vh] bg-white rounded-t-[20px] flex flex-col">
-                  <div className="mx-auto w-full max-w-7xl flex flex-col h-full overflow-hidden">
-                    <DrawerHeader className="px-10 pt-10 flex flex-row items-center justify-between border-b border-zinc-100 pb-6 !text-left !flex-row shrink-0">
-                      <DrawerTitle className="text-[15px] font-medium tracking-[0.2em] text-black uppercase">VIEW SIMILAR</DrawerTitle>
+                  <div className="mx-auto w-full flex flex-col h-full overflow-hidden">
+                    <DrawerHeader className="px-10 py-6 flex flex-row items-center justify-between border-b border-zinc-100 !text-left !flex-row shrink-0">
+                      <DrawerTitle className="text-xl font-medium text-black uppercase">VIEW SIMILAR</DrawerTitle>
                       <DrawerClose asChild>
                         <button className="text-zinc-400 hover:text-black transition-colors hover:cursor-pointer p-1">
                           <X size={22} strokeWidth={1.5} />
@@ -534,14 +534,14 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle 
                       </DrawerClose>
                     </DrawerHeader>
                     
-                    <div className="px-10 py-10 overflow-y-auto flex-1">
+                    <div className="sm:px-10 sm:py-10 px-5 py-5 overflow-y-auto flex-1">
                       {loadingSimilar ? (
                         <div className="flex flex-col items-center justify-center py-20 gap-4 w-full">
                           <Loader2 className="animate-spin text-zinc-400" size={40} />
                           <p className="text-sm font-bold uppercase tracking-widest text-zinc-400">Searching matching designs...</p>
                         </div>
                       ) : similarProducts.length > 0 ? (
-                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-x-8 gap-y-12 pb-10">
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 sm:gap-x-8 gap-x-4 sm:gap-y-12 gap-y-6 pb-10">
                           {similarProducts.slice(0, 10).map((item) => {
                             const itemId = item.shopifyId || item.id;
                             return (
@@ -628,7 +628,7 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle 
                           aria-label={`Show ${base} color`}
                           onClick={() => setActiveBase(base)}
                           className={`w-5 h-5 lg:w-7 lg:h-7 rounded-full border transition-all flex items-center justify-center hover:scale-110 ${
-                            isActive ? "border-black dark:border-white p-0.5" : "border-transparent"
+                            isActive ? "border-black dark:border-white" : "border-transparent"
                           }`}
                         >
                           <span
