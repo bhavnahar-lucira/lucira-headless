@@ -241,12 +241,14 @@ export default function ProductGallery({ media = [], title = "", activeColor = "
                     <span className="bg-white/95 px-3 py-1.5 rounded-sm text-[10px] font-bold uppercase tracking-[0.05em] shadow-sm w-fit">Best Seller</span>
                     <span className="bg-white/95 px-3 py-1.5 rounded-sm text-[10px] font-bold uppercase tracking-[0.05em] shadow-sm w-fit">Fast Shipping</span>
                   </div>
-                  <TryOnButton 
-                    product={product} 
-                    activeVariant={activeVariant}
-                    id="tryonbutton-desktop"
-                    className="absolute bottom-4 left-4 bg-white/95 backdrop-blur-sm px-4 py-2.5 rounded-full text-[12px] font-bold flex items-center gap-2 shadow-sm border border-gray-100 uppercase tracking-wider hover:bg-gray-50 transition-colors cursor-pointer z-10"
-                  />
+                  <div onClick={(e) => e.stopPropagation()}>
+                    <TryOnButton 
+                      product={product} 
+                      activeVariant={activeVariant}
+                      id="tryonbutton-desktop"
+                      className="absolute bottom-4 left-4 bg-white/95 backdrop-blur-sm px-4 py-2.5 rounded-full text-[12px] font-bold flex items-center gap-2 shadow-sm border border-gray-100 uppercase tracking-wider hover:bg-gray-50 transition-colors cursor-pointer z-30"
+                    />
+                  </div>
                 </>
               )}
 
