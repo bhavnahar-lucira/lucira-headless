@@ -58,13 +58,20 @@ function transformMenu(shopifyMenu) {
     if (menuType === "mega") {
         const children = item.items || [];
         
-        // 1. Detect Featured Group
+        // 1. Detect Featured Groups
         if (!isFeaturedDisabled) {
-            const featuredGroup = children.find(c => c.title.toLowerCase().startsWith("featured"));
-            if (featuredGroup) {
-                transformedItem.featured = {
-                    title: featuredGroup.title,
-                    items: featuredGroup.items.map(f => {
+            const featuredGroup = children.find(c => {
+                const title = c.title.toLowerCase();
+                return title.includes("featured") && !title.includes("in");
+            });
+            const featuredInGroup = children.find(c => c.title.toLowerCase().includes("featured in"));
+
+            if (featuredGroup || featuredInGroup) {
+                transformedItem.featured = {};
+                
+                if (featuredGroup) {
+                    transformedItem.featured.title = featuredGroup.title;
+                    transformedItem.featured.items = featuredGroup.items.map(f => {
                         const fResource = f.resource || {};
                         const fMeta = fResource.metafields?.nodes || [];
                         return {
@@ -72,14 +79,34 @@ function transformMenu(shopifyMenu) {
                             href: f.url.replace(/https:\/\/[^/]+/, ""),
                             menuIcon: getFileUrl(getMetafield(fMeta, "custom", "menu_links_image_icon")),
                         };
-                    })
-                };
+                    });
+                }
+
+                if (featuredInGroup) {
+                  transformedItem.featured.featuredIn = {
+                      title: featuredInGroup.title,
+                      items: featuredInGroup.items.map(f => {
+                          const fResource = f.resource || {};
+                          const fMeta = fResource.metafields?.nodes || [];
+                          return {
+                              label: f.title,
+                              href: f.url.replace(/https:\/\/[^/]+/, ""),
+                              icon: getFileUrl(getMetafield(fMeta, "custom", "menu_links_image_icon")) || getFileUrl(getMetafield(fMeta, "custom", "icon")),
+                          };
+                      })
+                  };
+                }
             }
         }
 
         // 2. Separate remaining items into Columns or Cards (Banners)
-        // This matches the Liquid logic: items with images are cards, others are columns.
-        const remainingItems = children.filter(c => !c.title.toLowerCase().startsWith("featured"));
+        // Filter out any group that was treated as "Featured" or "Featured In"
+        const remainingItems = children.filter(c => {
+            const title = c.title.toLowerCase();
+            const isFeatured = title.includes("featured") && !title.includes("in");
+            const isFeaturedIn = title.includes("featured in");
+            return !isFeatured && !isFeaturedIn;
+        });
         
         const columns = [];
         const cards = [];
