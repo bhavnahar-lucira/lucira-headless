@@ -75,6 +75,16 @@ import {
 import StyledByLucira from "../home/StyledByLucira";
 import { Sheet as MobileSheet } from "react-modal-sheet";
 
+function useMounted() {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  return mounted;
+}
+
 // Force en-IN formatting to be consistent across environments
 const formatPrice = (num) => {
   if (num === null || num === undefined) return "0";
@@ -808,6 +818,9 @@ export default function ProductPageClient({ product, complementaryProducts = [],
   // Get current display price from active variant or product
   const currentPrice = activeVariant ? activeVariant.price : product.price;
   const currentComparePrice = activeVariant ? activeVariant.compare_price : product.compare_price;
+  const mounted = useMounted();
+  const isDesktop = useMediaQuery("(max-width: 1023px)");
+  if (!mounted) return null;
 
   return (
     <div className="w-full">
@@ -1044,6 +1057,11 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                 product={product}
                 isColorInStock={isColorInStock}
                 isSizeInStock={isSizeInStock}
+                nearestStore={nearestStore}
+                availableStores={availableStores}
+                availableStoreCount={availableStoreCount}
+                deliveryInfo={deliveryInfo}
+                getStoreDisplayName={getStoreDisplayName}
               />
 
               {/* Desktop Selection Blocks */}
@@ -1878,80 +1896,168 @@ export default function ProductPageClient({ product, complementaryProducts = [],
       />
       <JoinLuciraCommunity/>
 
-      <Sheet open={isStoreDrawerOpen} onOpenChange={setIsStoreDrawerOpen}>
-        <SheetContent side="right" className="w-full sm:max-w-[450px] p-0 flex flex-col">
-          <SheetHeader className="p-6 border-b border-gray-100 flex flex-row items-center justify-between">
-            <SheetTitle className="text-lg font-bold">Store Availability</SheetTitle>
-          </SheetHeader>
-          
-          <div className="flex-1 overflow-y-auto p-6">
-            <div className="space-y-6">
-              {availableStores.length > 0 ? (
-                availableStores.map((store) => (
-                  <div key={store.id || store.shopifyId} className="border border-gray-100 rounded-xl p-5 space-y-4 bg-gray-50/50">
-                    <div className="flex justify-between items-start">
-                      <div className="space-y-1">
-                        <h3 className="font-bold text-lg">{getStoreDisplayName(store.name)}</h3>
-                        {store.distance !== null && (
-                          <div className="flex items-center gap-1.5 text-primary font-semibold text-sm">
-                            <MapPin size={14} />
-                            {Math.round(store.distance)} Km away
+      {isDesktop ? (
+        <MobileSheet
+          isOpen={isStoreDrawerOpen}
+          onClose={() => setIsStoreDrawerOpen(false)}
+          detents={[0.9, 0.5]}
+        >
+          <MobileSheet.Container className="z-[9999]">
+            <MobileSheet.Header />
+                <MobileSheet.Content>
+                  <div className="h-[100dvh]">
+                    <div className="flex items-center justify-between px-4 pb-6 border-b border-gray-100">
+                      <h2 className="text-lg font-bold">Store Availability</h2>
+                      <button onClick={() => setIsStoreDrawerOpen(false)} className="p-2">
+                        <X size={20} className="text-gray-400" />
+                      </button>
+                    </div>
+
+                    <div className="space-y-6  overflow-y-auto h-full">
+                    {availableStores.length > 0 ? (
+                      availableStores.map((store) => (
+                        <div key={store.id || store.shopifyId} className="border border-gray-100 rounded-xl p-5 space-y-4 bg-gray-50/50">
+                          <div className="flex justify-between items-start">
+                            <div className="space-y-1">
+                              <h3 className="font-bold text-lg">{getStoreDisplayName(store.name)}</h3>
+                              {store.distance !== null && (
+                                <div className="flex items-center gap-1.5 text-primary font-semibold text-sm">
+                                  <MapPin size={14} />
+                                  {Math.round(store.distance)} Km away
+                                </div>
+                              )}
+                            </div>
+                            {store.isInStock ? (
+                              <div className="bg-[#E3F5E0] text-black px-3 py-1 rounded-full flex items-center gap-1.5">
+                                <div className="w-2 h-2 bg-[#76D168] rounded-full"></div>
+                                <span className="text-xs font-bold uppercase">In Stock</span>
+                              </div>
+                            ) : (
+                              <div className="bg-amber-50 text-amber-700 px-3 py-1 rounded-full flex items-center gap-1.5 border border-amber-100">
+                                <div className="w-2 h-2 bg-amber-400 rounded-full"></div>
+                                <span className="text-xs font-bold uppercase">Ships to Store</span>
+                              </div>
+                            )}
                           </div>
-                        )}
-                      </div>
-                      {store.isInStock ? (
-                        <div className="bg-[#E3F5E0] text-black px-3 py-1 rounded-full flex items-center gap-1.5">
-                          <div className="w-2 h-2 bg-[#76D168] rounded-full"></div>
-                          <span className="text-xs font-bold uppercase">In Stock</span>
-                        </div>
-                      ) : (
-                        <div className="bg-amber-50 text-amber-700 px-3 py-1 rounded-full flex items-center gap-1.5 border border-amber-100">
-                          <div className="w-2 h-2 bg-amber-400 rounded-full"></div>
-                          <span className="text-xs font-bold uppercase">Ships to Store</span>
-                        </div>
-                      )}
-                    </div>
 
-                    <div className="space-y-3 pt-2">
-                      <div className="flex items-start gap-3 text-sm text-gray-600">
-                        <MapPin size={18} className="shrink-0 text-gray-400 mt-0.5" />
-                        <p className="leading-relaxed font-medium">{store.address1 || store.address}, {store.city}</p>
-                      </div>
-                      <div className="flex items-center gap-3 text-sm text-gray-600">
-                        <Phone size={18} className="shrink-0 text-gray-400" />
-                        <p className="font-medium">{store.phone || "+91 91724 99912"}</p>
-                      </div>
-                      <div className="flex items-center gap-3 text-sm text-gray-600">
-                        <Package size={18} className="shrink-0 text-gray-400" />
-                        <p className="font-medium">Ready for pickup in 2-4 hours</p>
-                      </div>
-                    </div>
+                          <div className="space-y-3 pt-2">
+                            <div className="flex items-start gap-3 text-sm text-gray-600">
+                              <MapPin size={18} className="shrink-0 text-gray-400 mt-0.5" />
+                              <p className="leading-relaxed font-medium">{store.address1 || store.address}, {store.city}</p>
+                            </div>
+                            <div className="flex items-center gap-3 text-sm text-gray-600">
+                              <Phone size={18} className="shrink-0 text-gray-400" />
+                              <p className="font-medium">{store.phone || "+91 91724 99912"}</p>
+                            </div>
+                            <div className="flex items-center gap-3 text-sm text-gray-600">
+                              <Package size={18} className="shrink-0 text-gray-400" />
+                              <p className="font-medium">Ready for pickup in 2-4 hours</p>
+                            </div>
+                          </div>
 
-                    <div className="grid grid-cols-2 gap-3 pt-2">
-                      <Button variant="outline" className="font-bold h-11 rounded-lg border-gray-200" asChild>
-                        <a href={`tel:${store.phone || "+919172499912"}`}>CALL STORE</a>
-                      </Button>
-                      <Button className="font-bold h-11 rounded-lg">
-                        DIRECTIONS
-                      </Button>
+                          <div className="grid grid-cols-2 gap-3 pt-2">
+                            <Button variant="outline" className="font-bold h-11 rounded-lg border-gray-200" asChild>
+                              <a href={`tel:${store.phone || "+919172499912"}`}>CALL STORE</a>
+                            </Button>
+                            <Button className="font-bold h-11 rounded-lg">
+                              DIRECTIONS
+                            </Button>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                    <div className="flex flex-col items-center justify-center py-20 text-center gap-4">
+                      <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center">
+                        <Store className="text-gray-300" size={32} />
+                      </div>
+                      <div className="space-y-1">
+                        <p className="font-bold text-gray-900">No Stores with Stock</p>
+                        <p className="text-sm text-gray-500">This design is currently not available in any nearby stores.</p>
+                      </div>
                     </div>
-                  </div>
-                ))
-              ) : (
-                <div className="flex flex-col items-center justify-center py-20 text-center gap-4">
-                  <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center">
-                    <Store className="text-gray-300" size={32} />
-                  </div>
-                  <div className="space-y-1">
-                    <p className="font-bold text-gray-900">No Stores with Stock</p>
-                    <p className="text-sm text-gray-500">This design is currently not available in any nearby stores.</p>
-                  </div>
+                  )}
                 </div>
-              )}
-            </div>
-          </div>
-        </SheetContent>
-      </Sheet>
+              </div>
+            </MobileSheet.Content>
+          </MobileSheet.Container>
+          <MobileSheet.Backdrop />
+        </MobileSheet>
+          ) : (
+            <Sheet open={isStoreDrawerOpen} onOpenChange={setIsStoreDrawerOpen}>
+            <SheetContent side="right" className="w-full sm:max-w-[450px] p-0 flex flex-col">
+              <SheetHeader className="p-6 border-b border-gray-100 flex flex-row items-center justify-between">
+                <SheetTitle className="text-lg font-bold">Store Availability</SheetTitle>
+              </SheetHeader>
+              
+              <div className="flex-1 overflow-y-auto p-6">
+                <div className="space-y-6">
+                  {availableStores.length > 0 ? (
+                    availableStores.map((store) => (
+                      <div key={store.id || store.shopifyId} className="border border-gray-100 rounded-xl p-5 space-y-4 bg-gray-50/50">
+                        <div className="flex justify-between items-start">
+                          <div className="space-y-1">
+                            <h3 className="font-bold text-lg">{getStoreDisplayName(store.name)}</h3>
+                            {store.distance !== null && (
+                              <div className="flex items-center gap-1.5 text-primary font-semibold text-sm">
+                                <MapPin size={14} />
+                                {Math.round(store.distance)} Km away
+                              </div>
+                            )}
+                          </div>
+                          {store.isInStock ? (
+                            <div className="bg-[#E3F5E0] text-black px-3 py-1 rounded-full flex items-center gap-1.5">
+                              <div className="w-2 h-2 bg-[#76D168] rounded-full"></div>
+                              <span className="text-xs font-bold uppercase">In Stock</span>
+                            </div>
+                          ) : (
+                            <div className="bg-amber-50 text-amber-700 px-3 py-1 rounded-full flex items-center gap-1.5 border border-amber-100">
+                              <div className="w-2 h-2 bg-amber-400 rounded-full"></div>
+                              <span className="text-xs font-bold uppercase">Ships to Store</span>
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="space-y-3 pt-2">
+                          <div className="flex items-start gap-3 text-sm text-gray-600">
+                            <MapPin size={18} className="shrink-0 text-gray-400 mt-0.5" />
+                            <p className="leading-relaxed font-medium">{store.address1 || store.address}, {store.city}</p>
+                          </div>
+                          <div className="flex items-center gap-3 text-sm text-gray-600">
+                            <Phone size={18} className="shrink-0 text-gray-400" />
+                            <p className="font-medium">{store.phone || "+91 91724 99912"}</p>
+                          </div>
+                          <div className="flex items-center gap-3 text-sm text-gray-600">
+                            <Package size={18} className="shrink-0 text-gray-400" />
+                            <p className="font-medium">Ready for pickup in 2-4 hours</p>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3 pt-2">
+                          <Button variant="outline" className="font-bold h-11 rounded-lg border-gray-200" asChild>
+                            <a href={`tel:${store.phone || "+919172499912"}`}>CALL STORE</a>
+                          </Button>
+                          <Button className="font-bold h-11 rounded-lg">
+                            DIRECTIONS
+                          </Button>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="flex flex-col items-center justify-center py-20 text-center gap-4">
+                      <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center">
+                        <Store className="text-gray-300" size={32} />
+                      </div>
+                      <div className="space-y-1">
+                        <p className="font-bold text-gray-900">No Stores with Stock</p>
+                        <p className="text-sm text-gray-500">This design is currently not available in any nearby stores.</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </SheetContent>
+          </Sheet>
+        )}
     </div>
   );
 }

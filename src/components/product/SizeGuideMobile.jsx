@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { X, Play } from "lucide-react";
 import { Sheet } from "react-modal-sheet";
 
@@ -21,7 +22,7 @@ const sizeData = [
   { ind: 17, us: "9", diaIn: 0.74, cirIn: 2.34 },
 ];
 
-export function SizeGuideMobile({ children }) {
+export function SizeGuideMobile({ children, nearestStore, availableStores = [], availableStoreCount = 0, deliveryInfo, getStoreDisplayName  }) {
   const [isOpen, setIsOpen] = useState(false);
   const [unit, setUnit] = useState("inch"); // 'inch' or 'cm'
 
@@ -34,6 +35,7 @@ export function SizeGuideMobile({ children }) {
 
   return (
     <>
+      
       <div onClick={() => setIsOpen(true)} className="contents">
         {children}
       </div>
@@ -53,6 +55,47 @@ export function SizeGuideMobile({ children }) {
                   <X size={20} className="text-gray-400" />
                 </button>
               </div>
+
+              <Link href="https://wa.me/919004435760?text=Hi,%20I%20want%20to%visit%20the%20store" target="_blank">
+                {availableStoreCount > 0 && nearestStore && (
+                  <div className="space-y-4 pt-2">
+                    <h3 className="text-lg font-bold text-gray-900">Nearest Store</h3>
+
+                    <div className="border border-gray-100 rounded-2xl p-4 bg-gray-50/50 space-y-3">
+                      <div className="flex justify-between items-start">
+                        <div className="space-y-0.5">
+                          <h4 className="font-bold text-base">
+                            {getStoreDisplayName ? getStoreDisplayName(nearestStore.name) : nearestStore.name}
+                          </h4>
+                          {nearestStore.distance !== null && (
+                            <p className="text-sm text-primary font-semibold">
+                              {Math.round(nearestStore.distance)} Km away
+                            </p>
+                          )}
+                        </div>
+                        {nearestStore.isInStock ? (
+                          <div className="bg-[#E3F5E0] text-black px-3 py-1 rounded-full flex items-center gap-1.5">
+                            <div className="w-2 h-2 bg-[#76D168] rounded-full" />
+                            <span className="text-xs font-bold uppercase">In Stock</span>
+                          </div>
+                        ) : (
+                          <div className="bg-amber-50 text-amber-700 px-3 py-1 rounded-full flex items-center gap-1.5 border border-amber-100">
+                            <div className="w-2 h-2 bg-amber-400 rounded-full" />
+                            <span className="text-xs font-bold uppercase">Ships to Store</span>
+                          </div>
+                        )}
+                      </div>
+
+                      <p className="text-sm text-gray-600 font-medium">
+                        {nearestStore.address1 || nearestStore.address}, {nearestStore.city}
+                      </p>
+                      <p className="text-sm text-gray-600 font-medium">
+                        {nearestStore.phone || "+91 91724 99912"}
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </Link>
 
               <div className="flex-1 overflow-y-auto mt-6 space-y-8 custom-scrollbar pr-1">
                 {/* Ring Sizer Promo */}
