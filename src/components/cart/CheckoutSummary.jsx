@@ -124,6 +124,12 @@ export default function CheckoutSummary({
       return;
     }
 
+    // If a coupon is applied, remove it
+    if (appliedCoupon) {
+      removeCoupon();
+      toast.info("Coupon has been removed as loyalty points are applied.");
+    }
+
     const promotion = pointsData.promotions[0];
     dispatch(applyPoints({
       coin_value: promotion.coin_value,
