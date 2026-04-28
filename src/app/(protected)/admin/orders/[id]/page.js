@@ -255,7 +255,7 @@ export default function OrderDetailsPage() {
               </div>
               <div className="pt-4 border-t border-zinc-100 flex justify-between items-center">
                 <span className="text-lg font-black text-zinc-900">Total</span>
-                <span className="text-2xl font-black text-primary">
+                <span className="text-2xl font-black font-700 text-primary">
                   {formatCurrency(order.totalPrice.amount, order.totalPrice.currencyCode)}
                 </span>
               </div>

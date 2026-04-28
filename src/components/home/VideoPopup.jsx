@@ -264,7 +264,7 @@ export default function VideoPopup({ isOpen, onClose, videoData, initialIndex })
           width: 4px;
         }
         .custom-scrollbar::-webkit-scrollbar-track {
-          background: #f1f1f1;
+          background: #fff;
           border-radius: 10px;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb {
