@@ -236,8 +236,8 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle 
     const labels = [];
     if (product.label) labels.push(product.label);
     
-    const tags = product.tags || [];
-    const lowerTags = tags.map(t => t.toLowerCase());
+    const tags = Array.isArray(product.tags) ? product.tags : [];
+    const lowerTags = tags.map(t => String(t).toLowerCase());
     
     // Priority order: Fast Shipping > Best Seller > New Arrival > Trending
     if (lowerTags.some(t => t.includes("fast shipping") || t.includes("fastshipping"))) labels.push("Fast Shipping");
