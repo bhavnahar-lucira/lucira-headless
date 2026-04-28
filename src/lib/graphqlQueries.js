@@ -28,11 +28,36 @@ export const GET_BLOGS_QUERY = `
           id
           title
           handle
+          articles(first: 250) {
+            edges {
+              node {
+                id
+                title
+                handle
+                content
+                contentHtml
+                excerpt
+                excerptHtml
+                publishedAt
+                authorV2 {
+                  name
+                }
+                image {
+                  url
+                  altText
+                }
+              }
+            }
+            pageInfo {
+              hasNextPage
+            }
+          }
         }
         cursor
       }
       pageInfo {
         hasNextPage
+        endCursor
       }
     }
   }
@@ -56,10 +81,12 @@ export const GET_ARTICLES_QUERY = `
           }
           image {
             url
+            altText
           }
           blog {
             id
             handle
+            title
           }
         }
         cursor
