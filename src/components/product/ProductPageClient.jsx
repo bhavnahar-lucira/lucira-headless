@@ -74,8 +74,6 @@ import {
 } from "@/components/ui/sheet";
 import StyledByLucira from "../home/StyledByLucira";
 
-import TryOnButton from "@/components/common/TryOnButton";
-
 import { Sheet as MobileSheet } from "react-modal-sheet";
 
 function useMounted() {

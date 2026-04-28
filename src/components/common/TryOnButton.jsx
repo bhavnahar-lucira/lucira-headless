@@ -2,14 +2,13 @@
 
 import { useEffect } from "react";
 
-export default function TryOnButton({ product, activeVariant, className = "", id = "tryonbutton2" }) {
-  const sku = (activeVariant?.sku || product?.variants?.[0]?.sku)?.replace("/", "");
-  const productName = product?.title;
-  const isAvailable = activeVariant ? activeVariant.inStock : product?.available;
+export default function TryOnButton({ sku, productTitle, isAvailable, className = "", id = "tryonbutton2" }) {
+  const formattedSku = sku?.replace("/", "");
+  const productName = productTitle;
 
   // ✅ Load Camweara External Button Script
   useEffect(() => {
-    if (!sku) return;
+    if (!formattedSku) return;
 
     let retryCount = 0;
     const maxRetries = 10;
@@ -20,7 +19,7 @@ export default function TryOnButton({ product, activeVariant, className = "", id
       if (window.loadTryOnButton && btnElement) {
         // console.log(`Initializing Camweara for ${id}`);
         window.loadTryOnButton({
-          psku: sku,
+          psku: formattedSku,
           page: "product",
           tryonBtnId: id, // 👈 bind to button
           regionId: "2",
@@ -55,14 +54,14 @@ export default function TryOnButton({ product, activeVariant, className = "", id
     };
 
     document.body.appendChild(script);
-  }, [sku, isAvailable, id]);
+  }, [formattedSku, isAvailable, id]);
 
   // ✅ Buy Now Callback (Next.js compatible)
   useEffect(() => {
-    if (!sku) return;
+    if (!formattedSku) return;
 
     window.onTryOnBuynowCallback = async (skuReceived) => {
-      if (skuReceived === sku) {
+      if (skuReceived === formattedSku) {
         // 👉 Replace with your real cart logic
         await fetch("/api/cart/add", {
           method: "POST",
@@ -87,7 +86,7 @@ export default function TryOnButton({ product, activeVariant, className = "", id
         }
       }
     };
-  }, [sku]);
+  }, [formattedSku]);
 
   // ✅ GTM Tracking (still works)
   const pushDataLayer = () => {
@@ -95,7 +94,7 @@ export default function TryOnButton({ product, activeVariant, className = "", id
     window.dataLayer.push({
       event: "promoClick",
       promoClick: {
-        promo_id: sku,
+        promo_id: formattedSku,
         creative_name: "Virtual Try On",
         promo_position: "Above Media Gallery",
         promo_name: productName,
@@ -104,7 +103,7 @@ export default function TryOnButton({ product, activeVariant, className = "", id
     });
   };
 
-  if (!sku) return null;
+  if (!formattedSku) return null;
 
   return (
     <button
