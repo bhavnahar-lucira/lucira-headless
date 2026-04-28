@@ -12,7 +12,7 @@ export default function PlatinumInvestmentSection({ cityName, settings }) {
 
   return (
     <section className="py-12 md:py-20 bg-white">
-      <div className="container-main px-4">
+      <div className="container-main">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20">
           {/* Left Column: Heading & Description */}
           <div className="lg:col-span-7 space-y-8">
@@ -22,8 +22,8 @@ export default function PlatinumInvestmentSection({ cityName, settings }) {
               </h2>
               <div className="h-1.5 w-20 bg-primary rounded-full" />
             </div>
-            
-            <div 
+
+            <div
               className="prose prose-zinc max-w-none prose-p:text-zinc-600 prose-p:leading-relaxed prose-p:text-[14px] md:prose-p:text-[18px] prose-p:font-figtree prose-strong:text-zinc-900 prose-a:text-primary prose-a:underline"
               dangerouslySetInnerHTML={{ __html: replaceShortcodes(settings?.investment_description) }}
             />
@@ -36,7 +36,7 @@ export default function PlatinumInvestmentSection({ cityName, settings }) {
                 <span className="w-1.5 h-6 bg-primary rounded-full" />
                 Table of Contents
               </h3>
-              <div 
+              <div
                 className="quick-links-wrapper font-figtree"
                 dangerouslySetInnerHTML={{ __html: settings?.investment_quick_links }}
               />

@@ -21,7 +21,7 @@ export default function InvestmentSection({ cityName, settings }) {
 
   return (
     <section className="py-8 md:py-10 bg-white">
-      <div className="container-main px-4">
+      <div className="container-main">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 lg:gap-24">
           <div className="lg:col-span-2 space-y-6">
             <h2 className="text-[18px] md:text-[28px] font-medium text-black uppercase tracking-tight leading-tight">

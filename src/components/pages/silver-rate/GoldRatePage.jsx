@@ -277,7 +277,7 @@
 
 //                                     {/* Market Analysis / Stable/Rise/Fall Info moved here so it is directly below the table */}
 //                                     <section className="py-12 md:py-15 bg-zinc-50 border-t border-zinc-100 mb-12">
-//                                         <div className="container-main px-4">
+//                                         <div className="container-main">
 //                                             <h2 className="text-[18px] md:text-[28px] font-medium text-zinc-900 mb-12 uppercase tracking-tight font-abhaya text-center px-4">
 //                                                 Market Analysis: {cityName} – {currentDate}
 //                                             </h2>
@@ -355,7 +355,7 @@
 //             {/* Shopify Page Body (if any) */}
 //             {page.body && (
 //                 <section className="py-12 md:py-15 bg-white">
-//                     <div className="container-main px-4">
+//                     <div className="container-main">
 //                         <div className="max-w-4xl mx-auto prose prose-zinc prose-lg prose-p:text-[14px] md:prose-p:text-[18px] prose-p:font-figtree prose-headings:font-abhaya prose-headings:uppercase px-2 md:px-0">
 //                             <div
 //                                 className="mt-12 md:mt-24 footer-pages pt-12 md:pt-24 border-t border-zinc-100 prose-headings:text-[18px] md:prose-headings:text-[28px] prose-p:text-[14px] md:prose-p:text-[18px] prose-p:leading-relaxed"

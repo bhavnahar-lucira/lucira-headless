@@ -18,15 +18,15 @@ export default function PlatinumFAQSection({ cityName, stateName, todayRate, sec
       .replaceAll('{stateName}', stateName);
 
     if (todayRate) {
-        const ratePerGram = todayRate / 10;
-        processed = processed.replaceAll('[platinum_rate_999]', `₹${Math.round(ratePerGram).toLocaleString('en-IN')}`);
-        processed = processed.replaceAll('[platinum_rate_950]', `₹${Math.round(ratePerGram * (950 / 1000)).toLocaleString('en-IN')}`);
-        processed = processed.replaceAll('[platinum_rate_900]', `₹${Math.round(ratePerGram * (900 / 1000)).toLocaleString('en-IN')}`);
-        
-        // JSON specific ones
-        processed = processed.replaceAll('[platinum_price_1g]', `₹${Math.round(ratePerGram).toLocaleString('en-IN')}`);
-        processed = processed.replaceAll('[current_date_timestamp]', new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }));
-        processed = processed.replaceAll('[current_date]', new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }));
+      const ratePerGram = todayRate / 10;
+      processed = processed.replaceAll('[platinum_rate_999]', `₹${Math.round(ratePerGram).toLocaleString('en-IN')}`);
+      processed = processed.replaceAll('[platinum_rate_950]', `₹${Math.round(ratePerGram * (950 / 1000)).toLocaleString('en-IN')}`);
+      processed = processed.replaceAll('[platinum_rate_900]', `₹${Math.round(ratePerGram * (900 / 1000)).toLocaleString('en-IN')}`);
+
+      // JSON specific ones
+      processed = processed.replaceAll('[platinum_price_1g]', `₹${Math.round(ratePerGram).toLocaleString('en-IN')}`);
+      processed = processed.replaceAll('[current_date_timestamp]', new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }));
+      processed = processed.replaceAll('[current_date]', new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }));
     }
 
     return processed;
@@ -34,7 +34,7 @@ export default function PlatinumFAQSection({ cityName, stateName, todayRate, sec
 
   return (
     <section className="py-12 md:py-20 bg-[#FAF3EC]/30">
-      <div className="container-main px-4 max-w-6xl mx-auto">
+      <div className="container-main max-w-6xl mx-auto">
         <div className="text-center mb-16 space-y-4">
           <h2 className="text-[18px] md:text-[28px] font-medium text-zinc-900 uppercase tracking-tight font-abhaya">
             {settings?.faq_heading || "FAQ'S"}

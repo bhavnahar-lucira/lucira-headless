@@ -25,7 +25,7 @@ export default function SilverFAQSection({ cityName, stateName, todayRate, secti
     processed = processed.replaceAll('[silver_rate_999_10gm]', `₹${Math.round(ratePerGram * 10).toLocaleString('en-IN')}`);
     processed = processed.replaceAll('[silver_rate_958_10gm]', `₹${Math.round(ratePerGram * 10 * (958 / 999)).toLocaleString('en-IN')}`);
     processed = processed.replaceAll('[silver_rate_925_10gm]', `₹${Math.round(ratePerGram * 10 * (925 / 999)).toLocaleString('en-IN')}`);
-    
+
     // Extra variables found in JSON
     processed = processed.replaceAll('[silver_price_10g]', `₹${Math.round(ratePerGram * 10).toLocaleString('en-IN')}`);
     processed = processed.replaceAll('[silver_rate_10g]', `₹${Math.round(ratePerGram * 10).toLocaleString('en-IN')}`);
@@ -37,7 +37,7 @@ export default function SilverFAQSection({ cityName, stateName, todayRate, secti
 
   return (
     <section className="py-12 md:py-20 bg-[#FAF3EC]/30">
-      <div className="container-main px-4 max-w-6xl mx-auto">
+      <div className="container-main max-w-6xl mx-auto">
         <div className="text-center mb-16 space-y-4">
           <h2 className="text-[18px] md:text-[28px] font-medium text-zinc-900 uppercase tracking-tight font-abhaya">
             {settings?.faq_heading || "FAQ'S"}

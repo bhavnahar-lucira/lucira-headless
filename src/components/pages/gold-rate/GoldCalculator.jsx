@@ -30,7 +30,7 @@ export default function GoldCalculator({ cityName, baseRate }) {
 
   return (
     <section className="py-8 md:py-10 bg-[#FAF3EC]/30">
-      <div className="container-main px-4">
+      <div className="container-main">
         <div className="max-w-4xl mx-auto text-center mb-16 space-y-4">
           <h2 className="text-[18px] md:text-[28px] font-medium text-zinc-900 uppercase tracking-tight font-abhaya">
             Gold Price Calculator
@@ -49,8 +49,8 @@ export default function GoldCalculator({ cityName, baseRate }) {
                   key={k.value}
                   onClick={() => setActiveKarat(k.value)}
                   className={`flex-1 py-3 md:py-4 text-[10px] md:text-sm rounded-xl transition-all font-figtree tracking-widest uppercase ${activeKarat === k.value
-                      ? "bg-primary text-white shadow-md font-bold"
-                      : "text-zinc-400 hover:text-zinc-600"
+                    ? "bg-primary text-white shadow-md font-bold"
+                    : "text-zinc-400 hover:text-zinc-600"
                     }`}
                 >
                   {k.label}
@@ -90,8 +90,8 @@ export default function GoldCalculator({ cityName, baseRate }) {
               <button
                 onClick={() => setIncludeGST(false)}
                 className={`flex-1 py-4 text-[10px] md:text-xs rounded-xl transition-all uppercase tracking-widest font-bold font-figtree ${!includeGST
-                    ? "bg-white text-zinc-900 shadow-sm"
-                    : "text-zinc-400 hover:text-zinc-600"
+                  ? "bg-white text-zinc-900 shadow-sm"
+                  : "text-zinc-400 hover:text-zinc-600"
                   }`}
               >
                 Excluding GST
@@ -99,8 +99,8 @@ export default function GoldCalculator({ cityName, baseRate }) {
               <button
                 onClick={() => setIncludeGST(true)}
                 className={`flex-1 py-4 text-[10px] md:text-xs rounded-xl transition-all uppercase tracking-widest font-bold font-figtree ${includeGST
-                    ? "bg-white text-zinc-900 shadow-sm"
-                    : "text-zinc-400 hover:text-zinc-600"
+                  ? "bg-white text-zinc-900 shadow-sm"
+                  : "text-zinc-400 hover:text-zinc-600"
                   }`}
               >
                 Including GST

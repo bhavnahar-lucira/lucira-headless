@@ -32,7 +32,7 @@ export default function FAQSection({ cityName, stateName, todayRate, sectionData
 
   return (
     <section className="py-12 md:py-20 bg-[#FAF3EC]/30">
-      <div className="container-main px-4 max-w-6xl mx-auto">
+      <div className="container-main max-w-6xl mx-auto">
         <div className="text-center mb-16 space-y-4">
           <h2 className="text-[18px] md:text-[28px] font-medium text-zinc-900 uppercase tracking-tight font-abhaya">
             {settings?.faq_heading || "FAQ'S"}

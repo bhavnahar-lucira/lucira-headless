@@ -12,7 +12,7 @@ export default function PlatinumPriceTable({ baseRate }) {
             <div className="absolute top-0 right-0 w-64 h-64 bg-[#f6f0ea] rounded-full -mr-32 -mt-32 blur-3xl opacity-50" />
             <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#f6f0ea] rounded-full -ml-32 -mb-32 blur-3xl opacity-50" />
 
-            <div className="container-main px-4 relative z-10">
+            <div className="container-main relative z-10">
                 <div className="max-w-4xl mx-auto text-center mb-16 space-y-4">
                     <h2 className="text-[18px] md:text-[28px] font-medium text-zinc-900 uppercase tracking-tight font-abhaya leading-tight px-4">
                         Platinum Price Breakdown By Weight

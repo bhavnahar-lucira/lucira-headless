@@ -55,7 +55,7 @@ export default function PlatinumInformationContent({ cityName, stateName, sectio
 
   return (
     <section className="information-content-section py-2 md:py-4 bg-white">
-      <div className="container-main px-4">
+      <div className="container-main">
         {/* Store Locations Header */}
         {storeBlocks.length > 0 && (
           <div className="address-locations-footer mb-20 border-b border-zinc-50 pb-20">
