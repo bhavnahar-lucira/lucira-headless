@@ -93,8 +93,8 @@ export default function PlatinumRatePage({ page }) {
         if (!rates) return base;
         return {
             ...base,
-            rate_today: `₹ ${(Number(rates.platinum_price_999) || parseInt(base.rate_today.replace(/[^\d]/g, ''))).toLocaleString('en-IN')}`,
-            rate_avg: `₹ ${(Number(rates.platinum_price_avg) || parseInt(base.rate_avg.replace(/[^\d]/g, ''))).toLocaleString('en-IN')}`,
+            rate_today: `₹ ${(Number(rates.platinum_price) * 10 || parseInt(base.rate_today.replace(/[^\d]/g, ''))).toLocaleString('en-IN')}`,
+            rate_avg: `₹ ${(Number(rates.platinum_price) * 1000 || parseInt(base.rate_avg.replace(/[^\d]/g, ''))).toLocaleString('en-IN')}`,
         };
     }, [rates]);
 

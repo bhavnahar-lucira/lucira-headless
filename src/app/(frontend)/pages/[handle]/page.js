@@ -25,6 +25,9 @@ export default async function Page({ params }) {
   }
 
   if (!page) return notFound();
+  
+  // Serialize page object for Client Components (removes BSON ObjectId)
+  page = JSON.parse(JSON.stringify(page));
 
   // Handle Gold, Silver, and Platinum Rate pages
   const isSilverRatePage = handle.includes("silver-rate-today");
