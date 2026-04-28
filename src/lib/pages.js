@@ -24,6 +24,12 @@ export async function getPageByHandleStorefront(handle) {
           handle
           body
           bodySummary
+          city: metafield(namespace: "custom", key: "city_name") {
+            value
+          }
+          state: metafield(namespace: "custom", key: "state_name") {
+            value
+          }
         }
       }
     `;
