@@ -422,37 +422,42 @@ export default function ProductPageClient({ product, complementaryProducts = [],
   };
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (isMobile) {
-          // On mobile: Always use bottom sticky bar when main ATC is not in view
-          setShowBottomAtc(!entry.isIntersecting);
-          setShowTopAtc(false);
-        } else {
-          // On desktop: Top bar when scrolled past, Bottom bar when at top
-          if (entry.isIntersecting) {
-            setShowTopAtc(false);
-            setShowBottomAtc(false);
+    const timer = setTimeout(() => {
+      if (!mainAtcRef.current) return;
+
+      console.log("Attaching Observer - Desktop Mode:", !isMobile);
+
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          console.log("Observer Triggered!", entry.isIntersecting);
+          const isPastPoint = entry.boundingClientRect.top < 0;
+
+          if (isMobile) {
+            setShowBottomAtc(!entry.isIntersecting);
           } else {
-            if (entry.boundingClientRect.top < 0) {
+            if (entry.isIntersecting) {
+              setShowTopAtc(false);
+              setShowBottomAtc(false);
+            } else if(isPastPoint) {
               setShowTopAtc(true);
               setShowBottomAtc(false);
             } else {
               setShowTopAtc(false);
               setShowBottomAtc(true);
+
             }
           }
-        }
-      },
-      { threshold: 0 }
-    );
+        },
+        { threshold: 0, rootMargin: "-10% 0px 0px 0px" }
+      );
 
-    if (mainAtcRef.current) {
       observer.observe(mainAtcRef.current);
-    }
+      
+      return () => observer.disconnect();
+    }, 100);
 
-    return () => observer.disconnect();
-  }, [isMobile]);
+    return () => clearTimeout(timer);
+  }, [isMobile, product.id]);
 
   useEffect(() => {
     if (user?.id) {
@@ -822,7 +827,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
   const currentPrice = activeVariant ? activeVariant.price : product.price;
   const currentComparePrice = activeVariant ? activeVariant.compare_price : product.compare_price;
   const mounted = useMounted();
-  const isDesktop = useMediaQuery("(max-width: 1023px)");
+  const isMobileView = useMediaQuery("(max-width: 1023px)");
   if (!mounted) return null;
 
   return (
@@ -1900,7 +1905,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
       />
       <JoinLuciraCommunity/>
 
-      {isDesktop ? (
+      {isMobileView ? (
         <MobileSheet
           isOpen={isStoreDrawerOpen}
           onClose={() => setIsStoreDrawerOpen(false)}
