@@ -2,15 +2,13 @@
 
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, Autoplay } from "swiper/modules";
-import { ChevronLeft, ChevronRight} from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useId } from "react";
+import Image from "next/image";
 
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
-import { Button } from "../ui/button";
-import LazyImage from "../common/LazyImage";
-import Image from "next/image";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 
 const slideData = [
@@ -21,7 +19,7 @@ const slideData = [
 export default function HeroBanner() {
   const id = useId().replace(/:/g, "");
   const paginationElClass = `pagination-${id}`;
-//   const isMobile = useMediaQuery("(max-width: 768px)");
+  const isMobile = useMediaQuery("(min-width: 1025px)");
 
   return (
     <div className="w-full bg-white">
@@ -43,21 +41,15 @@ export default function HeroBanner() {
         >
           {slideData.map((slide, index) => (
             <SwiperSlide key={slide.name}>
-              <div className="relative w-full aspect-[4/5] md:aspect-auto md:h-full">
-                <picture className="w-full h-full block">
-                  <source
-                    srcSet={`/images/heroslider/${slide.name}-Desktop.jpg`}
-                    media="(min-width: 1023px)"
-                  />
-                  <Image
-                    src={`/images/heroslider/${slide.name}-Mobile.jpg`}
-                    alt={slide.alt}
-                    fill
-                    priority={index === 0}
-                    className="object-cover object-center"
-                    sizes="100vw"
-                  />
-                </picture>
+              <div className="relative w-full aspect-[4/5] md:aspect-auto md:h-full overflow-hidden">
+                <Image key={`${slide.name}-${isMobile ? "desktop" : "mobile"}`}                  
+                  src={`/images/heroslider/${slide.name}-${isMobile ? "Desktop" : "Mobile"}.jpg`}
+                  alt={slide.alt}
+                  fill
+                  priority={index === 0}
+                  className="object-cover object-center transition-none"
+                  sizes="100vw"
+                />
               </div>
             </SwiperSlide>
           ))}
