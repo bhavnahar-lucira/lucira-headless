@@ -8,6 +8,7 @@ import 'swiper/css/pagination';
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import ProductCard from "@/components/product/ProductCard";
 import { useId } from "react";
+import { useMediaQuery } from '@/hooks/useMediaQuery';
 
 const SkeletonCard = () => (
   <div className="space-y-4 animate-pulse">
@@ -22,11 +23,15 @@ const SkeletonCard = () => (
 
 export default function CollectionSlider ({ products = [], loading = false }) {
   const displayProducts = products;  const id = useId().replace(/:/g, "");
+  const isDesktop = useMediaQuery("(min-width: 1025px)");
+  const isTablet = useMediaQuery("(min-width: 768px)");
   
   if (loading) {
+    const cols = isDesktop ? 4 : isTablet ? 3 : 2;
+    const skeletonCount = cols;
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 w-full py-4">
-        {[...Array(4)].map((_, i) => (
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 w-full py-4">
+        {[...Array(skeletonCount)].map((_, i) => (
           <SkeletonCard key={i} />
         ))}
       </div>
