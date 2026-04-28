@@ -398,7 +398,7 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle 
                           fill
                           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                           priority={index === 0}
-                          className={`object-contain p-0 lg:p-6 grayscale-[0.2] group-hover/card:grayscale-0 transition-all duration-300`}
+                          className={`object-contain p-0 grayscale-[0.2] group-hover/card:grayscale-0 transition-all duration-300`}
                         />
                       </div>
                     </SwiperSlide>
@@ -485,18 +485,17 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle 
 
                 handleWishlistToggle();
               }}
-              className={`absolute top-2 right-0 lg:top-4 lg:right-4 z-10 p-1.5 transition-transform duration-200 ${isWishlistAnimating ? "scale-110" : ""}`}
+              className={`absolute top-0 right-1 lg:top-2 lg:right-4 z-10 px-1.5 py-1 lg:p-1.5 transition-transform duration-200 ${isWishlistAnimating ? "scale-110" : ""}`}
             >
               <Heart
-                size={24}
                 fill={isWishlisted ? "currentColor" : "none"}
-                className={`${isWishlisted ? "text-rose-500" : "text-black"} stroke-[1.5px]`}
+                className={`${isWishlisted ? "text-rose-500 w-5 lg:w-6" : "text-black"} stroke-[1.5px] w-5 lg:w-6`}
               />
             </button>
 
             {/* Product Labels (with Seamless Vertical Slide) */}
             {displayLabels.length > 0 && (
-              <div className="absolute top-3 left-0 z-10 w-24 lg:w-28 h-6 lg:h-7 overflow-hidden bg-[#E2C07E]">
+              <div className="absolute top-0 lg:top-3 left-0 z-10 w-24 lg:w-28 h-6 lg:h-7 overflow-hidden bg-[#E2C07E]">
                 <AnimatePresence initial={false}>
                   <motion.div
                     key={displayLabels[currentLabelIndex]}
@@ -628,7 +627,7 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle 
                           aria-label={`Show ${base} color`}
                           onClick={() => setActiveBase(base)}
                           className={`w-5 h-5 lg:w-7 lg:h-7 rounded-full border transition-all flex items-center justify-center hover:scale-110 ${
-                            isActive ? "border-black dark:border-white" : "border-transparent"
+                            isActive ? "border-black dark:border-white" : "border-transparent p-0.5"
                           }`}
                         >
                           <span

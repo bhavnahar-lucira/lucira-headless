@@ -56,7 +56,7 @@ export function SizeGuideMobile({ children, nearestStore, availableStores = [], 
                 </button>
               </div>
 
-              <Link href="https://wa.me/919004435760?text=Hi,%20I%20want%20to%visit%20the%20store" target="_blank">
+              <Link href="https://wa.me/919004435760?text=Hi,%20I%20want%20to%20visit%20the%20store" target="_blank">
                 {availableStoreCount > 0 && nearestStore && (
                   <div className="space-y-4 pt-2">
                     <h3 className="text-lg font-bold text-gray-900">Nearest Store</h3>

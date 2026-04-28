@@ -47,7 +47,16 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 import { SizeGuideSheet } from "@/components/product/SizeGuideSheet";
 import { ProductCustomizerMobile } from "@/components/product/ProductCustomizerMobile";
 import { useDispatch, useSelector } from "react-redux";
@@ -1134,13 +1143,36 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                         </SizeGuideSheet>
                       )}
                     </div>
-                    
-                    <div className="bg-[#F8F9FA] rounded-lg flex items-center gap-4 px-4 py-2.5 border border-gray-100">
-                      <div className="bg-white rounded-lg p-2 shadow-sm">
-                        <Play size={16} fill="black" />
-                      </div>
-                      <span className="text-base text-black">Watch this quick video to measure your ring right.</span>
-                    </div>
+
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <div className="bg-[#F8F9FA] rounded-lg flex items-center gap-4 px-4 py-2.5 border border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors">
+                          <div className="bg-white rounded-lg p-2 shadow-sm">
+                            <Video size={16} fill="black" />
+                          </div>
+                          <span className="text-base text-black">
+                            Watch this quick video to measure your ring right.
+                          </span>
+                        </div>
+                      </DialogTrigger>
+
+                      <DialogContent className="sm:max-w-[800px] p-0 overflow-hidden border-none bg-transparent shadow-none">
+                        <DialogHeader className="sr-only">
+                          <DialogTitle>Ring Measurement Tutorial</DialogTitle>
+                        </DialogHeader>
+                        
+                        <div className="relative w-full aspect-video bg-black rounded-lg overflow-hidden">
+                          <video 
+                            src="https://cdn.shopify.com/videos/c/o/v/b6bd45e165384f7bb50a9598b5986822.mp4"
+                            className="w-full h-full"
+                            autoPlay
+                            muted
+                            playsInline
+                            controls
+                          />
+                        </div>
+                      </DialogContent>
+                    </Dialog>
 
                     <div className="grid grid-cols-7 gap-4">
                       {availableSizes.map(sizeStr => {
@@ -1149,7 +1181,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                           <button
                             key={`size-${sizeStr}`}
                             onClick={() => handleSizeSelection(sizeStr)}
-                            className={`relative border rounded-md h-10 flex items-center justify-center text-base transition-all ${
+                            className={`relative border rounded-md h-10 px-0.5 flex items-center justify-center text-sm transition-all ${
                               sizeStr === selectedSize
                                 ? "border-primary bg-white ring-1 ring-primary font-bold"
                                 : "border-gray-200 hover:border-primary font-normal"

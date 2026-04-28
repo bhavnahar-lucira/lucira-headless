@@ -251,7 +251,7 @@ export default function StoreLocatorSection() {
   // DESKTOP VIEW
   return (
     <section className="w-full bg-[#FEF5F1] py-14 mt-15">
-      <div className="container-main">
+      <div className="container-main max-w-360">
         <div className="text-left mb-4">
           <h2 className="main-title font-extrabold font-abhaya mb-2">Visit Lucira Store Near You</h2>
         </div>
