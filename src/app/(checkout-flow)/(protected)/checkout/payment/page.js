@@ -272,6 +272,13 @@ export default function PaymentPage() {
   const user = useSelector(selectUser);
   const {items, totalAmount, appliedCoupon, nectorPoints } = useCart();
 
+  // Remove points when leaving the payment page
+  useEffect(() => {
+    return () => {
+      dispatch(removePoints());
+    };
+  }, [dispatch]);
+
   const finalAmount = useMemo(() => {
     const insuranceItem = (items || []).find(item => item.variantId === INSURANCE_VARIANT_ID);
     const insuranceValue = insuranceItem ? (insuranceItem.price * (insuranceItem.quantity || 1)) : 0;

@@ -5,6 +5,7 @@ import ReduxProvider from "@/redux/provider";
 import QueryProvider from "@/providers/QueryProvider";
 import BackToTop from "@/components/common/BackToTop";
 import ToastProvider from "@/components/common/ToastProvider";
+import PointsResetHandler from "@/components/common/PointsResetHandler";
 import Script from "next/script";
 import GtmPageView from "@/components/common/GtmPageView";
 
@@ -89,6 +90,7 @@ export default function RootLayout({ children }) {
                 <GtmPageView />
               </Suspense>
             )}
+            <PointsResetHandler />
             {children}
             <BackToTop />
           </QueryProvider>

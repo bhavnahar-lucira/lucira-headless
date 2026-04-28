@@ -6,6 +6,7 @@ import {
   closeCart, 
   toggleCart, 
   setCart,
+  removeCoupon,
   addToCart as addToCartThunk,
   removeFromCart as removeFromCartThunk,
   updateCartItem as updateCartItemThunk
@@ -62,6 +63,7 @@ export const useCart = () => {
     addToCart,
     removeFromCart,
     updateCartItem,
+    removeCoupon: () => dispatch(removeCoupon()),
     openCart: () => dispatch(openCart()),
     closeCart: () => dispatch(closeCart()),
     toggleCart: () => dispatch(toggleCart()),
