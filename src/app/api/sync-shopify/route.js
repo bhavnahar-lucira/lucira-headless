@@ -84,7 +84,7 @@ export async function POST(req) {
                 pageInfo { hasNextPage endCursor }
                 edges {
                   node {
-                    id title handle descriptionHtml vendor productType status tags createdAt
+                    id title handle descriptionHtml vendor productType status tags createdAt publishedAt
                     seo { title description }
                     featuredImage { url }
                     collections(first: 100) { edges { node { handle } } }
@@ -251,8 +251,10 @@ export async function POST(req) {
                 vendor: p.vendor,
                 type: p.productType,
                 status: p.status,
+                isPublished: !!p.publishedAt,
                 tags: p.tags,
                 createdAt: p.createdAt,
+                publishedAt: p.publishedAt,
                 image: representativeVariant?.image || p.featuredImage?.url || (media.find(m => m.type === "IMAGE")?.url || null),
                 images: media.filter(m => m.type === "IMAGE").map(m => ({ url: m.url, alt: m.alt })),
                 media: media,
@@ -277,7 +279,11 @@ export async function POST(req) {
                 lastReviewsUpdated: new Date()
               };
 
-              await productsCollection.updateOne({ shopifyId: p.id }, { $set: mappedProduct }, { upsert: true });
+              if (p.status === "ACTIVE" && !!p.publishedAt) {
+                await productsCollection.updateOne({ shopifyId: p.id }, { $set: mappedProduct }, { upsert: true });
+              } else {
+                await productsCollection.deleteOne({ shopifyId: p.id });
+              }
             }
 
             totalProcessed += products.length;

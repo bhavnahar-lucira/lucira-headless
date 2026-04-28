@@ -1,11 +1,13 @@
 "use client";
 
+import { useState } from "react"; // Added for play/pause state
 import { X, ChevronLeft, ChevronRight, Play, Send, MessageCircle, Headset } from "lucide-react";
 import LazyImage from "../common/LazyImage";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination } from "swiper/modules";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from "@/components/ui/drawer";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
+import Link from "next/link";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
@@ -13,7 +15,31 @@ import "swiper/css/pagination";
 export default function VideoPopup({ isOpen, onClose, videoData, initialIndex }) {
   const isMobile = useMediaQuery("(max-width: 768px)");
 
+    
+  // 1. Manage play state to toggle UI overlays and native video controls
+  const [isPlaying, setIsPlaying] = useState(true);
+
   if (!isOpen) return null;
+
+  // 2. Centralized Product Logger
+  const logProductClick = (product) => {
+    console.log("Product Interaction Tracked:", {
+      title: product.title,
+      price: product.price,
+      timestamp: new Date().toISOString()
+    });
+  };
+
+  // 3. Play/Pause Toggle Logic
+  const togglePlay = (videoElement) => {
+    if (videoElement.paused) {
+      videoElement.play();
+      setIsPlaying(true);
+    } else {
+      videoElement.pause();
+      setIsPlaying(false);
+    }
+  };
 
   if (isMobile) {
     return (
@@ -32,6 +58,7 @@ export default function VideoPopup({ isOpen, onClose, videoData, initialIndex })
             onSlideChange={(swiper) => {
                 const allVideos = swiper.el.querySelectorAll("video");
                 allVideos.forEach((v) => v.pause());
+                setIsPlaying(true);
                 const activeSlide = swiper.slides[swiper.activeIndex];
                 const activeVideo = activeSlide.querySelector("video");
                 if (activeVideo) {
@@ -51,6 +78,10 @@ export default function VideoPopup({ isOpen, onClose, videoData, initialIndex })
                      loop
                      playsInline
                      className="w-full h-full object-cover"
+                     // Condition: Show native options only when playing
+                     controls={isPlaying} 
+                     onClick={(e) => togglePlay(e.currentTarget)}
+
                    />
 
                    {/* UI OVERLAYS */}
@@ -62,6 +93,16 @@ export default function VideoPopup({ isOpen, onClose, videoData, initialIndex })
                    >
                      <X size={24} strokeWidth={2} />
                    </button>
+
+                  {/* Play Indicator - only shows when paused */}
+                   {!isPlaying && (
+                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-[515]">
+                        <div className="w-16 h-16 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center">
+                           <Play size={28} fill="white" className="text-white ml-1" />
+                        </div>
+                     </div>
+                   )}
+
 
                    {/* 2. Swipe Up Indicator (Left Side) */}
                    <div className="absolute left-6 top-1/2 -translate-y-1/2 z-[510] flex flex-col items-center gap-3 pointer-events-none">
@@ -77,7 +118,7 @@ export default function VideoPopup({ isOpen, onClose, videoData, initialIndex })
                    <div className="absolute bottom-14 left-0 w-full z-[510]">
                       <div className="flex gap-4 overflow-x-auto no-scrollbar px-6 pb-4">
                          {item.products.map((product, pIdx) => (
-                           <div key={pIdx} className="min-w-[85vw] bg-white rounded-[20px] p-4 flex gap-4 shadow-2xl relative items-center">
+                           <Link href={product.url} key={pIdx} className="min-w-[85vw] bg-white rounded-[20px] p-4 flex gap-4 shadow-2xl relative items-center">
                               <div className="w-18 h-18 bg-zinc-50 rounded-xl overflow-hidden shrink-0 relative border border-zinc-100">
                                  <LazyImage src={product.image} alt={product.title} fill className="object-cover" />
                               </div>
@@ -93,10 +134,7 @@ export default function VideoPopup({ isOpen, onClose, videoData, initialIndex })
                                     </span>
                                  </div>
                               </div>
-                              <button className="bg-[#5B4740] text-white px-5 py-2 rounded-lg text-[11px] font-bold uppercase tracking-wider active:scale-95 transition-transform">
-                                 ADD
-                              </button>
-                           </div>
+                           </Link>
                          ))}
                       </div>
                       
@@ -153,7 +191,7 @@ export default function VideoPopup({ isOpen, onClose, videoData, initialIndex })
           onSlideChange={(swiper) => {
             const allVideos = swiper.el.querySelectorAll("video");
             allVideos.forEach((v) => v.pause());
-            
+            setIsPlaying(true);
             const activeSlide = swiper.slides[swiper.activeIndex];
             const activeVideo = activeSlide.querySelector("video");
             if (activeVideo) {
@@ -171,16 +209,18 @@ export default function VideoPopup({ isOpen, onClose, videoData, initialIndex })
                     loop
                     playsInline
                     className="w-full h-full object-cover"
+                    controls={isPlaying}
                     onClick={(e) => {
-                        if (e.target.paused) e.target.play();
-                        else e.target.pause();
+                       togglePlay(e.currentTarget);
                     }}
                   />
-                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none transition-opacity duration-300">
-                     <div className="w-16 h-16 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center border border-white/30 shadow-lg">
-                        <Play size={28} fill="white" className="text-white ml-1" />
-                     </div>
-                  </div>
+                   {!isPlaying && (
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none transition-opacity duration-300">
+                       <div className="w-16 h-16 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center border border-white/30 shadow-lg">
+                          <Play size={28} fill="white" className="text-white ml-1" />
+                       </div>
+                    </div>
+                  )}
                 </div>
 
                 <div className="w-full md:w-[58%] p-6 md:p-12 bg-white relative flex flex-col h-full">
@@ -194,7 +234,7 @@ export default function VideoPopup({ isOpen, onClose, videoData, initialIndex })
                   <div className="flex-grow overflow-y-auto pr-2 custom-scrollbar">
                     <div className="space-y-8 mt-4 md:mt-0">
                         {item.products && item.products.map((product, pIdx) => (
-                        <div key={pIdx} className="flex items-center gap-6 pb-6 border-b border-gray-100 last:border-0 last:pb-0">
+                        <Link href={product.url} key={pIdx} className="flex items-center gap-6 pb-6 border-b border-gray-100 last:border-0 last:pb-0">
                             <div className="w-24 h-24 bg-gray-50 rounded-lg overflow-hidden flex-shrink-0 border border-gray-100 relative">
                             <LazyImage src={product.image} alt={product.title} fill className="object-cover" />
                             </div>
@@ -208,18 +248,9 @@ export default function VideoPopup({ isOpen, onClose, videoData, initialIndex })
                                 {product.discount && <span className="text-[10px] md:text-xs font-bold bg-[#F5E6E4] text-[#8B4513] px-2 py-1 rounded tracking-wide uppercase">{product.discount}</span>}
                             </div>
                             </div>
-                            <button className="flex-shrink-0 bg-[#5A413F] text-white px-6 py-2.5 rounded text-xs font-black hover:bg-[#4a3533] transition-all uppercase tracking-widest shadow-sm">
-                            Add
-                            </button>
-                        </div>
+                        </Link>
                         ))}
                     </div>
-                  </div>
-
-                  <div className="mt-10">
-                    <button className="w-full border-2 border-[#5A413F] text-[#5A413F] py-4 px-6 rounded text-sm font-black hover:bg-[#5A413F] hover:text-white transition-all uppercase tracking-[0.1em] flex items-center justify-center">
-                        Add All Products To Cart - {item.totalPrice}
-                    </button>
                   </div>
                 </div>
               </div>

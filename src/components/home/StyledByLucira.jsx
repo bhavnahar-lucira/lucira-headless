@@ -18,21 +18,24 @@ const videoData = [
         title: "Classic Oval Shape Diamond Ring with Sleek Band",
         price: "₹55,735",
         originalPrice: "₹69,879",
-        discount: "21% OFF"
+        discount: "21% OFF",
+        url: "/products/classic-oval-shape-diamond-ring-with-sleek-band"
       },
       {
         image: "https://www.lucirajewelry.com/cdn/shop/files/2_8d16719b-79e8-4685-9853-53d36b7c07f2.jpg",
         title: "Gold Diamond Interlocking Circle Pendant",
         price: "₹36,383",
         originalPrice: "₹37,605",
-        discount: "21% OFF"
+        discount: "21% OFF",
+        url: "/products/gold-diamond-interlocking-circle-pendant"
       },
       {
         image: "https://www.lucirajewelry.com/cdn/shop/files/3_19273c5b-388e-473d-828e-5b23d9a17730.jpg",
         title: "Double Halo Round Diamond Bracelet",
         price: "₹99,970",
         originalPrice: "₹1,26,008",
-        discount: "21% OFF"
+        discount: "21% OFF",
+        url: "/products/double-halo-round-diamond-bracelet"
       }
     ],
     totalPrice: "₹2,99,910"
@@ -45,14 +48,16 @@ const videoData = [
         title: "Classic Round Diamond Ring",
         price: "₹55,400",
         originalPrice: "₹69,250",
-        discount: "20% OFF"
+        discount: "20% OFF",
+        url: "/products/classic-mens-round-diamond-ring"
       },
       {
         image: "https://www.lucirajewelry.com/cdn/shop/files/5_5b16719b-79e8-4685-9853-53d36b7c07f2.jpg",
         title: "Modern Gold Band",
         price: "₹28,150",
         originalPrice: "₹35,180",
-        discount: "20% OFF"
+        discount: "20% OFF",
+        url: "/products/mens-modern-round-diamond-band"
       }
     ],
     totalPrice: "₹83,550"
@@ -65,7 +70,8 @@ const videoData = [
         title: "Princess Cut Halo Necklace",
         price: "₹42,850",
         originalPrice: "₹53,560",
-        discount: "20% OFF"
+        discount: "20% OFF",
+        url: "/products/venetian-clover-diamond-chain-pendant"
       }
     ],
     totalPrice: "₹42,850"
@@ -78,7 +84,8 @@ const videoData = [
         title: "Elegant Diamond Bracelet",
         price: "₹89,200",
         originalPrice: "₹1,11,500",
-        discount: "20% OFF"
+        discount: "20% OFF",
+        url: "/products/elegant-geometric-round-diamond-bracelet"
       }
     ],
     totalPrice: "₹89,200"
@@ -91,7 +98,8 @@ const videoData = [
         title: "Modern Gold Band",
         price: "₹28,150",
         originalPrice: "₹35,180",
-        discount: "20% OFF"
+        discount: "20% OFF",
+        url: "/products/modern-flat-band-with-round-diamond"
       }
     ],
     totalPrice: "₹28,150"
@@ -104,7 +112,8 @@ const videoData = [
         title: "1 cts Emerald Solitaire and Rou...",
         price: "₹72,015",
         originalPrice: "₹90,018",
-        discount: "20% OFF"
+        discount: "20% OFF",
+        url: "/products/1-cts-emerald-solitaire-and-round-diamond-regal-ring"
       }
     ],
     totalPrice: "₹72,015"
@@ -117,7 +126,8 @@ const videoData = [
         title: "Classic Round Diamond Ring",
         price: "₹55,400",
         originalPrice: "₹69,250",
-        discount: "20% OFF"
+        discount: "20% OFF",
+        url: "/products/classic-mens-round-diamond-ring"
       }
     ],
     totalPrice: "₹55,400"
@@ -130,7 +140,8 @@ const videoData = [
         title: "Princess Cut Halo Necklace",
         price: "₹42,850",
         originalPrice: "₹53,560",
-        discount: "20% OFF"
+        discount: "20% OFF",
+        url: "/products/venetian-clover-diamond-chain-pendant"
       }
     ],
     totalPrice: "₹42,850"
@@ -143,7 +154,8 @@ const videoData = [
         title: "Elegant Diamond Bracelet",
         price: "₹89,200",
         originalPrice: "₹1,11,500",
-        discount: "20% OFF"
+        discount: "20% OFF",
+        url: "/products/elegant-geometric-round-diamond-bracelet"
       }
     ],
     totalPrice: "₹89,200"
@@ -156,7 +168,8 @@ const videoData = [
         title: "Modern Gold Band",
         price: "₹28,150",
         originalPrice: "₹35,180",
-        discount: "20% OFF"
+        discount: "20% OFF",
+        url: "/products/modern-flat-band-with-round-diamond"
       }
     ],
     totalPrice: "₹28,150"
@@ -168,13 +181,13 @@ export default function StyledByLucira() {
   const swiperRef = useRef(null);
 
   return (
-    <section className="w-full mt-12 md:mt-15 bg-white overflow-hidden pb-10">
+    <section className="w-full my-10 md:my-15 bg-white overflow-hidden">
       <div className="container-main">
-        <div className="text-center mb-6 md:mb-8">
-          <h2 className="text-3xl md:text-4xl font-black font-abhaya mb-2 text-zinc-900 tracking-tight">Styled By Lucira</h2>
+        <div className="text-center mb-6">
+          <h2 className="text-3xl md:text-4xl font-extrabold font-abhaya mb-2 text-black">Styled By Lucira</h2>
         </div>
 
-        <div className="relative w-full group/slider px-4 md:px-0">
+        <div className="relative w-full group/slider">
           <Swiper
             modules={[Navigation]}
             onSwiper={(swiper) => {
@@ -192,21 +205,26 @@ export default function StyledByLucira() {
             speed={600}
             grabCursor={true}
             breakpoints={{
+              360: {
+                slidesPerView: 1.2,
+                spaceBetween: 12,
+                centeredSlides: true,
+              },
               640: {
-                slidesPerView: 3,
+                slidesPerView: 2,
                 spaceBetween: 20,
                 centeredSlides: false
               },
-              1024: {
+              1025: {
                 slidesPerView: 3,
                 spaceBetween: 20,
                 centeredSlides: true
               },
-              1200: {
+              1370: {
                 slidesPerView: 5,
                 spaceBetween: 30,
                 centeredSlides: true
-              }
+              },
             }}
             className="lucira-swiper overflow-visible!"
           >

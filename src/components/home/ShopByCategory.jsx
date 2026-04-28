@@ -82,20 +82,20 @@ export default function ShopByCategory() {
   return (
     <section className="w-full bg-[#FEF5F1] py-12 md:py-14 mt-12 md:mt-15 overflow-hidden">
       <div className="container-main">
-        <h2 className="text-3xl md:text-4xl font-black text-center font-abhaya mb-6 md:mb-8 text-zinc-900 tracking-tight">
+        <h2 className="text-3xl md:text-4xl font-extrabold text-center font-abhaya mb-6 md:mb-5 text-black">
           Shop By
         </h2>
 
         {/* Categories Tab Bar */}
-        <div className="flex justify-start md:justify-center gap-6 md:gap-10 text-sm md:text-base mb-8 md:mb-10 overflow-x-auto no-scrollbar border-b border-zinc-100/50 md:border-none px-4 md:px-0">
+        <div className="flex justify-start md:justify-center gap-6 md:gap-8 text-sm md:text-base mb-8 overflow-x-auto no-scrollbar border-b border-zinc-100/50 md:border-none px-4 md:px-0">
           {CATEGORIES.map((cat) => (
             <button
               key={cat.slug}
               onClick={() => setActiveCategory(cat.slug)}
-              className={`relative pb-3 whitespace-nowrap uppercase tracking-widest font-bold transition-all ${
+              className={`relative pb-2 whitespace-nowrap capitalize font-normal cursor-pointer transition-all ${
                 activeCategory === cat.slug
-                  ? "text-zinc-900"
-                  : "text-zinc-400 hover:text-zinc-600"
+                  ? "text-black"
+                  : "text-black hover:text-zinc-800"
               }`}
             >
               {cat.label}
@@ -107,7 +107,7 @@ export default function ShopByCategory() {
         </div>
 
         {/* Toggle Switch: By Shape / By Style */}
-        <div className="flex justify-center mb-10 md:mb-12">
+        <div className="flex justify-center mb-8">
           <div className="flex w-[90%] md:w-auto border border-zinc-200 rounded-md overflow-hidden bg-white p-1">
             <button
               onClick={() => setActiveTab("shapes")}

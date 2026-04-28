@@ -62,7 +62,7 @@ export function extractSearchIntent(query = "") {
     keywords: unique(
       workingQuery
         .toLowerCase()
-        .split(/\s+/)
+        .split(/[\s-]+/) // Split by spaces or hyphens
         .map((term) => term.trim())
         .filter(Boolean)
     ),
@@ -90,8 +90,9 @@ export function buildTitleKeywordMatch(keywords = []) {
 export function buildFallbackKeywordMatch(keywords = []) {
   if (!keywords.length) return null;
 
+  // Broad OR match across keywords for better coverage when specific search fails
   return {
-    $and: keywords.map((keyword) => ({
+    $or: keywords.map((keyword) => ({
       $or: SEARCHABLE_FALLBACK_FIELDS.map((field) => fieldClause(field, keyword)),
     })),
   };
@@ -106,8 +107,11 @@ export function mergeMongoFilters(...filters) {
 }
 
 export async function resolveSearchMatch(productsCollection, baseFilter = {}, query = "") {
+  const activeFilter = { status: "ACTIVE", isPublished: true };
+  const combinedBaseFilter = { ...baseFilter, ...activeFilter };
+  
   const { filter: intentFilter, normalizedQuery, keywords } = extractSearchIntent(query);
-  const filters = [baseFilter, intentFilter];
+  const filters = [combinedBaseFilter, intentFilter];
 
   if (!keywords.length) {
     return {
@@ -118,12 +122,57 @@ export async function resolveSearchMatch(productsCollection, baseFilter = {}, qu
     };
   }
 
+  // 1. Check for exact match for title, handle or SKU first
+  // This ensures that if a user searches for a specific product by its full name or ID, they get it first
+  const trimmedQuery = query.trim();
+  const handleFriendlyQuery = normalizedQuery.replace(/\./g, "-").replace(/\s+/g, "-");
+
+  const exactMatchFilter = {
+    $or: [
+      { title: trimmedQuery },
+      { title: { $regex: new RegExp(`^${escapeRegex(trimmedQuery)}$`, "i") } },
+      { handle: trimmedQuery },
+      { handle: normalizedQuery },
+      { handle: handleFriendlyQuery },
+      { "variants.sku": trimmedQuery },
+      { "variants.sku": trimmedQuery.toUpperCase() }
+    ]
+  };
+
+  const exactMatchCount = await productsCollection.countDocuments(mergeMongoFilters(...filters, exactMatchFilter));
+  if (exactMatchCount > 0) {
+    return {
+      filter: mergeMongoFilters(...filters, exactMatchFilter),
+      normalizedQuery,
+      keywords,
+      strategy: "base", // Don't use text score if we have exact matches
+    };
+  }
+
+  // 2. If no exact match, proceed with text search
   // Use MongoDB $text search for relevance scoring
-  const textFilter = { $text: { $search: keywords.join(" ") } };
-  const finalFilter = mergeMongoFilters(...filters, textFilter);
+  // If we have an intent filter (like price), we should prioritize the normalizedQuery
+  // because the original query contains "noise" like "under 30k"
+  const hasIntent = Object.keys(intentFilter).length > 0;
+  const primaryPhrase = hasIntent ? normalizedQuery : trimmedQuery;
+  
+  const phrases = unique([primaryPhrase, keywords.join(" ")]);
+  const searchString = phrases.map(p => `\"${p}\"`).join(" ") + " " + keywords.join(" ");
+  
+  const textFilter = { $text: { $search: searchString } };
+  
+  // Use text filter directly to avoid MongoDB $or restriction with $text
+  // $text index already covers title, type, tags, and description.
+  const searchMatch = textFilter;
+
+  const finalFilter = mergeMongoFilters(...filters, searchMatch);
+
+  // We also return a broad fallback filter in case the primary search yields no results
+  const fallbackFilter = mergeMongoFilters(...filters, buildFallbackKeywordMatch(keywords));
 
   return {
     filter: finalFilter,
+    fallbackFilter,
     normalizedQuery,
     keywords,
     strategy: "text",

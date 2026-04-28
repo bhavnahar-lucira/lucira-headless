@@ -8,6 +8,7 @@ import 'swiper/css/pagination';
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import ProductCard from "@/components/product/ProductCard";
 import { useId } from "react";
+import { useMediaQuery } from '@/hooks/useMediaQuery';
 
 const SkeletonCard = () => (
   <div className="space-y-4 animate-pulse">
@@ -22,11 +23,15 @@ const SkeletonCard = () => (
 
 export default function CollectionSlider ({ products = [], loading = false }) {
   const displayProducts = products;  const id = useId().replace(/:/g, "");
+  const isDesktop = useMediaQuery("(min-width: 1025px)");
+  const isTablet = useMediaQuery("(min-width: 768px)");
   
   if (loading) {
+    const cols = isDesktop ? 4 : isTablet ? 3 : 2;
+    const skeletonCount = cols;
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 w-full py-4">
-        {[...Array(4)].map((_, i) => (
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 w-full py-4">
+        {[...Array(skeletonCount)].map((_, i) => (
           <SkeletonCard key={i} />
         ))}
       </div>
@@ -44,8 +49,8 @@ export default function CollectionSlider ({ products = [], loading = false }) {
       <div className="relative">
         <Swiper
           modules={[Navigation, Pagination]}
-          spaceBetween={16}
-          slidesPerView={1.2}
+          spaceBetween={12}
+          slidesPerView={2}
           onSlideChange={(swiper) => {
             const progress = (swiper.activeIndex / (swiper.slides.length - swiper.params.slidesPerView)) * 100;
             const bar = document.getElementById(`progress-bar-${id}`);
@@ -70,7 +75,7 @@ export default function CollectionSlider ({ products = [], loading = false }) {
         </Swiper>
 
         {/* Navigation & Progress Controls (Updated for design) */}
-        <div className="flex justify-between items-center mt-8 md:mt-12 px-1">
+        <div className="flex justify-between items-center mt-8 md:mt-6 px-1">
           {/* Progress Bar (Global) */}
           <div className="flex-1 max-w-[120px] md:max-w-[200px] h-[2px] bg-zinc-100 relative overflow-hidden">
             <div 

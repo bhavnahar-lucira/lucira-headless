@@ -30,7 +30,7 @@ const features = [
 export default function WeAreLucira() {
   return (
     <section className="mt-15 w-full bg-[#FEF5F1]">
-      <div className="grid w-full grid-cols-1 overflow-hidden xl:grid-cols-[380px_minmax(0,1fr)_380px] lg:grid-cols-[300px_minmax(0,1fr)_300px]">
+      <div className="grid w-full grid-cols-1 overflow-hidden xl:grid-cols-[400px_minmax(0,1fr)_400px] lg:grid-cols-[300px_minmax(0,1fr)_300px]">
         {/* Left Image Grid */}
         <div className="grid grid-rows-2">
           <div className="grid h-full grid-cols-[30%_70%]">
@@ -87,9 +87,9 @@ export default function WeAreLucira() {
               </div>
             </div>
 
-            <h2 className="main-title font-abhaya leading-none font-extrabold">We are Lucira</h2>
+            <h2 className="text-3xl font-extrabold font-abhaya mb-2 text-black">We are Lucira</h2>
 
-            <p className="mx-auto mt-2.5 max-w-155 text-base leading-7">
+            <p className="text-base font-normal text-black">
               Lucira reimagine diamonds for the modern India. A design-first
               fine jewelry brand, that turns everyday moments into timeless
               expressions of self.
@@ -103,15 +103,15 @@ export default function WeAreLucira() {
                             <LazyImage
                               src={item.icon}
                               alt={item.text}
-                              width={18}
-                              height={18}
+                              width={22}
+                              height={22}
                               className="shrink-0"
                             />
                         ) : (
-                            <item.icon size={18} className="shrink-0" />
+                            <item.icon size={22} className="shrink-0" />
                         )}
 
-                        <span className="text-sm font-medium">
+                        <span className="text-sm font-medium text-black">
                             {item.text}
                         </span>
                         </div>
@@ -131,7 +131,7 @@ export default function WeAreLucira() {
         </div>
 
         {/* Right Image Grid */}
-        <div className="grid grid-rows-2">
+        <div className="hidden grid-rows-2 lg:grid">
           <div className="grid h-full grid-cols-[70%_30%]">
             <div className="relative min-h-40 overflow-hidden">
               <LazyImage

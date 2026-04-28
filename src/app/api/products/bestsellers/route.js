@@ -15,10 +15,10 @@ export async function GET(request) {
     const productsCollection = db.collection("products");
 
     // 1. Build Query
-    let query = {};
+    let query = { status: "ACTIVE", isPublished: true };
     
     if (tab === "All") {
-      query = { tags: { $regex: /best seller/i } };
+      query.tags = { $regex: /best seller/i };
     } else {
       // 1. Specific bestseller collection handle
       const handle = `bestseller-${tab.toLowerCase()
@@ -30,7 +30,7 @@ export async function GET(request) {
       // 2. Fallback search (Tag: 'best seller' AND category name in tags/type)
       const categoryTerm = tab.toLowerCase().replace(/s$/, ""); // e.g. "Rings" -> "ring"
       
-      query = {
+      const categoryFilter = {
         $or: [
           { collectionHandles: handle },
           {
@@ -46,6 +46,7 @@ export async function GET(request) {
           }
         ]
       };
+      query = { ...query, ...categoryFilter };
     }
 
     // 2. Try to find in MongoDB
@@ -55,7 +56,12 @@ export async function GET(request) {
       .toArray();
 
     if (products.length > 0) {
-      return NextResponse.json({ products });
+      return NextResponse.json({ 
+        products: products.map(p => ({
+          ...p,
+          reviews: p.reviews || p.reviewStats || null
+        }))
+      });
     }
 
     // 3. Fallback: If "All" is empty, sync from Shopify
@@ -220,6 +226,9 @@ export async function GET(request) {
             description: node.description,
             descriptionHtml: node.descriptionHtml,
             createdAt: node.createdAt,
+            publishedAt: node.publishedAt || new Date().toISOString(), // Best selling from storefront are usually published
+            status: "ACTIVE",
+            isPublished: true,
             tags: node.tags.includes("best seller") ? node.tags : [...node.tags, "best seller"],
             image: selectedVariant.image || node.featuredImage?.url,
             images,

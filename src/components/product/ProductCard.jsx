@@ -6,7 +6,8 @@ import LazyImage from "../common/LazyImage";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/navigation";
-import { Navigation } from "swiper/modules";
+import "swiper/css/pagination";
+import { Navigation, Pagination } from "swiper/modules";
 import { motion, AnimatePresence } from "framer-motion";
 import { Star, ChevronLeft, ChevronRight, ArrowRight, Copy, X, Loader2, Play, ShieldCheck, Heart } from "lucide-react";
 import { toast } from "react-toastify";
@@ -235,8 +236,8 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle 
     const labels = [];
     if (product.label) labels.push(product.label);
     
-    const tags = product.tags || [];
-    const lowerTags = tags.map(t => t.toLowerCase());
+    const tags = Array.isArray(product.tags) ? product.tags : [];
+    const lowerTags = tags.map(t => String(t).toLowerCase());
     
     // Priority order: Fast Shipping > Best Seller > New Arrival > Trending
     if (lowerTags.some(t => t.includes("fast shipping") || t.includes("fastshipping"))) labels.push("Fast Shipping");
@@ -270,6 +271,8 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle 
   const swiperRef = useRef(null);
   const prevImageBtnRef = useRef(null);
   const nextImageBtnRef = useRef(null);
+
+  const hasSimilar = (product.matchingProductIds && product.matchingProductIds.length > 0) || product.hasSimilar;
 
   const handleBeforeInit = (swiper) => {
     if (galleryImages.length <= 1 || !swiper.params.navigation) return;
@@ -362,7 +365,11 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle 
                   spaceBetween={0}
                   loop={galleryImages.length > 1}
                   slidesPerView={1}
-                  modules={[Navigation]}
+                  modules={[Navigation, Pagination]}
+                  pagination={galleryImages.length > 1 ? {
+                    type: 'progressbar',
+                    el: `.pagination-${swiperId}`
+                  } : false}
                   navigation={galleryImages.length > 1 ? {
                     prevEl: prevImageBtnRef.current,
                     nextEl: nextImageBtnRef.current,
@@ -391,11 +398,14 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle 
                           fill
                           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                           priority={index === 0}
-                          className={`object-contain p-4 lg:p-6 grayscale-[0.2] group-hover/card:grayscale-0 transition-all duration-300`}
+                          className={`object-contain p-0 lg:p-6 grayscale-[0.2] group-hover/card:grayscale-0 transition-all duration-300`}
                         />
                       </div>
                     </SwiperSlide>
                   ))}
+                  {galleryImages.length > 1 && (
+                    <div className={`pagination-${swiperId} swiper-pagination bottom-0! lg:!hidden`} />
+                  )}
                 </Swiper>
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-zinc-400">No Image</div>
@@ -406,7 +416,7 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle 
             {videoMedia && (
               <button 
                 onClick={(e) => { e.preventDefault(); setShowVideoPopup(true); }}
-                className="absolute bottom-2 left-2 lg:bottom-4 lg:left-4 z-10 w-7 h-7 lg:w-9 lg:h-9 flex items-center justify-center rounded-full bg-white/90 backdrop-blur-sm border border-zinc-200 text-zinc-900 shadow-sm hover:bg-black hover:text-white transition-all duration-300"
+                className="absolute bottom-4 left-2 lg:left-4 z-10 w-7 h-7 lg:w-9 lg:h-9 flex items-center justify-center rounded-full bg-white/90 backdrop-blur-sm border border-zinc-200 text-zinc-900 shadow-sm hover:bg-black hover:text-white transition-all duration-300"
               >
                 <Play fill="currentColor" className="w-3 lg:w-4" />
               </button>
@@ -503,20 +513,20 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle 
             )}
 
             {/* View Similar Button */}
-            {product.matchingProductIds && product.matchingProductIds.length > 0 && (
+            {hasSimilar && (
               <Drawer open={showSimilar} onOpenChange={setShowSimilar}>
                 <DrawerTrigger asChild>
                   <button 
                     onClick={(e) => { e.preventDefault(); fetchSimilar(); }}
-                    className="absolute bottom-2 right-2 lg:bottom-4 lg:right-4 z-10 w-7 h-7 lg:w-9 lg:h-9 flex items-center justify-center rounded-full bg-white/90 backdrop-blur-sm border border-zinc-200 text-zinc-900 shadow-sm hover:bg-black hover:text-white transition-all duration-300"
+                    className="absolute bottom-4 right-2 lg:right-4 z-10 w-7 h-7 lg:w-9 lg:h-9 flex items-center justify-center rounded-full bg-white/90 backdrop-blur-sm border border-zinc-200 text-zinc-900 shadow-sm hover:bg-black hover:text-white transition-all duration-300"
                   >
                     <Copy className="w-3 lg:w-4" />
                   </button>
                 </DrawerTrigger>
                 <DrawerContent className="max-h-[90vh] h-[90vh] bg-white rounded-t-[20px] flex flex-col">
-                  <div className="mx-auto w-full max-w-7xl flex flex-col h-full overflow-hidden">
-                    <DrawerHeader className="px-10 pt-10 flex flex-row items-center justify-between border-b border-zinc-100 pb-6 !text-left !flex-row shrink-0">
-                      <DrawerTitle className="text-[15px] font-medium tracking-[0.2em] text-black uppercase">VIEW SIMILAR</DrawerTitle>
+                  <div className="mx-auto w-full flex flex-col h-full overflow-hidden">
+                    <DrawerHeader className="px-10 py-6 flex flex-row items-center justify-between border-b border-zinc-100 !text-left !flex-row shrink-0">
+                      <DrawerTitle className="text-xl font-medium text-black uppercase">VIEW SIMILAR</DrawerTitle>
                       <DrawerClose asChild>
                         <button className="text-zinc-400 hover:text-black transition-colors hover:cursor-pointer p-1">
                           <X size={22} strokeWidth={1.5} />
@@ -524,14 +534,14 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle 
                       </DrawerClose>
                     </DrawerHeader>
                     
-                    <div className="px-10 py-10 overflow-y-auto flex-1">
+                    <div className="sm:px-10 sm:py-10 px-5 py-5 overflow-y-auto flex-1">
                       {loadingSimilar ? (
                         <div className="flex flex-col items-center justify-center py-20 gap-4 w-full">
                           <Loader2 className="animate-spin text-zinc-400" size={40} />
                           <p className="text-sm font-bold uppercase tracking-widest text-zinc-400">Searching matching designs...</p>
                         </div>
                       ) : similarProducts.length > 0 ? (
-                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-x-8 gap-y-12 pb-10">
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 sm:gap-x-8 gap-x-4 sm:gap-y-12 gap-y-6 pb-10">
                           {similarProducts.slice(0, 10).map((item) => {
                             const itemId = item.shopifyId || item.id;
                             return (
@@ -618,7 +628,7 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle 
                           aria-label={`Show ${base} color`}
                           onClick={() => setActiveBase(base)}
                           className={`w-5 h-5 lg:w-7 lg:h-7 rounded-full border transition-all flex items-center justify-center hover:scale-110 ${
-                            isActive ? "border-black dark:border-white p-0.5" : "border-transparent"
+                            isActive ? "border-black dark:border-white" : "border-transparent"
                           }`}
                         >
                           <span
@@ -632,38 +642,41 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle 
               )}
 
               {/* Rating Section */}
-              {product.reviews?.count > 0 && (
+              {((product.reviews?.count || product.reviewStats?.count) > 0) && (
                 <div className="flex items-center gap-1.5">
                   <div className="flex items-center gap-0.5 text-amber-400">
                     {isMobile ? (
                       <Star size={12} fill="currentColor" />
                     ) : (
-                      [...Array(5)].map((_, i) => (
-                        <Star
-                          key={i}
-                          size={12}
-                          fill={i < i < Math.floor(product.reviews.average) ? "currentColor" : "none"}
-                          className={ i < i < Math.floor(product.reviews.average) ? "" : "text-zinc-200 dark:text-zinc-800"}
-                        />
-                      ))
+                      [...Array(5)].map((_, i) => {
+                        const average = product.reviews?.average || product.reviewStats?.average || 0;
+                        return (
+                          <Star
+                            key={i}
+                            size={12}
+                            fill={i < Math.floor(average) ? "currentColor" : "none"}
+                            className={i < Math.floor(average) ? "" : "text-zinc-200 dark:text-zinc-800"}
+                          />
+                        );
+                      })
                     )}
                   </div>
-                  <span className="text-sm font-semibold text-black mt-0.5">({product.reviews.count})</span>
+                  <span className="text-sm font-semibold text-black mt-0.5">({product.reviews?.count || product.reviewStats?.count})</span>
                 </div>
               )}
             </div>
 
             {/* Price Section */}
-            <div className="flex items-center gap-2 mt-2 font-figtree">
+            <div className="flex items-center flex-wrap gap-x-2 gap-y-1 mt-2 font-figtree">
               <p className="text-base lg:text-xl font-bold">₹{formatPrice(displayPrice)}</p>
               {displayComparePrice > displayPrice && (
                 <p className="text-[14px] lg:text-base text-gray-400 line-through">₹{formatPrice(displayComparePrice)}</p>
               )}
-              {/* {displayComparePrice > displayPrice && discountPercent > 0 && (
-                <span className="bg-[#E5E7EB] text-black px-2 py-0.5 rounded-full text-xs font-bold">
+              {displayComparePrice > displayPrice && discountPercent > 0 && (
+                <span className="hidden lg:inline-block bg-[#F2F2F2] text-black px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider whitespace-nowrap">
                   {discountPercent}% OFF
                 </span>
-              )} */}
+              )}
             </div>
 
             <div className="flex flex-col items-start gap-0.5">
@@ -795,6 +808,23 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle 
         .custom-product-swiper .swiper-button-prev,
         .custom-product-swiper .swiper-button-next {
           display: none !important;
+        }
+        
+        .custom-product-swiper .swiper-pagination-progressbar {
+          background: rgba(0,0,0,0.05) !important;
+          height: 2px !important;
+          bottom: 0 !important;
+          top: auto !important;
+        }
+        
+        .custom-product-swiper .swiper-pagination-progressbar-fill {
+          background: #5A413F !important;
+        }
+
+        @media (min-width: 1024px) {
+          .custom-product-swiper .swiper-pagination {
+            display: none !important;
+          }
         }
       ` }} />
 

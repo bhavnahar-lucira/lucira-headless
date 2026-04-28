@@ -143,20 +143,20 @@ export default function CustomerReview({
   if (reviews.length === 0) return null;
 
   return (
-    <section className="w-full mt-12 md:mt-20 py-10 bg-white overflow-hidden">
-      <div className="container-main px-4 md:px-0">
+    <section className="w-full my-10 md:my-15 bg-white overflow-hidden">
+      <div className="container-main">
         <div className={`mb-8 ${isMobile ? "text-left" : "text-center md:text-left"}`}>
-          <h2 className="text-3xl md:text-4xl font-black font-abhaya text-zinc-900 tracking-tight">
+          <h2 className="text-3xl md:text-4xl font-extrabold mb-4 font-abhaya text-black">
             {title}
           </h2>
-          {subtitle && <p className="text-sm md:text-base text-zinc-600 mt-2">{subtitle}</p>}
+          {subtitle && <p className="text-sm md:text-base text-zinc-600">{subtitle}</p>}
         </div>
 
         <div className="relative">
           <Swiper
             modules={[Navigation, Pagination]}
             spaceBetween={isMobile ? 12 : 20}
-            slidesPerView={isMobile ? 1.15 : 4.2}
+            slidesPerView={isMobile ? 1.5 : 4.2}
             loop={false}
             onSwiper={(swiper) => {
               swiperRef.current = swiper;
@@ -189,7 +189,7 @@ export default function CustomerReview({
           </Swiper>
 
           {/* Controls */}
-          <div className="mt-8 flex items-center justify-between">
+          <div className="mt-8 md:mt-6 px-1 flex items-center justify-between">
             {isMobile ? (
               <Link 
                 href="/reviews"
@@ -225,7 +225,7 @@ export default function CustomerReview({
           <div className="mt-12 text-center">
               <Link 
                   href="/reviews"
-                  className="inline-flex items-center justify-center border-b-2 border-black pb-1 font-black text-xs tracking-[0.3em] uppercase hover:text-primary hover:border-primary transition-all duration-300"
+                  className="inline-flex items-center justify-center px-7 py-3 h-auto text-sm md:text-base font-bold uppercase rounded-sm bg-primary hover:bg-[#4A3934] text-white transition-colors"
               >
                   View All Reviews
               </Link>
@@ -280,7 +280,7 @@ function ReviewBottomSheet({ isOpen, onClose, review }) {
       <Sheet.Container className="!rounded-t-[32px] overflow-hidden">
         <Sheet.Header />
         <Sheet.Content className="px-6 pb-12 overflow-y-auto no-scrollbar">
-          <div className="flex flex-col">
+          <div className="flex flex-col lg:pb-0 pb-10">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-xl font-black font-abhaya text-zinc-900 tracking-tight">
                 Why Our Customers Love Us

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { shopifyAdminFetch } from "@/lib/shopify";
 
 export async function POST(req) {
   try {
@@ -11,7 +12,9 @@ export async function POST(req) {
       );
     }
 
-    const shopifyCustomerId = `gid://shopify/Customer/${customerId}`;
+    const shopifyCustomerId = customerId.toString().startsWith("gid://")
+      ? customerId
+      : `gid://shopify/Customer/${customerId}`;
 
     const query = `
       query getCustomerReferral($id: ID!) {
@@ -26,40 +29,15 @@ export async function POST(req) {
       }
     `;
 
-    const response = await fetch(`https://${process.env.SHOPIFY_STORE}/admin/api/2024-01/graphql.json`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Shopify-Access-Token":
-            process.env.ADMIN_TOKEN
-        },
-        body: JSON.stringify({
-          query,
-          variables: {
-            id: shopifyCustomerId
-          }
-        })
-      }
-    );
+    const data = await shopifyAdminFetch(query, { id: shopifyCustomerId });
 
-    const data = await response.json();
-
-    if (data.errors?.length) {
-      return NextResponse.json(
-        { error: data.errors[0].message },
-        { status: 403 }
-      );
-    }
-
-    const rawJson = data?.data?.customer?.metafield?.value;
+    const rawJson = data?.customer?.metafield?.value;
 
     if (!rawJson) {
       return NextResponse.json({ referralLink: "" });
     }
 
     const parsed = JSON.parse(rawJson);
-
     const referralLink = parsed.nector_user_referral_link || "";
 
     return NextResponse.json({ referralLink });
@@ -68,7 +46,7 @@ export async function POST(req) {
     console.error("Referral API Error:", error);
     return NextResponse.json(
       { error: "Failed fetching referral link" },
-      { status:500 }
+      { status: 500 }
     );
   }
 }

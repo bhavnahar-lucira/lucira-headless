@@ -26,7 +26,7 @@ export default function FeatureBar() {
   ];
 
   return (
-    <div className="w-full py-10 bg-white">
+    <div className="w-full my-7 bg-white">
       <div className="container-main">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-y-10 gap-x-4 items-start">
           {features.map((item, index) => {
@@ -35,7 +35,7 @@ export default function FeatureBar() {
             return (
               <div
                 key={index}
-                className="flex flex-col md:flex-row items-center md:items-start gap-3 md:gap-4 text-center md:text-left"
+                className="flex flex-col md:flex-row items-center justify-center gap-3 md:gap-4 text-center md:text-left"
               >
                 <div className="shrink-0 text-zinc-700">
                   {Icon && <Icon size={28} strokeWidth={1.2} />}

@@ -33,6 +33,12 @@ async function createTextIndex() {
     );
     
     console.log('Index created successfully:', result);
+
+    console.log('Creating additional indexes for $or query support...');
+    await collection.createIndex({ title: 1 });
+    await collection.createIndex({ handle: 1 });
+    await collection.createIndex({ "variants.sku": 1 });
+    console.log('Additional indexes created.');
   } catch (err) {
     console.error('Error creating index:', err);
   } finally {

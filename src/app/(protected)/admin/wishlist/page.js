@@ -219,19 +219,19 @@ export default function WishlistPage() {
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-3xl font-black text-zinc-900 tracking-tight mb-1">My Wishlist</h2>
+          <h2 className="font-figtree text-2xl md:text-3xl font-bold text-zinc-900 tracking-tight mb-1">My Wishlist</h2>
           <p className="text-zinc-500 font-medium">Save your favorite pieces and return to them later.</p>
         </div>
         <button
           onClick={loadWishlist}
-          className="px-6 py-3 bg-primary text-white text-xs font-black uppercase tracking-[0.2em] rounded-2xl hover:opacity-90 transition-colors shadow-lg shadow-primary/20 flex items-center gap-2"
+          className="font-figtree px-6 py-3 bg-primary text-white text-xs font-semibold uppercase tracking-[0.15em] rounded-2xl hover:opacity-90 transition-colors shadow-lg shadow-primary/20 flex items-center gap-2 w-fit"
         >
           <ShoppingCart size={16} />
           Refresh
         </button>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-8 gap-y-12">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-2 gap-x-8 gap-y-12">
         {loading ? (
           <div className="col-span-full py-20 text-center text-zinc-500">Loading your wishlist...</div>
         ) : wishlistItems.length > 0 ? (
@@ -385,9 +385,9 @@ export default function WishlistPage() {
       {/* Similar Products Drawer */}
       <Drawer open={showSimilar} onOpenChange={setShowSimilar}>
         <DrawerContent className="max-h-[90vh] h-[90vh] bg-white rounded-t-[20px] flex flex-col">
-          <div className="mx-auto w-full max-w-7xl flex flex-col h-full overflow-hidden">
-            <DrawerHeader className="px-10 pt-10 flex flex-row items-center justify-between border-b border-zinc-100 pb-6 !text-left !flex-row shrink-0">
-              <DrawerTitle className="text-[15px] font-medium tracking-[0.2em] text-black uppercase">VIEW SIMILAR</DrawerTitle>
+          <div className="mx-auto w-full flex flex-col h-full overflow-hidden">
+            <DrawerHeader className="px-10 py-6 flex flex-row items-center justify-between border-b border-zinc-100 !text-left !flex-row shrink-0">
+              <DrawerTitle className="text-xl font-medium text-black uppercase">VIEW SIMILAR</DrawerTitle>
               <DrawerClose asChild>
                 <button className="text-zinc-400 hover:text-black transition-colors hover:cursor-pointer p-1">
                   <X size={22} strokeWidth={1.5} />
@@ -395,14 +395,14 @@ export default function WishlistPage() {
               </DrawerClose>
             </DrawerHeader>
             
-            <div className="px-10 py-10 overflow-y-auto flex-1">
+            <div className="sm:px-10 sm:py-10 px-5 py-5 overflow-y-auto flex-1">
               {loadingSimilar ? (
                 <div className="flex flex-col items-center justify-center py-20 gap-4 w-full">
                   <Loader2 className="animate-spin text-zinc-400" size={40} />
                   <p className="text-sm font-bold uppercase tracking-widest text-zinc-400">Searching matching designs...</p>
                 </div>
               ) : similarProducts.length > 0 ? (
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-x-8 gap-y-12 pb-10">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 sm:gap-x-8 gap-x-4 sm:gap-y-12 gap-y-6 pb-10">
                   {similarProducts.slice(0, 10).map((item) => (
                     <div key={item.shopifyId || item._id || item.id} className="space-y-4">
                       <Link href={`/products/${item.handle}`} onClick={() => setShowSimilar(false)} className="block space-y-4 group">

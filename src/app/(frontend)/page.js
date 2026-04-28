@@ -2,6 +2,7 @@
 import { Suspense } from "react";
 import dynamic from "next/dynamic";
 import HeroSlider from "@/components/home/HeroSlider";
+import HeroSliderImage from "@/components/home/HeroSliderImage";
 import ExploreRange from "@/components/home/ExploreRange";
 import FeatureBar from "@/components/home/FeatureBar";
 import ShopByCategory from "@/components/home/ShopByCategory";
@@ -31,7 +32,8 @@ import ExploreCollectionSection from "@/components/home/homeCollection/ExploreCo
 export default function Home() {
   return (
     <div className="w-full">
-      <HeroSlider/>
+      {/* <HeroSlider/> */}
+      <HeroSliderImage/>
       <FeatureBar/>
       <ExploreRange/>
       
@@ -74,9 +76,9 @@ export default function Home() {
       <Suspense fallback={<div className="h-20 bg-gray-100 animate-pulse"></div>}>
         <WeAreLucira/>
       </Suspense>
-      <Suspense fallback={<div className="h-20 bg-gray-100 animate-pulse"></div>}>
+      {/* <Suspense fallback={<div className="h-20 bg-gray-100 animate-pulse"></div>}>
         <LoveStorySlider/>
-      </Suspense>
+      </Suspense> */}
       <Suspense fallback={<div className="h-20 bg-gray-100 animate-pulse"></div>}>
         <NoteFromFounder/>
       </Suspense>

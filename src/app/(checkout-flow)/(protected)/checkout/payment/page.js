@@ -256,6 +256,13 @@ export default function PaymentPage() {
   const [selectedPaymentGateway, setSelectedPaymentGateway] = useState("razorpay");
   const [paymentLoading, setPaymentLoading] = useState(false);
   const [checkoutSelection, setCheckoutSelection] = useState(null);
+  const summaryRef = useRef(null);
+
+  const scrollToSummary = () => {
+    if (summaryRef.current) {
+      summaryRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
 
   const [addAddressDialogOpen, setAddAddressDialogOpen] = useState(false);
   const [addressForm, setAddressForm] = useState(emptyAddressForm);
@@ -264,6 +271,32 @@ export default function PaymentPage() {
 
   const user = useSelector(selectUser);
   const {items, totalAmount, appliedCoupon, nectorPoints } = useCart();
+
+  // Remove points when leaving the payment page
+  useEffect(() => {
+    return () => {
+      dispatch(removePoints());
+    };
+  }, [dispatch]);
+
+  const finalAmount = useMemo(() => {
+    const insuranceItem = (items || []).find(item => item.variantId === INSURANCE_VARIANT_ID);
+    const insuranceValue = insuranceItem ? (insuranceItem.price * (insuranceItem.quantity || 1)) : 0;
+    const subtotalValue = (totalAmount || 0) - insuranceValue;
+
+    const couponDetails = typeof appliedCoupon === 'object' ? appliedCoupon : { code: appliedCoupon, value: 0, valueType: "FIXED_AMOUNT" };
+    let couponDiscountAmount = 0;
+    if (appliedCoupon) {
+      if (couponDetails.valueType === "FIXED_AMOUNT") {
+        couponDiscountAmount = couponDetails.value;
+      } else if (couponDetails.valueType === "PERCENTAGE") {
+        couponDiscountAmount = (subtotalValue * couponDetails.value) / 100;
+      }
+    }
+
+    const pointsDiscountAmount = nectorPoints?.fiat_value || 0;
+    return subtotalValue + insuranceValue - couponDiscountAmount - pointsDiscountAmount;
+  }, [items, totalAmount, appliedCoupon, nectorPoints]);
 
   useEffect(() => {
     if (customer) {
@@ -943,190 +976,299 @@ export default function PaymentPage() {
     <div className="bg-white min-h-screen overflow-x-hidden">
       <div className="max-w-7xl w-full mx-auto relative z-10 px-4">
         <div className="flex flex-col lg:flex-row min-h-[calc(100vh-80px)]">
-          <div className="grow lg:basis-[60%] lg:shrink-0 py-10 px-4 lg:pr-12 space-y-10 bg-white">
-            <div className="border border-zinc-200 rounded-xl overflow-hidden bg-white">
-              <div className="p-4 grid grid-cols-[140px_1fr_60px] items-center gap-4 text-sm border-b border-zinc-100">
-                <span className="text-zinc-500 whitespace-nowrap">Contact</span>
-                <span className="text-zinc-900 font-medium truncate">{customer?.email || checkoutSelection?.customerEmail || "techamitjha@gmail.com"}</span>
-                <Link
-                  href="/checkout/shipping?method=ship"
-                  className="text-black font-semibold text-right underline"
-                >
-                  Change
-                </Link>
-              </div>
+          
+          {/* Main Content Area (60%) */}
+          <div className="grow lg:basis-[60%] lg:shrink-0 py-10 px-0 lg:pr-12 space-y-10 bg-white">
+            
+            {/* MOBILE ONLY ORDER */}
+            {!isDesktop && (
+              <div className="space-y-10 px-4">
+                {/* 1. Lucira Coins Balance */}
+                <CheckoutSummary showItems={false} showBreakdown={false} showContact={false} />
 
-              <div className="p-4 grid grid-cols-[140px_1fr_60px] items-center gap-4 text-sm border-b border-zinc-100">
-                <span className="text-zinc-500 whitespace-nowrap">{isPickup ? "Pickup location" : "Ship to"}</span>
-                <div className="text-zinc-900 font-medium">
-                  {isPickup ? (
-                    <div className="space-y-1">
-                      <p className="font-bold">{checkoutSelection?.selectedStore?.code || checkoutSelection?.selectedStore?.name}</p>
-                      <p className="line-clamp-2 text-zinc-600 font-normal">{checkoutSelection?.selectedStore?.address}</p>
-                    </div>
-                  ) : selectedAddress ? (
-                    <div className="space-y-1">
-                      <p className="line-clamp-2">{formatAddressPreview(selectedAddress)}</p>
-                      {selectedAddress.gstin && <p className="text-sm font-semibold">GSTIN: {selectedAddress.gstin}</p>}
-                    </div>
-                  ) : (
-                    <p>No shipping address selected</p>
-                  )}
-                </div>
-                <Link
-                  href={`/checkout/shipping?method=${isPickup ? "pickup" : "ship"}`}
-                  className="text-black font-semibold text-right underline"
-                >
-                  Change
-                </Link>
-              </div>
-
-              {!isPickup && (
-                <div className="p-4 grid grid-cols-[140px_1fr_60px] items-center gap-4 text-sm border-b border-zinc-100">
-                  <span className="text-zinc-500 whitespace-nowrap">Bill to</span>
-                  <div className="text-zinc-900 font-medium">
-                    {selectedBillingAddress ? (
-                      <div className="space-y-1">
-                        <p className="line-clamp-2">{formatAddressPreview(selectedBillingAddress)}</p>
-                        {selectedBillingAddress.gstin && <p className="text-sm font-semibold">GSTIN: {selectedBillingAddress.gstin}</p>}
-                      </div>
-                    ) : (
-                      <p>No billing address selected</p>
-                    )}
+                {/* 2. Payment options */}
+                <div className="space-y-4">
+                  <div className="space-y-1">
+                    <h2 className="text-2xl font-abhaya font-bold text-zinc-900">Payment</h2>
+                    <p className="text-sm font-figtree text-zinc-500">All transactions are secure and encrypted.</p>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => setBillingDialogOpen(true)}
-                    className="text-black font-semibold text-right underline"
-                  >
-                    Change
-                  </button>
+                  <RadioGroup value={selectedPaymentGateway} onValueChange={setSelectedPaymentGateway} className="grid gap-0 border border-zinc-200 rounded-lg overflow-hidden bg-white">
+                    {paymentGateways.map((gateway, index) => (
+                      <div key={gateway.id} className={`flex flex-col ${index === 0 ? "border-b border-zinc-100" : ""}`}>
+                        <div className={`p-5 flex flex-col md:flex-row gap-4 md:gap-0 items-center justify-between transition-all cursor-pointer ${index === 0 ? "bg-accent/15" : ""}`}>
+                          <div className="flex items-center gap-3">
+                            <RadioGroupItem value={gateway.id} id={`m-${gateway.id}`} className="text-[#005BD3] border-zinc-300" />
+                            <Label htmlFor={`m-${gateway.id}`} className="font-medium text-zinc-900 cursor-pointer">{gateway.name}</Label>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <div className="flex gap-1 items-center bg-white px-2 py-1 rounded border border-zinc-100">
+                              <Image src="/images/icons/upi.svg" className="h-3 w-auto opacity-70" alt="UPI" width={36} height={12} unoptimized />
+                            </div>
+                            <div className="flex gap-1 items-center bg-white px-2 py-1 rounded border border-zinc-100">
+                              <Image src="/images/icons/visa.svg" className="h-2 w-auto opacity-70" alt="VISA" width={36} height={8} unoptimized />
+                            </div>
+                            <div className="flex gap-1 items-center bg-white px-2 py-1 rounded border border-zinc-100">
+                              <Image src="/images/icons/mastercard.svg" className="h-3 w-auto opacity-70" alt="MASTERCARD" width={36} height={12} unoptimized />
+                            </div>
+                            <span className="text-[10px] text-zinc-400 font-bold">+{index === 0 ? "18" : "4"}</span>
+                          </div>
+                        </div>
+                        {gateway.description && (
+                          <div className="px-10 md:px-14 pb-5 pt-0 bg-accent/15 text-center">
+                            <div className="p-4 bg-zinc-50/50 rounded-lg text-sm text-zinc-600 border border-zinc-100">
+                              {gateway.description}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </RadioGroup>
                 </div>
-              )}
 
-              <div className="p-4 grid grid-cols-[140px_1fr] items-center gap-4 text-sm">
-                <span className="text-zinc-500 whitespace-nowrap">{isPickup ? "Method" : "Shipping method"}</span>
-                <span className="text-zinc-900 font-medium">
-                  {isPickup ? "Pickup" : "Shipping Rate"} · <span className="font-bold">{isPickup || isIndiaShipping ? "FREE" : "Calculated at next step"}</span>
-                </span>
-              </div>
-            </div>
+                {/* 3. Order Summary */}
+                <div ref={summaryRef}>
+                  <CheckoutSummary showPoints={false} showContact={false} />
+                </div>
 
-            <div className="space-y-4">
-              <div className="space-y-1">
-                <h2 className="text-2xl font-bold text-zinc-900 font-abhaya">Billing address</h2>
-                <p className="text-sm font-figtree text-zinc-500">Select the address that matches your card or payment method.</p>
-              </div>
-
-              {isPickup ? (
-                <div className="border border-zinc-100 rounded-xl overflow-hidden bg-white">
-                  <div className="p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div className="space-y-1">
-                      {selectedBillingAddress ? (
-                        <>
-                          <h4 className="font-bold text-zinc-900">
-                            {[selectedBillingAddress.firstName, selectedBillingAddress.lastName].filter(Boolean).join(" ")}
-                          </h4>
-                          <p className="text-sm text-zinc-500">{formatAddressPreview(selectedBillingAddress)}</p>
-                        </>
+                {/* 4. Contact, Ship to, Bill to section */}
+                <div className="border border-zinc-200 rounded-xl overflow-hidden bg-white">
+                  <div className="p-4 grid grid-cols-[100px_1fr] items-center gap-4 text-sm border-b border-zinc-100">
+                    <span className="text-zinc-500 whitespace-nowrap">Contact</span>
+                    <span className="text-zinc-900 font-medium truncate">{customer?.email || checkoutSelection?.customerEmail || "techamitjha@gmail.com"}</span>
+                  </div>
+                  <div className="p-4 grid grid-cols-[100px_1fr_60px] items-center gap-4 text-sm border-b border-zinc-100">
+                    <span className="text-zinc-500 whitespace-nowrap">{isPickup ? "Pickup" : "Ship to"}</span>
+                    <div className="text-zinc-900 font-medium">
+                      {isPickup ? (
+                        <div className="space-y-1">
+                          <p className="font-bold">{checkoutSelection?.selectedStore?.code || checkoutSelection?.selectedStore?.name}</p>
+                          <p className="line-clamp-2 text-zinc-600 font-normal">{checkoutSelection?.selectedStore?.address}</p>
+                        </div>
+                      ) : selectedAddress ? (
+                        <div className="space-y-1">
+                          <p className="line-clamp-2">{formatAddressPreview(selectedAddress)}</p>
+                          {selectedAddress.gstin && <p className="text-sm font-semibold">GSTIN: {selectedAddress.gstin}</p>}
+                        </div>
                       ) : (
-                        <p className="text-sm text-zinc-500 italic">No billing address selected</p>
+                        <p>No shipping address selected</p>
                       )}
                     </div>
-                    <Button
-                      variant="outline"
-                      onClick={() => setBillingDialogOpen(true)}
-                      className="border-zinc-200 text-zinc-800 font-bold"
-                    >
-                      Select billing address
-                    </Button>
+                    <Link href={`/checkout/shipping?method=${isPickup ? "pickup" : "ship"}`} className="text-black font-semibold text-right underline">Change</Link>
+                  </div>
+                  {!isPickup && (
+                    <div className="p-4 grid grid-cols-[100px_1fr_60px] items-center gap-4 text-sm border-b border-zinc-100">
+                      <span className="text-zinc-500 whitespace-nowrap">Bill to</span>
+                      <div className="text-zinc-900 font-medium">
+                        {selectedBillingAddress ? (
+                          <div className="space-y-1">
+                            <p className="line-clamp-2">{formatAddressPreview(selectedBillingAddress)}</p>
+                            {selectedBillingAddress.gstin && <p className="text-sm font-semibold">GSTIN: {selectedBillingAddress.gstin}</p>}
+                          </div>
+                        ) : (
+                          <p>No billing address selected</p>
+                        )}
+                      </div>
+                      <button type="button" onClick={() => setBillingDialogOpen(true)} className="text-black font-semibold text-right underline">Change</button>
+                    </div>
+                  )}
+                  <div className="p-4 grid grid-cols-[100px_1fr] items-center gap-4 text-sm">
+                    <span className="text-zinc-500 whitespace-nowrap">{isPickup ? "Method" : "Shipping"}</span>
+                    <span className="text-zinc-900 font-medium">
+                      {isPickup ? "Pickup" : "Shipping Rate"} · <span className="font-bold">{isPickup || isIndiaShipping ? "FREE" : "Calculated at next step"}</span>
+                    </span>
                   </div>
                 </div>
-              ) : (
-                <RadioGroup
-                  value={billingAddressMode}
-                  onValueChange={handleBillingModeChange}
-                  className="grid gap-0 border border-zinc-100 rounded-lg overflow-hidden bg-white"
-                >
-                  <div className={`p-5 flex items-center gap-3 border-b border-zinc-100 ${billingAddressMode === "same" ? "bg-accent/15" : ""}`}>
-                    <RadioGroupItem value="same" id="same" className="text-black border-zinc-300" />
-                    <Label htmlFor="same" className="font-medium text-zinc-900 cursor-pointer">Same as shipping address</Label>
-                  </div>
-                  <div className={`p-5 flex items-center gap-3 transition-all hover:bg-zinc-50/50 cursor-pointer ${billingAddressMode === "different" ? "bg-accent/15" : ""}`}>
-                    <RadioGroupItem value="different" id="different" className="text-black border-zinc-300" />
-                    <Label htmlFor="different" className="font-medium text-zinc-900 cursor-pointer">Use a different billing address</Label>
-                  </div>
-                </RadioGroup>
-              )}
-            </div>
 
-            <div className="space-y-4">
-              <div className="space-y-1">
-                <h2 className="text-2xl font-abhaya font-bold text-zinc-900">Payment</h2>
-                <p className="text-sm font-figtree text-zinc-500">All transactions are secure and encrypted.</p>
-              </div>
-
-              <RadioGroup
-                value={selectedPaymentGateway}
-                onValueChange={setSelectedPaymentGateway}
-                className="grid gap-0 border border-zinc-200 rounded-lg overflow-hidden bg-white"
-              >
-                {paymentGateways.map((gateway, index) => (
-                  <div key={gateway.id} className={`flex flex-col ${index === 0 ? "border-b border-zinc-100" : ""}`}>
-                    <div className={`p-5 flex flex-col md:flex-row gap-4 md:gap-0 items-center justify-between transition-all cursor-pointer ${index === 0 ? "bg-accent/15" : ""}`}>
-                      <div className="flex items-center gap-3">
-                        <RadioGroupItem value={gateway.id} id={gateway.id} className="text-[#005BD3] border-zinc-300" />
-                        <Label htmlFor={gateway.id} className="font-medium text-zinc-900 cursor-pointer">{gateway.name}</Label>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="flex gap-1 items-center bg-white px-2 py-1 rounded border border-zinc-100">
-                          <Image src="/images/icons/upi.svg" className="h-3 w-auto opacity-70" alt="UPI" width={36} height={12} unoptimized />
+                {/* 5. Billing address selection */}
+                <div className="space-y-4">
+                  <div className="space-y-1">
+                    <h2 className="text-2xl font-bold text-zinc-900 font-abhaya">Billing address</h2>
+                    <p className="text-sm font-figtree text-zinc-500">Select the address that matches your card.</p>
+                  </div>
+                  {isPickup ? (
+                    <div className="border border-zinc-100 rounded-xl overflow-hidden bg-white">
+                      <div className="p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div className="space-y-1">
+                          {selectedBillingAddress ? (
+                            <>
+                              <h4 className="font-bold text-zinc-900">{[selectedBillingAddress.firstName, selectedBillingAddress.lastName].filter(Boolean).join(" ")}</h4>
+                              <p className="text-sm text-zinc-500">{formatAddressPreview(selectedBillingAddress)}</p>
+                            </>
+                          ) : (
+                            <p className="text-sm text-zinc-500 italic">No billing address selected</p>
+                          )}
                         </div>
-                        <div className="flex gap-1 items-center bg-white px-2 py-1 rounded border border-zinc-100">
-                          <Image src="/images/icons/visa.svg" className="h-2 w-auto opacity-70" alt="VISA" width={36} height={8} unoptimized />
-                        </div>
-                        <div className="flex gap-1 items-center bg-white px-2 py-1 rounded border border-zinc-100">
-                          <Image src="/images/icons/mastercard.svg" className="h-3 w-auto opacity-70" alt="MASTERCARD" width={36} height={12} unoptimized />
-                        </div>
-                        <span className="text-[10px] text-zinc-400 font-bold">+{index === 0 ? "18" : "4"}</span>
+                        <Button variant="outline" onClick={() => setBillingDialogOpen(true)} className="border-zinc-200 text-zinc-800 font-bold">Select billing address</Button>
                       </div>
                     </div>
-                    {gateway.description && (
-                      <div className="px-10 md:px-14 pb-5 pt-0 bg-accent/15 text-center">
-                        <div className="p-4 bg-zinc-50/50 rounded-lg text-sm text-zinc-600 border border-zinc-100">
-                          {gateway.description}
-                        </div>
+                  ) : (
+                    <RadioGroup value={billingAddressMode} onValueChange={handleBillingModeChange} className="grid gap-0 border border-zinc-100 rounded-lg overflow-hidden bg-white">
+                      <div className={`p-5 flex items-center gap-3 border-b border-zinc-100 ${billingAddressMode === "same" ? "bg-accent/15" : ""}`}>
+                        <RadioGroupItem value="same" id="m-same" className="text-black border-zinc-300" />
+                        <Label htmlFor="m-same" className="font-medium text-zinc-900 cursor-pointer">Same as shipping address</Label>
                       </div>
-                    )}
-                  </div>
-                ))}
-              </RadioGroup>
-            </div>
+                      <div className={`p-5 flex items-center gap-3 transition-all hover:bg-zinc-50/50 cursor-pointer ${billingAddressMode === "different" ? "bg-accent/15" : ""}`}>
+                        <RadioGroupItem value="different" id="m-different" className="text-black border-zinc-300" />
+                        <Label htmlFor="m-different" className="font-medium text-zinc-900 cursor-pointer">Use a different billing address</Label>
+                      </div>
+                    </RadioGroup>
+                  )}
+                </div>
 
-            <div className="hidden lg:flex items-center justify-between gap-6 pt-4">
-              <Link href="/checkout/shipping" className="flex items-center gap-2 text-sm font-bold text-accent hover:underline">
-                <ChevronLeft size={16} />
-                Return to shipping
-              </Link>
-              <Button
-                type="button"
-                onClick={handlePayNow}
-                disabled={paymentLoading || !totalAmount}
-                className="px-14 h-14 bg-primary hover:bg-primary/90 text-white font-bold rounded-lg transition-all text-lg uppercase tracking-widest disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {paymentLoading ? "Processing..." : "Pay now"}
-              </Button>
-            </div>
+                {/* 6. CONTACT US FOR ASSISTANCE */}
+                <CheckoutSummary showItems={false} showBreakdown={false} showPoints={false} />
+              </div>
+            )}
+
+            {/* DESKTOP ONLY ORDER */}
+            {isDesktop && (
+              <div className="space-y-10">
+                <div className="border border-zinc-200 rounded-xl overflow-hidden bg-white">
+                  <div className="p-4 grid grid-cols-[140px_1fr_60px] items-center gap-4 text-sm border-b border-zinc-100">
+                    <span className="text-zinc-500 whitespace-nowrap">Contact</span>
+                    <span className="text-zinc-900 font-medium truncate">{customer?.email || checkoutSelection?.customerEmail || "techamitjha@gmail.com"}</span>
+                    <Link href="/checkout/shipping?method=ship" className="text-black font-semibold text-right underline">Change</Link>
+                  </div>
+                  <div className="p-4 grid grid-cols-[140px_1fr_60px] items-center gap-4 text-sm border-b border-zinc-100">
+                    <span className="text-zinc-500 whitespace-nowrap">{isPickup ? "Pickup location" : "Ship to"}</span>
+                    <div className="text-zinc-900 font-medium">
+                      {isPickup ? (
+                        <div className="space-y-1">
+                          <p className="font-bold">{checkoutSelection?.selectedStore?.code || checkoutSelection?.selectedStore?.name}</p>
+                          <p className="line-clamp-2 text-zinc-600 font-normal">{checkoutSelection?.selectedStore?.address}</p>
+                        </div>
+                      ) : selectedAddress ? (
+                        <div className="space-y-1">
+                          <p className="line-clamp-2">{formatAddressPreview(selectedAddress)}</p>
+                          {selectedAddress.gstin && <p className="text-sm font-semibold">GSTIN: {selectedAddress.gstin}</p>}
+                        </div>
+                      ) : (
+                        <p>No shipping address selected</p>
+                      )}
+                    </div>
+                    <Link href={`/checkout/shipping?method=${isPickup ? "pickup" : "ship"}`} className="text-black font-semibold text-right underline">Change</Link>
+                  </div>
+                  {!isPickup && (
+                    <div className="p-4 grid grid-cols-[140px_1fr_60px] items-center gap-4 text-sm border-b border-zinc-100">
+                      <span className="text-zinc-500 whitespace-nowrap">Bill to</span>
+                      <div className="text-zinc-900 font-medium">
+                        {selectedBillingAddress ? (
+                          <div className="space-y-1">
+                            <p className="line-clamp-2">{formatAddressPreview(selectedBillingAddress)}</p>
+                            {selectedBillingAddress.gstin && <p className="text-sm font-semibold">GSTIN: {selectedBillingAddress.gstin}</p>}
+                          </div>
+                        ) : (
+                          <p>No billing address selected</p>
+                        )}
+                      </div>
+                      <button type="button" onClick={() => setBillingDialogOpen(true)} className="text-black font-semibold text-right underline">Change</button>
+                    </div>
+                  )}
+                  <div className="p-4 grid grid-cols-[140px_1fr] items-center gap-4 text-sm">
+                    <span className="text-zinc-500 whitespace-nowrap">{isPickup ? "Method" : "Shipping method"}</span>
+                    <span className="text-zinc-900 font-medium">
+                      {isPickup ? "Pickup" : "Shipping Rate"} · <span className="font-bold">{isPickup || isIndiaShipping ? "FREE" : "Calculated at next step"}</span>
+                    </span>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="space-y-1">
+                    <h2 className="text-2xl font-bold text-zinc-900 font-abhaya">Billing address</h2>
+                    <p className="text-sm font-figtree text-zinc-500">Select the address that matches your card or payment method.</p>
+                  </div>
+                  {isPickup ? (
+                    <div className="border border-zinc-100 rounded-xl overflow-hidden bg-white">
+                      <div className="p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div className="space-y-1">
+                          {selectedBillingAddress ? (
+                            <>
+                              <h4 className="font-bold text-zinc-900">{[selectedBillingAddress.firstName, selectedBillingAddress.lastName].filter(Boolean).join(" ")}</h4>
+                              <p className="text-sm text-zinc-500">{formatAddressPreview(selectedBillingAddress)}</p>
+                            </>
+                          ) : (
+                            <p className="text-sm text-zinc-500 italic">No billing address selected</p>
+                          )}
+                        </div>
+                        <Button variant="outline" onClick={() => setBillingDialogOpen(true)} className="border-zinc-200 text-zinc-800 font-bold">Select billing address</Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <RadioGroup value={billingAddressMode} onValueChange={handleBillingModeChange} className="grid gap-0 border border-zinc-100 rounded-lg overflow-hidden bg-white">
+                      <div className={`p-5 flex items-center gap-3 border-b border-zinc-100 ${billingAddressMode === "same" ? "bg-accent/15" : ""}`}>
+                        <RadioGroupItem value="same" id="same" className="text-black border-zinc-300" />
+                        <Label htmlFor="same" className="font-medium text-zinc-900 cursor-pointer">Same as shipping address</Label>
+                      </div>
+                      <div className={`p-5 flex items-center gap-3 transition-all hover:bg-zinc-50/50 cursor-pointer ${billingAddressMode === "different" ? "bg-accent/15" : ""}`}>
+                        <RadioGroupItem value="different" id="different" className="text-black border-zinc-300" />
+                        <Label htmlFor="different" className="font-medium text-zinc-900 cursor-pointer">Use a different billing address</Label>
+                      </div>
+                    </RadioGroup>
+                  )}
+                </div>
+
+                <div className="space-y-4">
+                  <div className="space-y-1">
+                    <h2 className="text-2xl font-abhaya font-bold text-zinc-900">Payment</h2>
+                    <p className="text-sm font-figtree text-zinc-500">All transactions are secure and encrypted.</p>
+                  </div>
+                  <RadioGroup value={selectedPaymentGateway} onValueChange={setSelectedPaymentGateway} className="grid gap-0 border border-zinc-200 rounded-lg overflow-hidden bg-white">
+                    {paymentGateways.map((gateway, index) => (
+                      <div key={gateway.id} className={`flex flex-col ${index === 0 ? "border-b border-zinc-100" : ""}`}>
+                        <div className={`p-5 flex flex-col md:flex-row gap-4 md:gap-0 items-center justify-between transition-all cursor-pointer ${index === 0 ? "bg-accent/15" : ""}`}>
+                          <div className="flex items-center gap-3">
+                            <RadioGroupItem value={gateway.id} id={gateway.id} className="text-[#005BD3] border-zinc-300" />
+                            <Label htmlFor={gateway.id} className="font-medium text-zinc-900 cursor-pointer">{gateway.name}</Label>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <div className="flex gap-1 items-center bg-white px-2 py-1 rounded border border-zinc-100">
+                              <Image src="/images/icons/upi.svg" className="h-3 w-auto opacity-70" alt="UPI" width={36} height={12} unoptimized />
+                            </div>
+                            <div className="flex gap-1 items-center bg-white px-2 py-1 rounded border border-zinc-100">
+                              <Image src="/images/icons/visa.svg" className="h-2 w-auto opacity-70" alt="VISA" width={36} height={8} unoptimized />
+                            </div>
+                            <div className="flex gap-1 items-center bg-white px-2 py-1 rounded border border-zinc-100">
+                              <Image src="/images/icons/mastercard.svg" className="h-3 w-auto opacity-70" alt="MASTERCARD" width={36} height={12} unoptimized />
+                            </div>
+                            <span className="text-[10px] text-zinc-400 font-bold">+{index === 0 ? "18" : "4"}</span>
+                          </div>
+                        </div>
+                        {gateway.description && (
+                          <div className="px-10 md:px-14 pb-5 pt-0 bg-accent/15 text-center">
+                            <div className="p-4 bg-zinc-50/50 rounded-lg text-sm text-zinc-600 border border-zinc-100">
+                              {gateway.description}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </RadioGroup>
+                </div>
+
+                <div className="flex items-center justify-between gap-6 pt-4">
+                  <Link href="/checkout/shipping" className="flex items-center gap-2 text-sm font-bold text-accent hover:underline">
+                    <ChevronLeft size={16} />
+                    Return to shipping
+                  </Link>
+                  <Button type="button" onClick={handlePayNow} disabled={paymentLoading || !totalAmount} className="px-14 h-14 bg-primary hover:bg-primary/90 text-white font-bold rounded-lg transition-all text-lg uppercase tracking-widest disabled:cursor-not-allowed disabled:opacity-60">
+                    {paymentLoading ? "Processing..." : "Pay now"}
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
 
-          <div className="w-full lg:basis-[40%] lg:shrink-0 relative">
-            <div className="hidden lg:block absolute inset-y-0 left-0 w-screen bg-[#FAFAFA] border-l border-zinc-100 z-0" />
-            <div className="relative z-10 py-10 px-4 lg:pl-12 bg-[#FAFAFA] lg:bg-transparent min-h-full">
-              <div className="lg:sticky lg:top-0">
-                <CheckoutSummary />
+          {/* Desktop Summary Sidebar (40%) */}
+          {isDesktop && (
+            <div className="w-full lg:basis-[40%] lg:shrink-0 relative">
+              <div className="hidden lg:block absolute inset-y-0 left-0 w-screen bg-[#FAFAFA] border-l border-zinc-100 z-0" />
+              <div className="relative z-10 py-10 px-4 lg:pl-12 bg-[#FAFAFA] lg:bg-transparent min-h-full">
+                <div className="lg:sticky lg:top-0">
+                  <CheckoutSummary />
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
 
@@ -1134,14 +1276,17 @@ export default function PaymentPage() {
       <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-zinc-100 p-4 shadow-[0_-4px_15px_rgba(0,0,0,0.08)] z-[60]">
         <div className="flex items-center justify-between gap-4">
           <div className="flex flex-col">
-            <span className="text-lg font-bold text-zinc-900 leading-none">₹ {totalAmount.toLocaleString('en-IN')}</span>
-            <button className="text-[11px] font-bold text-accent uppercase tracking-tight mt-1 text-left">
+            <span className="text-lg font-bold text-zinc-900 leading-none">₹ {finalAmount.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
+            <button 
+              onClick={scrollToSummary}
+              className="text-[11px] font-bold text-accent uppercase tracking-tight mt-1 text-left"
+            >
               View Order Summary
             </button>
           </div>
           <Button 
             onClick={handlePayNow}
-            disabled={paymentLoading || !totalAmount}
+            disabled={paymentLoading || !finalAmount}
             className="grow bg-primary hover:bg-accent text-white font-bold h-12 uppercase tracking-widest rounded-lg text-sm"
           >
             {paymentLoading ? "Processing..." : "Pay Now"}

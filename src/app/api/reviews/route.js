@@ -19,23 +19,30 @@ export async function GET(request) {
     const productsCollection = db.collection("products");
     const reviewsCollection = db.collection("reviews");
 
-    const id = productId.split("/").pop();
+    const id = productId.includes("gid://") ? productId : `gid://shopify/Product/${productId}`;
 
     // 1. Update product summary (count and average rating)
-    const product = await productsCollection.findOne({ id: id });
-    await productsCollection.updateOne(
-      { id: id },
-      { 
-        $set: { 
-          reviewStats: {
-            count: reviews.count || 0,
-            average: reviews.average || 0,
-            stats: reviews.stats || []
-          },
-          lastReviewsUpdated: new Date() 
-        } 
-      }
-    );
+    const product = await productsCollection.findOne({ 
+      shopifyId: id,
+      status: "ACTIVE",
+      isPublished: true
+    });
+    
+    if (product) {
+      await productsCollection.updateOne(
+        { shopifyId: id },
+        { 
+          $set: { 
+            reviewStats: {
+              count: reviews.count || 0,
+              average: reviews.average || 0,
+              stats: reviews.stats || []
+            },
+            lastReviewsUpdated: new Date() 
+          } 
+        }
+      );
+    }
 
     // 2. Store detailed reviews in a separate collection
     if (reviews.list && reviews.list.length > 0) {

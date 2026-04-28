@@ -13,15 +13,15 @@ const OCCASIONS = [
 
 export default function ShopByOccasion() {
   return (
-    <section className="w-full mt-12 md:mt-20 bg-white">
-      <div className="container-main px-4">
+    <section className="w-full my-10 md:my-15 bg-white">
+      <div className="container-main">
 
-        <div className="text-center mb-6 md:mb-10">
-          <h2 className="text-3xl md:text-5xl font-extrabold font-abhaya mb-2 text-zinc-900 tracking-tight">Shop By Occasion</h2>
-          <p className="text-zinc-600 text-sm md:text-lg">Jewelry for life's most meaningful moments</p>
+        <div className="text-center mb-6 px-1 md:px-0">
+          <h2 className="text-3xl md:text-4xl font-extrabold font-abhaya mb-2 text-black">Shop By Occasion</h2>
+          <p className="text-black text-base md:text-base font-normal">Jewelry for life's most meaningful moments</p>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
           {OCCASIONS.map((occ, index) => (
             <Link 
               key={index} 
@@ -36,7 +36,7 @@ export default function ShopByOccasion() {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
               <div className="absolute bottom-4 left-4 right-4 md:bottom-6 md:left-6 md:right-6 flex justify-between items-center text-white">
-                <span className="text-[14px] md:text-2xl lg:text-lg font-bold tracking-tight">{occ.name}</span>
+                <span className="text-[14px] md:text-2xl font-semibold">{occ.name}</span>
                 <div className="w-6 h-6 md:w-10 md:h-10 rounded-full border border-white/40 flex items-center justify-center transition-all group-hover:bg-white group-hover:text-black">
                   <ArrowRight size={16} className="md:w-5 md:h-5" />
                 </div>

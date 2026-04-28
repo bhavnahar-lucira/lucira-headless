@@ -170,6 +170,16 @@
   body {
     @apply bg-background text-foreground;
   }
+  @media (min-width: 1024px) and (max-width: 1440px) {
+    html {
+      font-size: 14px; 
+    }
+  }
+  @media (min-width: 1024px) and (max-width: 1280px) {
+    html {
+      font-size: 13px;
+    }
+  }
 }
 
 #search-label span{
@@ -431,8 +441,11 @@
 
 /*common style*/
 @layer components {
-  .container-main {
+  /* .container-main {
     @apply max-w-360 w-[91%] mx-auto;
+  } */
+  .container-main {
+    @apply w-full max-w-480 mx-auto px-4  lg:px-17;
   }
   .main-title{
     font-size:2rem
@@ -459,11 +472,6 @@
 }
 
 /*Harsh Css Update*/
-.container-test {
-    padding-right: 4.2rem;
-    padding-left: 4.2rem;
-}
-
 .footer-pages {
     @apply text-zinc-700 leading-[1.75] text-[0.9375rem];
     font-family: 'Figtree', sans-serif;

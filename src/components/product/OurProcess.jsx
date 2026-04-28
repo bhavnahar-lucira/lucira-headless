@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { FreeMode } from "swiper/modules";
+import { FreeMode, Mousewheel } from "swiper/modules";
 
 import "swiper/css";
 import "swiper/css/free-mode";
@@ -44,10 +44,15 @@ export default function OurProcess() {
         </h2>
 
         <Swiper
-          modules={[FreeMode]}
+          modules={[FreeMode, Mousewheel]}
           spaceBetween={24}
           slidesPerView={1.2}
           freeMode={true}
+          mousewheel={{
+            forceToAxis: true,
+            sensitivity: 1,
+            releaseOnEdges: true,
+          }}
           breakpoints={{
             640: { slidesPerView: 2.2 },
             1024: { slidesPerView: 3.2 },

@@ -7,6 +7,7 @@ import LazyImage from "../common/LazyImage";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Pagination } from "swiper/modules";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 
 import "swiper/css";
@@ -193,11 +194,11 @@ export default function CuratedLooks() {
   if (isMobile) {
     return (
       <section className="w-full mt-12 bg-[#FEF5F1] py-12 overflow-hidden">
-        <div className="container-main px-4">
-          <div className="text-center mb-8">
-            <h2 className="text-3xl font-black font-abhaya mb-3 text-zinc-900 tracking-tight">Curated Looks For You</h2>
-            <p className="text-zinc-600 text-sm">Explore the jewelry pieces that defines the look</p>
-          </div>
+        <div className="container-main">
+            <div className="text-center mb-6 px-1 md:px-0">
+              <h2 className="text-3xl md:text-4xl font-extrabold font-abhaya mb-2 text-black">Curated Looks For You</h2>
+              <p className="text-black text-base font-normal">Explore the jewelry pieces that defines the look</p>
+            </div>
 
           <div className="relative">
             <Swiper
@@ -239,9 +240,10 @@ export default function CuratedLooks() {
                                 className="relative flex h-7 w-7 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-white/80 bg-white/20 backdrop-blur-sm"
                               >
                                 <span className="absolute h-7 w-7 animate-ping rounded-full bg-white/30" />
-                                <span className="absolute h-4 w-0.5 bg-white" />
+                                <Image src="/images/icons/hotspot-icon.svg" alt="Hotspot" width={20} height={20} />
+                                {/* <span className="absolute h-4 w-0.5 bg-white" />
                                 <span className="absolute h-0.5 w-4 bg-white" />
-                                <span className="relative z-10 h-3 w-3 rounded-full bg-white" />
+                                <span className="relative z-10 h-3 w-3 rounded-full bg-white" /> */}
                               </button>
                             </div>
                           ))}
@@ -342,9 +344,10 @@ export default function CuratedLooks() {
                         className="relative flex h-7 w-7 -translate-x-1/2 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-white/80 bg-white/20 backdrop-blur-sm"
                       >
                         <span className="absolute h-7 w-7 animate-ping rounded-full bg-white/30" />
-                        <span className="absolute h-4 w-0.5 bg-white" />
-                        <span className="absolute h-0.5 w-4 bg-white" />
-                        <span className="relative z-10 h-3 w-3 rounded-full bg-white" />
+                        <Image src="/images/icons/hotspot-icon.svg" alt="Hotspot" width={20} height={20} />
+                                {/* <span className="absolute h-4 w-0.5 bg-white" />
+                                <span className="absolute h-0.5 w-4 bg-white" />
+                                <span className="relative z-10 h-3 w-3 rounded-full bg-white" /> */}
                       </button>
 
                       <div
