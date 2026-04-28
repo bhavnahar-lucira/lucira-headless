@@ -10,6 +10,8 @@ import MobileHeader from "./MobileHeader";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { usePathname } from "next/navigation";
 
+import { cn } from "@/lib/utils";
+
 const TOP_HEIGHT = 40;
 const HEADER_HEIGHT = 96;
 
@@ -44,7 +46,7 @@ export default function Header() {
       {/* Placeholder to prevent layout jump */}
       <div style={{ height: 147 }} />
 
-      <header className="fixed top-0 left-0 w-full z-100 bg-white border-b border-gray-100">
+      <header className={cn("fixed top-0 left-0 w-full z-[100] bg-white border-b border-gray-100", hideTop && "sticky-header-active")}>
 
         {/* Announcement Bar */}
         <motion.div
@@ -66,7 +68,7 @@ export default function Header() {
             visibility: hideTop ? "hidden" : "visible",
           }}
           transition={{ duration: 0.25 }}
-          className="relative z-20"
+          className="relative z-20 overflow-hidden"
         >
           <MainHeader />
         </motion.div>

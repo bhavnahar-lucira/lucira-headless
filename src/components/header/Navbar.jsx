@@ -54,28 +54,33 @@ export default function Navbar({ hideTop }) {
         activeMenuPath;
 
   return (
-    <nav className="relative bg-white">
-      <div className="container-main relative">
+    <nav className="relative bg-white border-b border-gray-100 z-[90]">
+      <div className="container-main relative flex items-center min-h-[45px]">
+        {/* Left: Sticky Logo */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
+          initial={false}
           animate={{
             opacity: hideTop ? 1 : 0,
-            scale: hideTop ? 1 : 0.8,
+            x: hideTop ? 0 : -20,
+            width: hideTop ? "auto" : 0,
+            marginRight: hideTop ? 32 : 0,
           }}
-          transition={{ duration: 0.2 }}
-          className={`absolute left-4 lg:left-6 xl:left-2 top-1/2 -translate-y-1/2 w-8 h-8 lg:w-9 lg:h-9 xl:w-10 xl:h-10 flex items-center justify-center ${hideTop ? "pointer-events-auto" : "pointer-events-none"
-            }`}
+          transition={{ duration: 0.3, ease: "easeInOut" }}
+          className="overflow-hidden flex-shrink-0"
         >
-          <Link href="/">
+          <Link href="/" className="block">
             <Image
-              src="/images/icons/small-logo.svg"
+              src="https://cdn.shopify.com/s/files/1/0739/8516/3482/files/dark_brown_Logo_icon_2.svg?v=1777366090"
               alt="Lucira Jewelry"
-              width={20}
+              width={40}
               height={40}
+              className="w-8 h-8 lg:w-9 lg:h-9 object-contain"
             />
           </Link>
         </motion.div>
-        <ul className="flex flex-start gap-6 xl:gap-8 2xl:gap-8 lg:text-xs xl:text-sm uppercase">
+
+        {/* Navigation Menu */}
+        <ul className="flex items-center gap-6 xl:gap-8 2xl:gap-8 lg:text-xs xl:text-sm uppercase transition-all duration-300 mx-0">
           {MEGA_MENU.map((menu, index) => {
             const isActive =
               pathname === menu.href ||
@@ -208,15 +213,15 @@ export default function Navbar({ hideTop }) {
                     {/* FEATURED */}
                     {menu.featured && (
                       <div className="pr-4 border-r border-zinc-100">
-                        <h4 className="mb-6 text-sm font-bold uppercase tracking-[0.1em] text-black">
+                        <h4 className="mb-6 font-figtree font-semibold text-base leading-none text-black uppercase">
                           {menu.featured.title}
                         </h4>
                         <ul className="space-y-4 text-[13px] font-medium text-zinc-500">
                           {menu.featured.items?.map((item, i) => (
-                            <li key={i} className="hover:text-black transition-colors">
+                            <li key={i} className={`hover:text-black transition-colors ${item.menuIcon ? "lg:mb-0" : ""}`}>
                               <Link href={item.href || "#"} onClick={closeMenu} className="flex items-center gap-3 group">
                                 {item.menuIcon && (
-                                   <div className="relative h-12 w-12 shrink-0 flex items-center justify-center rounded-full overflow-hidden transition-all">
+                                   <div className="relative h-16 w-16 shrink-0 flex items-center justify-center rounded-full overflow-hidden transition-all">
                                       <Image
                                         src={item.menuIcon}
                                         alt={item.label}
@@ -225,7 +230,7 @@ export default function Navbar({ hideTop }) {
                                       />
                                    </div>
                                 )}
-                                <span>{item.label}</span>
+                                <span className="text-lg font-medium text-zinc-900">{item.label}</span>
                               </Link>
                             </li>
                           ))}
@@ -236,13 +241,19 @@ export default function Navbar({ hideTop }) {
                     {/* TEXT COLUMNS (RESTORED ICON LOGIC) */}
                     {menu.columns?.map((col, i) => (
                       <div key={i}>
-                        <h4 className="mb-6 text-sm font-bold uppercase tracking-[0.1em] text-black whitespace-nowrap">
+                        <h4 className="mb-6 font-figtree font-semibold text-[14px] leading-none text-black uppercase">
                           {col.title}
                         </h4>
 
                         <ul className="space-y-4 text-[13px] font-medium text-zinc-500">
                           {col.items.map((item, j) => (
-                            <li key={j} className="hover:text-black transition-colors">
+                            <li key={j} className={`hover:text-black transition-colors ${
+                              (col.type === "metal" || item.menuIcon || item.megaMenuImage || (col.type === "icon" && item.icon)) && 
+                              !col.title?.toLowerCase().includes("material") && 
+                              !col.title?.toLowerCase().includes("metal")
+                                ? "lg:mb-0"
+                                : ""
+                            }`}>
                               <Link
                                 href={item.href || "#"}
                                 onClick={closeMenu}
@@ -251,23 +262,20 @@ export default function Navbar({ hideTop }) {
                                 {/* ✅ METAL SWATCH */}
                                 {col.type === "metal" ? (
                                   <span
-                                    className="w-4 h-4 rounded-full border border-zinc-200"
-                                    style={{
-                                      background: item.label.toLowerCase().includes("yellow")
-                                        ? "linear-gradient(135deg, #E2C07E 0%, #D4AF37 100%)"
+                                    className={`w-8 h-8 rounded-full border border-zinc-200 ${
+                                      item.label.toLowerCase().includes("yellow")
+                                        ? "bg-[linear-gradient(147.45deg,_#C59922_17.98%,_#EAD59E_48.14%,_#C59922_83.84%)]"
                                         : item.label.toLowerCase().includes("rose")
-                                        ? "linear-gradient(135deg, #E9B4AB 0%, #C48D82 100%)"
-                                        : item.label.toLowerCase().includes("white")
-                                        ? "#E5E4E2"
-                                        : item.label.toLowerCase().includes("silver")
-                                        ? "#C0C0C0"
+                                        ? "bg-[linear-gradient(154.36deg,_#F2B5B5_10.36%,_#F8DBDB_68.09%)]"
                                         : item.label.toLowerCase().includes("platinum")
-                                        ? "#E5E4E2"
-                                        : "#ddd",
-                                    }}
+                                        ? "bg-[linear-gradient(154.03deg,_#DFDFDF_27.25%,_#F3F3F3_85.19%)]"
+                                        : item.label.toLowerCase().includes("white")
+                                        ? "bg-[linear-gradient(143.06deg,_#DFDFDF_29.61%,_#F3F3F3_48.83%,_#DFDFDF_66.43%)]"
+                                        : "bg-[#ddd]"
+                                    }`}
                                   />
                                 ) : item.menuIcon || item.megaMenuImage || (col.type === "icon" && item.icon) ? (
-                                  <div className="relative h-12 w-12 shrink-0 flex items-center justify-center rounded-full overflow-hidden transition-all">
+                                  <div className="relative h-16 w-16 shrink-0 flex items-center justify-center rounded-full overflow-hidden transition-all">
                                     <Image
                                       src={item.menuIcon || item.megaMenuImage || item.icon}
                                       alt={item.label}
@@ -277,7 +285,7 @@ export default function Navbar({ hideTop }) {
                                   </div>
                                 ) : null}
 
-                                <span>{item.label}</span>
+                                <span className="text-lg font-medium text-zinc-900">{item.label}</span>
                               </Link>
                             </li>
                           ))}
