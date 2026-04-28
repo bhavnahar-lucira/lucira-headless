@@ -15,14 +15,14 @@ export default function InformationContent({ cityName, stateName, sectionData, c
       .replaceAll('{stateName}', stateName);
 
     if (currentDate) {
-        processed = processed.replaceAll('[current_date]', currentDate);
+      processed = processed.replaceAll('[current_date]', currentDate);
     }
 
     if (todayRate) {
-        const rate24_10 = todayRate;
-        const rate22_10 = Math.round(todayRate * (22 / 24));
-        processed = processed.replaceAll('[gold_rate_24kt_10gm]', `₹${rate24_10.toLocaleString('en-IN')}`);
-        processed = processed.replaceAll('[gold_rate_22kt_10gm]', `₹${rate22_10.toLocaleString('en-IN')}`);
+      const rate24_10 = todayRate;
+      const rate22_10 = Math.round(todayRate * (22 / 24));
+      processed = processed.replaceAll('[gold_rate_24kt_10gm]', `₹${rate24_10.toLocaleString('en-IN')}`);
+      processed = processed.replaceAll('[gold_rate_22kt_10gm]', `₹${rate22_10.toLocaleString('en-IN')}`);
     }
 
     return processed;

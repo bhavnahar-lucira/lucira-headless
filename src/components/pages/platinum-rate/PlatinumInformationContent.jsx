@@ -15,27 +15,27 @@ export default function PlatinumInformationContent({ cityName, stateName, sectio
       .replaceAll('{stateName}', stateName);
 
     if (currentDate) {
-        processed = processed.replaceAll('[current_date]', currentDate);
+      processed = processed.replaceAll('[current_date]', currentDate);
     }
 
     if (todayRate) {
-        const ratePerGram = todayRate / 10;
-        
-        // Shortcodes defined in liquid
-        processed = processed.replaceAll('[platinum_rate_999]', `₹${Math.round(ratePerGram).toLocaleString('en-IN')}`);
-        processed = processed.replaceAll('[platinum_rate_950]', `₹${Math.round(ratePerGram * (950 / 1000)).toLocaleString('en-IN')}`);
-        processed = processed.replaceAll('[platinum_rate_900]', `₹${Math.round(ratePerGram * (900 / 1000)).toLocaleString('en-IN')}`);
-        
-        processed = processed.replaceAll('[platinum_rate_999_10gm]', `₹${Math.round(ratePerGram * 10).toLocaleString('en-IN')}`);
-        processed = processed.replaceAll('[platinum_rate_950_10gm]', `₹${Math.round(ratePerGram * 10 * (950 / 1000)).toLocaleString('en-IN')}`);
-        processed = processed.replaceAll('[platinum_rate_900_10gm]', `₹${Math.round(ratePerGram * 10 * (900 / 1000)).toLocaleString('en-IN')}`);
-        
-        // Placeholder replacements from JSON
-        processed = processed.replaceAll('<platinum rate>', `₹${Math.round(ratePerGram).toLocaleString('en-IN')}`);
-        processed = processed.replaceAll('&lt;platinum rate&gt;', `₹${Math.round(ratePerGram).toLocaleString('en-IN')}`);
-        processed = processed.replaceAll('<10* platinum rate>', `₹${Math.round(ratePerGram * 10).toLocaleString('en-IN')}`);
-        processed = processed.replaceAll('&lt;10* platinum rate&gt;', `₹${Math.round(ratePerGram * 10).toLocaleString('en-IN')}`);
-        processed = processed.replaceAll('[platinum_price_1g]', `₹${Math.round(ratePerGram).toLocaleString('en-IN')}`);
+      const ratePerGram = todayRate / 10;
+
+      // Shortcodes defined in liquid
+      processed = processed.replaceAll('[platinum_rate_999]', `₹${Math.round(ratePerGram).toLocaleString('en-IN')}`);
+      processed = processed.replaceAll('[platinum_rate_950]', `₹${Math.round(ratePerGram * (950 / 1000)).toLocaleString('en-IN')}`);
+      processed = processed.replaceAll('[platinum_rate_900]', `₹${Math.round(ratePerGram * (900 / 1000)).toLocaleString('en-IN')}`);
+
+      processed = processed.replaceAll('[platinum_rate_999_10gm]', `₹${Math.round(ratePerGram * 10).toLocaleString('en-IN')}`);
+      processed = processed.replaceAll('[platinum_rate_950_10gm]', `₹${Math.round(ratePerGram * 10 * (950 / 1000)).toLocaleString('en-IN')}`);
+      processed = processed.replaceAll('[platinum_rate_900_10gm]', `₹${Math.round(ratePerGram * 10 * (900 / 1000)).toLocaleString('en-IN')}`);
+
+      // Placeholder replacements from JSON
+      processed = processed.replaceAll('<platinum rate>', `₹${Math.round(ratePerGram).toLocaleString('en-IN')}`);
+      processed = processed.replaceAll('&lt;platinum rate&gt;', `₹${Math.round(ratePerGram).toLocaleString('en-IN')}`);
+      processed = processed.replaceAll('<10* platinum rate>', `₹${Math.round(ratePerGram * 10).toLocaleString('en-IN')}`);
+      processed = processed.replaceAll('&lt;10* platinum rate&gt;', `₹${Math.round(ratePerGram * 10).toLocaleString('en-IN')}`);
+      processed = processed.replaceAll('[platinum_price_1g]', `₹${Math.round(ratePerGram).toLocaleString('en-IN')}`);
     }
 
     return processed;
@@ -54,7 +54,7 @@ export default function PlatinumInformationContent({ cityName, stateName, sectio
   }, [blocks, block_order]);
 
   return (
-    <section className="information-content-section py-4 md:py-8 bg-white">
+    <section className="information-content-section py-2 md:py-4 bg-white">
       <div className="container-main px-4">
         {/* Store Locations Header */}
         {storeBlocks.length > 0 && (
