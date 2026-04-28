@@ -107,8 +107,11 @@ export function mergeMongoFilters(...filters) {
 }
 
 export async function resolveSearchMatch(productsCollection, baseFilter = {}, query = "") {
+  const activeFilter = { status: "ACTIVE", isPublished: true };
+  const combinedBaseFilter = { ...baseFilter, ...activeFilter };
+  
   const { filter: intentFilter, normalizedQuery, keywords } = extractSearchIntent(query);
-  const filters = [baseFilter, intentFilter];
+  const filters = [combinedBaseFilter, intentFilter];
 
   if (!keywords.length) {
     return {

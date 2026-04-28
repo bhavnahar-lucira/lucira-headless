@@ -6,15 +6,15 @@ import Marquee from "react-fast-marquee";
 export default function FeaturedIn() {
 
   const logos = [
-    "/images/feature/mediabrief.png",
-    "/images/feature/inc42.png",
-    "/images/feature/indiaretailing.png",
-    "/images/feature/bof.png",
-    "/images/feature/entrepreneur.png",
-    "/images/feature/jewelbuzz.png",
-    "/images/feature/madeinindia.png",
-    "/images/feature/bwdisrupt.png",
-    "/images/feature/retail.png",
+    "/images/feature/MediaBrief.svg",
+    "/images/feature/Inc42.svg",
+    "/images/feature/IndiaRetailing.svg",
+    "/images/feature/BQF.svg",
+    "/images/feature/Entrepreneur.svg",
+    "/images/feature/JewelBuzz.svg",
+    "/images/feature/MadeInMedia.svg",
+    "/images/feature/Disrupt.svg",
+    "/images/feature/ET.svg",
   ];
 
   return (
