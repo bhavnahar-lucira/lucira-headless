@@ -3,6 +3,9 @@ import { notFound } from "next/navigation";
 import ContactSection from "@/components/common/ContactSection";
 import SitemapPage from "@/components/sitemap/SitemapPage";
 import FooterPageContent from "@/components/FooterPageContent";
+import GoldRatePage from "@/components/pages/gold-rate/GoldRatePage";
+import SilverRatePage from "@/components/pages/silver-rate/SilverRatePage";
+import PlatinumRatePage from "@/components/pages/platinum-rate/PlatinumRatePage";
 
 export default async function Page({ params }) {
   const { handle } = await params;
@@ -22,6 +25,26 @@ export default async function Page({ params }) {
   }
 
   if (!page) return notFound();
+  
+  // Serialize page object for Client Components (removes BSON ObjectId)
+  page = JSON.parse(JSON.stringify(page));
+
+  // Handle Gold, Silver, and Platinum Rate pages
+  const isSilverRatePage = handle.includes("silver-rate-today");
+  const isPlatinumRatePage = handle.includes("platinum-rate-today");
+  const isGoldRatePage = handle.includes("gold-rate-today") || (page.city && page.state && !isSilverRatePage && !isPlatinumRatePage);
+
+  if (isSilverRatePage) {
+    return <SilverRatePage page={page} />;
+  }
+
+  if (isPlatinumRatePage) {
+    return <PlatinumRatePage page={page} />;
+  }
+
+  if (isGoldRatePage) {
+    return <GoldRatePage page={page} />;
+  }
 
   const hasBody = typeof page.body === "string" && page.body.trim() !== "";
 

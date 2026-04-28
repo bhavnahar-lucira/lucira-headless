@@ -279,7 +279,11 @@ export async function POST(req) {
                 lastReviewsUpdated: new Date()
               };
 
-              await productsCollection.updateOne({ shopifyId: p.id }, { $set: mappedProduct }, { upsert: true });
+              if (p.status === "ACTIVE" && !!p.publishedAt) {
+                await productsCollection.updateOne({ shopifyId: p.id }, { $set: mappedProduct }, { upsert: true });
+              } else {
+                await productsCollection.deleteOne({ shopifyId: p.id });
+              }
             }
 
             totalProcessed += products.length;

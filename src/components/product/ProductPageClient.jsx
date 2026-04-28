@@ -74,6 +74,18 @@ import {
 } from "@/components/ui/sheet";
 import StyledByLucira from "../home/StyledByLucira";
 
+import { Sheet as MobileSheet } from "react-modal-sheet";
+
+function useMounted() {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  return mounted;
+}
+
 // Force en-IN formatting to be consistent across environments
 const formatPrice = (num) => {
   if (num === null || num === undefined) return "0";
@@ -408,37 +420,42 @@ export default function ProductPageClient({ product, complementaryProducts = [],
   };
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (isMobile) {
-          // On mobile: Always use bottom sticky bar when main ATC is not in view
-          setShowBottomAtc(!entry.isIntersecting);
-          setShowTopAtc(false);
-        } else {
-          // On desktop: Top bar when scrolled past, Bottom bar when at top
-          if (entry.isIntersecting) {
-            setShowTopAtc(false);
-            setShowBottomAtc(false);
+    const timer = setTimeout(() => {
+      if (!mainAtcRef.current) return;
+
+      console.log("Attaching Observer - Desktop Mode:", !isMobile);
+
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          console.log("Observer Triggered!", entry.isIntersecting);
+          const isPastPoint = entry.boundingClientRect.top < 0;
+
+          if (isMobile) {
+            setShowBottomAtc(!entry.isIntersecting);
           } else {
-            if (entry.boundingClientRect.top < 0) {
+            if (entry.isIntersecting) {
+              setShowTopAtc(false);
+              setShowBottomAtc(false);
+            } else if(isPastPoint) {
               setShowTopAtc(true);
               setShowBottomAtc(false);
             } else {
               setShowTopAtc(false);
               setShowBottomAtc(true);
+
             }
           }
-        }
-      },
-      { threshold: 0 }
-    );
+        },
+        { threshold: 0, rootMargin: "-10% 0px 0px 0px" }
+      );
 
-    if (mainAtcRef.current) {
       observer.observe(mainAtcRef.current);
-    }
+      
+      return () => observer.disconnect();
+    }, 100);
 
-    return () => observer.disconnect();
-  }, [isMobile]);
+    return () => clearTimeout(timer);
+  }, [isMobile, product.id]);
 
   useEffect(() => {
     if (user?.id) {
@@ -807,6 +824,9 @@ export default function ProductPageClient({ product, complementaryProducts = [],
   // Get current display price from active variant or product
   const currentPrice = activeVariant ? activeVariant.price : product.price;
   const currentComparePrice = activeVariant ? activeVariant.compare_price : product.compare_price;
+  const mounted = useMounted();
+  const isMobileView = useMediaQuery("(max-width: 1023px)");
+  if (!mounted) return null;
 
   return (
     <div className="w-full">
@@ -841,21 +861,22 @@ export default function ProductPageClient({ product, complementaryProducts = [],
 
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] xl:grid-cols-[1fr_420px] 2xl:grid-cols-[1fr_530px] gap-10 items-start">
           {/* Left: Product Gallery */}
-          <ProductGallery 
-            media={product.media || []} 
-            title={product.title} 
-            activeColor={activeColor} 
+          <ProductGallery
+            media={product.media || []}
+            title={product.title}
+            activeColor={activeColor}
             onViewSimilar={fetchSimilar}
             hasSimilar={hasSimilarItems}
+            product={product}
+            activeVariant={activeVariant}
           />
-
           {/* Right: Product Info */}
           <div className="w-full">
             <div className="space-y-4">
               {/* Title */}
               <div className="w-full">
                 <div className="space-y-3">
-                  <h1 className="text-28px font-bold leading-[1.2] tracking-tight">
+                  <h1 className="text-xl font-bold leading-[1.2] tracking-tight">
                     {product.title}
                   </h1>
                   <div className="flex justify-between gap-2 items-center">
@@ -1043,6 +1064,11 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                 product={product}
                 isColorInStock={isColorInStock}
                 isSizeInStock={isSizeInStock}
+                nearestStore={nearestStore}
+                availableStores={availableStores}
+                availableStoreCount={availableStoreCount}
+                deliveryInfo={deliveryInfo}
+                getStoreDisplayName={getStoreDisplayName}
               />
 
               {/* Desktop Selection Blocks */}
@@ -1314,9 +1340,9 @@ export default function ProductPageClient({ product, complementaryProducts = [],
             <div className="space-y-2 mb-4">
                 <Drawer open={showSimilar} onOpenChange={setShowSimilar}>                  
                   <DrawerContent className="max-h-[90vh] h-[90vh] bg-white rounded-t-[20px] flex flex-col">
-                    <div className="mx-auto w-full max-w-7xl flex flex-col h-full overflow-hidden">
-                      <DrawerHeader className="px-10 pt-10 flex flex-row items-center justify-between border-b border-zinc-100 pb-6 !text-left !flex-row shrink-0">
-                        <DrawerTitle className="text-[15px] font-medium tracking-[0.2em] text-black uppercase">VIEW SIMILAR</DrawerTitle>
+                    <div className="mx-auto w-full flex flex-col h-full overflow-hidden">
+                      <DrawerHeader className="px-10 py-6 flex flex-row items-center justify-between border-b border-zinc-100 !text-left !flex-row shrink-0">
+                        <DrawerTitle className="text-xl font-medium text-black uppercase">VIEW SIMILAR</DrawerTitle>
                         <DrawerClose asChild>
                           <button className="text-zinc-400 hover:text-black transition-colors hover:cursor-pointer p-1">
                             <X size={22} strokeWidth={1.5} />
@@ -1324,14 +1350,14 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                         </DrawerClose>
                       </DrawerHeader>
                       
-                      <div className="px-10 py-10 overflow-y-auto flex-1">
+                      <div className="sm:px-10 sm:py-10 px-5 py-5 overflow-y-auto flex-1">
                         {loadingSimilar ? (
                           <div className="flex flex-col items-center justify-center py-20 gap-4 w-full">
                             <Loader2 className="animate-spin text-zinc-400" size={40} />
                             <p className="text-sm font-bold uppercase tracking-widest text-zinc-400">Searching matching designs...</p>
                           </div>
                         ) : similarProducts.length > 0 ? (
-                          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-x-8 gap-y-12 pb-10">
+                          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 sm:gap-x-8 gap-x-4 sm:gap-y-12 gap-y-6 pb-10">
                             {similarProducts.slice(0, 10).map((item) => (
                               <div key={item.shopifyId || item._id || item.id} className="space-y-4">
                                 <Link href={`/products/${item.handle}`} onClick={() => setShowSimilar(false)} className="block space-y-4 group">
@@ -1420,7 +1446,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
            
             {/* Features */}
             <div className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-6 lg:gap-x-6 text-xs sm:text-sm font-medium text-black`">
+              <div className="grid grid-cols-2 md:grid-cols-2 gap-y-4 gap-x-6 lg:gap-x-6 text-xs sm:text-sm font-medium text-black`">
                 <Feature icon={<Image src="/images/product/shipping.svg" alt="Shipping icon" width={28} height={28} />} text="Free and secure shipping" />
                 <Feature icon={<Image src="/images/product/return.svg" alt="Return icon" width={28} height={28} />} text="15-day free returns" />
                 <Feature icon={<Image src="/images/product/exchange.svg" alt="Exchange icon" width={28} height={28} />} text="Lifetime exchange and 100% value guarantee" />
@@ -1564,6 +1590,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                 description="Explore and try your favorite designs in person, with expert guidance from our in-store team."
                 action="BOOK APPOINTMENT"
                 img="/images/store.jpg"
+                url="https://wa.me/919004435760?text=Hi,%20I%20want%20to%20book%20an%20appointment"
               />
               <ExploreCard
                 key="try-at-home"
@@ -1571,6 +1598,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                 description="Try your selected pieces from the comfort of your home. Available in all major cities"
                 action="BOOK HOME TRIAL"
                 img="/images/subscribe-2.jpg"
+                url="https://wa.me/919004435760?text=Hi,%20I%20want%20to%20try%20this%20at%20home"
               />
               <Separator/>
             </div>
@@ -1600,7 +1628,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                 )}
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-2 gap-4">
                 {/* Metal Card */}
                 <div className="bg-[#F9F9F9] rounded-2xl p-5 space-y-4">
                   <div className="flex items-center gap-2 font-bold text-sm uppercase text-gray-700">
@@ -1875,80 +1903,168 @@ export default function ProductPageClient({ product, complementaryProducts = [],
       />
       <JoinLuciraCommunity/>
 
-      <Sheet open={isStoreDrawerOpen} onOpenChange={setIsStoreDrawerOpen}>
-        <SheetContent side="right" className="w-full sm:max-w-[450px] p-0 flex flex-col">
-          <SheetHeader className="p-6 border-b border-gray-100 flex flex-row items-center justify-between">
-            <SheetTitle className="text-lg font-bold">Store Availability</SheetTitle>
-          </SheetHeader>
-          
-          <div className="flex-1 overflow-y-auto p-6">
-            <div className="space-y-6">
-              {availableStores.length > 0 ? (
-                availableStores.map((store) => (
-                  <div key={store.id || store.shopifyId} className="border border-gray-100 rounded-xl p-5 space-y-4 bg-gray-50/50">
-                    <div className="flex justify-between items-start">
-                      <div className="space-y-1">
-                        <h3 className="font-bold text-lg">{getStoreDisplayName(store.name)}</h3>
-                        {store.distance !== null && (
-                          <div className="flex items-center gap-1.5 text-primary font-semibold text-sm">
-                            <MapPin size={14} />
-                            {Math.round(store.distance)} Km away
+      {isMobileView ? (
+        <MobileSheet
+          isOpen={isStoreDrawerOpen}
+          onClose={() => setIsStoreDrawerOpen(false)}
+          detents={[0.9, 0.5]}
+        >
+          <MobileSheet.Container className="z-[9999]">
+            <MobileSheet.Header />
+                <MobileSheet.Content>
+                  <div className="h-[100dvh]">
+                    <div className="flex items-center justify-between px-4 pb-6 border-b border-gray-100">
+                      <h2 className="text-lg font-bold">Store Availability</h2>
+                      <button onClick={() => setIsStoreDrawerOpen(false)} className="p-2">
+                        <X size={20} className="text-gray-400" />
+                      </button>
+                    </div>
+
+                    <div className="space-y-6  overflow-y-auto h-full">
+                    {availableStores.length > 0 ? (
+                      availableStores.map((store) => (
+                        <div key={store.id || store.shopifyId} className="border border-gray-100 rounded-xl p-5 space-y-4 bg-gray-50/50">
+                          <div className="flex justify-between items-start">
+                            <div className="space-y-1">
+                              <h3 className="font-bold text-lg">{getStoreDisplayName(store.name)}</h3>
+                              {store.distance !== null && (
+                                <div className="flex items-center gap-1.5 text-primary font-semibold text-sm">
+                                  <MapPin size={14} />
+                                  {Math.round(store.distance)} Km away
+                                </div>
+                              )}
+                            </div>
+                            {store.isInStock ? (
+                              <div className="bg-[#E3F5E0] text-black px-3 py-1 rounded-full flex items-center gap-1.5">
+                                <div className="w-2 h-2 bg-[#76D168] rounded-full"></div>
+                                <span className="text-xs font-bold uppercase">In Stock</span>
+                              </div>
+                            ) : (
+                              <div className="bg-amber-50 text-amber-700 px-3 py-1 rounded-full flex items-center gap-1.5 border border-amber-100">
+                                <div className="w-2 h-2 bg-amber-400 rounded-full"></div>
+                                <span className="text-xs font-bold uppercase">Ships to Store</span>
+                              </div>
+                            )}
                           </div>
-                        )}
-                      </div>
-                      {store.isInStock ? (
-                        <div className="bg-[#E3F5E0] text-black px-3 py-1 rounded-full flex items-center gap-1.5">
-                          <div className="w-2 h-2 bg-[#76D168] rounded-full"></div>
-                          <span className="text-xs font-bold uppercase">In Stock</span>
-                        </div>
-                      ) : (
-                        <div className="bg-amber-50 text-amber-700 px-3 py-1 rounded-full flex items-center gap-1.5 border border-amber-100">
-                          <div className="w-2 h-2 bg-amber-400 rounded-full"></div>
-                          <span className="text-xs font-bold uppercase">Ships to Store</span>
-                        </div>
-                      )}
-                    </div>
 
-                    <div className="space-y-3 pt-2">
-                      <div className="flex items-start gap-3 text-sm text-gray-600">
-                        <MapPin size={18} className="shrink-0 text-gray-400 mt-0.5" />
-                        <p className="leading-relaxed font-medium">{store.address1 || store.address}, {store.city}</p>
-                      </div>
-                      <div className="flex items-center gap-3 text-sm text-gray-600">
-                        <Phone size={18} className="shrink-0 text-gray-400" />
-                        <p className="font-medium">{store.phone || "+91 91724 99912"}</p>
-                      </div>
-                      <div className="flex items-center gap-3 text-sm text-gray-600">
-                        <Package size={18} className="shrink-0 text-gray-400" />
-                        <p className="font-medium">Ready for pickup in 2-4 hours</p>
-                      </div>
-                    </div>
+                          <div className="space-y-3 pt-2">
+                            <div className="flex items-start gap-3 text-sm text-gray-600">
+                              <MapPin size={18} className="shrink-0 text-gray-400 mt-0.5" />
+                              <p className="leading-relaxed font-medium">{store.address1 || store.address}, {store.city}</p>
+                            </div>
+                            <div className="flex items-center gap-3 text-sm text-gray-600">
+                              <Phone size={18} className="shrink-0 text-gray-400" />
+                              <p className="font-medium">{store.phone || "+91 91724 99912"}</p>
+                            </div>
+                            <div className="flex items-center gap-3 text-sm text-gray-600">
+                              <Package size={18} className="shrink-0 text-gray-400" />
+                              <p className="font-medium">Ready for pickup in 2-4 hours</p>
+                            </div>
+                          </div>
 
-                    <div className="grid grid-cols-2 gap-3 pt-2">
-                      <Button variant="outline" className="font-bold h-11 rounded-lg border-gray-200" asChild>
-                        <a href={`tel:${store.phone || "+919172499912"}`}>CALL STORE</a>
-                      </Button>
-                      <Button className="font-bold h-11 rounded-lg">
-                        DIRECTIONS
-                      </Button>
+                          <div className="grid grid-cols-2 gap-3 pt-2">
+                            <Button variant="outline" className="font-bold h-11 rounded-lg border-gray-200" asChild>
+                              <a href={`tel:${store.phone || "+919172499912"}`}>CALL STORE</a>
+                            </Button>
+                            <Button className="font-bold h-11 rounded-lg">
+                              DIRECTIONS
+                            </Button>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                    <div className="flex flex-col items-center justify-center py-20 text-center gap-4">
+                      <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center">
+                        <Store className="text-gray-300" size={32} />
+                      </div>
+                      <div className="space-y-1">
+                        <p className="font-bold text-gray-900">No Stores with Stock</p>
+                        <p className="text-sm text-gray-500">This design is currently not available in any nearby stores.</p>
+                      </div>
                     </div>
-                  </div>
-                ))
-              ) : (
-                <div className="flex flex-col items-center justify-center py-20 text-center gap-4">
-                  <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center">
-                    <Store className="text-gray-300" size={32} />
-                  </div>
-                  <div className="space-y-1">
-                    <p className="font-bold text-gray-900">No Stores with Stock</p>
-                    <p className="text-sm text-gray-500">This design is currently not available in any nearby stores.</p>
-                  </div>
+                  )}
                 </div>
-              )}
-            </div>
-          </div>
-        </SheetContent>
-      </Sheet>
+              </div>
+            </MobileSheet.Content>
+          </MobileSheet.Container>
+          <MobileSheet.Backdrop />
+        </MobileSheet>
+          ) : (
+            <Sheet open={isStoreDrawerOpen} onOpenChange={setIsStoreDrawerOpen}>
+            <SheetContent side="right" className="w-full sm:max-w-[450px] p-0 flex flex-col">
+              <SheetHeader className="p-6 border-b border-gray-100 flex flex-row items-center justify-between">
+                <SheetTitle className="text-lg font-bold">Store Availability</SheetTitle>
+              </SheetHeader>
+              
+              <div className="flex-1 overflow-y-auto p-6">
+                <div className="space-y-6">
+                  {availableStores.length > 0 ? (
+                    availableStores.map((store) => (
+                      <div key={store.id || store.shopifyId} className="border border-gray-100 rounded-xl p-5 space-y-4 bg-gray-50/50">
+                        <div className="flex justify-between items-start">
+                          <div className="space-y-1">
+                            <h3 className="font-bold text-lg">{getStoreDisplayName(store.name)}</h3>
+                            {store.distance !== null && (
+                              <div className="flex items-center gap-1.5 text-primary font-semibold text-sm">
+                                <MapPin size={14} />
+                                {Math.round(store.distance)} Km away
+                              </div>
+                            )}
+                          </div>
+                          {store.isInStock ? (
+                            <div className="bg-[#E3F5E0] text-black px-3 py-1 rounded-full flex items-center gap-1.5">
+                              <div className="w-2 h-2 bg-[#76D168] rounded-full"></div>
+                              <span className="text-xs font-bold uppercase">In Stock</span>
+                            </div>
+                          ) : (
+                            <div className="bg-amber-50 text-amber-700 px-3 py-1 rounded-full flex items-center gap-1.5 border border-amber-100">
+                              <div className="w-2 h-2 bg-amber-400 rounded-full"></div>
+                              <span className="text-xs font-bold uppercase">Ships to Store</span>
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="space-y-3 pt-2">
+                          <div className="flex items-start gap-3 text-sm text-gray-600">
+                            <MapPin size={18} className="shrink-0 text-gray-400 mt-0.5" />
+                            <p className="leading-relaxed font-medium">{store.address1 || store.address}, {store.city}</p>
+                          </div>
+                          <div className="flex items-center gap-3 text-sm text-gray-600">
+                            <Phone size={18} className="shrink-0 text-gray-400" />
+                            <p className="font-medium">{store.phone || "+91 91724 99912"}</p>
+                          </div>
+                          <div className="flex items-center gap-3 text-sm text-gray-600">
+                            <Package size={18} className="shrink-0 text-gray-400" />
+                            <p className="font-medium">Ready for pickup in 2-4 hours</p>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3 pt-2">
+                          <Button variant="outline" className="font-bold h-11 rounded-lg border-gray-200" asChild>
+                            <a href={`tel:${store.phone || "+919172499912"}`}>CALL STORE</a>
+                          </Button>
+                          <Button className="font-bold h-11 rounded-lg">
+                            DIRECTIONS
+                          </Button>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="flex flex-col items-center justify-center py-20 text-center gap-4">
+                      <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center">
+                        <Store className="text-gray-300" size={32} />
+                      </div>
+                      <div className="space-y-1">
+                        <p className="font-bold text-gray-900">No Stores with Stock</p>
+                        <p className="text-sm text-gray-500">This design is currently not available in any nearby stores.</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </SheetContent>
+          </Sheet>
+        )}
     </div>
   );
 }
@@ -1971,7 +2087,7 @@ function DiamondDetail({ img, shape, pcs, carat, quality }) {
   );
 }
 
-function ExploreCard({ title, description, action, img }) {
+function ExploreCard({ title, description, action, img, url }) {
   return (
     <div className="bg-[#F9F9F9] border border-gray-100 rounded-lg p-3 md:p-4 flex items-start gap-3 md:gap-4">
       <div className="w-20 h-20 sm:w-24 sm:h-24 md:w-24 md:h-16 shrink-0 rounded-md bg-gray-200 relative overflow-hidden shadow-sm">
@@ -1980,8 +2096,10 @@ function ExploreCard({ title, description, action, img }) {
       <div className="flex-1 min-w-0 flex flex-col gap-2">
         <p className="text-sm md:text-base font-semibold leading-tight"> {title} </p>
         <p className="text-xs md:text-sm font-medium leading-[1.5] text-gray-700"> {description} </p>
-        <Button variant="link" className=" p-0 m-0 h-auto w-fit text-sm font-bold underline underline-offset-4 justify-start">
-          {action}
+        <Button variant="link" className=" p-0 m-0 h-auto w-fit text-sm font-bold underline underline-offset-4 justify-start" asChild>
+          <a href={url} target="_blank" rel="noopener noreferrer"> 
+            {action}
+          </a>
         </Button>
       </div>
     </div>

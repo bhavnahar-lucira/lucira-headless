@@ -14,7 +14,11 @@ export async function GET(request) {
     const db = client.db("next_local_db");
     const productsCollection = db.collection("products");
 
-    const product = await productsCollection.findOne({ handle: handle });
+    const product = await productsCollection.findOne({ 
+      handle: handle,
+      status: "ACTIVE",
+      isPublished: true
+    });
     
     if (!product) {
       return NextResponse.json({ error: "Product not found" }, { status: 404 });

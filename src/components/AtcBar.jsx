@@ -77,7 +77,7 @@ export default function AtcBar({
 
           <div className="flex items-center gap-3 shrink-0">
             <div className="hidden lg:flex items-center gap-2 mr-2">
-              <button className="h-10 px-6 border border-[#A36E6E] text-[#A36E6E] font-bold text-[12px] rounded-full uppercase tracking-wider whitespace-nowrap hover:bg-[#A36E6E]/5 transition-colors">
+              <button className="h-14 px-6 border border-primary text-primary font-bold text-sm rounded-lg uppercase tracking-wider whitespace-nowrap hover:bg-[#A36E6E]/5 transition-colors">
                 YOU SAVE ₹{formatPrice(schemeSavings)} WITH SCHEME
               </button>
             </div>
@@ -85,7 +85,7 @@ export default function AtcBar({
             <Button 
               onClick={onAddToCart}
               disabled={addingToCart}
-              className="h-10 px-10 text-sm font-bold bg-[#A36E6E] hover:bg-[#8F5D5D] text-white rounded-full transition-colors uppercase tracking-wider min-w-[160px]"
+              className="h-14 px-10 text-sm font-bold bg-primary hover:bg-accent text-white rounded-lg transition-colors uppercase tracking-wider min-w-[160px]"
             >
               {addingToCart ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -93,11 +93,11 @@ export default function AtcBar({
             </Button>
 
             <div className="hidden xl:flex items-center gap-2">
-              <button className="h-10 w-10 border border-[#E89393] text-[#E89393] rounded-lg flex items-center justify-center hover:bg-[#FFF5F5] transition-colors">
-                <Home size={18} />
+              <button className="h-14 w-14 border border-[#E89393] text-[#E89393] rounded-lg flex items-center justify-center hover:bg-[#FFF5F5] transition-colors">
+                <Home size={20} />
               </button>
-              <button className="h-10 w-10 border border-[#A193E8] text-[#A193E8] rounded-lg flex items-center justify-center hover:bg-[#F5F5FF] transition-colors">
-                <StoreIcon size={18} />
+              <button className="h-14 w-14 border border-[#A193E8] text-[#A193E8] rounded-lg flex items-center justify-center hover:bg-[#F5F5FF] transition-colors">
+                <StoreIcon size={20} />
               </button>
             </div>
           </div>

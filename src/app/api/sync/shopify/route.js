@@ -50,7 +50,18 @@ export async function POST() {
         after: blogsAfter,
       });
 
-      const blogs = blogsData.blogs.edges.map((edge) => edge.node);
+      const blogs = blogsData.blogs.edges.map((edge) => {
+        const blog = edge.node;
+        const articlePreviewCount = blog.articles?.edges?.length || 0;
+
+        return {
+          id: blog.id,
+          title: blog.title,
+          handle: blog.handle,
+          articlePreviewCount,
+          hasMoreArticles: blog.articles?.pageInfo?.hasNextPage || false,
+        };
+      });
       allBlogs.push(...blogs);
       blogsHasNextPage = blogsData.blogs.pageInfo.hasNextPage;
       if (blogsHasNextPage) {
@@ -87,6 +98,7 @@ export async function POST() {
           ...node,
           blogId: blog?.id,
           blogHandle: blog?.handle,
+          blogTitle: blog?.title,
         };
       });
 
