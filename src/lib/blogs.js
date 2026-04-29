@@ -18,7 +18,8 @@ export async function getArticleByBlogAndHandle(blogHandle, articleHandle) {
     blogHandle,
   });
 
-  if (article?.contentHtml || article?.content) return serialize(article);
+  // Only return immediately if we have content AND the new metafields
+  if ((article?.contentHtml || article?.content) && article?.author_name) return serialize(article);
 
   const storefrontArticle = await getArticleByBlogAndHandleStorefront(blogHandle, articleHandle);
   const adminArticle =
@@ -74,10 +75,26 @@ export async function getArticleByBlogAndHandleStorefront(blogHandle, articleHan
           authorV2 {
             name
           }
+          tags
           image {
             url
             altText
           }
+          author_name: metafield(namespace: "custom", key: "author_name") { value }
+          authors_image: metafield(namespace: "custom", key: "authors_image") { 
+            value 
+            reference {
+              ... on MediaImage {
+                image {
+                  url
+                }
+              }
+            }
+          }
+          authors_description: metafield(namespace: "custom", key: "authors_description") { value }
+          authors_linkedin: metafield(namespace: "custom", key: "authors_linkedin") { value }
+          views: metafield(namespace: "custom", key: "views") { value }
+          read_time: metafield(namespace: "custom", key: "read_time") { value }
           seo {
             title
             description
@@ -257,6 +274,26 @@ export async function getArticlesByBlogHandle(blogHandle) {
     .collection("articles")
     .find({ blogHandle })
     .sort({ publishedAt: -1 })
+    .toArray();
+
+  return serialize(articles) || [];
+}
+
+export async function getMostViewedArticles(limit = 4) {
+  const client = await clientPromise;
+  const db = client.db();
+
+  const articles = await db
+    .collection("articles")
+    .aggregate([
+      {
+        $addFields: {
+          viewsInt: { $toInt: { $ifNull: ["$views.value", "0"] } }
+        }
+      },
+      { $sort: { viewsInt: -1, publishedAt: -1 } },
+      { $limit: limit }
+    ])
     .toArray();
 
   return serialize(articles) || [];
