@@ -28,7 +28,7 @@ export default function FeaturedIn() {
       image: "/images/feature/MadeInMedia.svg",
     },
     {
-      url: "https://madeinmedia.in/candere-founder-rupesh-jain-launches-lab-grown-diamond-jewellery-brand-lucira-taps-into-booming-industry-potential/",
+      url: "https://startuptalky.com/news/lucira-secures-5-5-million-in-seed-funding/",
       image: "/images/feature/StartupTalky.svg",
     },
     {
