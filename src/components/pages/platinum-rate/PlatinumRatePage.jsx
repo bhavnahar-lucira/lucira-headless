@@ -90,9 +90,17 @@ export default function PlatinumRatePage({ page }) {
 
     const platinumWidgetSettings = useMemo(() => {
         const base = PLATINUM_RATE_TEMPLATE.sections.platinum_calculate_widget_PRDzWq.settings;
-        if (!rates) return base;
+        if (!rates) return {
+            ...base,
+            flip_founder_image: base.flip_founder_image || "shopify://shop_images/612a521c6534a80708c03812f6a24fb301fc6dfa_1.png",
+            flip_founder_name: base.flip_founder_name || "Rupesh Jain",
+            flip_founder_designation: base.flip_founder_designation || "Founder",
+        };
         return {
             ...base,
+            flip_founder_image: base.flip_founder_image || "shopify://shop_images/612a521c6534a80708c03812f6a24fb301fc6dfa_1.png",
+            flip_founder_name: base.flip_founder_name || "Rupesh Jain",
+            flip_founder_designation: base.flip_founder_designation || "Founder",
             rate_today: `₹ ${(Number(rates.platinum_price) * 10 || parseInt(base.rate_today.replace(/[^\d]/g, ''))).toLocaleString('en-IN')}`,
             rate_avg: `₹ ${(Number(rates.platinum_price) * 1000 || parseInt(base.rate_avg.replace(/[^\d]/g, ''))).toLocaleString('en-IN')}`,
         };
@@ -115,29 +123,33 @@ export default function PlatinumRatePage({ page }) {
     return (
         <div className="platinum-rate-page bg-white min-h-screen font-figtree overflow-x-hidden">
             {/* Hero Section */}
-            <section className="relative w-full flex flex-col justify-center overflow-hidden pt-8 pb-12 lg:pt-10 lg:pb-10 min-h-[600px] lg:min-h-[600px]">
+            <section className="relative w-full flex flex-col justify-start overflow-hidden pt-6 md:pt-10 lg:pt-12 pb-12 lg:pb-10 min-h-[600px] lg:min-h-[600px]">
                 <div
                     className="absolute inset-0 bg-cover bg-center transition-transform duration-[20s] hover:scale-105"
                     style={{ backgroundImage: `url(${platinumWidgetSettings.background_image?.replace('shopify://shop_images/', 'https://www.lucirajewelry.com/cdn/shop/files/') || 'https://www.lucirajewelry.com/cdn/shop/files/baneer-gold.jpg'})` }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-black/10 z-[1]" />
 
-                <div className="container-main relative z-10 w-full px-4 lg:px-8 xl:px-12 flex flex-col items-start max-w-7xl mx-auto">
-                    <div className="w-full lg:w-[500px] xl:w-[550px] space-y-5 lg:space-y-6">
+                <div className="relative z-10 w-full px-6 md:px-10 lg:px-12 flex flex-col items-start">
+                    <div className="w-full lg:w-[600px] xl:w-[650px] space-y-5 lg:space-y-6">
                         {/* Header Row */}
-                        <div className="flex flex-col sm:flex-row sm:items-baseline gap-2 sm:gap-6">
-                            <h1 className="text-white text-[18px] md:text-[24px] lg:text-[26px] font-medium tracking-tight font-abhaya uppercase">
+                        <div className="flex flex-row justify-between items-center w-full gap-4">
+                            <h1 className="text-white text-[18px] md:text-[24px] lg:text-[26px] font-medium tracking-tight font-abhaya uppercase whitespace-nowrap">
                                 TODAYS PLATINUM RATE IN {cityName}
                             </h1>
-                            <button onClick={() => setIsFlipped(!isFlipped)} className="text-white/80 hover:text-white text-[12px] md:text-[14px] underline underline-offset-4 tracking-wide font-figtree transition-colors text-left">
-                                {isFlipped ? "View Todays Platinum Rate" : "Is Platinum A Wise Investment?"}
+                            <button onClick={() => setIsFlipped(!isFlipped)} className="text-white/80 hover:text-white text-[12px] md:text-[14px] underline underline-offset-4 tracking-wide font-figtree transition-colors text-right whitespace-nowrap shrink-0">
+                                {isFlipped ? "View Todays Platinum Rate" : "Why Invest in Platinum?"}
                             </button>
                         </div>
 
-                        {/* Flipped Card Container */}
-                        <div className="relative w-full h-[180px] md:h-[220px] [perspective:1000px]">
-                            <div className={`relative w-full h-full transition-all duration-700 [transform-style:preserve-3d] ${isFlipped ? '[transform:rotateX(180deg)]' : ''}`}>
-                                {/* FRONT FACE: Rates */}
+                        {/* Flip Container */}
+                        <div className="perspective-2000 w-full group relative h-[140px] md:h-[180px]">
+                            <div
+                                className={`relative w-full h-full transition-all duration-1000 preserve-3d cursor-pointer hover:scale-[1.02] ${isFlipped ? 'rotate-x-180' : ''}`}
+                                style={{ transformStyle: 'preserve-3d' }}
+                                onClick={() => setIsFlipped(!isFlipped)}
+                            >
+                                {/* FRONT FACE: Rates Card */}
                                 <div className="absolute inset-0 bg-white rounded-xl md:rounded-2xl p-4 md:p-6 shadow-2xl flex flex-col justify-center" style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden', transform: 'translateZ(1px)' }}>
                                     <div className="grid grid-cols-2 gap-2 md:gap-4 divide-x divide-zinc-100 md:pt-4">
                                         <div className="space-y-1 md:space-y-2 pr-2">
@@ -155,12 +167,8 @@ export default function PlatinumRatePage({ page }) {
                                             </p>
                                         </div>
                                     </div>
-                                    <div className="mt-4 md:mt-6 pt-4 border-t border-zinc-50 flex justify-between items-center">
-                                        <div className="flex items-center gap-2">
-                                            <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                                            <span className="text-[9px] md:text-[11px] text-zinc-400 font-medium font-figtree uppercase tracking-wider">Live Market Updates</span>
-                                        </div>
-                                        <span className="text-[9px] md:text-[11px] text-zinc-400 font-figtree">Last Updated: {currentDate}, 10:00 AM</span>
+                                    <div className="mt-2 pt-2 md:pt-3 border-t border-zinc-100">
+                                        <p className="text-[9px] md:text-[11px] text-zinc-500 font-figtree">Last Updated - {currentDate}, 10:00 AM</p>
                                     </div>
                                 </div>
 
@@ -181,13 +189,13 @@ export default function PlatinumRatePage({ page }) {
                                             <h3 className="text-[12px] md:text-[15px] font-bold text-zinc-900 mb-0.5 md:mb-1 uppercase tracking-tight font-abhaya leading-tight truncate">
                                                 {platinumWidgetSettings.flip_card_title || "Why Invest in Platinum?"}
                                             </h3>
-                                            <p className="text-zinc-500 text-[9px] md:text-[12px] leading-snug font-figtree italic mb-1 md:mb-2 md:mt-2 line-clamp-none md:line-clamp-none">
-                                                "{platinumWidgetSettings.flip_card_description || "Platinum is one of the rarest and most valuable precious metals."}"
+                                            <p className="text-zinc-500 text-[9px] md:text-[14px] leading-snug font-figtree italic mb-1 md:mb-2 md:mt-2 line-clamp-none md:line-clamp-none">
+                                                "Trends come and go, but platinum stays. It’s rare, resilient, and made to be lived in. If you’re thinking long-term—style and value—there’s no better time to invest in platinum."
                                             </p>
                                             <div className="flex items-end justify-between mt-auto">
                                                 <div className="flex flex-col">
-                                                    <span className="text-[9px] md:text-[12px] font-bold text-zinc-900 uppercase tracking-widest">{platinumWidgetSettings.flip_founder_name || "Lucira"}</span>
-                                                    <span className="text-[7px] md:text-[10px] text-primary uppercase tracking-widest">{platinumWidgetSettings.flip_founder_designation || "Jewelry"}</span>
+                                                    <span className="text-[9px] md:text-[10px] font-bold text-zinc-900 uppercase tracking-widest">{platinumWidgetSettings.flip_founder_name}</span>
+                                                    <span className="text-[7px] md:text-[8px] text-primary uppercase tracking-widest">{platinumWidgetSettings.flip_founder_designation}</span>
                                                 </div>
                                                 {platinumWidgetSettings.flip_card_link_label && (
                                                     <Link href={platinumWidgetSettings.flip_card_link_url || "#"} className="text-[9px] md:text-[10px] font-bold text-primary uppercase tracking-widest hover:text-black transition-colors flex items-center gap-1">
@@ -202,33 +210,35 @@ export default function PlatinumRatePage({ page }) {
                         </div>
 
                         {/* Selectors */}
-                        <div className="grid grid-cols-2 gap-3 md:gap-4 w-full">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div className="relative group">
-                                <label className="absolute -top-2 left-3 bg-zinc-900 text-[8px] md:text-[10px] px-1 text-white/60 z-20 font-figtree uppercase tracking-widest">State</label>
+                                <label className="absolute -top-2 left-3 px-1 bg-transparent text-[10px] text-white/80 font-figtree z-10 backdrop-blur-[2px]">State</label>
                                 <select
                                     value={selectedState}
                                     onChange={handleStateChange}
-                                    className="w-full h-11 md:h-12 bg-black/40 backdrop-blur-md border border-white/20 rounded-lg px-4 text-white text-[11px] md:text-[13px] font-figtree appearance-none focus:outline-none focus:border-primary transition-all cursor-pointer uppercase tracking-wider"
+                                    className="w-full h-12 border border-white/30 bg-white/5 hover:bg-white/10 rounded-lg px-4 text-white text-[13px] font-figtree font-medium uppercase appearance-none focus:outline-none focus:ring-1 focus:ring-white focus:bg-white/10 transition-all cursor-pointer shadow-inner backdrop-blur-sm"
                                 >
-                                    {Object.keys(stateCityMap).sort().map(state => (
-                                        <option key={state} value={state} className="text-black bg-white">{state.replace(/-/g, ' ')}</option>
+                                    <option value="" className="text-black">Select State</option>
+                                    {Object.keys(stateCityMap).map(state => (
+                                        <option key={state} value={state} className="text-black">{state.replace(/-/g, ' ')}</option>
                                     ))}
                                 </select>
-                                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 pointer-events-none group-hover:text-primary transition-colors" size={16} />
+                                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-white/50 pointer-events-none group-hover:text-white transition-colors" size={16} />
                             </div>
-
                             <div className="relative group">
-                                <label className="absolute -top-2 left-3 bg-zinc-900 text-[8px] md:text-[10px] px-1 text-white/60 z-20 font-figtree uppercase tracking-widest">City</label>
+                                <label className="absolute -top-2 left-3 px-1 bg-transparent text-[10px] text-white/80 font-figtree z-10 backdrop-blur-[2px]">City</label>
                                 <select
                                     value={selectedCity}
                                     onChange={(e) => setSelectedCity(e.target.value)}
-                                    className="w-full h-11 md:h-12 bg-black/40 backdrop-blur-md border border-white/20 rounded-lg px-4 text-white text-[11px] md:text-[13px] font-figtree appearance-none focus:outline-none focus:border-primary transition-all cursor-pointer uppercase tracking-wider"
+                                    disabled={!selectedState}
+                                    className="w-full h-12 border border-white/30 bg-white/5 hover:bg-white/10 rounded-lg px-4 text-white text-[13px] font-figtree font-medium uppercase appearance-none focus:outline-none focus:ring-1 focus:ring-white focus:bg-white/10 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-inner backdrop-blur-sm"
                                 >
-                                    {(stateCityMap[selectedState] || []).sort().map(city => (
-                                        <option key={city} value={city.toLowerCase().replace(/\s+/g, '-')} className="text-black bg-white">{city}</option>
+                                    <option value="" className="text-black">Select City</option>
+                                    {(stateCityMap[selectedState] || []).map(city => (
+                                        <option key={city} value={city.toLowerCase().replace(/\s+/g, '-')} className="text-black">{city}</option>
                                     ))}
                                 </select>
-                                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 pointer-events-none group-hover:text-primary transition-colors" size={16} />
+                                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-white/50 pointer-events-none group-hover:text-white transition-colors" size={16} />
                             </div>
                         </div>
 
@@ -291,6 +301,24 @@ export default function PlatinumRatePage({ page }) {
                     }
                 })}
             </div>
+            <style jsx>{`
+                .perspective-2000 { perspective: 2000px; }
+                .preserve-3d { transform-style: preserve-3d; }
+                .backface-hidden { 
+                  backface-visibility: hidden; 
+                  -webkit-backface-visibility: hidden;
+                  -webkit-transform-style: preserve-3d;
+                }
+                .rotate-x-180 { transform: rotateX(180deg); }
+                .font-abhaya { font-family: var(--font-abhaya), serif; }
+                .font-figtree { font-family: var(--font-figtree), sans-serif; }
+                
+                .gold-flip-back {
+                  transform: rotateX(180deg) translateZ(2px);
+                  backface-visibility: hidden;
+                  -webkit-backface-visibility: hidden;
+                }
+            `}</style>
         </div>
     );
 }
