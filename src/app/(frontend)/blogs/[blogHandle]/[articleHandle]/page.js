@@ -1,10 +1,11 @@
 import { notFound } from "next/navigation";
-import { 
-  getArticleByBlogAndHandle, 
-  getArticlesByBlogHandle, 
-  getMostViewedArticles 
+import {
+  getArticleByBlogAndHandle,
+  getArticlesByBlogHandle,
+  getMostViewedArticles
 } from "@/lib/blogs";
 import BlogArticleClient from "@/components/blogs/BlogArticleClient";
+import "./blog-article.css";
 
 function stripHtml(value) {
   return value?.replace(/<[^>]*>?/gm, "").replace(/\s+/g, " ").trim() || "";
@@ -96,13 +97,15 @@ export default async function BlogArticlePage({ params }) {
   const publishedDate = formatDate(article.publishedAt);
   const readTime = readingTime(article);
   const { html: bodyHtml, toc } = prepareArticleHtml(article.contentHtml || article.content);
-  
+
   const related = relatedArticles
     .filter((item) => item.handle !== article.handle)
     .slice(0, 4);
 
+
+
   return (
-    <BlogArticleClient 
+    <BlogArticleClient
       article={article}
       bodyHtml={bodyHtml}
       toc={toc}
