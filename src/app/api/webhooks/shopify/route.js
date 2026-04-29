@@ -91,7 +91,6 @@ async function processWebhook(topic, payload, eventId) {
     const db = client.db("next_local_db");
     
     // 2. Idempotency & Race Conditions - Atomic Check
-    // We try to "lock" this event immediately. If it already exists, matchedCount > 0.
     const eventLock = await db.collection("webhook_events").updateOne(
       { eventId },
       { $setOnInsert: { topic, startedAt: new Date() } },
@@ -133,15 +132,26 @@ async function processWebhook(topic, payload, eventId) {
         isFromGraphQL = false;
       }
 
+      if (!productData.id) {
+        console.error(`Webhook payload missing ID for topic ${topic}. EventId: ${eventId}`);
+        await db.collection("webhook_events").updateOne(
+          { eventId },
+          { $set: { status: "failed", error: "Missing product ID in payload", completedAt: new Date() } }
+        );
+        return;
+      }
+
       productHandle = productData.handle;
       const shopifyId = isFromGraphQL ? productData.id : `gid://shopify/Product/${productData.id}`;
       const newUpdate = new Date(productData.updatedAt || productData.updated_at);
 
-      // 1. Fetch existing data to perform a merge instead of a full overwrite
+      console.log(`Processing ${topic} for shopifyId: ${shopifyId} (Handle: ${productHandle})`);
+
+      // 1. Fetch existing data
       const existingProduct = await productsCollection.findOne({ shopifyId });
       const existingVariants = existingProduct?.variants || [];
 
-      // 2. Map new variant data from webhook
+      // 2. Map new variant data
       const mappedVariants = isFromGraphQL 
         ? productData.variants.edges.map(({ node: v }) => {
             const options = {};
@@ -173,35 +183,7 @@ async function processWebhook(topic, payload, eventId) {
             };
           });
 
-      // 3. Merge Webhook variants with Enriched DB variants & Detect Changes
-      const changedFields = new Set();
-      
-      const finalVariants = mappedVariants.map(newV => {
-        const existingV = existingVariants.find(ev => ev.id === newV.id);
-        if (existingV) {
-          // Detect changes for logging
-          if (newV.price !== existingV.price) changedFields.add("Price");
-          if (newV.inventoryQuantity !== existingV.inventoryQuantity) changedFields.add("Inventory");
-          if (newV.title !== existingV.title) changedFields.add("Variant Title");
-          
-          return { ...existingV, ...newV };
-        }
-        changedFields.add("New Variant");
-        return newV;
-      });
-
-      // Detect Top-level changes
-      if (existingProduct) {
-        if (productData.title !== existingProduct.title) changedFields.add("Title");
-        if (productData.handle !== existingProduct.handle) changedFields.add("Handle");
-        if ((productData.status || "").toLowerCase() !== (existingProduct.status || "").toLowerCase()) changedFields.add("Status");
-      } else {
-        changedFields.add("Full Import");
-      }
-
-      const changesSummary = Array.from(changedFields).join(", ") || "Metadata/No Change";
-
-      // 4. Determine Representative Variant (for top-level price and image)
+      // 3. Determine Representative Variant
       const inStockVariants = mappedVariants.filter(v => v.inStock);
       const isRing = String(productData.productType || productData.product_type || "").toLowerCase().includes("ring");
       
@@ -218,7 +200,6 @@ async function processWebhook(topic, payload, eventId) {
         representativeVariant = mappedVariants[0];
       }
 
-      // Map Metafields
       const productMetafields = isFromGraphQL ? {
         shop_for: productData.shop_for?.value,
         weight: productData.weight?.value,
@@ -230,12 +211,11 @@ async function processWebhook(topic, payload, eventId) {
         lead_time: productData.lead_time?.value
       } : undefined;
 
-      // Define variables for document
-      const status = (productData.status || "").toLowerCase();
+      const status = (productData.status || "").toUpperCase(); // Keep as ACTIVE/DRAFT/ARCHIVED
       const publishedAt = productData.publishedAt || productData.published_at;
-      const isVisible = status === "active" && publishedAt !== null;
+      const isPublished = publishedAt !== null; // True if published to Online Store/any channel
+      const isVisible = status === "ACTIVE" && isPublished;
 
-      // Normalize Tags (Webhooks send a string, GraphQL sends an array)
       let finalTags = [];
       if (Array.isArray(productData.tags)) {
         finalTags = productData.tags;
@@ -243,74 +223,133 @@ async function processWebhook(topic, payload, eventId) {
         finalTags = productData.tags.split(',').map(tag => tag.trim()).filter(Boolean);
       }
 
-      // SURGICAL UPDATE: Update top-level fields
-      const updateOps = {
-        $set: {
-          title: productData.title,
-          handle: productData.handle,
-          description: productData.descriptionHtml || productData.body_html || productData.description,
-          vendor: productData.vendor,
-          type: productData.productType || productData.product_type,
-          status,
-          publishedAt,
-          updatedAt: newUpdate,
-          tags: finalTags,
-          isVisible,
-          price: representativeVariant?.price || 0,
-          compare_price: representativeVariant?.compare_price || null,
-          image: representativeVariant?.image || productData.featuredImage?.url || (productData.image?.src || productData.images?.[0]?.src),
-          images: isFromGraphQL 
-            ? productData.images.edges.map(e => ({ url: e.node.url, alt: e.node.altText || "" }))
-            : productData.images?.map(img => ({ url: img.src, alt: img.alt || "" })),
-          lastWebhookUpdate: new Date(),
+      // 4. SURGICAL DIFF: Only update what changed
+      const updateSet = {};
+      const changedFields = [];
+
+      const checkAndAdd = (field, newValue, existingValue) => {
+        if (JSON.stringify(newValue) !== JSON.stringify(existingValue)) {
+          updateSet[field] = newValue;
+          changedFields.push(field);
         }
       };
 
-      if (productMetafields) {
-        updateOps.$set.productMetafields = productMetafields;
+      if (!existingProduct) {
+        // Full Import if product doesn't exist
+        updateSet.title = productData.title;
+        updateSet.handle = productData.handle;
+        updateSet.description = productData.descriptionHtml || productData.body_html || productData.description;
+        updateSet.vendor = productData.vendor;
+        updateSet.type = productData.productType || productData.product_type;
+        updateSet.status = status;
+        updateSet.publishedAt = publishedAt;
+        updateSet.isPublished = isPublished;
+        updateSet.isVisible = isVisible;
+        updateSet.updatedAt = newUpdate;
+        updateSet.tags = finalTags;
+        updateSet.price = representativeVariant?.price || 0;
+        updateSet.compare_price = representativeVariant?.compare_price || null;
+        updateSet.image = representativeVariant?.image || productData.featuredImage?.url || (productData.image?.src || productData.images?.[0]?.src);
+        updateSet.images = isFromGraphQL 
+          ? productData.images.edges.map(e => ({ url: e.node.url, alt: e.node.altText || "" }))
+          : productData.images?.map(img => ({ url: img.src, alt: img.alt || "" }));
+        if (productMetafields) updateSet.productMetafields = productMetafields;
+        changedFields.push("Full Import");
+      } else {
+        checkAndAdd("title", productData.title, existingProduct.title);
+        checkAndAdd("handle", productData.handle, existingProduct.handle);
+        checkAndAdd("description", productData.descriptionHtml || productData.body_html || productData.description, existingProduct.description);
+        checkAndAdd("vendor", productData.vendor, existingProduct.vendor);
+        checkAndAdd("type", productData.productType || productData.product_type, existingProduct.type);
+        checkAndAdd("status", status, existingProduct.status);
+        checkAndAdd("publishedAt", publishedAt, existingProduct.publishedAt);
+        checkAndAdd("isPublished", isPublished, existingProduct.isPublished);
+        checkAndAdd("isVisible", isVisible, existingProduct.isVisible);
+        checkAndAdd("tags", finalTags, existingProduct.tags);
+        checkAndAdd("price", representativeVariant?.price || 0, existingProduct.price);
+        checkAndAdd("compare_price", representativeVariant?.compare_price || null, existingProduct.compare_price);
+        checkAndAdd("image", representativeVariant?.image || productData.featuredImage?.url || (productData.image?.src || productData.images?.[0]?.src), existingProduct.image);
+        
+        const newImages = isFromGraphQL 
+          ? productData.images.edges.map(e => ({ url: e.node.url, alt: e.node.altText || "" }))
+          : productData.images?.map(img => ({ url: img.src, alt: img.alt || "" }));
+        checkAndAdd("images", newImages, existingProduct.images);
+
+        // Surgically update productMetafields sub-fields
+        if (productMetafields) {
+          Object.keys(productMetafields).forEach(key => {
+            const fieldKey = `productMetafields.${key}`;
+            if (JSON.stringify(productMetafields[key]) !== JSON.stringify(existingProduct.productMetafields?.[key])) {
+              updateSet[fieldKey] = productMetafields[key];
+              changedFields.push(fieldKey);
+            }
+          });
+        }
+        
+        if (changedFields.length > 0) {
+          updateSet.updatedAt = newUpdate;
+          updateSet.lastWebhookUpdate = new Date();
+        }
       }
 
-      // Perform the top-level update
-      await productsCollection.updateOne(
-        { 
-          shopifyId, 
-          $or: [
-            { updatedAt: { $lt: newUpdate } },
-            { updatedAt: { $exists: false } }
-          ]
-        },
-        updateOps,
-        { upsert: true }
-      );
-
-      // Surgically update each variant's commercial fields
-      for (const v of mappedVariants) {
+      // Perform surgical update for top-level if changes detected
+      if (Object.keys(updateSet).length > 0) {
         await productsCollection.updateOne(
-          { 
-            shopifyId, 
-            "variants.id": v.id 
-          },
-          { 
-            $set: { 
-              "variants.$.price": v.price,
-              "variants.$.compare_price": v.compare_price,
-              "variants.$.inventoryQuantity": v.inventoryQuantity,
-              "variants.$.inStock": v.inStock,
-              "variants.$.sku": v.sku,
-              "variants.$.title": v.title,
-              "variants.$.image": v.image || undefined,
-              "variants.$.options": v.options
-            } 
-          }
+          { shopifyId },
+          { $set: updateSet },
+          { upsert: !existingProduct }
         );
       }
+
+      // 5. Surgical Variant Updates
+      for (const v of mappedVariants) {
+        const existingV = existingVariants.find(ev => ev.id === v.id);
+        const variantUpdate = {};
+
+        if (!existingV) {
+          // New variant
+          await productsCollection.updateOne(
+            { shopifyId, "variants.id": { $ne: v.id } },
+            { $push: { variants: v } }
+          );
+          changedFields.push(`New Variant:${v.id}`);
+        } else {
+          const checkVariant = (field, newVal, oldVal) => {
+            if (JSON.stringify(newVal) !== JSON.stringify(oldVal)) {
+              variantUpdate[`variants.$.${field}`] = newVal;
+              changedFields.push(`variant.${v.id}.${field}`);
+            }
+          };
+
+          checkVariant("price", v.price, existingV.price);
+          checkVariant("compare_price", v.compare_price, existingV.compare_price);
+          checkVariant("inventoryQuantity", v.inventoryQuantity, existingV.inventoryQuantity);
+          checkVariant("inStock", v.inStock, existingV.inStock);
+          checkVariant("sku", v.sku, existingV.sku);
+          checkVariant("title", v.title, existingV.title);
+          checkVariant("image", v.image || undefined, existingV.image);
+          checkVariant("options", v.options, existingV.options);
+
+          if (Object.keys(variantUpdate).length > 0) {
+            await productsCollection.updateOne(
+              { shopifyId, "variants.id": v.id },
+              { $set: variantUpdate }
+            );
+          }
+        }
+      }
       
-      console.log(`Product ${productData.handle} surgically updated. Changes: ${changesSummary}`);
+      const changesSummary = changedFields.join(", ") || "No relevant changes";
+      console.log(`Product ${productHandle} surgically processed. Changes: ${changesSummary}`);
       
-      // Mark event as completed successfully
       await db.collection("webhook_events").updateOne(
         { eventId },
-        { $set: { status: "success", productHandle, changes: changesSummary, completedAt: new Date() } }
+        { $set: { 
+          status: "success", 
+          productHandle, 
+          changes: changesSummary, 
+          completedAt: new Date() 
+        } }
       );
     }
 

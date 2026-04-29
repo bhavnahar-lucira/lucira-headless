@@ -14,6 +14,7 @@ import {
 
 export default function WebhookLogsPage() {
   const [logs, setLogs] = useState([]);
+  const [stats, setStats] = useState({ created: 0, updated: 0, deleted: 0 });
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -36,6 +37,7 @@ export default function WebhookLogsPage() {
       const res = await fetch("/api/dashboard/webhooks");
       const data = await res.json();
       if (data.logs) setLogs(data.logs);
+      if (data.stats) setStats(data.stats);
     } catch (err) {
       console.error("Failed to fetch logs", err);
     } finally {
@@ -97,6 +99,42 @@ export default function WebhookLogsPage() {
         </button>
       </div>
 
+      {/* Summary Stats */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+        <div className="bg-white border border-zinc-200 p-6 rounded-2xl shadow-sm space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Created Today</span>
+            <div className="p-2 bg-emerald-50 rounded-lg">
+              <CheckCircle2 className="text-emerald-500" size={16} />
+            </div>
+          </div>
+          <div className="text-3xl font-black text-zinc-900">{stats.created}</div>
+          <p className="text-[10px] text-zinc-400 font-bold">NEW PRODUCTS SYNCED</p>
+        </div>
+
+        <div className="bg-white border border-zinc-200 p-6 rounded-2xl shadow-sm space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Updated Today</span>
+            <div className="p-2 bg-blue-50 rounded-lg">
+              <RefreshCw className="text-blue-500" size={16} />
+            </div>
+          </div>
+          <div className="text-3xl font-black text-zinc-900">{stats.updated}</div>
+          <p className="text-[10px] text-zinc-400 font-bold">MODIFIED PRODUCTS</p>
+        </div>
+
+        <div className="bg-white border border-zinc-200 p-6 rounded-2xl shadow-sm space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Deleted Today</span>
+            <div className="p-2 bg-rose-50 rounded-lg">
+              <XCircle className="text-rose-500" size={16} />
+            </div>
+          </div>
+          <div className="text-3xl font-black text-zinc-900">{stats.deleted}</div>
+          <p className="text-[10px] text-zinc-400 font-bold">REMOVED FROM STORE</p>
+        </div>
+      </div>
+
       <div className="bg-white border border-zinc-200 rounded-2xl overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
@@ -152,7 +190,11 @@ export default function WebhookLogsPage() {
                       </td>
                       <td className="px-6 py-4">
                         <span className="text-xs font-bold text-zinc-700 bg-zinc-100 px-2 py-1 rounded-md">
-                          {log.changes || "--"}
+                          {typeof log.changes === 'string' 
+                            ? log.changes 
+                            : Array.isArray(log.changes) 
+                              ? log.changes.map(c => c.field).join(", ") 
+                              : "--"}
                         </span>
                       </td>
                       <td className="px-6 py-4">
