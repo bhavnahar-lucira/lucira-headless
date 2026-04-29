@@ -193,6 +193,14 @@ export function OtpSpinAuth({
   };
 
   const handleOtpChange = (index, value) => {
+    // Handle paste or autofill of the entire 4-digit code
+    if (value.length === 4 && /^\d+$/.test(value)) {
+      const newOtp = value.split("");
+      setOtp(newOtp);
+      setTimeout(() => handleVerifyOtp(value), 50);
+      return;
+    }
+
     if (!/^\d*$/.test(value)) return;
     const newOtp = [...otp];
     newOtp[index] = value.slice(-1);
@@ -202,12 +210,11 @@ export function OtpSpinAuth({
       otpRefs[index + 1].current.focus();
     }
     
-    // Auto-verify if 4 digits are entered
+    // Auto-verify if 4 digits are entered manually
     if (index === 3 && value) {
       const finalOtp = [...newOtp];
       finalOtp[3] = value.slice(-1);
       if (finalOtp.every(d => d !== "")) {
-        // We call it after a tiny delay so the last digit is visible
         setTimeout(() => {
            const otpVal = finalOtp.join("");
            if (otpVal.length === 4) {
@@ -382,6 +389,8 @@ export function OtpSpinAuth({
                   key={i}
                   ref={otpRefs[i]}
                   type="tel"
+                  inputMode="numeric"
+                  autoComplete={i === 0 ? "one-time-code" : "off"}
                   maxLength="1"
                   value={digit}
                   onChange={(e) => handleOtpChange(i, e.target.value)}
