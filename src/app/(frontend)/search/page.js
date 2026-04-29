@@ -540,7 +540,7 @@ export default function SearchPage() {
                 </p>
               </div>
 
-              <div className="flex flex-col sm:flex-row gap-4 w-full max-w-lg justify-center">
+              <div className="flex flex-col sm:flex-row gap-4 md:w-sm max-w-2xl justify-center">
                 <Link 
                   href="/collections/all" 
                   className="flex-1 bg-primary text-white py-4 px-8 rounded-full uppercase tracking-wider text-sm font-bold transition-all shadow-sm"

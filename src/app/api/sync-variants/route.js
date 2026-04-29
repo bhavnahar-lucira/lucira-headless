@@ -249,6 +249,7 @@ export async function POST(req) {
               image: v.image?.url || p.image,
               price_breakup: priceBreakup || existingV?.price_breakup,
               metafields: {
+                ...(existingV?.metafields || {}),
                 in_store_available: inStoreAvailable,
                 diamond_1_shape: v.diamond_shape?.value || v.d1_shape?.value,
                 ring_size_inventory: v.ring_size?.value,
@@ -258,9 +259,9 @@ export async function POST(req) {
                 gross_weight: v.ornaverse_gross_weight?.value || v.custom_gross_weight?.value,
                 top_height: v.top_height?.value,
                 top_width: v.top_width?.value,
-                ornaverse_components: v.ornaverse_components?.value ? JSON.parse(v.ornaverse_components.value) : null,
-                diamonds: diamonds.length > 0 ? diamonds : null,
-                gemstones: gemstones.length > 0 ? gemstones : null
+                ornaverse_components: v.ornaverse_components?.value ? JSON.parse(v.ornaverse_components.value) : (existingV?.metafields?.ornaverse_components || null),
+                diamonds: diamonds.length > 0 ? diamonds : (existingV?.metafields?.diamonds || null),
+                gemstones: gemstones.length > 0 ? gemstones : (existingV?.metafields?.gemstones || null)
               }
             };
           });

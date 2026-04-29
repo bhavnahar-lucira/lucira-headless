@@ -15,14 +15,15 @@ import "swiper/css/navigation";
 import "swiper/css/thumbs";
 
 import TryOnButton from "../common/TryOnButton";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 
 export default function ProductGallery({ media = [], title = "", activeColor = "", onViewSimilar, hasSimilar = false, product, activeVariant }) {
+  const isDesktop = useMediaQuery("(min-width: 1024px)");
+  const [mounted, setMounted] = useState(false);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [zoomLevel, setZoomLevel] = useState(1);
   const [thumbsSwiper, setThumbsSwiper] = useState(null);
-
-  console.log("prouct", product);
 
   const displayLabels = useMemo(() => {
     const labels = [];
@@ -40,9 +41,9 @@ export default function ProductGallery({ media = [], title = "", activeColor = "
     return [...new Set(labels)].slice(0, 2);
   }, [product.label, product.tags]);
 
-  console.log(displayLabels);
-  
-  
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const sortedMedia = useMemo(() => {
     if (!media || media.length === 0) return [];
@@ -265,12 +266,15 @@ export default function ProductGallery({ media = [], title = "", activeColor = "
                     ))}
                   </div>
                   <div onClick={(e) => e.stopPropagation()}>
-                    <TryOnButton 
-                      product={product} 
-                      activeVariant={activeVariant}
-                      id="tryonbutton-desktop"
-                      className="absolute bottom-4 left-4 bg-white/95 backdrop-blur-sm px-4 py-2.5 rounded-full text-[12px] font-bold flex items-center gap-2 shadow-sm border border-gray-100 uppercase tracking-wider hover:bg-gray-50 transition-colors cursor-pointer z-30"
-                    />
+                    {mounted && isDesktop && (
+                      <TryOnButton 
+                        sku={activeVariant?.sku || product?.variants?.[0]?.sku}
+                        productTitle={product?.title}
+                        isAvailable={activeVariant ? activeVariant.inStock : product?.available}
+                        id="tryonbutton-desktop"
+                        className="absolute bottom-4 left-4 bg-white/95 backdrop-blur-sm px-4 py-2.5 rounded-full text-[12px] font-bold flex items-center gap-2 shadow-sm border border-gray-100 uppercase tracking-wider hover:bg-gray-50 transition-colors cursor-pointer z-30"
+                      />
+                    )}
                   </div>
                 </>
               )}
@@ -355,12 +359,15 @@ export default function ProductGallery({ media = [], title = "", activeColor = "
           {/* Action Buttons Overlay */}
           <div className="absolute bottom-4 left-2 right-2 flex justify-between items-center z-10">
              <div onClick={(e) => e.stopPropagation()} className="data-no-swiping">
-               <TryOnButton 
-                 product={product} 
-                 activeVariant={activeVariant}
-                 id="tryonbutton-mobile"
-                 className="bg-white/95 backdrop-blur-sm px-4 py-2.5 rounded-full text-[12px] font-bold flex items-center gap-2 shadow-sm border border-gray-100 uppercase tracking-wider cursor-pointer"
-               />
+               {mounted && !isDesktop && (
+                 <TryOnButton 
+                   sku={activeVariant?.sku || product?.variants?.[0]?.sku}
+                   productTitle={product?.title}
+                   isAvailable={activeVariant ? activeVariant.inStock : product?.available}
+                   id="tryonbutton-mobile"
+                   className="bg-white/95 backdrop-blur-sm px-4 py-2.5 rounded-full text-[12px] font-bold flex items-center gap-2 shadow-sm border border-gray-100 uppercase tracking-wider cursor-pointer"
+                 />
+               )}
              </div>
              <button 
                onClick={(e) => {

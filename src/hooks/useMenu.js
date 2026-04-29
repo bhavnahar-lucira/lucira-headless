@@ -52,28 +52,61 @@ function transformMenu(shopifyMenu) {
       href: item.url.replace(/https:\/\/[^/]+/, ""), // Strip domain
       type: menuType,
       layout: layout,
+      mobileBanner: getFileUrl(getMetafield(metafields, "custom", "mobile_menu_banner_image")),
     };
 
     if (menuType === "mega") {
         const children = item.items || [];
         
-        // 1. Detect Featured Group
+        // 1. Detect Featured Groups
         if (!isFeaturedDisabled) {
-            const featuredGroup = children.find(c => c.title.toLowerCase().startsWith("featured"));
-            if (featuredGroup) {
-                transformedItem.featured = {
-                    title: featuredGroup.title,
-                    items: featuredGroup.items.map(f => ({
-                        label: f.title,
-                        href: f.url.replace(/https:\/\/[^/]+/, "")
-                    }))
-                };
+            const featuredGroup = children.find(c => {
+                const title = c.title.toLowerCase();
+                return title.includes("featured") && !title.includes("in");
+            });
+            const featuredInGroup = children.find(c => c.title.toLowerCase().includes("featured in"));
+
+            if (featuredGroup || featuredInGroup) {
+                transformedItem.featured = {};
+                
+                if (featuredGroup) {
+                    transformedItem.featured.title = featuredGroup.title;
+                    transformedItem.featured.items = featuredGroup.items.map(f => {
+                        const fResource = f.resource || {};
+                        const fMeta = fResource.metafields?.nodes || [];
+                        return {
+                            label: f.title,
+                            href: f.url.replace(/https:\/\/[^/]+/, ""),
+                            menuIcon: getFileUrl(getMetafield(fMeta, "custom", "menu_links_image_icon")),
+                        };
+                    });
+                }
+
+                if (featuredInGroup) {
+                  transformedItem.featured.featuredIn = {
+                      title: featuredInGroup.title,
+                      items: featuredInGroup.items.map(f => {
+                          const fResource = f.resource || {};
+                          const fMeta = fResource.metafields?.nodes || [];
+                          return {
+                              label: f.title,
+                              href: f.url.replace(/https:\/\/[^/]+/, ""),
+                              icon: getFileUrl(getMetafield(fMeta, "custom", "menu_links_image_icon")) || getFileUrl(getMetafield(fMeta, "custom", "icon")),
+                          };
+                      })
+                  };
+                }
             }
         }
 
         // 2. Separate remaining items into Columns or Cards (Banners)
-        // This matches the Liquid logic: items with images are cards, others are columns.
-        const remainingItems = children.filter(c => !c.title.toLowerCase().startsWith("featured"));
+        // Filter out any group that was treated as "Featured" or "Featured In"
+        const remainingItems = children.filter(c => {
+            const title = c.title.toLowerCase();
+            const isFeatured = title.includes("featured") && !title.includes("in");
+            const isFeaturedIn = title.includes("featured in");
+            return !isFeatured && !isFeaturedIn;
+        });
         
         const columns = [];
         const cards = [];
@@ -97,17 +130,30 @@ function transformMenu(shopifyMenu) {
                 columns.push({
                     title: child.title,
                     type: isMetal ? "metal" : (isIcon ? "icon" : (getMetafield(childMetafields, "custom", "column_type")?.value || "text")),
-                    items: child.items?.map(sub => {
-                        const subResource = sub.resource || {};
-                        const subMeta = subResource.metafields?.nodes || [];
-                        return {
-                            label: sub.title,
-                            href: sub.url.replace(/https:\/\/[^/]+/, ""),
-                            icon: getFileUrl(getMetafield(subMeta, "custom", "icon")),
-                            svgSprite: getMetafield(subMeta, "custom", "menu_image_svg_sprite")?.value,
-                            megaMenuImage: getFileUrl(getMetafield(subMeta, "custom", "mega_menu_image"))
-                        };
-                    }) || []
+                    items: (() => {
+                        const seen = new Set();
+                        // Filter out duplicates and items that match the parent title
+                        return (child.items || [])
+                            .filter(sub => {
+                                const label = sub.title.toLowerCase().trim();
+                                if (label === child.title.toLowerCase().trim() || seen.has(label)) {
+                                    return false;
+                                }
+                                seen.add(label);
+                                return true;
+                            })
+                            .map(sub => {
+                                const subResource = sub.resource || {};
+                                const subMeta = subResource.metafields?.nodes || [];
+                                return {
+                                    label: sub.title,
+                                    href: sub.url.replace(/https:\/\/[^/]+/, ""),
+                                    icon: getFileUrl(getMetafield(subMeta, "custom", "icon")),
+                                    megaMenuImage: getFileUrl(getMetafield(subMeta, "custom", "mega_menu_image")),
+                                    menuIcon: getFileUrl(getMetafield(subMeta, "custom", "menu_links_image_icon")),
+                                };
+                            });
+                    })()
                 });
             }
         });

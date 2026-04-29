@@ -158,7 +158,7 @@ export default function SearchPopup({ onClose, searchQuery, searchResults, isSea
           width: 4px;
         }
         .custom-scrollbar::-webkit-scrollbar-track {
-          background: #f1f1f1;
+          background: #fff;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb {
           background: #ccc;

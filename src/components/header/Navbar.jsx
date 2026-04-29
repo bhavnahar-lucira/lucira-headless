@@ -54,28 +54,33 @@ export default function Navbar({ hideTop }) {
         activeMenuPath;
 
   return (
-    <nav className="relative border-t border-gray-100 bg-white">
-      <div className="max-w-screen-xl mx-auto px-4 lg:px-6 relative">
+    <nav className="relative bg-white border-b border-gray-100 z-[90]">
+      <div className="container-main relative flex items-center min-h-[45px]">
+        {/* Left: Sticky Logo */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
+          initial={false}
           animate={{
             opacity: hideTop ? 1 : 0,
-            scale: hideTop ? 1 : 0.8,
+            x: hideTop ? 0 : -20,
+            width: hideTop ? "auto" : 0,
+            marginRight: hideTop ? 32 : 0,
           }}
-          transition={{ duration: 0.2 }}
-          className={`absolute left-4 lg:left-6 xl:left-2 top-1/2 -translate-y-1/2 w-8 h-8 lg:w-9 lg:h-9 xl:w-10 xl:h-10 flex items-center justify-center ${hideTop ? "pointer-events-auto" : "pointer-events-none"
-            }`}
+          transition={{ duration: 0.3, ease: "easeInOut" }}
+          className="overflow-hidden flex-shrink-0"
         >
-          <Link href="/">
+          <Link href="/" className="block">
             <Image
-              src="/images/icons/small-logo.svg"
+              src="https://cdn.shopify.com/s/files/1/0739/8516/3482/files/dark_brown_Logo_icon_2.svg?v=1777366090"
               alt="Lucira Jewelry"
-              width={20}
+              width={40}
               height={40}
+              className="w-8 h-8 lg:w-9 lg:h-9 object-contain"
             />
           </Link>
         </motion.div>
-        <ul className="flex justify-center gap-6 xl:gap-10 2xl:gap-12 lg:text-xs xl:text-sm uppercase">
+
+        {/* Navigation Menu */}
+        <ul className="flex items-center gap-6 xl:gap-8 2xl:gap-8 lg:text-xs xl:text-sm uppercase transition-all duration-300 mx-0">
           {MEGA_MENU.map((menu, index) => {
             const isActive =
               pathname === menu.href ||
@@ -94,7 +99,7 @@ export default function Navbar({ hideTop }) {
                   href={menu.href}
                   onClick={closeMenu}
                   className={cn(
-                    "block py-6 tracking-wide transition-all duration-200",
+                    "block py-4 tracking-normal transition-all duration-200 uppercase text-[14px] leading-none font-medium font-figtree",
                     isActive || isHovered
                       ? "text-primary"
                       : "text-gray-700 hover:text-primary",
@@ -107,7 +112,7 @@ export default function Navbar({ hideTop }) {
                 {(isHovered || (isActive && activeMenu === null)) && (
                   <motion.div
                     layoutId="nav-underline"
-                    className="absolute bottom-3 left-0 right-0 h-0.5 bg-primary"
+                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"
                   />
                 )}
               </li>
@@ -128,10 +133,9 @@ export default function Navbar({ hideTop }) {
                 const menu = MEGA_MENU[activeMenu];
 
                 const baseCols = menu.columns?.length || 0;
-                const featuredCol = menu.featured ? 1 : 0;
+                const hasFeaturedItems = menu.featured?.items?.length > 0 || (Array.isArray(menu.featured) && menu.featured.length > 0);
+                const featuredCol = hasFeaturedItems ? 1 : 0;
                 const cardCols = menu.cards?.length || 0;
-                const totalCols =
-                  baseCols + featuredCol + cardCols || 1;
 
                 const isImageOnly =
                   menu.type === "image-grid" ||
@@ -140,18 +144,25 @@ export default function Navbar({ hideTop }) {
                 let gridTemplate;
 
                 if (isImageOnly) {
+                  const totalCols = baseCols + (menu.featured ? 1 : 0) + cardCols || 1;
                   gridTemplate = `repeat(${totalCols}, minmax(0, 1fr))`;
                 } else {
-                  const normalCols = totalCols - cardCols;
+                  // Dynamically calculate weights for each column
+                  const weights = [];
+                  
+                  if (hasFeaturedItems) weights.push(1.2); 
 
-                  gridTemplate = `
-                    ${Array(normalCols)
-                      .fill("minmax(0, 1fr)")
-                      .join(" ")}
-                    ${Array(cardCols)
-                      .fill("minmax(0, 1.5fr)")
-                      .join(" ")}
-                  `;
+                  menu.columns?.forEach(col => {
+                    const title = col.title?.toLowerCase();
+                    const isByStyle = title.includes("style");
+                    weights.push(isByStyle ? 2.2 : 1); 
+                  });
+
+                  for (let i = 0; i < cardCols; i++) {
+                    weights.push(1.5); 
+                  }
+
+                  gridTemplate = weights.map(w => `minmax(0, ${w}fr)`).join(" ");
                 }
 
                 /* IMAGE GRID */
@@ -200,128 +211,158 @@ export default function Navbar({ hideTop }) {
                 }
 
                 /* MEGA MENU */
+                const featuredIn = menu.featured?.featuredIn || menu.featuredIn;
+
                 return (
-                  <div
-                    className="grid gap-x-4"
-                    style={{ gridTemplateColumns: gridTemplate }}
-                  >
-                    {/* FEATURED */}
-                    {menu.featured && (
-                      <div className="pr-4 border-r border-zinc-100">
-                        <h4 className="mb-6 text-sm font-bold uppercase tracking-[0.1em] text-black">
-                          {menu.featured.title}
-                        </h4>
-                        <ul className="space-y-4 text-[13px] font-medium text-zinc-500">
-                          {menu.featured.items?.map((item, i) => (
-                            <li key={i} className="hover:text-black transition-colors">
-                              <Link href={item.href || "#"} onClick={closeMenu}>
-                                {item.label}
+                  <div className="flex flex-col">
+                    <div
+                      className="grid gap-x-4"
+                      style={{ gridTemplateColumns: gridTemplate }}
+                    >
+                      {/* FEATURED */}
+                      {hasFeaturedItems && (
+                        <div className="pr-6 border-r border-zinc-100 min-h-[250px]">
+                          <h4 className="mb-6 font-figtree font-semibold text-base leading-none text-black uppercase">
+                            {menu.featured.title || "Featured"}
+                          </h4>
+                          <ul className="space-y-4">
+                            {(menu.featured.items || (Array.isArray(menu.featured) ? menu.featured : [])).map((item, i) => (
+                              <li key={i}>
+                                <Link href={item.href || "#"} onClick={closeMenu} className="group block">
+                                  <span className="text-lg font-medium text-zinc-900 group-hover:text-primary transition-colors">{item.label}</span>
+                                </Link>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+
+                      {/* TEXT COLUMNS (RESTORED ICON LOGIC) */}
+                      {menu.columns?.map((col, i) => {
+                        const title = col.title?.toLowerCase();
+                        const isByStyle = title.includes("style");
+                        const isByShape = title.includes("shape");
+                        const isGridCol = isByStyle; // Only Style is a grid column
+
+                        return (
+                          <div key={i} className={cn(isGridCol && "col-span-1")}>
+                            <h4 className="mb-4 font-figtree font-semibold text-[14px] leading-none text-black uppercase">
+                              {col.title}
+                            </h4>
+
+                            <ul className={cn(
+                              "text-[13px] font-medium text-zinc-500",
+                              isGridCol ? "grid grid-cols-2 gap-x-8 gap-y-0" : "space-y-4"
+                            )}>
+                              {col.items.map((item, j) => (
+                                <li key={j} className={cn(
+                                  "hover:text-black transition-colors",
+                                  (col.type === "metal" || item.menuIcon || item.megaMenuImage || (col.type === "icon" && item.icon)) && 
+                                  !col.title?.toLowerCase().includes("material") && 
+                                  !col.title?.toLowerCase().includes("metal")
+                                    ? "lg:mb-0"
+                                    : ""
+                                )}>
+                                  <Link
+                                    href={item.href || "#"}
+                                    onClick={closeMenu}
+                                    className="flex items-center gap-3 group"
+                                  >
+                                    {/* ✅ METAL SWATCH */}
+                                    {col.type === "metal" ? (
+                                      <span
+                                        className={`w-8 h-8 rounded-full border border-zinc-200 ${
+                                          item.label.toLowerCase().includes("yellow")
+                                            ? "bg-[linear-gradient(147.45deg,_#C59922_17.98%,_#EAD59E_48.14%,_#C59922_83.84%)]"
+                                            : item.label.toLowerCase().includes("rose")
+                                            ? "bg-[linear-gradient(154.36deg,_#F2B5B5_10.36%,_#F8DBDB_68.09%)]"
+                                            : item.label.toLowerCase().includes("platinum")
+                                            ? "bg-[linear-gradient(154.03deg,_#DFDFDF_27.25%,_#F3F3F3_85.19%)]"
+                                            : item.label.toLowerCase().includes("white")
+                                            ? "bg-[linear-gradient(143.06deg,_#DFDFDF_29.61%,_#F3F3F3_48.83%,_#DFDFDF_66.43%)]"
+                                            : "bg-[#ddd]"
+                                        }`}
+                                      />
+                                    ) : item.menuIcon || item.megaMenuImage || (col.type === "icon" && item.icon) ? (
+                                      <div className={cn(
+                                        "relative shrink-0 flex items-center justify-center rounded-full overflow-hidden transition-all",
+                                        isByShape ? "h-12 w-12" : "h-16 w-16"
+                                      )}>
+                                        <Image
+                                          src={item.menuIcon || item.megaMenuImage || item.icon}
+                                          alt={item.label}
+                                          fill
+                                          className="object-contain p-1"
+                                        />
+                                      </div>
+                                    ) : null}
+
+                                    <span className="text-lg font-medium text-zinc-900 group-hover:text-primary transition-colors">{item.label}</span>
+                                  </Link>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        );
+                      })}
+
+                      {/* CARDS (UNCHANGED UI) */}
+                      {menu.cards?.map((card, i) => (
+                        <div key={i} className="col-span-1">
+                          <Link
+                            href={card.href || "#"}
+                            onClick={closeMenu}
+                            className="group relative block"
+                          >
+                            <div className="relative aspect-4/4 overflow-hidden rounded-md">
+                              <Image
+                                src={card.image}
+                                alt={card.title}
+                                fill
+                                className="object-cover"
+                              />
+                              <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/20 to-transparent" />
+                            </div>
+
+                            <div className="absolute bottom-4 left-4 text-white">
+                              <p className="text-lg font-semibold">{card.title}</p>
+                              <p className="text-sm opacity-90">{card.subtitle}</p>
+                            </div>
+
+                            <div className="absolute bottom-4 right-4">
+                              <div className="flex lg:h-8 lg:w-8 xl:h-10 xl:w-10 items-center justify-center rounded-full border border-white text-white group-hover:bg-white group-hover:text-black">
+                                <ArrowRight size={18} />
+                              </div>
+                            </div>
+                          </Link>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* FEATURED IN BOTTOM STRIP */}
+                    {featuredIn && (
+                      <div className="mt-10 pt-8 border-t border-zinc-100">
+                        <div className="flex items-center gap-8">
+                          <h4 className="font-figtree font-semibold text-[13px] leading-none text-zinc-400 uppercase tracking-widest shrink-0">
+                            {featuredIn.title}
+                          </h4>
+                          <div className="flex flex-wrap items-center gap-x-10 gap-y-4">
+                            {featuredIn.items.map((item, i) => (
+                              <Link key={i} href={item.href || "#"} onClick={closeMenu} className="flex items-center gap-3 group">
+                                {item.icon && (
+                                  <div className="relative h-10 w-10 rounded-full bg-zinc-50 flex items-center justify-center overflow-hidden border border-transparent group-hover:border-primary transition-all">
+                                    <Image src={item.icon} alt={item.label} fill className="object-contain p-2" />
+                                  </div>
+                                )}
+                                <span className="text-[13px] text-zinc-600 font-semibold group-hover:text-primary uppercase transition-colors whitespace-nowrap tracking-wide">
+                                  {item.label}
+                                </span>
                               </Link>
-                            </li>
-                          ))}
-                        </ul>
+                            ))}
+                          </div>
+                        </div>
                       </div>
                     )}
-
-                    {/* TEXT COLUMNS (RESTORED ICON LOGIC) */}
-                    {menu.columns?.map((col, i) => (
-                      <div key={i}>
-                        <h4 className="mb-6 text-sm font-bold uppercase tracking-[0.1em] text-black whitespace-nowrap">
-                          {col.title}
-                        </h4>
-
-                        <ul className="space-y-4 text-[13px] font-medium text-zinc-500">
-                          {col.items.map((item, j) => (
-                            <li key={j} className="hover:text-black transition-colors">
-                              <Link
-                                href={item.href || "#"}
-                                onClick={closeMenu}
-                                className="flex items-center gap-3 group"
-                              >
-                                {/* ✅ METAL SWATCH */}
-                                {col.type === "metal" ? (
-                                  <span
-                                    className="w-4 h-4 rounded-full border border-zinc-200"
-                                    style={{
-                                      background: item.label.toLowerCase().includes("yellow")
-                                        ? "linear-gradient(135deg, #E2C07E 0%, #D4AF37 100%)"
-                                        : item.label.toLowerCase().includes("rose")
-                                        ? "linear-gradient(135deg, #E9B4AB 0%, #C48D82 100%)"
-                                        : item.label.toLowerCase().includes("white")
-                                        ? "#E5E4E2"
-                                        : item.label.toLowerCase().includes("silver")
-                                        ? "#C0C0C0"
-                                        : item.label.toLowerCase().includes("platinum")
-                                        ? "#E5E4E2"
-                                        : "#ddd",
-                                    }}
-                                  />
-                                ) : item.svgSprite ? (
-                                  <span
-                                    className="w-4.5 h-4.5 shrink-0 grayscale group-hover:grayscale-0 transition-all flex items-center justify-center [&_svg]:w-full [&_svg]:h-full"
-                                    dangerouslySetInnerHTML={{ __html: item.svgSprite }}
-                                  />
-                                ) : item.megaMenuImage || (col.type === "icon" && item.icon) ? (
-                                  <div className="relative h-4.5 w-4.5 shrink-0 grayscale group-hover:grayscale-0 transition-all">
-                                    <Image
-                                      src={item.megaMenuImage || item.icon}
-                                      alt={item.label}
-                                      fill
-                                      className="object-contain"
-                                    />
-                                  </div>
-                                ) : null}
-
-                                <span>{item.label}</span>
-                              </Link>
-                            </li>
-                          ))}
-
-                          {/* SHOP ALL */}
-                          <li className="pt-2">
-                            <Link
-                              href={menu.href || "#"}
-                              onClick={closeMenu}
-                              className="text-[11px] font-bold uppercase tracking-widest text-zinc-400 hover:text-black transition-colors"
-                            >
-                              {col.title.replace("Shop By", "Shop All")}
-                            </Link>
-                          </li>
-                        </ul>
-                      </div>
-                    ))}
-
-                    {/* CARDS (UNCHANGED UI) */}
-                    {menu.cards?.map((card, i) => (
-                      <div key={i} className="col-span-1">
-                        <Link
-                          href={card.href || "#"}
-                          onClick={closeMenu}
-                          className="group relative block"
-                        >
-                          <div className="relative aspect-4/4 overflow-hidden rounded-md">
-                            <Image
-                              src={card.image}
-                              alt={card.title}
-                              fill
-                              className="object-cover"
-                            />
-                            <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/20 to-transparent" />
-                          </div>
-
-                          <div className="absolute bottom-4 left-4 text-white">
-                            <p className="text-lg font-semibold">{card.title}</p>
-                            <p className="text-sm opacity-90">{card.subtitle}</p>
-                          </div>
-
-                          <div className="absolute bottom-4 right-4">
-                            <div className="flex lg:h-8 lg:w-8 xl:h-10 xl:w-10 items-center justify-center rounded-full border border-white text-white group-hover:bg-white group-hover:text-black">
-                              <ArrowRight size={18} />
-                            </div>
-                          </div>
-                        </Link>
-                      </div>
-                    ))}
                   </div>
                 );
               })()}

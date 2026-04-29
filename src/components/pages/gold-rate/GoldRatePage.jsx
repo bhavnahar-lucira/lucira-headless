@@ -119,21 +119,21 @@ export default function GoldRatePage({ page }) {
     return (
         <div className="gold-rate-page bg-white min-h-screen font-figtree overflow-x-hidden">
             {/* Hero Section */}
-            <section className="relative w-full flex flex-col justify-center overflow-hidden pt-8 pb-12 lg:pt-10 lg:pb-10 min-h-[600px] lg:min-h-[600px]">
+            <section className="relative w-full flex flex-col justify-start overflow-hidden pt-6 md:pt-10 lg:pt-12 pb-12 lg:pb-10 min-h-[600px] lg:min-h-[600px]">
                 <div
                     className="absolute inset-0 bg-cover bg-center transition-transform duration-[20s] hover:scale-105"
                     style={{ backgroundImage: "url('https://www.lucirajewelry.com/cdn/shop/files/baneer-gold.jpg')" }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-black/10 z-[1]" />
 
-                <div className="container-main relative z-10 w-full px-4 lg:px-8 xl:px-12 flex flex-col items-start max-w-7xl mx-auto">
-                    <div className="w-full lg:w-[500px] xl:w-[550px] space-y-5 lg:space-y-6">
+                <div className="relative z-10 w-full px-6 md:px-10 lg:px-12 flex flex-col items-start">
+                    <div className="w-full lg:w-[600px] xl:w-[650px] space-y-5 lg:space-y-6">
                         {/* Header Row */}
-                        <div className="flex flex-col sm:flex-row sm:items-baseline gap-2 sm:gap-6">
-                            <h1 className="text-white text-[18px] md:text-[24px] lg:text-[26px] font-medium tracking-tight font-abhaya uppercase">
+                        <div className="flex flex-row justify-between items-center w-full gap-4">
+                            <h1 className="text-white text-[18px] md:text-[24px] lg:text-[26px] font-medium tracking-tight font-abhaya uppercase whitespace-nowrap">
                                 TODAYS GOLD RATE IN {cityName}
                             </h1>
-                            <button onClick={() => setIsFlipped(!isFlipped)} className="text-white/80 hover:text-white text-[12px] md:text-[14px] underline underline-offset-4 tracking-wide font-figtree transition-colors text-left">
+                            <button onClick={() => setIsFlipped(!isFlipped)} className="text-white/80 hover:text-white text-[12px] md:text-[14px] underline underline-offset-4 tracking-wide font-figtree transition-colors text-right whitespace-nowrap shrink-0">
                                 {isFlipped ? "View Todays Gold Rate" : "Is Gold A Wise Investment?"}
                             </button>
                         </div>
@@ -186,13 +186,13 @@ export default function GoldRatePage({ page }) {
                                             <h3 className="text-[12px] md:text-[15px] font-bold text-zinc-900 mb-0.5 md:mb-1 uppercase tracking-tight font-abhaya leading-tight truncate">
                                                 {goldWidgetSettings.flip_card_title}
                                             </h3>
-                                            <p className="text-zinc-500 text-[9px] md:text-[12px] leading-snug font-figtree italic mb-1 md:mb-2 md:mt-2 line-clamp-none md:line-clamp-none">
+                                            <p className="text-zinc-500 text-[9px] md:text-[14px] leading-snug font-figtree italic mb-1 md:mb-2 md:mt-2 line-clamp-none md:line-clamp-none">
                                                 "{goldWidgetSettings.flip_card_description}"
                                             </p>
                                             <div className="flex items-end justify-between mt-auto">
                                                 <div className="flex flex-col">
-                                                    <span className="text-[9px] md:text-[12px] font-bold text-zinc-900 uppercase tracking-widest">{goldWidgetSettings.flip_founder_name}</span>
-                                                    <span className="text-[7px] md:text-[10px] text-primary uppercase tracking-widest">{goldWidgetSettings.flip_founder_designation}</span>
+                                                    <span className="text-[9px] md:text-[10px] font-bold text-zinc-900 uppercase tracking-widest">{goldWidgetSettings.flip_founder_name}</span>
+                                                    <span className="text-[7px] md:text-[8px] text-primary uppercase tracking-widest">{goldWidgetSettings.flip_founder_designation}</span>
                                                 </div>
                                                 {goldWidgetSettings.flip_card_link_label && (
                                                     <Link href={goldWidgetSettings.flip_card_link_url || "#"} className="text-[9px] md:text-[10px] font-bold text-primary uppercase tracking-widest hover:text-black transition-colors flex items-center gap-1">

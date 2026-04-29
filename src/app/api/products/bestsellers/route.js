@@ -59,6 +59,7 @@ export async function GET(request) {
       return NextResponse.json({ 
         products: products.map(p => ({
           ...p,
+          tags: Array.isArray(p.tags) ? p.tags : (typeof p.tags === 'string' ? p.tags.split(',').map(t => t.trim()).filter(Boolean) : []),
           reviews: p.reviews || p.reviewStats || null
         }))
       });
