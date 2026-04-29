@@ -349,6 +349,9 @@ export function OtpSpinAuth({ onSuccess, onClose, initialMobile = "", initialSte
             <button className="btn-primary" onClick={handleSendOtp} disabled={loading}>
               {loading ? "SENDING..." : "REQUEST OTP"}
             </button>
+            <div className="safe-secure-text">
+              <span>100% Secured & Spam Free</span>
+            </div>
             <p className="register-link">
               New user? <span className="cursor-pointer font-bold underline" onClick={() => onStepChange ? onStepChange("register") : setStep("register")}>Register</span>
             </p>
@@ -492,9 +495,6 @@ export function OtpSpinAuth({ onSuccess, onClose, initialMobile = "", initialSte
           </p>
         )}
 
-        <div className="safe-secure-text">
-          <span>100% Secured & Spam Free</span>
-        </div>
       </div>
     </div>
   );
