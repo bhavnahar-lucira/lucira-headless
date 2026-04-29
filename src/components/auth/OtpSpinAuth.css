@@ -184,7 +184,7 @@ element.style {
 }
 
 .close-button {
-  @apply absolute top-5 right-5 z-20 p-1 rounded-full text-white cursor-pointer border-none flex items-center justify-center bg-[#5f4745];
+  @apply absolute top-5 right-5 z-20 p-1 rounded-full text-black cursor-pointer border-none flex items-center justify-center;
 }
 
 .field-input {
