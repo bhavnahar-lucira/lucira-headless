@@ -176,15 +176,17 @@ export default function BlogArticleClient({
         </div>
 
         {/* CTA Banner */}
-        <section className="cta-banner" style={{ backgroundImage: "url('https://cdn.shopify.com/s/files/1/0739/8516/3482/files/Req_from_Sanghani_20_black.png?v=1768481813')" }}>
-          <h2 className="cta-title">Shop Your First Lab Grown Diamond</h2>
-          <p className="cta-description">
-            Step into a new era of sparkle — brilliant, ethical, yours. Shop your first lab grown diamond today.
-          </p>
-          <Link href="/collections/all" className="cta-button">
-            Shop Now
-          </Link>
-        </section>
+        <div className="blog-internal-container !flex-col !gap-0">
+          <section className="cta-banner" style={{ backgroundImage: "url('https://cdn.shopify.com/s/files/1/0739/8516/3482/files/Req_from_Sanghani_20_black.png?v=1768481813')" }}>
+            <h2 className="cta-title">Shop Your First Lab Grown Diamond</h2>
+            <p className="cta-description">
+              Step into a new era of sparkle — brilliant, ethical, yours. Shop your first lab grown diamond today.
+            </p>
+            <Link href="/collections/all" className="cta-button">
+              Shop Now
+            </Link>
+          </section>
+        </div>
 
         {/* Most Viewed Blogs */}
         {mostViewed.length > 0 && (
