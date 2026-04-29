@@ -14,7 +14,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Link from "next/link";
 import SearchPopup from "./SearchPopup";
-import { AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { pushLogout, pushViewCart } from "@/lib/gtm";
 
@@ -63,6 +63,14 @@ const CartIcon = () => (
   </svg>
 );
 
+const SEARCH_PLACEHOLDERS = [
+  "Engagement Rings",
+  "Solitaire Rings",
+  "Diamond Earrings",
+  "Gold Necklaces",
+  "Silver Bracelets"
+];
+
 export default function MainHeader() {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -71,12 +79,20 @@ export default function MainHeader() {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [placeholderIndex, setPlaceholderIndex] = useState(0);
 
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.user);
   const { totalQuantity, totalAmount, items } = useSelector((state) => state.cart);
   const wishlistItems = useSelector((state) => state.wishlist.items);
   const guestWishlistItems = useSelector((state) => state.wishlist.guestItems);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setPlaceholderIndex((prev) => (prev + 1) % SEARCH_PLACEHOLDERS.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, []);
 
   //GTM begain
     const handleCartClick = () => {
@@ -243,24 +259,47 @@ export default function MainHeader() {
         </Link>
 
         {/* Search Input and Dropdown Wrapper */}
-        <div className={`flex justify-center relative ${showSearch ? "z-[1001]" : "z-10"}`}>
+        <div className={`flex justify-center relative ${showSearch ? "z-[1001] overflow-visible" : "z-10"}`}>
           <div className="relative w-full max-w-137.5">
-            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-900 pointer-events-none">
+            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-900 pointer-events-none z-30">
               <SearchIcon />
             </div>
-            <input
-              type="text"
-              placeholder="Shop for Engagement Rings"
-              className="w-full h-[40px] pl-[45px] pr-[10px] py-[8px] rounded-sm bg-[#F9F9F9] text-[16px] font-medium outline-none focus:bg-white focus:ring-1 focus:ring-gray-200 transition-all"
-              onFocus={() => setIsFocused(true)}
-              onBlur={() => {
-                setTimeout(() => setIsFocused(false), 200);
-              }}
-              onClick={() => setIsFocused(true)}
-              value={searchQuery}
-              onChange={handleSearchChange}
-              onKeyDown={handleKeyDown}
-            />
+            <div className="relative w-full">
+              <input
+                type="text"
+                placeholder=""
+                className="w-full h-[40px] pl-[45px] pr-[10px] py-[8px] rounded-sm bg-[#F9F9F9] text-[16px] font-medium outline-none focus:bg-white focus:ring-1 focus:ring-gray-200 transition-all relative z-20"
+                onFocus={() => setIsFocused(true)}
+                onBlur={() => {
+                  setTimeout(() => setIsFocused(false), 200);
+                }}
+                onClick={() => setIsFocused(true)}
+                value={searchQuery}
+                onChange={handleSearchChange}
+                onKeyDown={handleKeyDown}
+              />
+              
+              {/* Animated Placeholder Ticker */}
+              {!isFocused && !searchQuery && (
+                <div className="absolute inset-0 flex items-center pointer-events-none z-30 overflow-hidden pl-[45px]">
+                  <span className="text-[16px] text-gray-500 font-medium whitespace-nowrap">Search for&nbsp;</span>
+                  <div className="relative h-full flex items-center overflow-hidden">
+                    <AnimatePresence mode="wait">
+                      <motion.span
+                        key={placeholderIndex}
+                        initial={{ y: 20, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        exit={{ y: -20, opacity: 0 }}
+                        transition={{ duration: 0.5, ease: "easeInOut" }}
+                        className="text-[16px] text-gray-500 font-medium whitespace-nowrap"
+                      >
+                        {SEARCH_PLACEHOLDERS[placeholderIndex]}...
+                      </motion.span>
+                    </AnimatePresence>
+                  </div>
+                </div>
+              )}
+            </div>
 
             <AnimatePresence>
               {showSearch && (
