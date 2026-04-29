@@ -68,7 +68,7 @@ export default function Header() {
             visibility: hideTop ? "hidden" : "visible",
           }}
           transition={{ duration: 0.25 }}
-          className="relative z-20 overflow-hidden"
+          className={cn("relative z-20", hideTop ? "overflow-hidden" : "overflow-visible")}
         >
           <MainHeader />
         </motion.div>

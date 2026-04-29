@@ -243,7 +243,7 @@ export default function MainHeader() {
         </Link>
 
         {/* Search Input and Dropdown Wrapper */}
-        <div className={`flex justify-center relative ${showSearch ? "z-[1001]" : "z-10"}`}>
+        <div className={`flex justify-center relative ${showSearch ? "z-[1001] overflow-visible" : "z-10"}`}>
           <div className="relative w-full max-w-137.5">
             <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-900 pointer-events-none">
               <SearchIcon />

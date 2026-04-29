@@ -580,7 +580,7 @@ export default function MobileHeader() {
 
       {/* Search Bar Row */}
       {showSearch && (
-        <div className="px-4 py-2 bg-white animate-in slide-in-from-top-2 duration-200 relative">
+        <div className={`px-4 py-2 bg-white animate-in slide-in-from-top-2 duration-200 relative ${isFocused || searchQuery.length > 0 ? "z-[1001] overflow-visible" : "z-10"}`}>
           <div className="relative">
             <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-900 pointer-events-none">
               <SearchIcon />
@@ -593,6 +593,7 @@ export default function MobileHeader() {
               onChange={handleSearchChange}
               onKeyDown={handleKeyDown}
               onFocus={() => setIsFocused(true)}
+              onClick={() => setIsFocused(true)}
               onBlur={() => {
                 setTimeout(() => setIsFocused(false), 200);
               }}
