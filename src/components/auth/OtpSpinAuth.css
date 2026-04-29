@@ -256,8 +256,12 @@ element.style {
 }
 
 .safe-secure-text {
-  @apply flex items-center justify-center gap-1 text-[12px] text-black;
+  @apply flex items-center justify-center gap-2 text-[12px] text-black;
   margin-top: 12px;
+}
+
+.safe-secure-text svg {
+  @apply flex-shrink-0;
 }
 
 .signupSection {
