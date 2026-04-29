@@ -39,7 +39,16 @@ const COUPON_MAP = {
   "1500_off": "GRAND1500",
 };
 
-export function OtpSpinAuth({ onSuccess, onClose, initialMobile = "", initialStep = "login", onStepChange }) {
+export function OtpSpinAuth({ 
+  onSuccess, 
+  onClose, 
+  initialMobile = "", 
+  initialStep = "login", 
+  onStepChange,
+  forceShowWheel = false,
+  overrideHeading = "",
+  overrideSubtext = ""
+}) {
   const router = useRouter();
   const dispatch = useDispatch();
   const controls = useAnimation();
@@ -227,7 +236,6 @@ export function OtpSpinAuth({ onSuccess, onClose, initialMobile = "", initialSte
 
   const handleSpinAndRegister = async () => {
     if (!firstName || !lastName || !email) return toast.error("Please fill all fields");
-    if (!consent) return toast.error("Please accept T&Cs");
 
     setIsSpinning(true);
     const prize = getWeightedPrize();
@@ -275,8 +283,10 @@ export function OtpSpinAuth({ onSuccess, onClose, initialMobile = "", initialSte
     toast.success("Coupon copied!");
   };
 
+  const showWheel = step === "register" || forceShowWheel;
+
   return (
-    <div className={`otp-spin-auth-wrapper ${step === "register" ? "signup-active" : "login-active"}`}>
+    <div className={`otp-spin-auth-wrapper ${showWheel ? "signup-active" : "login-active"}`}>
       <button 
         className="close-button" 
         onClick={onClose || onSuccess}
@@ -286,11 +296,7 @@ export function OtpSpinAuth({ onSuccess, onClose, initialMobile = "", initialSte
       </button>
 
       {/* Background/Side Image Container */}
-      {(step === "login" || step === "otp" || step === "success") && (
-        <div className="login-image-side" />
-      )}
-
-      {step === "register" && (
+      {showWheel ? (
         <div className="spin-wheel-wrapper">
           <div className="wheel-container">
             <motion.img
@@ -306,14 +312,17 @@ export function OtpSpinAuth({ onSuccess, onClose, initialMobile = "", initialSte
               className="spin-wheel-cta"
             />
           </div>
-         
         </div>
+      ) : (
+        (step === "login" || step === "otp" || step === "success") && (
+          <div className="login-image-side" />
+        )
       )}
 
       <div className="otp-form-wrapper">
         <div className="otp-heading">
           <img
-            src="/images/logo.svg"
+            src="https://www.lucirajewelry.com/cdn/shop/files/LJ_Logo_Pink.svg"
             width="120"
             height="49"
             alt="lucira jewelry logo"
@@ -322,11 +331,12 @@ export function OtpSpinAuth({ onSuccess, onClose, initialMobile = "", initialSte
 
         {step === "login" && (
           <>
-            <p className="heading">WELCOME TO LUCIRA</p>
-            <p className="subtext">Welcome To The Jewelry World Of Lucira!</p>
+            <p className="heading">{overrideHeading || "WELCOME TO LUCIRA"}</p>
+            <p className="subtext">{overrideSubtext || "Welcome To The Jewelry World Of Lucira!"}</p>
             <div className="mobile-wrap">
               <span className="country-code">+91</span>
               <input
+                ref={mobileRef}
                 type="tel"
                 placeholder="Enter Phone Number"
                 maxLength="10"
@@ -360,8 +370,8 @@ export function OtpSpinAuth({ onSuccess, onClose, initialMobile = "", initialSte
 
         {step === "otp" && (
           <>
-            <p className="heading">VERIFY OTP</p>
-            <p className="subtext">Sent to +91 {mobile}</p>
+            <p className="heading">{overrideHeading || "VERIFY OTP"}</p>
+            <p className="subtext">{overrideSubtext || `Sent to +91 ${mobile}`}</p>
             <div className="otp-inputs">
               {otp.map((digit, i) => (
                 <input
@@ -392,13 +402,14 @@ export function OtpSpinAuth({ onSuccess, onClose, initialMobile = "", initialSte
 
         {step === "register" && (
           <div className="signupSection">
-            <p className="heading">Register to Win Rewards</p>
+            <p className="heading">Register to Win a Reward</p>
             <p className="subtext">Try Your Luck! Win a Diamond Pendant</p>
             <div className="registration-form-inputs">
               <div className="registration-form-row-wrapper">
                 <div className="grid-column">
                   <label>First Name <span className="red-required">*</span></label>
                   <input
+                    ref={firstNameRef}
                     type="text"
                     className="field-input"
                     value={firstName}
@@ -462,8 +473,10 @@ export function OtpSpinAuth({ onSuccess, onClose, initialMobile = "", initialSte
         {step === "success" && (
           <div className="success-section" id="successSection">
             <div className="text-4xl mb-4 text-center">🎉</div>
-            <p className="heading">Account Created Successfully!</p>
-            <p className="subtext">Your reward is ready. Apply this at checkout.</p>
+            <p className="heading">Your Account has been created Successfully</p>
+            <p className="subtext" style={{ maxWidth: "280px", margin: "14px auto" }}>
+              Your reward is ready, Apply this on checkout
+            </p>
             <div className="coupon-box">
               <span id="couponCode">{COUPON_MAP[wonPrize?.value] || "LUCIRA10"}</span>
               <button className="copy-btn" onClick={copyCoupon}>

@@ -11,9 +11,23 @@ import { Sheet } from "react-modal-sheet";
 import { OtpSpinAuth } from "./OtpSpinAuth";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 
-export function AuthDialog({ open, onOpenChange, onSuccess }) {
+export function AuthDialog({ 
+  open, 
+  onOpenChange, 
+  onSuccess, 
+  initialStep = "login",
+  forceShowWheel = false,
+  overrideHeading = "",
+  overrideSubtext = ""
+}) {
   const isMobile = useMediaQuery("(max-width: 768px)");
-  const [currentStep, setCurrentStep] = useState("login");
+  const [currentStep, setCurrentStep] = useState(initialStep);
+
+  useEffect(() => {
+    if (open) {
+      setCurrentStep(initialStep);
+    }
+  }, [open, initialStep]);
 
   const handleSuccess = () => {
     onOpenChange(false);
@@ -52,6 +66,9 @@ export function AuthDialog({ open, onOpenChange, onSuccess }) {
                 onClose={() => onOpenChange(false)} 
                 initialStep={currentStep}
                 onStepChange={handleStepChange}
+                forceShowWheel={forceShowWheel}
+                overrideHeading={overrideHeading}
+                overrideSubtext={overrideSubtext}
               />
             </div>
           </Sheet.Content>
@@ -78,6 +95,9 @@ export function AuthDialog({ open, onOpenChange, onSuccess }) {
           onClose={() => onOpenChange(false)} 
           initialStep={currentStep}
           onStepChange={handleStepChange}
+          forceShowWheel={forceShowWheel}
+          overrideHeading={overrideHeading}
+          overrideSubtext={overrideSubtext}
         />
       </DialogContent>
     </Dialog>
