@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Menu, Search, Heart, ShoppingBag, Home, X, ChevronRight, ChevronLeft, User as UserIcon, LogOut, MessageCircle, Package, Video, Store, ChevronDown } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -17,8 +17,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { pushLogout, pushViewCart } from "@/lib/gtm";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import LuciraLogo from "./LuciraLogo";
-import SearchPopup from "./SearchPopup";
-import { AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
+import { Sheet as MobileSheet } from "react-modal-sheet";
 
 const CATEGORY_IMAGES = {
   "BEST SELLERS": "/images/menu/engagement-ring.jpg",
@@ -42,6 +42,14 @@ const METAL_COLORS = {
 
 const STYLE_ICON_FALLBACK = (label) => `/images/styles/${label.toLowerCase().replace(/ /g, "")}.png`;
 const SHAPE_ICON_FALLBACK = (label) => `/images/shapes/${label.toLowerCase()}.png`;
+
+const SEARCH_PLACEHOLDERS = [
+  "Engagement Rings",
+  "Solitaire Rings",
+  "Diamond Earrings",
+  "Gold Necklaces",
+  "Silver Bracelets"
+];
 
 function SafeImage({ src, alt, fallback = "/images/icons/diamond.svg", ...props }) {
   const [imgSrc, setImgSrc] = useState(src);
@@ -94,47 +102,33 @@ export default function MobileHeader() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [showSearch, setShowSearch] = useState(!isProductPage);
+  const [showSearch, setShowSearch] = useState(false);
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
-  const [isFocused, setIsFocused] = useState(false);
-  
-  const isSearchSuggestionsVisible = (isFocused || searchQuery.length > 0) && showSearch;
-
-  // Lock body scroll when search suggestions are active
-  useEffect(() => {
-    if (isSearchSuggestionsVisible) {
-      document.body.style.overflow = "hidden";
-      document.body.style.touchAction = "none"; // Extra prevention for mobile touch scroll
-    } else {
-      document.body.style.overflow = "";
-      document.body.style.touchAction = "";
-    }
-    return () => {
-      document.body.style.overflow = "";
-      document.body.style.touchAction = "";
-    };
-  }, [isSearchSuggestionsVisible]);
+  const searchInputRef = useRef(null);
 
   const { menuData } = useMenu("main-menu-official");
   const MEGA_MENU = menuData || STATIC_MENU;
 
-  // Sync showSearch when pathname changes
-  useEffect(() => {
-    setShowSearch(!pathname.startsWith('/products/'));
-  }, [pathname]);
-
   const { user } = useSelector((state) => state.user);
-  const { totalQuantity, totalAmount, items } = useSelector((state) => state.cart);
+  const { totalQuantity } = useSelector((state) => state.cart);
   const wishlistItems = useSelector((state) => state.wishlist.items);
 
   const [activeMenuPath, setActiveMenuPath] = useState([]);
+  const [placeholderIndex, setPlaceholderIndex] = useState(0);
 
   useEffect(() => {
     if (!isMenuOpen) {
       setActiveMenuPath([]);
     }
   }, [isMenuOpen]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setPlaceholderIndex((prev) => (prev + 1) % SEARCH_PLACEHOLDERS.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, []);
 
   const handleSearchChange = async (e) => {
     const query = e.target.value;
@@ -156,6 +150,123 @@ export default function MobileHeader() {
     }
   };
 
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter" && searchQuery.trim().length > 0) {
+      router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+      setShowSearch(false);
+    }
+  };
+
+  const handleResultClick = (href) => {
+    setShowSearch(false);
+    setSearchQuery("");
+    setSearchResults([]);
+    router.push(href);
+  };
+
+  const renderSearchContent = () => {
+    return (
+      <div className="flex flex-col h-full bg-white px-4">
+        <div className="flex items-center gap-3 py-4 border-b border-gray-100 sticky top-0 bg-white z-10">
+          <button onClick={() => setShowSearch(false)} className="p-1">
+            <ChevronLeft size={24} />
+          </button>
+          <div className="relative flex-grow">
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+              <SearchIcon />
+            </div>
+            <input
+              ref={searchInputRef}
+              type="text"
+              placeholder="Search for jewelry..."
+              className="w-full bg-gray-50 h-11 pl-10 pr-4 rounded-full text-sm outline-none focus:ring-1 focus:ring-gray-200"
+              value={searchQuery}
+              onChange={handleSearchChange}
+              onKeyDown={handleKeyDown}
+              autoFocus
+            />
+            {searchQuery && (
+              <button 
+                onClick={() => { setSearchQuery(""); setSearchResults([]); }}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
+              >
+                <X size={16} />
+              </button>
+            )}
+          </div>
+        </div>
+
+        <div className="flex-grow overflow-y-auto py-4 pb-20 custom-scrollbar">
+          {searchQuery.length > 0 ? (
+            <div className="space-y-6">
+              {isSearching ? (
+                <div className="flex justify-center py-10">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                </div>
+              ) : searchResults.length > 0 ? (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 gap-4">
+                    {searchResults.slice(0, 8).map((item) => (
+                      <div 
+                        key={item.id} 
+                        onClick={() => handleResultClick(item.url)}
+                        className="flex items-center gap-4 p-2 rounded-lg active:bg-gray-50 border border-gray-50"
+                      >
+                        <div className="w-16 h-16 relative bg-gray-50 rounded-md overflow-hidden shrink-0 border border-gray-100">
+                          <Image src={item.image || "/images/product/1.jpg"} alt={item.title} fill className="object-contain p-1 mix-blend-multiply" />
+                        </div>
+                        <div className="flex-grow min-w-0">
+                          <h4 className="text-sm font-medium text-gray-900 truncate">{item.title}</h4>
+                          <p className="text-xs text-gray-500 font-bold mt-1">₹{item.price?.toLocaleString()}</p>
+                        </div>
+                        <ChevronRight size={16} className="text-gray-300" />
+                      </div>
+                    ))}
+                  </div>
+                  <div className="pt-4 border-t border-gray-100">
+                    <button 
+                      onClick={() => handleResultClick(`/search?q=${encodeURIComponent(searchQuery.trim())}`)}
+                      className="w-full text-center text-primary font-bold text-sm py-3 uppercase tracking-widest hover:underline decoration-primary/30 underline-offset-4"
+                    >
+                      View All Results for "{searchQuery}"
+                    </button>
+                  </div>
+                </div>
+              ) : searchQuery.length > 1 && (
+                <div className="text-center py-20">
+                  <p className="text-gray-500">No results found for "{searchQuery}"</p>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="space-y-6">
+              <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest px-1">Popular Categories</h3>
+              <div className="grid grid-cols-2 gap-3">
+                {MEGA_MENU.slice(0, 8).map((item, index) => {
+                  const label = item.label || item.title;
+                  const image = item.mobileBanner || CATEGORY_IMAGES[label] || "/images/menu/engagement-ring.jpg";
+                  return (
+                    <button
+                      key={index}
+                      onClick={() => handleResultClick(item.href || "#")}
+                      className="relative aspect-[16/9] overflow-hidden rounded-xl group border border-gray-100"
+                    >
+                      <Image src={image} alt={label} fill className="object-cover" />
+                      <div className="absolute inset-0 bg-black/20 group-active:bg-black/40 transition-colors" />
+                      <span className="absolute inset-0 flex items-center justify-center text-white text-[13px] font-bold tracking-wider px-2 text-center drop-shadow-md">
+                        {label}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
   const handleLogout = async () => {
     try {
       pushLogout({
@@ -173,20 +284,6 @@ export default function MobileHeader() {
       dispatch(clearCart());
       dispatch(restoreGuestWishlist());
       router.push("/");
-    }
-  };
-
-  const handleSearch = (e) => {
-    if (e.key === "Enter" && searchQuery.trim()) {
-      router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
-      setIsFocused(false);
-    }
-  };
-
-  const handleKeyDown = (e) => {
-    if (e.key === "Enter" && searchQuery.trim().length > 0) {
-      router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
-      setIsFocused(false);
     }
   };
 
@@ -378,7 +475,6 @@ export default function MobileHeader() {
           })}
         </div>
 
-        {/* Bottom Section */}
         <div className="mt-4 space-y-6">
           <div className="bg-[#FAF6F3] mx-4 p-4 space-y-4 rounded-lg">
             <Link href="/account/orders" onClick={() => setIsMenuOpen(false)} className="block text-[16px] tracking-wider border-b border-gray-200 pb-3 font-figtree font-medium text-base leading-none align-middle capitalize text-black">
@@ -453,7 +549,7 @@ export default function MobileHeader() {
               <div className="flex items-center gap-4">
                 <div className="w-10 h-10 flex items-center justify-center">
                   <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M13.334 10.8334L17.6865 13.7351C17.7492 13.7768 17.8221 13.8008 17.8974 13.8044C17.9727 13.808 18.0475 13.7911 18.114 13.7555C18.1804 13.7199 18.236 13.667 18.2747 13.6024C18.3135 13.5377 18.3339 13.4638 18.334 13.3884V6.55839C18.334 6.48508 18.3147 6.41306 18.278 6.3496C18.2413 6.28614 18.1884 6.23349 18.1249 6.19697C18.0613 6.16045 17.9892 6.14136 17.9159 6.1416C17.8426 6.14185 17.7706 6.16144 17.7073 6.19839L13.334 8.75006" stroke="black" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"></path>
+                    <path d="M13.334 10.8334L17.6865 13.7351C17.7492 13.7768 17.8221 13.8008 17.8974 13.8044C17.9727 13.8044C18.0475 13.7911 18.114 13.7555C18.1804 13.7199 18.236 13.667 18.2747 13.6024C18.3135 13.5377 18.3339 13.4638 18.334 13.3884V6.55839C18.334 6.48508 18.3147 6.41306 18.278 6.3496C18.2413 6.28614 18.1884 6.23349 18.1249 6.19697C18.0613 6.16045 17.9892 6.14136 17.9159 6.1416C17.8426 6.14185 17.7706 6.16144 17.7073 6.19839L13.334 8.75006" stroke="black" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"></path>
                     <path d="M11.667 5H3.33366C2.41318 5 1.66699 5.74619 1.66699 6.66667V13.3333C1.66699 14.2538 2.41318 15 3.33366 15H11.667C12.5875 15 13.3337 14.2538 13.3337 13.3333V6.66667C13.3337 5.74619 12.5875 5 11.667 5Z" stroke="black" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"></path>
                   </svg>
                 </div>
@@ -536,7 +632,6 @@ export default function MobileHeader() {
             </SheetContent>
           </Sheet>
 
-          {/* Center: Logo */}
           <Link href="/" className="flex items-center">
             <Image
               src="/images/logo.svg"
@@ -548,10 +643,9 @@ export default function MobileHeader() {
           </Link>
         </div>
 
-        {/* Right: Icons */}
         <div className="flex items-center gap-4">
           {isProductPage && (
-            <button onClick={() => setShowSearch(!showSearch)} className="p-1">
+            <button onClick={() => setShowSearch(true)} className="p-1">
               <SearchIcon />
             </button>
           )}
@@ -578,41 +672,48 @@ export default function MobileHeader() {
         </div>
       </div>
 
-      {/* Search Bar Row */}
-      {showSearch && (
-        <div className={`px-4 py-2 bg-white animate-in slide-in-from-top-2 duration-200 relative ${isFocused || searchQuery.length > 0 ? "z-[1001] overflow-visible" : "z-10"}`}>
-          <div className="relative">
-            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-900 pointer-events-none">
+      {!isProductPage && (
+        <div className="px-4 py-2 bg-white">
+          <div 
+            onClick={() => setShowSearch(true)}
+            className="relative w-full bg-[#f9f9f9] h-[40px] pl-[40px] pr-4 rounded-full flex items-center cursor-pointer border border-transparent shadow-sm active:shadow-inner transition-all overflow-hidden"
+          >
+            <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500">
               <SearchIcon />
             </div>
-            <input
-              type="text"
-              placeholder="Shop for Solitaire Rings"
-              className="w-full bg-gray-50 h-10 pl-10 pr-4 rounded-sm text-sm outline-none focus:ring-1 focus:ring-gray-200"
-              value={searchQuery}
-              onChange={handleSearchChange}
-              onKeyDown={handleKeyDown}
-              onFocus={() => setIsFocused(true)}
-              onClick={() => setIsFocused(true)}
-              onBlur={() => {
-                setTimeout(() => setIsFocused(false), 200);
-              }}
-              autoFocus={isProductPage}
-            />
+            <div className="relative h-full w-full flex items-center overflow-hidden ml-[2px]">
+              <span className="text-[14px] text-gray-500 font-medium whitespace-nowrap">Search for&nbsp;</span>
+               <AnimatePresence mode="wait">
+                  <motion.span
+                    key={placeholderIndex}
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    exit={{ y: -20, opacity: 0 }}
+                    transition={{ duration: 0.5, ease: "easeInOut" }}
+                    className="text-[14px] text-gray-500 font-medium whitespace-nowrap"
+                  >
+                    {SEARCH_PLACEHOLDERS[placeholderIndex]}...
+                  </motion.span>
+               </AnimatePresence>
+            </div>
           </div>
-
-          <AnimatePresence>
-            {(isFocused || searchQuery.length > 0) && (
-              <SearchPopup 
-                onClose={() => setIsFocused(false)} 
-                searchQuery={searchQuery}
-                searchResults={searchResults}
-                isSearching={isSearching}
-              />
-            )}
-          </AnimatePresence>
         </div>
       )}
+
+      <MobileSheet 
+        isOpen={showSearch} 
+        onClose={() => setShowSearch(false)}
+        detents={[1]} 
+      >
+        <MobileSheet.Container>
+          <MobileSheet.Header />
+          <MobileSheet.Content>
+            {renderSearchContent()}
+          </MobileSheet.Content>
+        </MobileSheet.Container>
+        <MobileSheet.Backdrop />
+      </MobileSheet>
+
       <AuthDialog open={isAuthOpen} onOpenChange={setIsAuthOpen} />
     </div>
   );
