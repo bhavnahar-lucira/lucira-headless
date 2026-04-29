@@ -163,8 +163,13 @@ export default function HowToWearPage() {
 
                         <div className="flex flex-col md:flex-row gap-6 md:gap-10 items-center">
                             <div className="w-full md:w-[30%]">
-                                <div className="relative w-full h-[250px] rounded-lg overflow-hidden">
-                                    <Image src={item.img} alt="necklace" fill className="object-cover" />
+                                <div className={`relative w-full ${idx === 0 ? "h-[250px]" : "aspect-square"} rounded-lg overflow-hidden`}>
+                                    <Image 
+                                        src={item.img} 
+                                        alt="necklace" 
+                                        fill 
+                                        className={idx === 0 ? "object-cover" : "object-contain"} 
+                                    />
                                 </div>
                             </div>
                             <div className="flex-1 text-sm md:text-base text-gray-700 space-y-2">
