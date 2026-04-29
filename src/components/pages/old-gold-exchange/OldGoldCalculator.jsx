@@ -50,8 +50,8 @@ export default function OldGoldCalculator({ config }) {
     // rates from API are usually per 10g or per 1g?
     // Looking at priceEngine.js, it seems to be per gram or 10g depending on integration.
     // The Liquid script assumes rates['24kt'] is per 10g.
-    const rate24 = Number(rates.gold_price_24k) || 82000; // per 10g
-    const rate22 = Number(rates.gold_price_22k) || 75000; // per 10g
+    const rate24 = (Number(rates.gold_price_24k) * 10) || 82000;
+    const rate22 = (Number(rates.gold_price_22k) * 10) || 75000;
 
     let baseRate;
     switch (selectedKarat) {
@@ -236,8 +236,8 @@ export default function OldGoldCalculator({ config }) {
               <tbody className="divide-y divide-gray-100">
                 {KARATS.filter(k => ["24", "22", "18", "14"].includes(k.label.replace("KT", ""))).map((karat) => {
                   const kVal = karat.value;
-                  const rate24 = Number(rates?.gold_price_24k) || 82000;
-                  const rate22 = Number(rates?.gold_price_22k) || 75000;
+                  const rate24 = (Number(rates?.gold_price_24k) * 10) || 82000;
+                  const rate22 = (Number(rates?.gold_price_22k) * 10) || 75000;
                   let base;
                   if (kVal === "24") base = rate24;
                   else if (kVal === "22") base = rate22;
