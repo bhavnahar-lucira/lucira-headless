@@ -12,11 +12,21 @@ export const MEGA_MENU = [
         type: "mega",
         layout: "5-col-featured",
         href: "/collections/engagement-rings",
-        featured: [
-            { label: "Best Selling", href: "/collections/bestsellers" },
-            { label: "New Arrival", href: "/collections/new-arrivals" },
-            { label: "Men's Rings", href: "/collections/mens-ring" }
-        ],
+        featured: {
+            title: "Featured",
+            items: [
+                { label: "Latest Designs", href: "/collections/latest-designs" },
+                { label: "Bestsellers", href: "/collections/bestsellers" }
+            ],
+            featuredIn: {
+                title: "Featured In",
+                items: [
+                    { label: "New Arrivals", icon: "/images/icons/style/solitaire.svg", href: "/collections/new-arrivals" },
+                    { label: "Men's Ring", icon: "/images/icons/style/solitaire.svg", href: "/collections/mens-ring" },
+                    { label: "Best Selling", icon: "/images/icons/style/solitaire.svg", href: "/collections/bestsellers" }
+                ]
+            }
+        },
         columns: [
             {
                 title: "Shop By Style",

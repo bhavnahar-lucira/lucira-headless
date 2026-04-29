@@ -99,24 +99,32 @@ export async function POST() {
                 id
                 handle
                 featuredImage { url }
-                metafields(first: 10) {
+                metafields(first: 25) {
                   nodes {
                     namespace
                     key
                     value
                     type
+                    reference {
+                      ... on MediaImage { image { url } }
+                      ... on GenericFile { url }
+                    }
                   }
                 }
               }
               ... on Page {
                 id
                 handle
-                metafields(first: 10) {
+                metafields(first: 25) {
                   nodes {
                     namespace
                     key
                     value
                     type
+                    reference {
+                      ... on MediaImage { image { url } }
+                      ... on GenericFile { url }
+                    }
                   }
                 }
               }
