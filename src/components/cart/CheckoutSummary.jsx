@@ -30,12 +30,12 @@ export default function CheckoutSummary({
   const [loadingPoints, setLoadingPoints] = useState(false);
   const [isApplying, setIsApplying] = useState(false);
 
-  const isPaymentPage = pathname === "/checkout/payment";
+  const isPaymentPage = pathname && (pathname === "/checkout/payment" || pathname.includes("/checkout/payment"));
 
-  const isCheckoutPage = pathname.startsWith("/checkout") && pathname !== "/checkout/cart";
+  const isCheckoutPage = pathname && pathname.startsWith("/checkout") && pathname !== "/checkout/cart";
 
   // Check if cart contains Diamond Jewellery
-  const hasDiamondJewellery = items.some(item => {
+  const hasDiamondJewellery = (items || []).some(item => {
     const type = (item.type || item.productType || item.product_type || "").toLowerCase();
     const title = (item.title || "").toLowerCase();
     const hasDiamondCharges = !!item.diamondCharges || (item.customAttributes?.some(attr => attr.key === "_Diamond Charges" && attr.value));
@@ -46,10 +46,10 @@ export default function CheckoutSummary({
            hasDiamondCharges;
   });
 
-  const insuranceItem = items.find(item => item.variantId === INSURANCE_VARIANT_ID);
+  const insuranceItem = (items || []).find(item => item.variantId === INSURANCE_VARIANT_ID);
   const insuranceValue = insuranceItem ? (insuranceItem.price * (insuranceItem.quantity || 1)) : 0;
 
-  const goldCoinItem = items.find(item => item.variantId === GOLDCOIN_VARIANT_ID);
+  const goldCoinItem = (items || []).find(item => item.variantId === GOLDCOIN_VARIANT_ID);
   const subtotalValue = (totalAmount || 0) - insuranceValue;
 
   const couponDetails = typeof appliedCoupon === 'object' ? appliedCoupon : { code: appliedCoupon, summary: "Applied", value: 0, valueType: "FIXED_AMOUNT" };
@@ -68,23 +68,16 @@ export default function CheckoutSummary({
   const grandTotalValue = subtotalValue + insuranceValue - discountValue - pointsDiscountAmount;
 
   useEffect(() => {
-    if (isPaymentPage && user?.id && hasDiamondJewellery) {
+    if (isPaymentPage && user?.id) {
       fetchPoints();
     }
-  }, [isPaymentPage, user?.id, hasDiamondJewellery]);
+  }, [isPaymentPage, user?.id, items]);
 
   const fetchPoints = async () => {
+    if (!user?.id) return;
     try {
       setLoadingPoints(true);
       
-      const diamondJewelleryAmount = items
-        .filter(item => {
-          const type = (item.type || item.productType || "").toLowerCase();
-          const title = (item.title || "").toLowerCase();
-          return type.includes("diamond") || title.includes("diamond") || title.includes("solitaire") || type.includes("solitaire");
-        })
-        .reduce((acc, item) => acc + (item.price * item.quantity), 0);
-
       const getNectorCustomerId = (gid) => {
         if (!gid) return "";
         const match = String(gid).match(/\d+$/);
@@ -99,12 +92,23 @@ export default function CheckoutSummary({
           customer_id: getNectorCustomerId(user.id),
           country: "ind",
           action: "list",
-          amount: diamondJewelleryAmount
+          amount: Math.max(totalAmount || 0, 1)
         })
       });
+
+      if (!response.ok) {
+        throw new Error(`API returned ${response.status}`);
+      }
+
       const result = await response.json();
-      if (result.meta?.code === 200) {
-        setPointsData(result.data);
+      
+      const points = result.data || result;
+      const meta = result.meta || { code: 200 };
+
+      if (meta.code === 200 || points.points_balance !== undefined) {
+        setPointsData(points);
+      } else {
+        console.error("Nector API Error:", result);
       }
     } catch (error) {
       console.error("Error fetching points:", error);
@@ -124,7 +128,6 @@ export default function CheckoutSummary({
       return;
     }
 
-    // If a coupon is applied, remove it
     if (appliedCoupon) {
       removeCoupon();
       toast.info("Coupon has been removed as loyalty points are applied.");
@@ -144,11 +147,14 @@ export default function CheckoutSummary({
     toast.info("Points discount removed");
   };
 
-  const displayItems = items.filter(
+  const displayItems = (items || []).filter(
     (item) =>
       item.variantId !== INSURANCE_VARIANT_ID &&
       item.variantId !== GOLDCOIN_VARIANT_ID
   );
+
+  const hasPointsBalance = pointsData && parseInt(pointsData.points_balance || 0) > 0;
+  const shouldShowPointsSection = showPoints && isPaymentPage && user && (loadingPoints || nectorPoints || hasPointsBalance);
 
   return (
     <div className={`space-y-6 ${className}`}>
@@ -240,7 +246,7 @@ export default function CheckoutSummary({
         </div>
       )}
 
-      {showPoints && isPaymentPage && user && hasDiamondJewellery && (
+      {shouldShowPointsSection && (
         <div className="bg-[#FAF6F3] p-4 rounded-xl border border-[#E8DCCF] space-y-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -253,26 +259,45 @@ export default function CheckoutSummary({
               <span className="text-sm font-bold text-[#B4936B]">{pointsData.points_balance}</span>
             )}
           </div>
-          {loadingPoints ? (
-            <div className="flex justify-center py-2">
-              <Loader2 className="animate-spin text-[#B4936B]" size={20} />
-            </div>
-          ) : nectorPoints ? (
-            <div className="flex items-center justify-between bg-white/50 p-2 rounded-lg border border-[#B4936B]/20">
-              <div className="text-xs">
-                <span className="font-bold text-[#189351]">Applied: -₹{nectorPoints.fiat_value}</span>
-                <p className="text-zinc-500 tracking-tight">Redeemed {nectorPoints.coin_value} coins</p>
-              </div>
-              <button onClick={handleRemovePoints} className="text-[10px] font-bold text-red-500 hover:underline uppercase">Remove</button>
-            </div>
-          ) : pointsData?.promotions?.[0] ? (
-            <div className="space-y-3">
-              <p className="text-[11px] text-zinc-500 leading-tight italic">Apply {pointsData.promotions[0].title} for {pointsData.promotions[0].coin_value} coins?</p>
-              <button onClick={handleApplyPoints} className="w-full bg-[#B4936B] hover:bg-[#A3825A] text-white py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-colors shadow-sm">Apply Points</button>
-            </div>
-          ) : pointsData && (
-            <p className="text-[10px] text-zinc-400 text-center italic">Not enough coins to redeem for this order.</p>
-          )}
+          {(() => {
+            if (loadingPoints) {
+              return (
+                <div className="flex justify-center py-2">
+                  <Loader2 className="animate-spin text-[#B4936B]" size={20} />
+                </div>
+              );
+            }
+            if (nectorPoints) {
+              return (
+                <div className="flex items-center justify-between bg-white/50 p-2 rounded-lg border border-[#B4936B]/20">
+                  <div className="text-xs">
+                    <span className="font-bold text-[#189351]">Applied: -₹{nectorPoints.fiat_value}</span>
+                    <p className="text-zinc-500 tracking-tight">Redeemed {nectorPoints.coin_value} coins</p>
+                  </div>
+                  <button onClick={handleRemovePoints} className="text-[10px] font-bold text-red-500 hover:underline uppercase">Remove</button>
+                </div>
+              );
+            }
+            if (hasDiamondJewellery && pointsData?.promotions?.[0]) {
+              return (
+                <div className="space-y-3">
+                  <p className="text-[11px] text-zinc-500 leading-tight italic">Apply {pointsData.promotions[0].title} for {pointsData.promotions[0].coin_value} coins?</p>
+                  <button onClick={handleApplyPoints} className="w-full bg-[#B4936B] hover:bg-[#A3825A] text-white py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-colors shadow-sm">Apply Points</button>
+                </div>
+              );
+            }
+            if (!hasDiamondJewellery && pointsData) {
+              return (
+                <p className="text-[10px] text-zinc-400 text-center italic leading-tight">Loyalty points can only be applied to Diamond Jewellery.</p>
+              );
+            }
+            if (pointsData && (!pointsData.promotions || pointsData.promotions.length === 0)) {
+              return (
+                <p className="text-[10px] text-zinc-400 text-center italic">Not enough coins to redeem for this order.</p>
+              );
+            }
+            return null;
+          })()}
         </div>
       )}
 
