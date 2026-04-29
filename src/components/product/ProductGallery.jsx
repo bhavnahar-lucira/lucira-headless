@@ -22,6 +22,28 @@ export default function ProductGallery({ media = [], title = "", activeColor = "
   const [zoomLevel, setZoomLevel] = useState(1);
   const [thumbsSwiper, setThumbsSwiper] = useState(null);
 
+  console.log("prouct", product);
+
+  const displayLabels = useMemo(() => {
+    const labels = [];
+    if (product.label) labels.push(product.label);
+    
+    const tags = Array.isArray(product.tags) ? product.tags : [];
+    const lowerTags = tags.map(t => String(t).toLowerCase());
+    
+    // Priority order: Fast Shipping > Best Seller > New Arrival > Trending
+    if (lowerTags.some(t => t.includes("fast shipping") || t.includes("fastshipping"))) labels.push("Fast Shipping");
+    if (lowerTags.some(t => t.includes("best seller"))) labels.push("Best Seller");
+    if (lowerTags.some(t => t.includes("new arrival") || t === "new")) labels.push("New Arrival");
+    if (lowerTags.some(t => t.includes("trending"))) labels.push("Trending");
+    
+    return [...new Set(labels)].slice(0, 2);
+  }, [product.label, product.tags]);
+
+  console.log(displayLabels);
+  
+  
+
   const sortedMedia = useMemo(() => {
     if (!media || media.length === 0) return [];
 
@@ -238,8 +260,9 @@ export default function ProductGallery({ media = [], title = "", activeColor = "
               {isFirst && (
                 <>
                   <div className="absolute top-4 left-4 flex flex-col gap-2 z-10">
-                    <span className="bg-white/95 px-3 py-1.5 rounded-sm text-[10px] font-bold uppercase tracking-[0.05em] shadow-sm w-fit">Best Seller</span>
-                    <span className="bg-white/95 px-3 py-1.5 rounded-sm text-[10px] font-bold uppercase tracking-[0.05em] shadow-sm w-fit">Fast Shipping</span>
+                    {displayLabels.map((label, index) => (
+                      <span key={index} className="bg-accent/90 px-3 py-1.5 rounded-sm text-[10px] font-semibold uppercase tracking-[0.05em] shadow-sm w-fit">{label}</span>
+                    ))}
                   </div>
                   <div onClick={(e) => e.stopPropagation()}>
                     <TryOnButton 
@@ -324,8 +347,9 @@ export default function ProductGallery({ media = [], title = "", activeColor = "
 
           {/* Badges Overlay */}
           <div className="absolute top-4 left-2 flex flex-col gap-2 z-10 pointer-events-none">
-            <span className="bg-white/95 px-3 py-1.5 rounded-sm text-[10px] font-bold uppercase tracking-[0.05em] shadow-sm w-fit">Best Seller</span>
-            <span className="bg-white/95 px-3 py-1.5 rounded-sm text-[10px] font-bold uppercase tracking-[0.05em] shadow-sm w-fit">Fast Shipping</span>
+            {displayLabels.map((label, index) => (
+              <span key={index} className="bg-accent/90 text-black px-3 py-1.5 rounded-sm text-[10px] font-semibold uppercase tracking-[0.05em] shadow-sm w-fit">{label}</span>
+            ))}
           </div>
 
           {/* Action Buttons Overlay */}

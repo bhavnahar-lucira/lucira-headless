@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { X, Play } from "lucide-react";
+import { X } from "lucide-react";
 import { Sheet } from "react-modal-sheet";
 
 const sizeData = [

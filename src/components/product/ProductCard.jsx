@@ -627,11 +627,11 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle 
                           aria-label={`Show ${base} color`}
                           onClick={() => setActiveBase(base)}
                           className={`w-5 h-5 lg:w-7 lg:h-7 rounded-full border transition-all flex items-center justify-center hover:scale-110 ${
-                            isActive ? "border-black dark:border-white" : "border-transparent p-0.5"
+                            isActive ? "border-black" : "border-transparent"
                           }`}
                         >
                           <span
-                            className="w-full h-full rounded-full border border-zinc-200 dark:border-zinc-700"
+                            className="w-full h-full rounded-full"
                             style={{ backgroundColor: colorMap[base] }}
                           />
                         </button>

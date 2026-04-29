@@ -22,18 +22,21 @@ const WAYS = [
     desc: "Shop live over video call view designs up close, compare pieces, and get expert guidance.",
     buttonText: "SCHEDULE VIDEO CALL",
     image: "/images/explore/1.jpg",
+    url: "https://wa.me/919004435760?text=Hi,%20I%20want%20to%20schedule%20video%20call%20"
   },
   {
     title: "Try At Home",
     desc: "Select your favorite pieces & try them at home before you decide, see the fit, finish in your own space.",
     buttonText: "BOOK HOME TRIAL",
     image: "/images/explore/2.jpg",
+    url: "https://wa.me/919004435760?text=Hi,%20I%20want%20to%20book%20home%20trial%20"
   },
   {
     title: "Visit Our Store",
     desc: "Explore and try your favorite designs in person, with expert guidance from our in-store team.",
     buttonText: "BOOK APPOINTMENT",
     image: "/images/explore/3.jpg",
+    url: "https://wa.me/919004435760?text=Hi,%20I%20want%20to%20book%20an%20appointment%20"
   }
 ];
 
@@ -103,9 +106,14 @@ export default function WaysToExplore() {
                           {way.desc}
                         </p>
                         <div className="mt-auto w-full">
+                          <Button asChild
+                            className="w-full h-10 px-8 text-sm font-bold uppercase bg-primary hover:bg-primary text-white transition-all rounded-lg"
+                          >
+                            <a href={way.url} target="_blank">{way.buttonText}</a>
+                          </Button>
                           <Button 
                             onClick={() => handleAction(way.buttonText)}
-                            className="w-full h-10 px-8 text-sm font-bold uppercase bg-primary hover:bg-primary text-white transition-all rounded-lg"
+                            className="w-full h-10 px-8 text-sm font-bold uppercase bg-primary hover:bg-primary text-white transition-all rounded-lg hidden"
                           >
                             {way.buttonText}
                           </Button>
@@ -163,10 +171,16 @@ export default function WaysToExplore() {
                       {way.desc}
                     </p>
                     <div className="mt-auto w-full">
+                      <Button asChild
+                        variant="outline" 
+                        className="h-9 px-8 text-sm font-bold uppercase hover:bg-primary hover:text-white hover:border-primary cursor-pointer"
+                      >
+                        <a href={way.url} target="_blank">{way.buttonText}</a>
+                      </Button>
                       <Button 
                         variant="outline" 
                         onClick={() => handleAction(way.buttonText)}
-                        className="h-9 px-8 text-sm font-bold uppercase hover:bg-primary hover:text-white hover:border-primary cursor-pointer"
+                        className="h-9 px-8 text-sm font-bold uppercase hover:bg-primary hover:text-white hover:border-primary cursor-pointer hidden"
                       >
                         {way.buttonText}
                       </Button>
