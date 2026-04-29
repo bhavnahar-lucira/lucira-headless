@@ -83,6 +83,20 @@ export const GET_ARTICLES_QUERY = `
             url
             altText
           }
+          author_name: metafield(namespace: "custom", key: "author_name") { value }
+          authors_image: metafield(namespace: "custom", key: "authors_image") { 
+            value 
+            reference {
+              ... on MediaImage {
+                image {
+                  url
+                }
+              }
+            }
+          }
+          authors_description: metafield(namespace: "custom", key: "authors_description") { value }
+          authors_linkedin: metafield(namespace: "custom", key: "authors_linkedin") { value }
+          views: metafield(namespace: "custom", key: "views") { value }
           blog {
             id
             handle
