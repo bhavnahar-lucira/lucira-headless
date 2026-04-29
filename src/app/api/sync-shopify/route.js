@@ -207,7 +207,15 @@ export async function POST(req) {
               const finalVariants = variants.map(newV => {
                 const existingV = existingVariants.find(ev => ev.id === newV.id);
                 if (existingV) {
-                  return { ...existingV, ...newV };
+                  // Deep merge metafields to protect gemstones, diamonds, etc.
+                  return { 
+                    ...existingV, 
+                    ...newV,
+                    metafields: {
+                      ...(existingV.metafields || {}),
+                      ...(newV.metafields || {})
+                    }
+                  };
                 }
                 return newV;
               });
@@ -250,8 +258,9 @@ export async function POST(req) {
                 description: p.descriptionHtml,
                 vendor: p.vendor,
                 type: p.productType,
-                status: p.status,
+                status: p.status, // This will be "ACTIVE", "DRAFT", etc.
                 isPublished: !!p.publishedAt,
+                isVisible: p.status === "ACTIVE" && !!p.publishedAt,
                 tags: p.tags,
                 createdAt: p.createdAt,
                 publishedAt: p.publishedAt,
@@ -279,11 +288,8 @@ export async function POST(req) {
                 lastReviewsUpdated: new Date()
               };
 
-              if (p.status === "ACTIVE" && !!p.publishedAt) {
-                await productsCollection.updateOne({ shopifyId: p.id }, { $set: mappedProduct }, { upsert: true });
-              } else {
-                await productsCollection.deleteOne({ shopifyId: p.id });
-              }
+              // Always update/upsert the product. Never delete it here.
+              await productsCollection.updateOne({ shopifyId: p.id }, { $set: mappedProduct }, { upsert: true });
             }
 
             totalProcessed += products.length;
