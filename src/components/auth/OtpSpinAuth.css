@@ -94,7 +94,13 @@
 }
 
 .otp-form-wrapper {
-  @apply flex flex-col justify-center w-full p-5 md:p-8;
+  @apply flex flex-col w-full p-5 md:p-8;
+}
+
+@media (min-width: 768px) {
+  .otp-form-wrapper {
+    @apply justify-center;
+  }
 }
 
 @media (min-width: 768px) {

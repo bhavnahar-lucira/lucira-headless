@@ -53,9 +53,8 @@ export function AuthDialog({
         isOpen={open} 
         onClose={() => onOpenChange(false)}
       >
-        <Sheet.Container className="!rounded-t-[30px] !bg-[#FFFEFC] !h-auto">
-          <Sheet.Header />
-          <Sheet.Content className="!pb-10">
+        <Sheet.Container className="!bg-white !rounded-t-lg !shadow-[0_-2px_16px_rgba(0,0,0,0.3)] !h-auto">
+          <Sheet.Content className="!p-0">
             <div className="sr-only">
               <h2>{currentStep === "register" ? "Registration" : "Authentication"}</h2>
               <p>{currentStep === "register" ? "Join Lucira to win rewards." : "Login to your account."}</p>
