@@ -12,7 +12,7 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Star, Play, Info, Heart, Video, Store, ChevronRight, Share2, Check, Copy, Loader2, X, ArrowRight, MapPin, Phone, Package } from "lucide-react";
+import { Star, Play, Info, Heart, Video, Store, ChevronRight, Share2, Check, Copy, Loader2, X, ArrowRight, MapPin, Phone, Package, Coins } from "lucide-react";
 import { BadgeCheck } from "lucide-react";
 import PriceSavingsDetails from "@/components/product/PriceSavingsDetails";
 import ProductAccordion from "@/components/product/ProductAccordion";
@@ -47,7 +47,16 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 import { SizeGuideSheet } from "@/components/product/SizeGuideSheet";
 import { ProductCustomizerMobile } from "@/components/product/ProductCustomizerMobile";
 import { useDispatch, useSelector } from "react-redux";
@@ -150,6 +159,24 @@ const mapShapeCode = (code) => {
   };
   return maps[code.toUpperCase()] || code;
 };
+
+const serviceSlider = [
+  {
+    img: "/images/service/PDPGoldCoin.png",
+    title: "Complimentary Gold Coin",
+    desc: "Receive a free gold coin with this ring, making your order even more special."
+  },
+  {
+    img: "/images/service/PDPOldGoldExchange.jpg",
+    title: "Old Gold Exchange",
+    desc: "Exchange your old gold at the best value and upgrade to new Lucira Jewelry with ease."
+  },
+  {
+    img: "/images/service/PDPScheme.png",
+    title: "9 + 1 Scheme",
+    desc: "Complete 9 monthly payments and enjoy an extra month benefit from Lucira Jewelry."
+  }
+]
 
 export default function ProductPageClient({ product, complementaryProducts = [], matchingProducts = [] }) {
   const router = useRouter();
@@ -1135,13 +1162,37 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                         </SizeGuideSheet>
                       )}
                     </div>
-                    
-                    <div className="bg-[#F8F9FA] rounded-lg flex items-center gap-4 px-4 py-2.5 border border-gray-100">
-                      <div className="bg-white rounded-lg p-2 shadow-sm">
-                        <Play size={16} fill="black" />
-                      </div>
-                      <span className="text-base text-black">Watch this quick video to measure your ring right.</span>
-                    </div>
+
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <div className="bg-[#F8F9FA] rounded-lg flex items-center gap-4 px-4 py-2.5 border border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors">
+                          <div className="bg-white rounded-lg shadow-sm">
+                            <Image src="/images/Sizing_A_ring_thumb.jpg" alt="Video Icon" aspect-ratio="3/4" width={60} height={25} />
+                            {/* <Video size={16} fill="black" /> */}
+                          </div>
+                          <span className="text-base text-black">
+                            Watch this quick video to measure your ring right.
+                          </span>
+                        </div>
+                      </DialogTrigger>
+
+                      <DialogContent className="sm:max-w-[800px] p-0 overflow-hidden border-none bg-transparent shadow-none">
+                        <DialogHeader className="sr-only">
+                          <DialogTitle>Ring Measurement Tutorial</DialogTitle>
+                        </DialogHeader>
+                        
+                        <div className="relative w-full aspect-video bg-black rounded-lg overflow-hidden">
+                          <video 
+                            src="https://cdn.shopify.com/videos/c/o/v/b6bd45e165384f7bb50a9598b5986822.mp4"
+                            className="w-full h-full"
+                            autoPlay
+                            muted
+                            playsInline
+                            controls
+                          />
+                        </div>
+                      </DialogContent>
+                    </Dialog>
 
                     <div className="grid grid-cols-7 gap-4">
                       {availableSizes.map(sizeStr => {
@@ -1150,7 +1201,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                           <button
                             key={`size-${sizeStr}`}
                             onClick={() => handleSizeSelection(sizeStr)}
-                            className={`relative border rounded-md h-10 flex items-center justify-center text-base transition-all ${
+                            className={`relative border rounded-md h-10 px-0.5 flex items-center justify-center text-sm transition-all ${
                               sizeStr === selectedSize
                                 ? "border-primary bg-white ring-1 ring-primary font-bold"
                                 : "border-gray-200 hover:border-primary font-normal"
@@ -1460,8 +1511,8 @@ export default function ProductPageClient({ product, complementaryProducts = [],
 
               {/* Lucira Coins */}
               <div className="flex gap-4 items-center bg-gray-50 border border-gray-100 rounded-xl p-4">
-                <div className="bg-primary/10 w-12 h-12 rounded-lg flex items-center justify-center">
-                  <Star size={24} className="text-primary fill-primary" />
+                <div className="bg-gradient-to-br from-[#f9e8b8] to-[#e8c97a] shadow-[0_2px_10px_rgba(184,146,74,0.25),inset_0_1px_2px_rgba(255,255,255,0.6)] w-12 h-12 rounded-lg flex items-center justify-center">
+                  <Coins size={24} className="text-primary" />
                 </div>
                 <div className="space-y-1">
                   <p className="text-sm font-semibold leading-tight">
@@ -1555,16 +1606,16 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                   onSlideChange={(swiper) => setActivePromoSlide(swiper.activeIndex + 1)}
                   className="w-full overflow-visible!"
                 >
-                  {[1, 2, 3].map((i) => (
+                  {serviceSlider.map((item, i) => (
                     <SwiperSlide key={`promo-${i}`}>
                       <div className="bg-[#F9F9F9] border border-gray-100 rounded-xl p-5 flex items-center gap-5 h-full">
-                        <div className="relative w-16 h-16 rounded-full overflow-hidden shadow-sm shrink-0">
-                          <Image src="/images/story-ring.jpg" alt="Complimentary gold coin" fill className="object-cover" />
+                        <div className="relative w-18 h-18 rounded-lg overflow-hidden shadow-sm shrink-0">
+                          <img src={item.img} alt="Complimentary gold coin" fill className="object-cover" />
                         </div>
                         <div className="space-y-2">
-                          <p className="text-lg font-semibold italic leading-tight">Complimentary Gold Coin</p>
+                          <p className="text-lg font-semibold italic leading-tight">{item.title}</p>
                           <p className="text-sm leading-relaxed">
-                            Receive a free gold coin with this ring, making your order even more special.
+                            {item.desc}
                           </p>
                         </div>
                       </div>
@@ -1837,8 +1888,10 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                      Certified Quality Guaranteed.
                   </div>
                   <div className="flex items-start justify-between gap-4 xl:flex-nowrap flex-wrap">
-                    <button className="text-sm font-semibold underline underline-offset-[6px] decoration-black mt-1 whitespace-nowrap">
+                    <button className="text-sm font-semibold underline underline-offset-[6px] decoration-black mt-1 whitespace-nowrap" asChild>
+                      <a href="/images/certificate/SampleCertificate.jpg" alt="Sample Certificate" download>
                       See Sample Certificate
+                      </a>
                     </button>
                     <div className="flex items-center gap-7">
                       <div className="w-14 h-14 relative">
@@ -1867,7 +1920,6 @@ export default function ProductPageClient({ product, complementaryProducts = [],
       <Suspense fallback={<div className="h-20 bg-gray-100 animate-pulse"></div>}>
         <StyledByLucira/>
       </Suspense>
-      <FeaturedIn/>
       <OurProcess/>
       <div ref={reviewsRef}>
         <CustomerReviews 

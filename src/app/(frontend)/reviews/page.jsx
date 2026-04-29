@@ -90,7 +90,7 @@ export default function ReviewsPage() {
         
         {/* Main Header / Stats */}
         <div className="text-center mb-12">
-          <h1 className="text-3xl md:text-4xl font-extrabold font-abhaya mb-12 uppercase tracking-widest">Customer Reviews</h1>
+          <h1 className="text-3xl md:text-4xl font-extrabold font-abhaya mb-12">Customer Reviews</h1>
           
           <div className="flex flex-col md:flex-row items-center justify-between gap-12 bg-white/30 p-8 rounded-2xl backdrop-blur-sm border border-white/20 shadow-sm">
             {/* Average Rating */}
@@ -106,7 +106,7 @@ export default function ReviewsPage() {
                   />
                 ))}
               </div>
-              <span className="text-sm font-bold text-gray-500 uppercase tracking-widest">{stats.total} reviews</span>
+              <span className="text-sm font-bold text-gray-600 uppercase">{stats.total} reviews</span>
             </div>
 
             {/* Stars Breakdown */}
@@ -132,7 +132,7 @@ export default function ReviewsPage() {
             {/* Recommend Percent */}
             <div className="flex flex-col items-center">
               <span className="text-5xl font-black text-gray-900 mb-2">{recommendPercent}%</span>
-              <p className="text-[10px] font-black text-gray-500 max-w-[120px] uppercase tracking-widest leading-relaxed">Would recommend Lucira</p>
+              <p className="text-xs font-black text-gray-600 max-w-[120px] uppercase tracking-widest leading-relaxed text-center">Would recommend Lucira</p>
             </div>
           </div>
 
@@ -193,9 +193,9 @@ export default function ReviewsPage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-10 border-b border-gray-200 pb-8">
           <div className="flex items-center gap-8">
             <div className="flex items-center gap-3">
-              <span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Rating:</span>
+              <span className="text-sm font-semibold text-gray-600">Rating:</span>
               <Select value={filterRating} onValueChange={handleFilterChange}>
-                <SelectTrigger className="w-[140px] border-none bg-transparent font-black text-sm uppercase tracking-widest focus:ring-0 focus:ring-offset-0 p-0 h-auto cursor-pointer">
+                <SelectTrigger className="w-[140px] border-none bg-transparent font-bold text-sm uppercase tracking-widest focus:ring-0 focus:ring-offset-0 p-0 h-auto cursor-pointer">
                   <SelectValue placeholder="All Ratings" />
                 </SelectTrigger>
                 <SelectContent className="rounded-xl border-gray-100 shadow-xl">
@@ -208,13 +208,13 @@ export default function ReviewsPage() {
                 </SelectContent>
               </Select>
             </div>
-            <span className="text-[10px] font-black text-gray-300 uppercase tracking-[0.2em]">{stats.total} verified reviews</span>
+            <span className="text-lg font-bold text-black uppercase tracking-[0.2em]">{stats.total} verified reviews</span>
           </div>
 
           <div className="flex items-center gap-3">
-            <span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Sort by:</span>
+            <span className="text-sm font-semibold text-gray-600">Sort by:</span>
             <Select value={sortBy} onValueChange={handleSortChange}>
-                <SelectTrigger className="w-[160px] border-none bg-transparent font-black text-sm uppercase tracking-widest focus:ring-0 focus:ring-offset-0 p-0 h-auto cursor-pointer">
+                <SelectTrigger className="w-[160px] border-none bg-transparent font-bold text-sm uppercase tracking-widest focus:ring-0 focus:ring-offset-0 p-0 h-auto cursor-pointer">
                   <SelectValue placeholder="Featured" />
                 </SelectTrigger>
                 <SelectContent className="rounded-xl border-gray-100 shadow-xl">
@@ -239,11 +239,11 @@ export default function ReviewsPage() {
             >
               <div className="flex items-start justify-between mb-6">
                 <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 rounded-full bg-[#8D7774] text-white flex items-center justify-center font-bold text-xl uppercase border-4 border-white shadow-sm relative overflow-hidden flex-shrink-0">
+                  <div className="w-14 h-14 rounded-full bg-primary text-white flex items-center justify-center font-bold text-xl uppercase border-4 border-white shadow-sm relative overflow-hidden flex-shrink-0">
                     {review.personImage ? (
                         <div className="relative w-full h-full">
                             {!loadedImages[`avatar-${idx}`] && (
-                                <div className="absolute inset-0 flex items-center justify-center bg-[#8D7774] z-[5]">
+                                <div className="absolute inset-0 flex items-center justify-center bg-primary z-[5]">
                                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                                 </div>
                             )}
@@ -262,8 +262,8 @@ export default function ReviewsPage() {
                   <div>
                     <h3 className="font-black text-gray-900 flex items-center gap-2 text-sm uppercase tracking-widest">
                         {review.personName}
-                        <div className="flex items-center gap-1 text-[9px] text-[#A68966] font-black uppercase tracking-widest">
-                            <BadgeCheck size={14} className="fill-[#A68966] text-white" />
+                        <div className="flex items-center gap-1 text-[9px] text-accent font-black uppercase tracking-widest">
+                            <BadgeCheck size={14} className="fill-accent text-white" />
                             Verified
                         </div>
                     </h3>
@@ -328,7 +328,7 @@ export default function ReviewsPage() {
                     <div className="w-10 h-10 bg-gray-50 rounded-lg border border-gray-100 overflow-hidden relative flex-shrink-0">
                         <Image src={review.productImage || "/images/product/1.jpg"} alt={review.productTitle} fill className="object-cover group-hover/link:scale-110 transition-transform duration-500" />
                     </div>
-                    <span className="text-[10px] font-black text-gray-400 group-hover/link:text-gray-900 transition-colors truncate uppercase tracking-widest">
+                    <span className="text-sm font-bold text-black group-hover/link:text-gray-900 transition-colors truncate tracking-widest">
                         {review.productTitle}
                     </span>
                 </Link>

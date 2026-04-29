@@ -10,10 +10,11 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
+import Link from "next/link";
 
 const slideData = [
-  { name: "Eterna-Band", alt: "Eterna Band Collection" },
-  { name: "Hina-Khan", alt: "Hina Khan Signature Series" },
+  { name: "Eterna-Band", alt: "Eterna Band Collection", url: "/collections/all" },
+  { name: "Hina-Khan", alt: "Hina Khan Signature Series", url: "/collections/all" },
 ];
 
 export default function HeroBanner() {
@@ -23,7 +24,7 @@ export default function HeroBanner() {
 
   return (
     <div className="w-full bg-white">
-      <div className="relative w-full h-auto md:h-[calc(100dvh-270px)] md:min-h-[450px] overflow-hidden group">
+      <div className="relative w-full h-auto md:h-[calc(100dvh-225px)] md:min-h-[450px] overflow-hidden group">
         <Swiper
           modules={[Navigation, Pagination, Autoplay]}
           slidesPerView={1}
@@ -42,14 +43,16 @@ export default function HeroBanner() {
           {slideData.map((slide, index) => (
             <SwiperSlide key={slide.name}>
               <div className="relative w-full aspect-[4/5] md:aspect-auto md:h-full overflow-hidden">
-                <Image key={`${slide.name}-${isMobile ? "desktop" : "mobile"}`}                  
-                  src={`/images/heroslider/${slide.name}-${isMobile ? "Desktop" : "Mobile"}.jpg`}
-                  alt={slide.alt}
-                  fill
-                  priority={index === 0}
-                  className="object-cover object-center transition-none"
-                  sizes="100vw"
-                />
+                <Link href={slide.url}>
+                  <Image key={`${slide.name}-${isMobile ? "desktop" : "mobile"}`}                  
+                    src={`/images/heroslider/${slide.name}-${isMobile ? "Desktop" : "Mobile"}.jpg`}
+                    alt={slide.alt}
+                    fill
+                    priority={index === 0}
+                    className="object-cover object-center transition-none"
+                    sizes="100vw"
+                  />
+                </Link>
               </div>
             </SwiperSlide>
           ))}
