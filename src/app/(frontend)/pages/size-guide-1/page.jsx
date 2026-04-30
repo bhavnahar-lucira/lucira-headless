@@ -323,7 +323,7 @@ export default function SizeGuidePage() {
                 </div>
             </section>
             <section className="mb-[clamp(30px,5vw,40px)] flex flex-col lg:flex-row gap-6">
-                <div className="flex-1 bg-white p-5 sm:p-6 rounded-lg shadow- border">
+                <div className="flex-1 bg-white p-5 sm:p-6 rounded-lg shadow border">
                     <h2 className="text-lg sm:text-xl font-medium mb-4">
                         Bracelet Size Chart
                     </h2>
@@ -355,7 +355,7 @@ export default function SizeGuidePage() {
                         </Link>
                     </div>
                 </div>
-                <div className="flex-1 bg-white p-5 sm:p-6 rounded-lg shadow border flex flex-col items-center">
+                <div className="flex-1 bg-white p-5 sm:p-6 rounded-lg shadow border flex flex-col">
                     <h2 className="text-lg sm:text-xl font-medium mb-4 text-center">
                         Watch How to Measure Your Bracelet Size
                     </h2>
@@ -364,7 +364,7 @@ export default function SizeGuidePage() {
                         autoPlay
                         loop
                         muted
-                        className="w-full max-w-[500px] rounded-md shadow"
+                        className="w-full h-full object-cover rounded-md shadow min-h-[300px]"
                     >
                         <source
                         src="https://cdn.shopify.com/videos/c/o/v/0ce96de369c24ea6a38a54a667a04818.mp4"

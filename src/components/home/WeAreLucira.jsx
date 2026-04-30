@@ -121,7 +121,7 @@ export default function WeAreLucira() {
 
             <div className="mt-6.5 flex justify-center">
               <Link
-                href="/about-us"
+                href="/pages/about-our-company"
                 className="inline-flex min-h-11 items-center justify-center rounded-md bg-primary px-8 text-base font-bold uppercase tracking-wide text-white transition hover:opacity-90"
               >
                 Learn More

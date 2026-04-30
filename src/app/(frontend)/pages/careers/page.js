@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export default function CareersPage() {
   return (
-    <div className="container mx-auto py-7">
+    <div className="w-full max-w-[1280px] mx-auto px-4 sm:px-6 md:px-8 lg:px-12 py-10 md:py-16">
       <div className="full-page font-figtree">
         <div className="page-title mb-8">
           <h1 className="font-abhaya text-3xl font-semibold">Join The Lucira Team!</h1>

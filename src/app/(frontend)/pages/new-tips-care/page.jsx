@@ -341,9 +341,11 @@ export default function JewelryCareTipsPage() {
                     </div>
                     ))}
                 </div>
-                <p className="text-[12px] md:text-[18px] mt-2 leading-relaxed">
-                    With the right care, your diamond will keep its shine through celebrations, milestones, and the moments that matter most.
-                </p>
+                <div className="max-w-212.5 mx-auto mt-10 mb-20 text-center">
+                    <p className="text-[14px] md:text-[18px] leading-relaxed italic text-gray-800">
+                        With the right care, your diamond will keep its shine through celebrations, milestones, and the moments that matter most.
+                    </p>
+                </div>
             </section>
         </>
     )

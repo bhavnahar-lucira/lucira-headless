@@ -14,18 +14,18 @@ const videoData = [
     video: "https://www.lucirajewelry.com/cdn/shop/videos/c/vp/6f8b91e03c4740e6b497e9fd12cfb809/6f8b91e03c4740e6b497e9fd12cfb809.HD-1080p-4.8Mbps-66567656.mp4",
     products: [
       {
-        image: "https://www.lucirajewelry.com/cdn/shop/files/1_70747447-975a-4537-8b01-f2f6027a00f2.jpg",
+        image: "https://www.lucirajewelry.com/cdn/shop/files/LJ-R00014YG_1_9e9365bf-5b4b-4dce-bd97-0c990bad1d27.webp",
         title: "Classic Oval Shape Diamond Ring with Sleek Band",
-        price: "₹55,735",
-        originalPrice: "₹69,879",
+        price: "₹58,249",
+        originalPrice: "₹69,702",
         discount: "21% OFF",
         url: "/products/classic-oval-shape-diamond-ring-with-sleek-band"
       },
       {
-        image: "https://www.lucirajewelry.com/cdn/shop/files/2_8d16719b-79e8-4685-9853-53d36b7c07f2.jpg",
+        image: "https://www.lucirajewelry.com/cdn/shop/files/LJ-PD0054YG_1.webp",
         title: "Gold Diamond Interlocking Circle Pendant",
-        price: "₹36,383",
-        originalPrice: "₹37,605",
+        price: "₹34,740",
+        originalPrice: "₹35,962",
         discount: "21% OFF",
         url: "/products/gold-diamond-interlocking-circle-pendant"
       },
@@ -38,141 +38,141 @@ const videoData = [
         url: "/products/double-halo-round-diamond-bracelet"
       }
     ],
-    totalPrice: "₹2,99,910"
+    totalPrice: "₹1,92,959"
   },
   {
     video: "https://www.lucirajewelry.com/cdn/shop/videos/c/vp/6f39f797cd7e4c7c94aa2e1b4bcf457b/6f39f797cd7e4c7c94aa2e1b4bcf457b.HD-1080p-2.5Mbps-55011497.mp4",
     products: [
       {
-        image: "https://www.lucirajewelry.com/cdn/shop/files/4_3659a8cb-1d88-4444-8888-888888888888.jpg",
+        image: "https://www.lucirajewelry.com/cdn/shop/files/LJ-R00419YG_1.jpg",
         title: "Classic Round Diamond Ring",
-        price: "₹55,400",
-        originalPrice: "₹69,250",
+        price: "₹113,865",
+        originalPrice: "₹124,244",
         discount: "20% OFF",
         url: "/products/classic-mens-round-diamond-ring"
       },
       {
-        image: "https://www.lucirajewelry.com/cdn/shop/files/5_5b16719b-79e8-4685-9853-53d36b7c07f2.jpg",
+        image: "https://www.lucirajewelry.com/cdn/shop/files/LJ-R00421WG_1.webp",
         title: "Modern Gold Band",
-        price: "₹28,150",
-        originalPrice: "₹35,180",
+        price: "₹120,641",
+        originalPrice: "₹131,162",
         discount: "20% OFF",
         url: "/products/mens-modern-round-diamond-band"
       }
     ],
-    totalPrice: "₹83,550"
+    totalPrice: "₹234,506"
   },
   {
     video: "https://www.lucirajewelry.com/cdn/shop/videos/c/vp/da2e9e63a0a34e44a11e112df8d0fefa/da2e9e63a0a34e44a11e112df8d0fefa.HD-720p-1.6Mbps-50616558.mp4",
     products: [
       {
-        image: "https://www.lucirajewelry.com/cdn/shop/files/3_19273c5b-388e-473d-828e-5b23d9a17730.jpg",
+        image: "https://www.lucirajewelry.com/cdn/shop/files/LJ-PD0322YG_1.jpg",
         title: "Princess Cut Halo Necklace",
-        price: "₹42,850",
-        originalPrice: "₹53,560",
+        price: "₹74,390",
+        originalPrice: "₹80,912",
         discount: "20% OFF",
         url: "/products/venetian-clover-diamond-chain-pendant"
       }
     ],
-    totalPrice: "₹42,850"
+    totalPrice: "₹74,390"
   },
   {
     video: "https://www.lucirajewelry.com/cdn/shop/videos/c/vp/1708dd89d83f490cb2182445fceaf6cb/1708dd89d83f490cb2182445fceaf6cb.HD-1080p-4.8Mbps-66567546.mp4",
     products: [
       {
-        image: "https://www.lucirajewelry.com/cdn/shop/files/4_3659a8cb-1d88-4444-8888-888888888888.jpg",
+        image: "https://www.lucirajewelry.com/cdn/shop/files/LJ-BR0131YG_1.jpg",
         title: "Elegant Diamond Bracelet",
-        price: "₹89,200",
-        originalPrice: "₹1,11,500",
+        price: "₹21,498",
+        originalPrice: "₹22,774",
         discount: "20% OFF",
         url: "/products/elegant-geometric-round-diamond-bracelet"
       }
     ],
-    totalPrice: "₹89,200"
+    totalPrice: "₹21,498"
   },
   {
     video: "https://www.lucirajewelry.com/cdn/shop/videos/c/vp/ef21629570184348bdce61b21e913c82/ef21629570184348bdce61b21e913c82.HD-1080p-3.3Mbps-55148000.mp4",
     products: [
       {
-        image: "https://www.lucirajewelry.com/cdn/shop/files/5_5b16719b-79e8-4685-9853-53d36b7c07f2.jpg",
+        image: "https://www.lucirajewelry.com/cdn/shop/files/LJ-R00093YG_1_48cf4932-4f87-4fa3-930d-ae5c4da7b615.webp",
         title: "Modern Gold Band",
-        price: "₹28,150",
-        originalPrice: "₹35,180",
+        price: "₹67,842",
+        originalPrice: "₹71,031",
         discount: "20% OFF",
         url: "/products/modern-flat-band-with-round-diamond"
       }
     ],
-    totalPrice: "₹28,150"
+    totalPrice: "₹67,842"
   },
   {
     video: "https://www.lucirajewelry.com/cdn/shop/videos/c/vp/6f8b91e03c4740e6b497e9fd12cfb809/6f8b91e03c4740e6b497e9fd12cfb809.HD-1080p-4.8Mbps-66567656.mp4",
     products: [
       {
-        image: "https://www.lucirajewelry.com/cdn/shop/files/1_70747447-975a-4537-8b01-f2f6027a00f2.jpg",
+        image: "https://www.lucirajewelry.com/cdn/shop/files/LJ-R00740WG_1.jpg",
         title: "1 cts Emerald Solitaire and Rou...",
-        price: "₹72,015",
-        originalPrice: "₹90,018",
+        price: "₹74,435",
+        originalPrice: "₹88,038",
         discount: "20% OFF",
         url: "/products/1-cts-emerald-solitaire-and-round-diamond-regal-ring"
       }
     ],
-    totalPrice: "₹72,015"
+    totalPrice: "₹74,435"
   },
   {
     video: "https://www.lucirajewelry.com/cdn/shop/videos/c/vp/6f39f797cd7e4c7c94aa2e1b4bcf457b/6f39f797cd7e4c7c94aa2e1b4bcf457b.HD-1080p-2.5Mbps-55011497.mp4",
     products: [
       {
-        image: "https://www.lucirajewelry.com/cdn/shop/files/2_8d16719b-79e8-4685-9853-53d36b7c07f2.jpg",
+        image: "https://www.lucirajewelry.com/cdn/shop/files/LJ-R00419YG_1.jpg",
         title: "Classic Round Diamond Ring",
-        price: "₹55,400",
-        originalPrice: "₹69,250",
+        price: "₹113,865",
+        originalPrice: "₹124,244",
         discount: "20% OFF",
         url: "/products/classic-mens-round-diamond-ring"
       }
     ],
-    totalPrice: "₹55,400"
+    totalPrice: "₹113,865"
   },
   {
     video: "https://www.lucirajewelry.com/cdn/shop/videos/c/vp/da2e9e63a0a34e44a11e112df8d0fefa/da2e9e63a0a34e44a11e112df8d0fefa.HD-720p-1.6Mbps-50616558.mp4",
     products: [
       {
-        image: "https://www.lucirajewelry.com/cdn/shop/files/3_19273c5b-388e-473d-828e-5b23d9a17730.jpg",
+        image: "https://www.lucirajewelry.com/cdn/shop/files/LJ-PD0322YG_1.jpg",
         title: "Princess Cut Halo Necklace",
-        price: "₹42,850",
-        originalPrice: "₹53,560",
+        price: "₹74,390",
+        originalPrice: "₹80,912",
         discount: "20% OFF",
         url: "/products/venetian-clover-diamond-chain-pendant"
       }
     ],
-    totalPrice: "₹42,850"
+    totalPrice: "₹74,390"
   },
   {
     video: "https://www.lucirajewelry.com/cdn/shop/videos/c/vp/1708dd89d83f490cb2182445fceaf6cb/1708dd89d83f490cb2182445fceaf6cb.HD-1080p-4.8Mbps-66567546.mp4",
     products: [
       {
-        image: "https://www.lucirajewelry.com/cdn/shop/files/4_3659a8cb-1d88-4444-8888-888888888888.jpg",
+        image: "https://www.lucirajewelry.com/cdn/shop/files/LJ-BR0131YG_1.jpg",
         title: "Elegant Diamond Bracelet",
-        price: "₹89,200",
-        originalPrice: "₹1,11,500",
+        price: "₹21,498",
+        originalPrice: "₹22,774",
         discount: "20% OFF",
         url: "/products/elegant-geometric-round-diamond-bracelet"
       }
     ],
-    totalPrice: "₹89,200"
+    totalPrice: "₹21,498"
   },
   {
     video: "https://www.lucirajewelry.com/cdn/shop/videos/c/vp/ef21629570184348bdce61b21e913c82/ef21629570184348bdce61b21e913c82.HD-1080p-3.3Mbps-55148000.mp4",
     products: [
       {
-        image: "https://www.lucirajewelry.com/cdn/shop/files/5_5b16719b-79e8-4685-9853-53d36b7c07f2.jpg",
+        image: "https://www.lucirajewelry.com/cdn/shop/files/LJ-R00093YG_1_48cf4932-4f87-4fa3-930d-ae5c4da7b615.webp",
         title: "Modern Gold Band",
-        price: "₹28,150",
-        originalPrice: "₹35,180",
+        price: "₹67,842",
+        originalPrice: "₹71,031",
         discount: "20% OFF",
         url: "/products/modern-flat-band-with-round-diamond"
       }
     ],
-    totalPrice: "₹28,150"
+    totalPrice: "₹67,842"
   }
 ];
 
@@ -201,28 +201,24 @@ export default function StyledByLucira() {
             centeredSlides={true}
             loop={true}
             slidesPerGroup={1}
-            spaceBetween={12}
+            spaceBetween={15}
             speed={600}
             grabCursor={true}
             breakpoints={{
               360: {
                 slidesPerView: 1.2,
-                spaceBetween: 12,
                 centeredSlides: true,
               },
               640: {
-                slidesPerView: 2,
-                spaceBetween: 20,
+                slidesPerView: 2.5,
                 centeredSlides: false
               },
-              1025: {
-                slidesPerView: 3,
-                spaceBetween: 20,
+              1023: {
+                slidesPerView: 4,
                 centeredSlides: true
               },
               1370: {
                 slidesPerView: 5,
-                spaceBetween: 30,
                 centeredSlides: true
               },
             }}
