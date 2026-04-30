@@ -339,10 +339,27 @@ export default function CollectionPage({ params: paramsPromise }) {
     });
 
     // Add skeletons at the end if we are fetching the next page
+    // if (isFetchingNextPage) {
+    //   for (let i = 0; i < 4; i++) {
+    //     items.push(<ProductCardSkeleton key={`skeleton-next-${i}`} />);
+    //   }
+    // }
+
     if (isFetchingNextPage) {
-      for (let i = 0; i < 3; i++) {
-        items.push(<ProductCardSkeleton key={`skeleton-next-${i}`} />);
-      }
+      items.push(
+        <>
+          <ProductCardSkeleton key="next-1" />
+          <div className="hidden sm:block">
+            <ProductCardSkeleton key="next-2" />
+          </div>
+          <div className="hidden lg:block">
+            <ProductCardSkeleton key="next-3" />
+          </div>
+          <div className="hidden 2xl:block">
+            <ProductCardSkeleton key="next-4" />
+          </div>
+        </>
+      );
     }
 
     return items;
@@ -431,7 +448,7 @@ export default function CollectionPage({ params: paramsPromise }) {
                 className="object-cover"
               />
               {/* Badges Overlay */}
-              <div className="absolute top-1/2 -translate-y-1/2 right-6 flex flex-col gap-6">
+              <div className="absolute top-1/2 -translate-y-1/2 right-6 flex-col gap-6 hidden">
                 <div className="bg-white p-2 pt-5 rounded-xl shadow-md text-center relative">
                   <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
                     <Image src="/images/icons/diamond.svg" alt="Diamond" width={28} height={28} className="brightness-0" />
@@ -458,7 +475,7 @@ export default function CollectionPage({ params: paramsPromise }) {
         {/* ================= FILTERS SIDEBAR ================= */}
         <div className="hidden lg:block xl:w-78 lg:w-60 shrink-0">
           <div className="sticky top-19 self-start h-fit">
-            <ScrollArea className="w-full h-[calc(100vh-5rem)]">
+            <ScrollArea className="w-full h-[calc(100dvh-5rem)]">
               {filtersLoading && Object.keys(availableFilters).length === 0 ? (
                 <FilterSidebarSkeleton />
               ) : (

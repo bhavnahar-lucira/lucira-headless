@@ -28,10 +28,12 @@ const NoteFromFounder = dynamic(() => import("@/components/home/NoteFromFounder"
 import BestsellerSection from "@/components/home/homeCollection/BestsellerSection";
 import GemstoneSection from "@/components/home/homeCollection/GemstoneSection";
 import ExploreCollectionSection from "@/components/home/homeCollection/ExploreCollectionSection";
+import MobileCategorySlider from "@/components/home/MobileCategorySlider";
 
 export default function Home() {
   return (
     <div className="w-full">
+      <MobileCategorySlider />
       {/* <HeroSlider/> */}
       <HeroSliderImage/>
       <FeatureBar/>

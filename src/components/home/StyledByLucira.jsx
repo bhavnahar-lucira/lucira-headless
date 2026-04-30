@@ -52,28 +52,24 @@ export default function StyledByLucira() {
             centeredSlides={true}
             loop={true}
             slidesPerGroup={1}
-            spaceBetween={12}
+            spaceBetween={15}
             speed={600}
             grabCursor={true}
             breakpoints={{
               360: {
                 slidesPerView: 1.2,
-                spaceBetween: 12,
                 centeredSlides: true,
               },
               640: {
-                slidesPerView: 2,
-                spaceBetween: 20,
+                slidesPerView: 2.5,
                 centeredSlides: false
               },
-              1025: {
-                slidesPerView: 3,
-                spaceBetween: 20,
+              1023: {
+                slidesPerView: 4,
                 centeredSlides: true
               },
               1370: {
                 slidesPerView: 5,
-                spaceBetween: 30,
                 centeredSlides: true
               },
             }}

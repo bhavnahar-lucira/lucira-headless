@@ -38,7 +38,7 @@ const CATEGORY_FILTERS = {
   },
   earrings: {
     shapes: [
-      { id: "Round", label: "Round", img: "/images/shapes/Round.png", href:"/collections/earrings-round" },
+      { id: "Round", label: "Round", img: "/images/shapes/round.png", href:"/collections/earrings-round" },
       { id: "emerald", label: "EMERALD", img: "/images/shapes/emerald.png", href:"/collections/earrings-emerald" },
       { id: "marquise", label: "MARQUISE", img: "/images/shapes/marquise.png", href:"/collections/earrings-marquise" },
       { id: "cushion", label: "CUSHION", img: "/images/shapes/cushion.png", href:"/collections/earrings-cushion" },
