@@ -21,7 +21,7 @@ function ReviewCard({ item, onClick, isMobile }) {
         className={`overflow-hidden ${isMobile ? "rounded-2xl shadow-md" : "rounded-sm"} border border-[#e6e1de] bg-white transition-all hover:border-black/10 h-full flex flex-col cursor-pointer group`}
     >
       <div className="block">
-        <div className={`relative ${isMobile ? "aspect-[4/4.5]" : "aspect-[0.92/1]"} w-full bg-gray-50 overflow-hidden`}>
+        <div className={`relative ${isMobile ? "aspect-4/4.5" : "aspect-[0.92/1]"} w-full bg-gray-50 overflow-hidden`}>
           <LazyImage
             src={item.personImage || "/images/review/1.jpg"}
             alt={item.personName}
@@ -44,7 +44,7 @@ function ReviewCard({ item, onClick, isMobile }) {
             )}
           </div>
 
-          <p className="mb-4 line-clamp-3 text-[13px] leading-relaxed text-zinc-600 min-h-[60px]">
+          <p className="mb-4 line-clamp-3 text-[13px] leading-relaxed text-zinc-600 min-h-15">
             “{item.review}”
             {isMobile && item.review.length > 100 && <span className="text-zinc-900 font-bold ml-1 underline">Read more</span>}
           </p>
@@ -59,6 +59,7 @@ function ReviewCard({ item, onClick, isMobile }) {
                 src={item.productImage || "/images/product/1.jpg"}
                 alt={item.productTitle}
                 fill
+                sizes="40px"
                 className="object-cover"
               />
             </div>
@@ -132,7 +133,7 @@ export default function CustomerReview({
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
                     {[1, 2, 3, 4].map((i) => (
-                        <div key={i} className="h-96 bg-gray-100 rounded-sm"></div>
+                        <div key={i} className="aspect-3/4 bg-gray-100 rounded-sm"></div>
                     ))}
                 </div>
             </div>
@@ -277,7 +278,7 @@ function ReviewBottomSheet({ isOpen, onClose, review }) {
       snapPoints={[0, 0.9, 1]}
       initialSnap={1}
     >
-      <Sheet.Container className="!rounded-t-[32px] overflow-hidden">
+      <Sheet.Container className="rounded-t-[32px]! overflow-hidden">
         <Sheet.Header />
         <Sheet.Content className="px-6 pb-12 overflow-y-auto no-scrollbar">
           <div className="flex flex-col lg:pb-0 pb-10">
@@ -293,8 +294,8 @@ function ReviewBottomSheet({ isOpen, onClose, review }) {
               </button>
             </div>
 
-            <div className="relative aspect-[4/4.5] w-full rounded-2xl overflow-hidden mb-6 shadow-lg">
-               <LazyImage src={review.personImage || "/images/review/1.jpg"} alt={review.personName} fill className="object-cover" />
+            <div className="relative aspect-4/4.5 w-full rounded-2xl overflow-hidden mb-6 shadow-lg">
+               <LazyImage src={review.personImage || "/images/review/1.jpg"} alt={review.personName} fill sizes="(max-width: 768px) 100vw, 400px" className="object-cover" />
             </div>
 
             <div className="mb-6">
@@ -314,10 +315,10 @@ function ReviewBottomSheet({ isOpen, onClose, review }) {
 
             <div className="bg-zinc-50 rounded-2xl p-4 border border-zinc-100 flex items-center gap-4">
                <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl border border-white bg-white shadow-sm">
-                  <LazyImage src={review.productImage || "/images/product/1.jpg"} alt={review.productTitle} fill className="object-cover" />
+                  <LazyImage src={review.productImage || "/images/product/1.jpg"} alt={review.productTitle} fill sizes="60px" className="object-cover" />
                </div>
                <div className="flex-1 min-w-0">
-                  <p className="text-[13px] font-bold text-zinc-900 underline underline-offset-4 decoration-zinc-200 truncate mb-1">
+                  <p className="text-xs font-bold text-zinc-900 underline underline-offset-4 decoration-zinc-200 truncate mb-1">
                     {review.productTitle}
                   </p>
                   <div className="flex items-center gap-1.5">

@@ -959,7 +959,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                       );
                     })()}
                     {/* Rating */}
-                    {(product.reviews || product.reviewStats) && (
+                    {((product.reviews?.count || product.reviewStats?.count) > 0) && (
                       <div 
                         className="flex items-center gap-1.5 cursor-pointer hover:opacity-80 transition-opacity"
                         onClick={() => reviewsRef.current?.scrollIntoView({ behavior: "smooth" })}
@@ -1608,7 +1608,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                     <SwiperSlide key={`promo-${i}`}>
                       <div className="bg-[#F9F9F9] border border-gray-100 rounded-xl p-5 flex items-center gap-5 h-full">
                         <div className="relative w-18 h-18 rounded-lg overflow-hidden shadow-sm shrink-0">
-                          <img src={item.img} alt="Complimentary gold coin" fill className="object-cover" />
+                          <Image src={item.img} alt="Complimentary gold coin" fill className="object-cover" />
                         </div>
                         <div className="space-y-2">
                           <p className="text-lg font-semibold italic leading-tight">{item.title}</p>
@@ -1886,11 +1886,11 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                      Certified Quality Guaranteed.
                   </div>
                   <div className="flex items-start justify-between gap-4 xl:flex-nowrap flex-wrap">
-                    <button className="text-sm font-semibold underline underline-offset-[6px] decoration-black mt-1 whitespace-nowrap" asChild>
+                    <Button variant="link" className="text-sm font-semibold underline underline-offset-[6px] decoration-black mt-1 whitespace-nowrap p-0 h-auto" asChild>
                       <a href="/images/certificate/SampleCertificate.jpg" alt="Sample Certificate" download>
                       See Sample Certificate
                       </a>
-                    </button>
+                    </Button>
                     <div className="flex items-center gap-7">
                       <div className="w-14 h-14 relative">
                         <Image src="/images/product/IGI.png" alt="IGI" fill className="object-contain" />

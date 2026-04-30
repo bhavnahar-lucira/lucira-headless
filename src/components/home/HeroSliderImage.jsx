@@ -4,13 +4,12 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, Autoplay } from "swiper/modules";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useId } from "react";
-import Image from "next/image";
+import Link from "next/link";
+import { getImageProps } from "next/image";
 
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
-import { useMediaQuery } from "@/hooks/useMediaQuery";
-import Link from "next/link";
 
 const slideData = [
   { name: "Eterna-Band", alt: "Eterna Band Collection", url: "/collections/all" },
@@ -20,11 +19,12 @@ const slideData = [
 export default function HeroBanner() {
   const id = useId().replace(/:/g, "");
   const paginationElClass = `pagination-${id}`;
-  const isMobile = useMediaQuery("(min-width: 1025px)");
+  
+  const bannerHeightClasses = "h-auto aspect-4/5 md:aspect-auto md:h-[calc(100dvh-225px)] md:min-h-[450px]";
 
   return (
     <div className="w-full bg-white">
-      <div className="relative w-full h-auto md:h-[calc(100dvh-225px)] md:min-h-[450px] overflow-hidden group">
+      <div className={`relative w-full overflow-hidden group ${bannerHeightClasses}`}>
         <Swiper
           modules={[Navigation, Pagination, Autoplay]}
           slidesPerView={1}
@@ -40,25 +40,44 @@ export default function HeroBanner() {
           }}
           className="h-full w-full"
         >
-          {slideData.map((slide, index) => (
-            <SwiperSlide key={slide.name}>
-              <div className="relative w-full aspect-[4/5] md:aspect-auto md:h-full overflow-hidden">
-                <Link href={slide.url}>
-                  <Image key={`${slide.name}-${isMobile ? "desktop" : "mobile"}`}                  
-                    src={`/images/heroslider/${slide.name}-${isMobile ? "Desktop" : "Mobile"}.jpg`}
-                    alt={slide.alt}
-                    fill
-                    priority={index === 0}
-                    className="object-cover object-center transition-none"
-                    sizes="100vw"
-                  />
-                </Link>
-              </div>
-            </SwiperSlide>
-          ))}
-        </Swiper>
+          {slideData.map((slide, index) => {
+            const common = { 
+              alt: slide.alt, 
+              fill: true, 
+              priority: index === 0,
+              sizes: "100vw",
+              className: "object-cover object-center" 
+            };
 
-        {/* Controls */}
+            const { props: { srcSet: desktop } } = getImageProps({
+              ...common,
+              src: `/images/heroslider/${slide.name}-Desktop.jpg`,
+            });
+
+            const { props: { srcSet: mobile, ...rest } } = getImageProps({
+              ...common,
+              src: `/images/heroslider/${slide.name}-Mobile.jpg`,
+            });
+
+            return (
+              <SwiperSlide key={slide.name}>
+                <Link href={slide.url} className="block w-full h-full">
+                  <div className="relative w-full h-full">
+                    <picture>
+                      <source media="(min-width: 1025px)" srcSet={desktop} />
+                      <source media="(max-width: 1024px)" srcSet={mobile} />
+                      <img 
+                        {...rest}
+                        className="w-full h-full object-cover object-center"
+                      />
+                    </picture>
+                  </div>
+                </Link>
+              </SwiperSlide>
+            );
+          })}
+        </Swiper>
+        
         <button className="hero-prev absolute left-4 top-1/2 -translate-y-1/2 z-20 hidden md:flex w-12 h-12 rounded-full bg-white/80 items-center justify-center shadow-md hover:bg-white transition-all">
           <ChevronLeft size={24} className="text-black" />
         </button>

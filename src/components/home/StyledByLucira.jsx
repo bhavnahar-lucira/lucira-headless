@@ -41,9 +41,7 @@ export default function StyledByLucira() {
         <div className="relative w-full group/slider">
           <Swiper
             modules={[Navigation]}
-            onSwiper={(swiper) => {
-              swiperRef.current = swiper;
-            }}
+            onSwiper={(swiper) => (swiperRef.current = swiper)}
             navigation={{
               prevEl: ".main-prev",
               nextEl: ".main-next",
@@ -56,30 +54,19 @@ export default function StyledByLucira() {
             speed={600}
             grabCursor={true}
             breakpoints={{
-              360: {
-                slidesPerView: 1.2,
-                centeredSlides: true,
-              },
-              640: {
-                slidesPerView: 2.5,
-                centeredSlides: false
-              },
-              1023: {
-                slidesPerView: 4,
-                centeredSlides: true
-              },
-              1370: {
-                slidesPerView: 5,
-                centeredSlides: true
-              },
+              320: { slidesPerView: 1.2 },
+              640: { slidesPerView: 2.5 },
+              1024: { slidesPerView: 4 },
+              1280: { slidesPerView: 5 },
             }}
             className="lucira-swiper overflow-visible!"
           >
             {videoData.map((item, i) => (
-              <SwiperSlide key={`styled-v-${i}`}>
+              <SwiperSlide key={`styled-v-${i}`} className="h-full">
                 <StyledVideoCard 
                   video={item.video} 
-                  onClick={() => setPopupState({ isOpen: true, index: i })}
+                  onClick={() => handleOpen(i)}
+                  imageSizes="(max-width: 640px) 80vw, (max-width: 1024px) 40vw, 20vw"
                 />
               </SwiperSlide>
             ))}
@@ -97,7 +84,7 @@ export default function StyledByLucira() {
 
       <VideoPopup 
         isOpen={popupState.isOpen}
-        onClose={() => setPopupState({ ...popupState, isOpen: false })}
+        onClose={handleClose}
         videoData={videoData}
         initialIndex={popupState.index}
       />
