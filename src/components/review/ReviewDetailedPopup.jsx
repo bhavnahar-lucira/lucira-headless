@@ -49,7 +49,7 @@ export default function ReviewDetailedPopup({ isOpen, onClose, reviews, activeIn
     : (review.personImage || "/images/review/1.jpg");
     
   const currentImage = getValidSrc(currentImageRaw);
-
+  console.log("Review log:- ", review);
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 md:p-10 transition-all duration-300">
       
@@ -155,7 +155,7 @@ export default function ReviewDetailedPopup({ isOpen, onClose, reviews, activeIn
             {/* Review Text */}
             <div className="mb-8 flex-grow">
               <h4 className="font-bold text-black text-xl lg:text-2xl mb-4 leading-tight tracking-tight">
-                {review.title || "Perfect Product"}
+                {review.title }
               </h4>
               <p className="text-gray-600 leading-relaxed text-lg italic">
                 "{review.review}"
@@ -164,7 +164,7 @@ export default function ReviewDetailedPopup({ isOpen, onClose, reviews, activeIn
 
             {/* Product Card */}
             <Link 
-                href={`/products/${review.productHandle}`} 
+                href={`/products/${review.reference_product_slug}`} 
                 onClick={onClose}
                 className="mt-auto p-4 bg-gray-50 rounded-xl border border-gray-100 flex items-center gap-4 group hover:bg-gray-100 transition-all"
             >

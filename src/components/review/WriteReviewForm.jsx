@@ -3,8 +3,9 @@
 import { X, Star, Upload, Loader2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { submitReview, uploadSingleImage, extractReviewId } from "@/lib/nector";
 
-export default function WriteReviewForm({ isOpen, onClose }) {
+export default function WriteReviewForm({ isOpen, onClose, productId }) {
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [formData, setFormData] = useState({
@@ -65,16 +66,74 @@ export default function WriteReviewForm({ isOpen, onClose }) {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log("[WriteReviewForm] Submit triggered. Current formData:", formData, "Rating:", rating);
+    
     if (validate()) {
       setIsSubmitting(true);
-      // Simulate API call
-      setTimeout(() => {
-        setIsSubmitting(false);
-        alert("Review submitted successfully! (Simulation)");
+      try {
+        const payload = {
+          reference_product_source : 'shopify',
+          reference_product_id     : productId || 'all',
+          name: formData.name,
+          rating,
+          description : formData.review,
+          metadetail  : { mobile: formData.mobile, country: 'ind' },
+        };
+        if (formData.email) payload.metadetail.email = formData.email;
+        if (formData.title) payload.title = formData.title;
+
+        console.log("[WriteReviewForm] Submitting review payload:", payload);
+        const result = await submitReview(payload);
+        console.log("[WriteReviewForm] Review submission successful. Result:", result);
+
+        const success = result?.meta?.code === 200 || result?.data?.success === true;
+        if (!success && !result?.review_id && !result?.data?.review_id) {
+            throw new Error(result?.meta?.message || result?.message || 'Review submission failed');
+        }
+
+        const reviewId = extractReviewId(result);
+        console.log("[WriteReviewForm] Extracted Review ID:", reviewId);
+
+        // If there are images and we have a reviewId, upload them
+        if (images.length > 0) {
+          if (reviewId) {
+            console.log(`[WriteReviewForm] Found ${images.length} images. Starting uploads for Review ID: ${reviewId}`);
+            const uploadPromises = images.map((file, index) => {
+              console.log(`[WriteReviewForm] Initiating upload for image ${index + 1}/${images.length}: ${file.name}`);
+              return uploadSingleImage(file, reviewId);
+            });
+            
+            const uploadResults = await Promise.all(uploadPromises);
+            console.log("[WriteReviewForm] All image uploads completed. Results:", uploadResults);
+          } else {
+            console.warn("[WriteReviewForm] Images present but no reviewId found in response. Skipping uploads.");
+          }
+        } else {
+          console.log("[WriteReviewForm] No images selected for upload.");
+        }
+
+        alert("Review submitted successfully!");
         onClose();
-      }, 1500);
+        // Reset form
+        setFormData({
+          name: "",
+          mobile: "",
+          email: "",
+          title: "",
+          review: "",
+        });
+        setRating(0);
+        setImages([]);
+      } catch (error) {
+        console.error("[WriteReviewForm] Error in submission process:", error);
+        alert(error.message || "Failed to submit review. Please try again.");
+      } finally {
+        setIsSubmitting(false);
+      }
+    } else {
+      console.warn("[WriteReviewForm] Validation failed. Errors:", errors);
     }
   };
 

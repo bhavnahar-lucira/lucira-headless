@@ -36,102 +36,60 @@ export default function CustomerReviews({ reviews, productId, productTitle, prod
   const [loading, setLoading] = useState(true);
   const [filterRating, setFilterRating] = useState("all");
   const [sortBy, setSortBy] = useState("featured");
+  const [usedFallback, setUsedFallback] = useState(false);
 
   useEffect(() => {
     async function initReviews() {
-      // Don't show global loader if we are just filtering/sorting
-      // unless it's the very first load
-      const isInitialLoad = data.list.length === 0;
-      if (isInitialLoad) {
-        setLoading(true);
-      }
-      
-      const activeReviews = reviews || null;
-      const count = activeReviews?.count || 0;
-      const list = activeReviews?.list || [];
-
-      // If product has reviews with a list, use them
-      if (count > 0 && list.length > 0 && !isGlobal) {
-        setData({
-            count: count,
-            average: activeReviews.average || 0,
-            stats: { breakdown: activeReviews.stats?.reduce((acc, s) => ({ ...acc, [s.rating]: s.count }), {}) || {} },
-            list: list
-        });
+      setLoading(true);
+      try {
+        const result = await loadNectorReviews(productId);
         
-        // Extract gallery from product reviews
-        const galleryItems = [];
-        list.forEach((r, idx) => {
-            if (r.images?.length > 0) {
-                r.images.forEach(img => {
-                    if (img) galleryItems.push({ url: img, reviewIndex: idx });
-                });
-            }
-        });
-        setGallery(galleryItems);
-        setIsGlobal(false);
-        setLoading(false);
-      } else if (productId && !isGlobal) {
-        // If we have count but no list, try to fetch specific reviews for this product
-        try {
-          const response = await fetch(`/api/reviews?productId=${productId}`);
-          const result = await response.json();
-          if (result && result.count > 0 && result.list?.length > 0) {
-             setData({
-                count: result.count,
-                average: result.average,
-                stats: { breakdown: result.stats?.reduce((acc, s) => ({ ...acc, [s.rating]: s.count }), {}) || {} },
-                list: result.list
+        // Transform stats array to breakdown object if needed
+        const breakdown = {};
+        if (Array.isArray(result.stats)) {
+            result.stats.forEach(s => {
+                breakdown[s.rating] = s.count;
             });
-            const galleryItems = [];
-            result.list.forEach((r, idx) => {
-                if (r.images?.length > 0) {
-                    r.images.forEach(img => {
-                        if (img) galleryItems.push({ url: img, reviewIndex: idx });
-                    });
+        } else if (result.stats?.breakdown) {
+            Object.assign(breakdown, result.stats.breakdown);
+        }
+
+        // Calculate average if not provided
+        let average = result.average || 0;
+        if (!average && result.items?.length > 0) {
+            const sum = result.items.reduce((s, r) => s + (parseFloat(r.rating) || 0), 0);
+            average = (sum / result.items.length).toFixed(1);
+        }
+
+        setData({
+          count: result.count,
+          average: average,
+          stats: { breakdown },
+          list: result.items
+        });
+
+        // Extract gallery
+        const galleryItems = [];
+        result.items.forEach((r, idx) => {
+            const uploads = Array.isArray(r.uploads) ? r.uploads : (r.uploads?.uploads || []);
+            uploads.forEach(u => {
+                if (u?.link && u.type === 'image') {
+                    galleryItems.push({ url: u.link, reviewIndex: idx });
                 }
             });
-            setGallery(galleryItems);
-            setIsGlobal(false);
-            setLoading(false);
-            return;
-          }
-        } catch (error) {
-          console.error("Error fetching product specific reviews:", error);
-        }
-        
-        // Fallback to global if still no reviews
-        fetchGlobalFallback();
-      } else if (isGlobal) {
-        fetchGlobalFallback();
-      } else {
-        fetchGlobalFallback();
+        });
+        setGallery(galleryItems);
+        setIsGlobal(!result.isProductView);
+        setUsedFallback(result.usedFallback);
+      } catch (error) {
+        console.error("Error loading reviews:", error);
+      } finally {
+        setLoading(false);
       }
-    }
-
-    async function fetchGlobalFallback() {
-        try {
-          const response = await fetch(`/api/all-reviews?page=1&limit=20&rating=${filterRating}&sort=${sortBy === 'featured' ? 'newest' : sortBy}`);
-          const result = await response.json();
-          if (result.reviews && result.reviews.length > 0) {
-            setData({
-              count: result.total,
-              average: result.stats.average,
-              stats: result.stats,
-              list: result.reviews
-            });
-            setGallery(result.gallery?.map(g => ({ url: typeof g === 'string' ? g : g.url, reviewId: g.reviewId })) || []);
-            setIsGlobal(true);
-          }
-        } catch (error) {
-          console.error("Error fetching global reviews fallback:", error);
-        } finally {
-          setLoading(false);
-        }
     }
 
     initReviews();
-  }, [reviews, productId, isGlobal, filterRating, sortBy]);
+  }, [productId]);
 
   const filteredAndSortedReviews = useMemo(() => {
     if (isGlobal) return data.list;
@@ -203,17 +161,26 @@ export default function CustomerReviews({ reviews, productId, productTitle, prod
   };
 
   // Prepare mapped reviews for the popup
-  const mappedReviews = filteredAndSortedReviews?.map(r => ({
-    ...r,
-    productTitle: r.productTitle || productTitle,
-    productImage: getValidSrc(r.productImage || productImage),
-    productHandle: r.productHandle || productHandle,
-    personName: r.name || r.personName || "Verified Buyer",
-    review: r.text || r.review || "",
-    verified: true
-  })) || [];
+  const mappedReviews = filteredAndSortedReviews?.map(r => {
+    const name = (r.name || 'Customer').trim();
+    const uploads = Array.isArray(r.uploads) ? r.uploads : (r.uploads?.uploads || []);
+    const images = uploads.filter(u => u?.link && (u.type === 'image' || !u.type)).map(u => u.link);
+    
+    return {
+        ...r,
+        productTitle: r.reference_product_name || productTitle,
+        productImage: getValidSrc(r.reference_product_image || productImage),
+        productHandle: r.reference_product_handle || productHandle,
+        personName: name,
+        review: r.description || r.body || "",
+        images: images,
+        verified: r.is_verified === true
+    };
+  }) || [];
 
-  const recommendPercent = isGlobal ? Math.round(((Number(data.stats.breakdown[4] || 0) + Number(data.stats.breakdown[5] || 0)) / (data.stats.total || 1)) * 100) : 97;
+  const recommendCount = (Number(data.stats.breakdown[4] || 0) + Number(data.stats.breakdown[5] || 0));
+  const totalForRecommend = Object.values(data.stats.breakdown).reduce((a, b) => Number(a) + Number(b), 0);
+  const recommendPercent = totalForRecommend > 0 ? Math.round((recommendCount / totalForRecommend) * 100) : 97;
 
   return (
     <section className="w-full md:py-20 py-15 bg-[#FEF5F1] mt-15" id="reviews">
@@ -412,10 +379,11 @@ export default function CustomerReviews({ reviews, productId, productTitle, prod
 }
 
 function ReviewCard({ review, onClick }) {
-  const name = review.name || review.personName || "Verified Buyer";
-  const rating = review.rating || 5;
-  const text = review.text || review.review;
-  const images = review.images || [];
+  const name = (review.name || 'Customer').trim();
+  const rating = parseFloat(review.rating) || 0;
+  const text = review.description || review.body;
+  const uploads = Array.isArray(review.uploads) ? review.uploads : (review.uploads?.uploads || []);
+  const images = uploads.filter(u => u?.link && (u.type === 'image' || !u.type)).map(u => u.link);
   
   const formatDate = (dateStr) => {
     if (!dateStr) return "";
@@ -441,10 +409,12 @@ function ReviewCard({ review, onClick }) {
               <span className="font-bold text-gray-800 text-sm sm:text-lg capitalize tracking-wide truncate max-w-full">
                 {name}
               </span>
-              <div className="flex items-center gap-1 text-accent font-black uppercase tracking-wide text-[8px] sm:text-[9px] shrink-0">
-                <CheckCircle size={12} className="fill-accent text-white" />
-                <span>Verified</span>
-              </div>
+              {review.is_verified && (
+                <div className="flex items-center gap-1 text-accent font-black uppercase tracking-wide text-[8px] sm:text-[9px] shrink-0">
+                  <CheckCircle size={12} className="fill-accent text-white" />
+                  <span>Verified</span>
+                </div>
+              )}
             </div>
             
             <div className="flex items-center gap-1 mt-1.5 text-amber-400 flex-wrap">
@@ -463,13 +433,13 @@ function ReviewCard({ review, onClick }) {
             </div>
             
             <span className="block lg:hidden mt-2 text-[9px] sm:text-[10px] font-bold text-gray-600 uppercase tracking-wide">
-              {formatDate(review.date)}
+              {formatDate(review.posted_at || review.created_at)}
             </span>
           </div>
         </div>
         
         <span className="hidden lg:block shrink-0 text-xs font-bold text-gray-600 uppercase tracking-wide">
-          {formatDate(review.date)}
+          {formatDate(review.posted_at || review.created_at)}
         </span>
       </div>
       

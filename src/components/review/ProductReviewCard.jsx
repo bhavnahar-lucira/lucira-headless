@@ -65,7 +65,7 @@ const reviews = [
   },
 ];
 
-export default function ProductReviewCard() {
+export default function ProductReviewCard({ productId }) {
   const [activeFilter, setActiveFilter] = useState("all");
   const [isWriteReviewOpen, setIsWriteReviewOpen] = useState(false);
 
@@ -160,6 +160,7 @@ export default function ProductReviewCard() {
       <WriteReviewForm 
         isOpen={isWriteReviewOpen}
         onClose={() => setIsWriteReviewOpen(false)}
+        productId={productId}
       />
 
       {/* Animated Masonry Gallery */}
