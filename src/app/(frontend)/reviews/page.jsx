@@ -14,6 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import ReviewDetailedPopup from "@/components/review/ReviewDetailedPopup";
+import WriteReviewForm from "@/components/review/WriteReviewForm";
 
 // Import Swiper styles
 import "swiper/css";
@@ -33,6 +34,7 @@ export default function ReviewsPage() {
 
   // Popup State
   const [popupState, setPopupState] = useState({ isOpen: false, index: 0 });
+  const [isWriteReviewOpen, setIsWriteReviewOpen] = useState(false);
 
   useEffect(() => {
     async function fetchReviews() {
@@ -136,7 +138,10 @@ export default function ReviewsPage() {
             </div>
           </div>
 
-          <button className="mt-10 px-12 py-4 bg-[#5A413F] text-white font-black text-xs uppercase tracking-[0.2em] rounded shadow-lg hover:bg-[#4a3533] transition-all active:scale-95">
+          <button 
+            onClick={() => setIsWriteReviewOpen(true)}
+            className="mt-10 px-12 py-4 bg-[#5A413F] text-white font-black text-xs uppercase tracking-[0.2em] rounded shadow-lg hover:bg-[#4a3533] transition-all active:scale-95"
+          >
             Write A Review
           </button>
         </div>
@@ -380,6 +385,11 @@ export default function ReviewsPage() {
         reviews={reviews}
         activeIndex={popupState.index}
         onIndexChange={(index) => setPopupState({ ...popupState, index })}
+      />
+
+      <WriteReviewForm 
+        isOpen={isWriteReviewOpen}
+        onClose={() => setIsWriteReviewOpen(false)}
       />
 
       <style jsx global>{`

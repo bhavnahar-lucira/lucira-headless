@@ -6,6 +6,7 @@ import { Star, Camera, MessageSquarePlus, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import ProductReview from "./ProductReview";
+import WriteReviewForm from "./WriteReviewForm";
 
 const filters = [
   { id: "all", label: "All Reviews" },
@@ -66,6 +67,7 @@ const reviews = [
 
 export default function ProductReviewCard() {
   const [activeFilter, setActiveFilter] = useState("all");
+  const [isWriteReviewOpen, setIsWriteReviewOpen] = useState(false);
 
   const filteredReviews = reviews.filter((review) => {
     if (activeFilter === "video") return review.video;
@@ -144,12 +146,21 @@ export default function ProductReviewCard() {
           })}
         </div>
 
-        <Button variant="outline" className="gap-2">
+        <Button 
+          variant="outline" 
+          className="gap-2"
+          onClick={() => setIsWriteReviewOpen(true)}
+        >
           <MessageSquarePlus size={16}/>
           Write a Review
         </Button>
 
       </div>
+
+      <WriteReviewForm 
+        isOpen={isWriteReviewOpen}
+        onClose={() => setIsWriteReviewOpen(false)}
+      />
 
       {/* Animated Masonry Gallery */}
       <motion.div layout className="max-w-7xl mx-auto mt-10 columns-1 sm:columns-2 lg:columns-4 gap-6">
