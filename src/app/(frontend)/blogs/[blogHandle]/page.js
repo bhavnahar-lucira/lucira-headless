@@ -65,11 +65,12 @@ export default async function BlogListingPage({ params, searchParams }) {
       {/* Filter Navigation */}
       <section className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-zinc-100">
         <div className="container-main">
-          <div className="flex items-center justify-center overflow-x-auto no-scrollbar py-6 gap-8 lg:gap-12">
+          <div className="flex items-center lg:justify-center overflow-x-auto no-scrollbar py-4 lg:py-6 gap-6 lg:gap-12 px-4 lg:px-0">
             <Link
               href={`/blogs/${blogHandle}`}
-              className={`whitespace-nowrap text-[11px] font-bold uppercase tracking-[0.2em] transition-all relative pb-1 ${!tag ? "text-[#a68380]" : "text-zinc-400 hover:text-zinc-600"
-                }`}
+              className={`whitespace-nowrap text-[10px] lg:text-[11px] font-bold uppercase tracking-[0.2em] transition-all relative pb-1 ${
+                !tag ? "text-[#a68380]" : "text-zinc-400 hover:text-zinc-600"
+              }`}
             >
               All
               {!tag && (
@@ -80,8 +81,9 @@ export default async function BlogListingPage({ params, searchParams }) {
               <Link
                 key={t}
                 href={`/blogs/${blogHandle}?tag=${encodeURIComponent(t)}`}
-                className={`whitespace-nowrap text-[11px] font-bold uppercase tracking-[0.2em] transition-all relative pb-1 ${tag === t ? "text-[#a68380]" : "text-zinc-400 hover:text-zinc-600"
-                  }`}
+                className={`whitespace-nowrap text-[10px] lg:text-[11px] font-bold uppercase tracking-[0.2em] transition-all relative pb-1 ${
+                  tag === t ? "text-[#a68380]" : "text-zinc-400 hover:text-zinc-600"
+                }`}
               >
                 {t}
                 {tag === t && (
@@ -94,9 +96,9 @@ export default async function BlogListingPage({ params, searchParams }) {
       </section>
 
       {/* Articles Grid */}
-      <section className="container-main py-8">
+      <section className="container-main py-10 lg:py-16">
         {filteredArticles.length > 0 ? (
-          <div className="grid gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-x-4 gap-y-10 grid-cols-2 lg:grid-cols-4 lg:gap-x-6 lg:gap-y-12">
             {filteredArticles.map((article, index) => {
               const firstTag = article.tags?.[0] || "Blog";
 
@@ -107,7 +109,7 @@ export default async function BlogListingPage({ params, searchParams }) {
                   className="group flex flex-col h-full"
                 >
                   {/* Image Container - Aspect 1/1.15 */}
-                  <div className="relative aspect-[1/1.15] overflow-hidden rounded-lg mb-6">
+                  <div className="relative aspect-[1/1.15] overflow-hidden rounded-lg mb-4 lg:mb-6">
                     {article.image?.url ? (
                       <Image
                         src={article.image.url}
@@ -125,19 +127,19 @@ export default async function BlogListingPage({ params, searchParams }) {
                   </div>
 
                   {/* Category */}
-                  <div className="text-[11px] font-medium uppercase tracking-[0.1em] text-zinc-500 mb-2">
+                  <div className="text-[9px] lg:text-[11px] font-medium uppercase tracking-[0.1em] text-zinc-500 mb-1 lg:mb-2">
                     {firstTag}
                   </div>
 
                   {/* Content Container */}
-                  <div className="flex justify-between items-start gap-4">
-                    <h2 className="font-abhaya text-lg lg:text-xl font-bold leading-tight text-zinc-900 group-hover:text-[#a68380] transition-colors duration-300 line-clamp-2">
+                  <div className="flex justify-between items-start gap-2 lg:gap-4">
+                    <h2 className="font-abhaya text-sm lg:text-xl font-bold leading-tight text-zinc-900 group-hover:text-[#a68380] transition-colors duration-300 line-clamp-2">
                       {article.title}
                     </h2>
 
                     {/* Arrow Icon in Circle */}
-                    <div className="w-8 h-8 rounded-full border border-zinc-200 flex items-center justify-center flex-shrink-0 transition-all duration-300 group-hover:border-[#a68380] group-hover:bg-[#a68380]/5">
-                      <ChevronRight size={16} className="text-zinc-400 group-hover:text-[#a68380] transition-transform duration-300 group-hover:-rotate-45" />
+                    <div className="w-6 h-6 lg:w-8 lg:h-8 rounded-full border border-zinc-200 flex items-center justify-center flex-shrink-0 transition-all duration-300 group-hover:border-[#a68380] group-hover:bg-[#a68380]/5">
+                      <ChevronRight size={14} className="text-zinc-400 lg:size-4 group-hover:text-[#a68380] transition-transform duration-300 group-hover:-rotate-45" />
                     </div>
                   </div>
                 </Link>
