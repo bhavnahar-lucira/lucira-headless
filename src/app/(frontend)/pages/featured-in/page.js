@@ -99,7 +99,7 @@ export default function FeaturedInPage() {
 
   return (
     <section className="w-full bg-white font-figtree py-10 md:py-16">
-      <div className="container mx-auto px-5 md:px-[60px]">
+      <div className="container mx-auto px-5 ">
 
         {/* Header Section */}
         <div className="text-center mb-10 md:mb-14">
@@ -129,7 +129,7 @@ export default function FeaturedInPage() {
                 {article.date}
               </p>
 
-              <h3 className="font-abhaya text-lg md:text-[22px] font-semibold leading-tight uppercase mb-3 text-foreground">
+              <h3 className="font-figtree text-lg md:text-[22px] font-semibold leading-tight uppercase mb-3 text-foreground">
                 {article.heading}
               </h3>
 

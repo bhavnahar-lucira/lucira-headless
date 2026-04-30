@@ -117,7 +117,7 @@ export default function ReviewDetailedPopup({ isOpen, onClose, reviews, activeIn
             
             {/* User Info */}
             <div className="flex items-center gap-4 mb-8">
-              <div className="w-16 h-16 rounded-full bg-[#8D7774] text-white flex items-center justify-center font-bold text-2xl uppercase border-4 border-white shadow-md relative overflow-hidden flex-shrink-0">
+              <div className="w-16 h-16 rounded-full bg-primary text-white flex items-center justify-center font-bold text-2xl uppercase border-4 border-white shadow-md relative overflow-hidden flex-shrink-0">
                 {review.personImage ? (
                     <Image src={getValidSrc(review.personImage)} alt={review.personName} fill className="object-cover" />
                 ) : (
@@ -125,9 +125,9 @@ export default function ReviewDetailedPopup({ isOpen, onClose, reviews, activeIn
                 )}
               </div>
               <div>
-                <h3 className="font-black text-gray-900 text-xl leading-tight mb-1 uppercase tracking-widest">{review.personName}</h3>
-                <div className="flex items-center gap-1.5 text-xs text-[#A68966] font-bold uppercase tracking-widest">
-                    <BadgeCheck size={16} className="fill-[#A68966] text-white" />
+                <h3 className="font-bold text-gray-800 text-xl leading-tight mb-1 capitalize tracking-widest">{review.personName}</h3>
+                <div className="flex items-center gap-1.5 text-xs text-accent font-bold uppercase tracking-wide">
+                    <BadgeCheck size={16} className="fill-accent text-white" />
                     Verified Customer
                 </div>
               </div>
@@ -146,7 +146,7 @@ export default function ReviewDetailedPopup({ isOpen, onClose, reviews, activeIn
                     ))}
                 </div>
                 {review.date && (
-                    <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">
+                    <span className="text-xs font-bold text-gray-600 uppercase tracking-widest">
                         {new Date(review.date).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })}
                     </span>
                 )}
@@ -154,7 +154,7 @@ export default function ReviewDetailedPopup({ isOpen, onClose, reviews, activeIn
 
             {/* Review Text */}
             <div className="mb-8 flex-grow">
-              <h4 className="font-black text-gray-900 text-2xl mb-4 leading-tight uppercase tracking-tight">
+              <h4 className="font-bold text-black text-xl lg:text-2xl mb-4 leading-tight tracking-tight">
                 {review.title || "Perfect Product"}
               </h4>
               <p className="text-gray-600 leading-relaxed text-lg italic">
@@ -172,8 +172,8 @@ export default function ReviewDetailedPopup({ isOpen, onClose, reviews, activeIn
                 <Image src={getValidSrc(review.productImage)} alt={review.productTitle} fill className="object-cover group-hover:scale-110 transition-transform duration-500" />
               </div>
               <div className="min-w-0">
-                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-1">Reviewed product</span>
-                <h4 className="text-sm font-bold text-gray-900 truncate group-hover:text-primary transition-colors uppercase tracking-widest">
+                <span className="text-[10px] font-bold text-gray-700 uppercase tracking-widest block mb-1">Reviewed product</span>
+                <h4 className="text-sm font-bold text-black truncate group-hover:text-primary transition-colors">
                   {review.productTitle}
                 </h4>
               </div>

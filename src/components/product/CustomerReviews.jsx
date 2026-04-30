@@ -216,12 +216,12 @@ export default function CustomerReviews({ reviews, productId, productTitle, prod
   const recommendPercent = isGlobal ? Math.round(((Number(data.stats.breakdown[4] || 0) + Number(data.stats.breakdown[5] || 0)) / (data.stats.total || 1)) * 100) : 97;
 
   return (
-    <section className="w-full py-20 bg-[#FEF5F1] mt-15" id="reviews">
+    <section className="w-full md:py-20 py-15 bg-[#FEF5F1] mt-15" id="reviews">
       <div className="container-main">
         
         {/* Heading */}
-        <div className="mb-16 text-center">
-            <h2 className="text-3xl md:text-4xl font-extrabold mb-4 uppercase tracking-widest font-abhaya">
+        <div className="md:mb-16 mb:10 text-center">
+            <h2 className="text-3xl md:text-4xl font-extrabold mb-4 font-abhaya">
             {isGlobal ? "Customer Stories" : "Customer Reviews"}
             </h2>
             {isGlobal && (
@@ -245,7 +245,7 @@ export default function CustomerReviews({ reviews, productId, productTitle, prod
                   />
                 ))}
               </div>
-              <span className="text-sm font-bold text-gray-500 uppercase tracking-widest">{data.count} reviews</span>
+              <span className="text-sm font-bold text-gray-600 uppercase">{data.count} reviews</span>
             </div>
 
             <div className="flex-grow max-w-md w-full space-y-3">
@@ -269,7 +269,7 @@ export default function CustomerReviews({ reviews, productId, productTitle, prod
 
             <div className="flex flex-col items-center">
               <span className="text-5xl font-black text-gray-900 mb-2">{recommendPercent}%</span>
-              <p className="text-[10px] font-black text-gray-500 max-w-[120px] uppercase tracking-widest leading-relaxed">Would recommend Lucira</p>
+              <p className="text-xs font-black text-gray-600 max-w-[120px] uppercase tracking-widest leading-relaxed text-center">Would recommend Lucira</p>
             </div>
         </div>
 
@@ -317,9 +317,9 @@ export default function CustomerReviews({ reviews, productId, productTitle, prod
         {/* Filter Bar */}
         <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-10 border-b border-gray-200 pb-8 px-2">
           <div className="flex items-center gap-3">
-            <span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Rating:</span>
+            <span className="text-sm font-semibold text-gray-600">Rating:</span>
             <Select value={filterRating} onValueChange={handleFilterChange}>
-              <SelectTrigger className="w-auto min-w-[120px] border-none bg-transparent font-black text-sm uppercase tracking-widest focus:ring-0 focus:ring-offset-0 p-0 h-auto cursor-pointer gap-2">
+              <SelectTrigger className="w-auto min-w-[120px] border-none bg-transparent font-bold text-sm uppercase focus:ring-0 focus:ring-offset-0 p-0 h-auto cursor-pointer gap-2">
                 <SelectValue placeholder="All Ratings" />
               </SelectTrigger>
               <SelectContent className="rounded-xl border-gray-100 shadow-xl">
@@ -332,21 +332,21 @@ export default function CustomerReviews({ reviews, productId, productTitle, prod
           </div>
 
           <div className="flex-1 text-center hidden md:block">
-            <span className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em]">
+            <span className="text-lg font-bold text-black uppercase tracking-[0.2em]">
               {data.count} Verified Reviews
             </span>
           </div>
           
           <div className="md:hidden text-center w-full">
-            <span className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em]">
+            <span className="text-lg font-bold text-black uppercase tracking-[0.2em]">
               {data.count} Verified Reviews
             </span>
           </div>
 
           <div className="flex items-center gap-3">
-            <span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Sort by:</span>
+            <span className="text-sm font-semibold text-gray-600">Sort by:</span>
             <Select value={sortBy} onValueChange={handleSortChange}>
-                <SelectTrigger className="w-auto min-w-[140px] border-none bg-transparent font-black text-sm uppercase tracking-widest focus:ring-0 focus:ring-offset-0 p-0 h-auto cursor-pointer gap-2">
+                <SelectTrigger className="w-auto min-w-[140px] border-none bg-transparent font-bold text-sm uppercase focus:ring-0 focus:ring-offset-0 p-0 h-auto cursor-pointer gap-2">
                   <SelectValue placeholder="Featured" />
                 </SelectTrigger>
                 <SelectContent className="rounded-xl border-gray-100 shadow-xl">
@@ -386,7 +386,7 @@ export default function CustomerReviews({ reviews, productId, productTitle, prod
                 href="/reviews"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-14 py-5 bg-[#5A413F] text-white font-black text-xs uppercase tracking-[0.3em] rounded shadow-xl hover:bg-[#4a3533] transition-all active:scale-95 inline-block"
+                className="w-full md:w-auto px-7 py-4 h-auto text-sm md:text-base font-bold uppercase rounded-sm bg-primary hover:bg-[#4A3934] text-white transition-colors"
             >
                 View All Reviews
             </Link>
@@ -428,7 +428,7 @@ function ReviewCard({ review, onClick }) {
     <div onClick={onClick} className="bg-white p-4 sm:p-6 md:p-8 lg:p-10 rounded-xl md:rounded-2xl flex flex-col gap-4 md:gap-6 border border-gray-50 shadow-[0_4px_30px_-10px_rgba(0,0,0,0.04)] hover:shadow-md transition-all group cursor-pointer">
       <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-3">
         <div className="flex items-start sm:items-center gap-3 sm:gap-4 min-w-0 flex-1">
-          <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-[#8D7774] flex items-center justify-center text-white font-bold border-4 border-white uppercase text-base sm:text-xl shadow-sm relative overflow-hidden shrink-0">
+          <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-primary flex items-center justify-center text-white font-bold border-4 border-white uppercase text-base sm:text-xl shadow-sm relative overflow-hidden shrink-0">
             {review.personImage ? (
               <Image src={getValidSrc(review.personImage)} alt={name} fill className="object-cover" />
             ) : (
@@ -438,11 +438,11 @@ function ReviewCard({ review, onClick }) {
 
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-x-2 gap-y-1 min-w-0">
-              <span className="font-black text-gray-900 text-xs sm:text-sm uppercase tracking-wide truncate max-w-full">
+              <span className="font-bold text-gray-800 text-sm sm:text-lg capitalize tracking-wide truncate max-w-full">
                 {name}
               </span>
-              <div className="flex items-center gap-1 text-[#A68966] font-black uppercase tracking-wide text-[8px] sm:text-[9px] shrink-0">
-                <CheckCircle size={12} className="fill-[#A68966] text-white" />
+              <div className="flex items-center gap-1 text-accent font-black uppercase tracking-wide text-[8px] sm:text-[9px] shrink-0">
+                <CheckCircle size={12} className="fill-accent text-white" />
                 <span>Verified</span>
               </div>
             </div>
@@ -462,19 +462,19 @@ function ReviewCard({ review, onClick }) {
               </span>
             </div>
             
-            <span className="block lg:hidden mt-2 text-[9px] sm:text-[10px] font-black text-gray-300 uppercase tracking-wide">
+            <span className="block lg:hidden mt-2 text-[9px] sm:text-[10px] font-bold text-gray-600 uppercase tracking-wide">
               {formatDate(review.date)}
             </span>
           </div>
         </div>
         
-        <span className="hidden lg:block shrink-0 text-[10px] font-black text-gray-300 uppercase tracking-wide">
+        <span className="hidden lg:block shrink-0 text-xs font-bold text-gray-600 uppercase tracking-wide">
           {formatDate(review.date)}
         </span>
       </div>
       
       <div className="space-y-2 md:space-y-3 flex-grow">
-        <h4 className="text-base sm:text-lg font-black text-gray-900 leading-tight tracking-tight uppercase group-hover:text-primary transition-colors">
+        <h4 className="text-base sm:text-lg font-bold text-black leading-tight tracking-tight group-hover:text-primary transition-colors">
           {review.title || "Brilliant Purchase"}
         </h4>
         <p className="text-gray-500 leading-relaxed text-xs sm:text-sm italic line-clamp-4">

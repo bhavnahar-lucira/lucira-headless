@@ -1,7 +1,7 @@
 "use client";
 
 import LazyImage from "../common/LazyImage";
-import { Truck, RefreshCcw, Gem, RotateCcw } from "lucide-react";
+import { Truck, RefreshCcw, Gem, HandCoins } from "lucide-react";
 
 const moneyBack = "/images/icons/money-back.svg";
 
@@ -16,11 +16,11 @@ export default function FeatureBar() {
       text: "100% diamond value guarantee",
     },
     {
-      icon: RotateCcw,
+      icon: RefreshCcw,
       text: "Lifetime buy back or exchange",
     },
     {
-      image: moneyBack,
+      icon: HandCoins,
       text: "15-day free returns",
     },
   ];
