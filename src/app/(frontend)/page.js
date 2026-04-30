@@ -1,11 +1,10 @@
-"use client";
 import { Suspense } from "react";
 import dynamic from "next/dynamic";
-import HeroSlider from "@/components/home/HeroSlider";
 import HeroSliderImage from "@/components/home/HeroSliderImage";
 import ExploreRange from "@/components/home/ExploreRange";
 import FeatureBar from "@/components/home/FeatureBar";
 import ShopByCategory from "@/components/home/ShopByCategory";
+import JewelryBlogContainer from "@/components/home/JewelryBlogContainer";
 
 // Lazy load below-the-fold components
 const StyledByLucira = dynamic(() => import("@/components/home/StyledByLucira"), { suspense: true });
@@ -18,11 +17,9 @@ const CuratedLooks = dynamic(() => import("@/components/home/CuratedLooks"), { s
 const StoreLocatorSection = dynamic(() => import("@/components/home/StoreLocatorSection"), { suspense: true });
 const CustomerReview = dynamic(() => import("@/components/home/CustomerReview"), { suspense: true });
 const WeAreLucira = dynamic(() => import("@/components/home/WeAreLucira"), { suspense: true });
-const LoveStorySlider = dynamic(() => import("@/components/home/LoveStoryCard"), { suspense: true });
-const JewelryBlog = dynamic(() => import("@/components/home/JewelryBlog"), { suspense: true });
+const NoteFromFounder = dynamic(() => import("@/components/home/NoteFromFounder"), { suspense: true });
 const InstagramFeed = dynamic(() => import("@/components/home/InstagramFeed"), { suspense: true });
 const JoinLuciraCommunity = dynamic(() => import("@/components/product/JoinLuciraCommunity").then(mod => ({ default: mod.JoinLuciraCommunity })), { suspense: true });
-const NoteFromFounder = dynamic(() => import("@/components/home/NoteFromFounder"), { suspense: true });
 
 // Refactored Sections
 import BestsellerSection from "@/components/home/homeCollection/BestsellerSection";
@@ -34,64 +31,63 @@ export default function Home() {
   return (
     <div className="w-full">
       <MobileCategorySlider />
-      {/* <HeroSlider/> */}
-      <HeroSliderImage/>
-      <FeatureBar/>
-      <ExploreRange/>
-      
+      <HeroSliderImage />
+      <FeatureBar />
+      <ExploreRange />
+
       <BestsellerSection />
-      
-      <ShopByCategory/>
+
+      <ShopByCategory />
       <Suspense fallback={<div className="h-20 bg-gray-100 animate-pulse"></div>}>
-        <StyledByLucira/>
+        <StyledByLucira />
       </Suspense>
       <Suspense fallback={<div className="h-20 bg-gray-100 animate-pulse"></div>}>
-        <LuxuryMarquee prop={["bg-secondary", "text-black", "mt-5", "lg:mt-15", "text-lg", "font-semibold"]}/>
+        <LuxuryMarquee prop={["bg-secondary", "text-black", "mt-5", "lg:mt-15", "text-lg", "font-semibold"]} />
       </Suspense>
       <Suspense fallback={<div className="h-20 bg-gray-100 animate-pulse"></div>}>
-        <ShopByOccasion/>
+        <ShopByOccasion />
       </Suspense>
       <Suspense fallback={<div className="h-20 bg-gray-100 animate-pulse"></div>}>
-        <FeaturedIn/>
+        <FeaturedIn />
       </Suspense>
       <Suspense fallback={<div className="h-20 bg-gray-100 animate-pulse"></div>}>
-        <WaysToExplore/>
+        <WaysToExplore />
       </Suspense>
-      
+
       <GemstoneSection />
-      
+
       <Suspense fallback={<div className="h-20 bg-gray-100 animate-pulse"></div>}>
-        <EveryoneYouLove/>
+        <EveryoneYouLove />
       </Suspense>
-      
+
       <ExploreCollectionSection />
 
       <Suspense fallback={<div className="h-20 bg-gray-100 animate-pulse"></div>}>
-        <CuratedLooks/>
+        <CuratedLooks />
       </Suspense>
       <Suspense fallback={<div className="h-20 bg-gray-100 animate-pulse"></div>}>
-        <StoreLocatorSection/>
+        <StoreLocatorSection />
       </Suspense>
       <Suspense fallback={<div className="h-20 bg-gray-100 animate-pulse"></div>}>
-        <CustomerReview/>
+        <CustomerReview />
       </Suspense>
       <Suspense fallback={<div className="h-20 bg-gray-100 animate-pulse"></div>}>
-        <WeAreLucira/>
+        <WeAreLucira />
       </Suspense>
-      {/* <Suspense fallback={<div className="h-20 bg-gray-100 animate-pulse"></div>}>
-        <LoveStorySlider/>
-      </Suspense> */}
+
       <Suspense fallback={<div className="h-20 bg-gray-100 animate-pulse"></div>}>
-        <NoteFromFounder/>
+        <NoteFromFounder />
       </Suspense>
       <Suspense fallback={<div className="h-20 bg-gray-100 animate-pulse"></div>}>
-        <InstagramFeed/>
+        <InstagramFeed />
       </Suspense>
-      {/* <Suspense fallback={<div className="h-20 bg-gray-100 animate-pulse"></div>}>
-        <JewelryBlog/>
-      </Suspense> */}
+      
+      <Suspense fallback={<div className="h-40 bg-gray-50 animate-pulse"></div>}>
+        <JewelryBlogContainer />
+      </Suspense>
+
       <Suspense fallback={<div className="h-20 bg-gray-100 animate-pulse"></div>}>
-        <JoinLuciraCommunity/>
+        <JoinLuciraCommunity />
       </Suspense>
     </div>
   );
