@@ -369,7 +369,7 @@ export function OtpSpinAuth({
 
         {step === "login" && (
           <>
-            <p className="mb-2 text-center text-base leading-tight font-medium text-black uppercase mx-auto mt-4">{overrideHeading || "WELCOME TO LUCIRA"}</p>
+            <p className="mb-2 text-center text-xl leading-tight font-medium text-black uppercase mx-auto mt-4">{overrideHeading || "WELCOME TO LUCIRA"}</p>
             <p className="text-[12px] font-medium text-[#5B5B5B] text-center mb-5 tracking-wider leading-relaxed capitalize max-w-[300px] mx-auto">{overrideSubtext || "Welcome To The Jewelry World Of Lucira!"}</p>
             <div className="flex items-center border border-[#e2e2e2] h-[45px] px-4 rounded-lg bg-white">
               <span className="text-sm font-normal mr-2.5 pr-3 border-r border-[#d0d0d0]">+91</span>
@@ -418,7 +418,7 @@ export function OtpSpinAuth({
 
         {step === "otp" && (
           <>
-            <p className="mb-2 text-center text-base leading-tight font-medium text-black uppercase mx-auto mt-4">{overrideHeading || "VERIFY OTP"}</p>
+            <p className="mb-2 text-center text-xl leading-tight font-medium text-black uppercase mx-auto mt-4">{overrideHeading || "VERIFY OTP"}</p>
             <p className="text-[12px] font-medium text-[#5B5B5B] text-center mb-5 tracking-wider leading-relaxed capitalize max-w-[300px] mx-auto">{overrideSubtext || `Sent to +91 ${mobile}`}</p>
             <div className="flex justify-center gap-2 mt-4 mb-4">
               {otp.map((digit, i) => (
@@ -457,7 +457,7 @@ export function OtpSpinAuth({
 
         {step === "register" && (
           <div className="overflow-hidden">
-            <p className="mb-2 text-center text-base leading-tight font-medium text-black uppercase mx-auto mt-4">Register to Win a Reward</p>
+            <p className="mb-2 text-center text-xl leading-tight font-medium text-black uppercase mx-auto mt-4">Register to Win a Reward</p>
             <p className="text-[12px] font-medium text-[#5B5B5B] text-center mb-5 tracking-wider leading-relaxed capitalize max-w-[300px] mx-auto">Try Your Luck! Win a Diamond Pendant</p>
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-3.5">
@@ -534,7 +534,7 @@ export function OtpSpinAuth({
         {step === "success" && (
           <div className="text-center">
             <div className="text-4xl mb-4 text-center">🎉</div>
-            <p className="mb-2 text-center text-base leading-tight font-medium text-black uppercase mx-auto mt-4 max-w-[245px]">Your Account has been created Successfully</p>
+            <p className="mb-2 text-center text-xl leading-tight font-medium text-black uppercase mx-auto mt-4 max-w-[245px]">Your Account has been created Successfully</p>
             <p className="text-[12px] font-medium text-[#5B5B5B] text-center mb-3 tracking-wider leading-relaxed capitalize max-w-[280px] mx-auto mt-3">
               Your reward is ready, Apply this on checkout
             </p>
