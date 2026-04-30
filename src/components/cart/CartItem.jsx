@@ -7,6 +7,8 @@ import { removeFromCart, updateCartItem } from "@/redux/features/cart/cartSlice"
 import { 
   addWishlistItem, 
   removeWishlistItem,
+  addGuestWishlistItem,
+  removeGuestWishlistItem,
 } from "@/redux/features/wishlist/wishlistSlice";
 import { useState, useMemo } from "react";
 import { toast } from "react-toastify";
@@ -43,18 +45,32 @@ export default function CartItem({ item, onAuthRequired }) {
   const currentVariant =
     variantOptions.find((variant) => variant.variantId === item.variantId) ||
     variantOptions.find((variant) => String(variant.size) === String(item.size));
+  
+  const sizeOptions = useMemo(() => {
+    const rawOptions = variantOptions.length > 0
+      ? variantOptions
+      : (item.availableSizes || [item.size]).filter(Boolean).map((size) => ({ size }));
+    
+    // Ensure unique sizes for the dropdown
+    const seen = new Set();
+    return rawOptions.filter(opt => {
+      const s = String(opt.size);
+      if (!s || seen.has(s)) return false;
+      seen.add(s);
+      return true;
+    });
+  }, [variantOptions, item.availableSizes, item.size]);
+
   const isInStock = currentVariant?.inStock ?? item.inStock ?? true;
-  const canEditSelection = !isInStock;
+  const canEditSelection = sizeOptions.length > 1;
+  const displaySize = currentVariant?.size || item.size;
+  
   const lineAmount = (item.price || 0) * (item.quantity || 1);
   const lineCompareAmount = (item.comparePrice || 0) * (item.quantity || 1);
   const hasDiscount = lineCompareAmount > lineAmount;
 
   const statusLabel = isInStock ? "In Stock" : "Made to Order";
   const statusClass = isInStock ? "text-green-500" : "text-primary";
-  const sizeOptions =
-    variantOptions.length > 0
-      ? variantOptions
-      : (item.availableSizes || [item.size]).map((size) => ({ size }));
 
   const handleRemove = async () => {
     setRemoving(true);
@@ -99,12 +115,6 @@ export default function CartItem({ item, onAuthRequired }) {
   };
 
   const handleMoveToWishlist = async () => {
-    if (!isAuthenticated) {
-      toast.info("Please login to move items to wishlist");
-      onAuthRequired?.();
-      return;
-    }
-
     setMovingToWishlist(true);
     try {
       if (!isWishlisted) {
@@ -120,7 +130,12 @@ export default function CartItem({ item, onAuthRequired }) {
           hasVideo: Boolean(item.hasVideo),
           hasSimilar: Boolean(item.handle),
         };
-        await dispatch(addWishlistItem(payload)).unwrap();
+
+        if (isAuthenticated) {
+          await dispatch(addWishlistItem(payload)).unwrap();
+        } else {
+          dispatch(addGuestWishlistItem(payload));
+        }
       }
 
       const currentOrigin = typeof window !== 'undefined' ? window.location.origin : "";
@@ -242,12 +257,12 @@ export default function CartItem({ item, onAuthRequired }) {
                     </span>
                     {canEditSelection ? (
                       <Select
-                        value={String(item.size)}
+                        value={String(displaySize)}
                         onValueChange={(val) => handleUpdate("size", val)}
                         disabled={updating}
                       >
                         <SelectTrigger className="h-6 border-none bg-transparent p-0 text-xs font-bold text-zinc-800 shadow-none focus:ring-0">
-                          <SelectValue placeholder={item.size} />
+                          <SelectValue placeholder={displaySize} />
                         </SelectTrigger>
                         <SelectContent>
                           {sizeOptions.map((variant) => (
@@ -258,7 +273,7 @@ export default function CartItem({ item, onAuthRequired }) {
                         </SelectContent>
                       </Select>
                     ) : (
-                      <span className="text-xs font-bold text-zinc-800">{item.size}</span>
+                      <span className="text-xs font-bold text-zinc-800">{displaySize}</span>
                     )}
                   </div>
                 )}
@@ -383,12 +398,12 @@ export default function CartItem({ item, onAuthRequired }) {
                     </span>
                     {canEditSelection ? (
                       <Select
-                        value={String(item.size)}
+                        value={String(displaySize)}
                         onValueChange={(val) => handleUpdate("size", val)}
                         disabled={updating}
                       >
                         <SelectTrigger className="h-auto border-none bg-transparent p-0 text-[13px] font-bold text-zinc-800 shadow-none focus:ring-0 gap-0.5 min-w-0 w-auto">
-                          <SelectValue placeholder={item.size} />
+                          <SelectValue placeholder={displaySize} />
                         </SelectTrigger>
                         <SelectContent>
                           {sizeOptions.map((variant) => (
@@ -399,7 +414,7 @@ export default function CartItem({ item, onAuthRequired }) {
                         </SelectContent>
                       </Select>
                     ) : (
-                      <span className="text-[13px] font-bold text-zinc-800">{item.size}</span>
+                      <span className="text-[13px] font-bold text-zinc-800">{displaySize}</span>
                     )}
                   </div>
                 )}
