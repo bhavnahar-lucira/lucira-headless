@@ -58,6 +58,7 @@ export const metadata = {
     icon: "/Favicon.png",
     apple: "/Favicon.png",
   },
+  manifest: "/manifest.json",
 };
 
 export default function RootLayout({ children }) {
