@@ -97,15 +97,15 @@ export default function Footer() {
                 </AccordionTrigger>
                 <AccordionContent className="pb-6">
                   <ul className="space-y-3 font-figtree text-[13px]">
-                      <li><Link href="/pages/diamond-education">Diamond Education</Link></li>
-                      <li><Link href="/pages/metal-education">Metal Education</Link></li>
-                      <li><Link href="/pages/size-guide-1">Size Guide</Link></li>
-                      <li><Link href="/pages/how-to-wear-2">How To Wear</Link></li>
-                      <li><Link href="/pages/new-tips-care">Jewelry Care Tips</Link></li>
-                      <li><Link href="/pages/lgd-mine-page">LGD vs Mined</Link></li>
-                      <li><Link href="/pages/ring-shank">Ring Shank</Link></li>
-                      <li><Link href="/pages/product-passport">Product Passport</Link></li>
-                      <li><Link href="/pages/diamond-shapes">Diamond Shapes</Link></li>
+                    <li><Link href="/pages/diamond-education">Diamond Education</Link></li>
+                    <li><Link href="/pages/metal-education">Metal Education</Link></li>
+                    <li><Link href="/pages/size-guide-1">Size Guide</Link></li>
+                    <li><Link href="/pages/how-to-wear-2">How To Wear</Link></li>
+                    <li><Link href="/pages/new-tips-care">Jewelry Care Tips</Link></li>
+                    <li><Link href="/pages/lgd-mine-page">LGD vs Mined</Link></li>
+                    <li><Link href="/pages/ring-shank">Ring Shank</Link></li>
+                    <li><Link href="/pages/product-passport">Product Passport</Link></li>
+                    <li><Link href="/pages/diamond-shapes">Diamond Shapes</Link></li>
                   </ul>
                 </AccordionContent>
               </AccordionItem>
@@ -167,7 +167,7 @@ export default function Footer() {
               <Link href="https://www.youtube.com/@Lucira_Jewelry" target="_blank"><Youtube size={22} /></Link>
               <Link href="https://in.pinterest.com/Lucira_Jewelry/_created" target="_blank">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.162-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.965 1.406-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.126-2.914 1.002 0 1.485.753 1.485 1.656 0 1.007-.644 2.512-.975 3.907-.276 1.169.587 2.122 1.74 2.122 2.088 0 3.691-2.197 3.691-5.371 0-2.808-2.015-4.776-4.907-4.776-3.344 0-5.305 2.508-5.305 5.1 0 1.011.39 2.096.875 2.69.096.118.11.222.081.334l-.324 1.32c-.052.214-.173.26-.399.162-1.488-.693-2.417-2.868-2.417-4.618 0-3.76 2.731-7.213 7.876-7.213 4.132 0 7.34 2.944 7.34 6.88 0 4.106-2.587 7.41-6.177 7.41-1.206 0-2.34-.627-2.729-1.362l-.744 2.834c-.269 1.027-1 2.316-1.492 3.111 1.052.325 2.16.501 3.31.501 6.621 0 11.988-5.367 11.988-11.987C24.005 5.367 18.639 0 12.017 0z"/>
+                  <path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.162-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.965 1.406-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.126-2.914 1.002 0 1.485.753 1.485 1.656 0 1.007-.644 2.512-.975 3.907-.276 1.169.587 2.122 1.74 2.122 2.088 0 3.691-2.197 3.691-5.371 0-2.808-2.015-4.776-4.907-4.776-3.344 0-5.305 2.508-5.305 5.1 0 1.011.39 2.096.875 2.69.096.118.11.222.081.334l-.324 1.32c-.052.214-.173.26-.399.162-1.488-.693-2.417-2.868-2.417-4.618 0-3.76 2.731-7.213 7.876-7.213 4.132 0 7.34 2.944 7.34 6.88 0 4.106-2.587 7.41-6.177 7.41-1.206 0-2.34-.627-2.729-1.362l-.744 2.834c-.269 1.027-1 2.316-1.492 3.111 1.052.325 2.16.501 3.31.501 6.621 0 11.988-5.367 11.988-11.987C24.005 5.367 18.639 0 12.017 0z" />
                 </svg>
               </Link>
               <Link href="https://www.linkedin.com/company/lucira-jewelry" target="_blank"><Linkedin size={20} /></Link>
@@ -196,7 +196,7 @@ export default function Footer() {
     <footer className="w-full bg-primary text-white mt-15">
       <div className="container-main py-12">
         <div className="grid grid-cols-1 xl:gap-10 lg:gap-8 xl:grid-cols-[220px_1fr] lg:grid-cols-[160px_1fr]">
-          
+
           {/* LEFT LOGO */}
           <div className="text-center">
             <div className="mb-4 opacity-75">
@@ -215,7 +215,7 @@ export default function Footer() {
 
           {/* RIGHT LINKS */}
           <div className="grid grid-cols-2 gap-8 md:grid-cols-3 lg:grid-cols-5">
-            
+
             {/* SHOP ALL */}
             <div>
               <h4 className="mb-4 text-lg font-extrabold font-abhaya">Shop All</h4>
@@ -319,30 +319,30 @@ export default function Footer() {
           </div>
         </div>
       </div>
-       {/* SOCIAL */}
-        <div className="mb-6.5 flex items-center justify-center gap-6 border-t border-white/20 pt-6">
-          <p className="text-lg font-extraboldfont-abhaya">Follow Us</p>
+      {/* SOCIAL */}
+      <div className="mb-6.5 flex items-center justify-center gap-6 border-t border-white/20 pt-6">
+        <p className="text-lg font-extraboldfont-abhaya">Follow Us</p>
 
-          <div className="flex items-center gap-4">
-            <Link href="https://www.facebook.com/lucirajewelry" target="_balnk">
-              <Facebook size={18} />
-            </Link>
-            <Link href="https://www.instagram.com/lucirajewelry" target="_blank">
-              <Instagram size={18} />
-            </Link>
-            <Link href="https://www.youtube.com/@Lucira_Jewelry" target="_blank">
-              <Youtube size={18} />
-            </Link>
-            <Link href="https://in.pinterest.com/Lucira_Jewelry/_created/" target="_blank">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.162-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.965 1.406-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.126-2.914 1.002 0 1.485.753 1.485 1.656 0 1.007-.644 2.512-.975 3.907-.276 1.169.587 2.122 1.74 2.122 2.088 0 3.691-2.197 3.691-5.371 0-2.808-2.015-4.776-4.907-4.776-3.344 0-5.305 2.508-5.305 5.1 0 1.011.39 2.096.875 2.69.096.118.11.222.081.334l-.324 1.32c-.052.214-.173.26-.399.162-1.488-.693-2.417-2.868-2.417-4.618 0-3.76 2.731-7.213 7.876-7.213 4.132 0 7.34 2.944 7.34 6.88 0 4.106-2.587 7.41-6.177 7.41-1.206 0-2.34-.627-2.729-1.362l-.744 2.834c-.269 1.027-1 2.316-1.492 3.111 1.052.325 2.16.501 3.31.501 6.621 0 11.988-5.367 11.988-11.987C24.005 5.367 18.639 0 12.017 0z"/>
-              </svg>
-            </Link>
-            <Link href="https://www.linkedin.com/company/lucira-jewelry" target="_blank">
-              <Linkedin size={18} />
-            </Link>
-          </div>
+        <div className="flex items-center gap-4">
+          <Link href="https://www.facebook.com/lucirajewelry">
+            <Facebook size={18} />
+          </Link>
+          <Link href="https://www.instagram.com/lucirajewelry">
+            <Instagram size={18} />
+          </Link>
+          <Link href="https://www.youtube.com/@Lucira_Jewelry">
+            <Youtube size={18} />
+          </Link>
+          <Link href="https://in.pinterest.com/Lucira_Jewelry/_created/">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.162-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.965 1.406-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.126-2.914 1.002 0 1.485.753 1.485 1.656 0 1.007-.644 2.512-.975 3.907-.276 1.169.587 2.122 1.74 2.122 2.088 0 3.691-2.197 3.691-5.371 0-2.808-2.015-4.776-4.907-4.776-3.344 0-5.305 2.508-5.305 5.1 0 1.011.39 2.096.875 2.69.096.118.11.222.081.334l-.324 1.32c-.052.214-.173.26-.399.162-1.488-.693-2.417-2.868-2.417-4.618 0-3.76 2.731-7.213 7.876-7.213 4.132 0 7.34 2.944 7.34 6.88 0 4.106-2.587 7.41-6.177 7.41-1.206 0-2.34-.627-2.729-1.362l-.744 2.834c-.269 1.027-1 2.316-1.492 3.111 1.052.325 2.16.501 3.31.501 6.621 0 11.988-5.367 11.988-11.987C24.005 5.367 18.639 0 12.017 0z" />
+            </svg>
+          </Link>
+          <Link href="https://www.linkedin.com/company/lucira-jewelry">
+            <Linkedin size={18} />
+          </Link>
         </div>
+      </div>
 
       {/* BOTTOM BAR */}
       <div className="border-t border-white/20 py-4 text-sm">

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo, use, useRef } from "react";
+import { useState, useEffect, useCallback, useMemo, use, useRef, Fragment } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -347,7 +347,7 @@ export default function CollectionPage({ params: paramsPromise }) {
 
     if (isFetchingNextPage) {
       items.push(
-        <>
+        <Fragment key="next-page-skeletons">
           <ProductCardSkeleton key="next-1" />
           <div className="hidden sm:block">
             <ProductCardSkeleton key="next-2" />
@@ -358,7 +358,7 @@ export default function CollectionPage({ params: paramsPromise }) {
           <div className="hidden 2xl:block">
             <ProductCardSkeleton key="next-4" />
           </div>
-        </>
+        </Fragment>
       );
     }
 
@@ -590,20 +590,21 @@ export default function CollectionPage({ params: paramsPromise }) {
           {/* Applied Filters Badges */}
           {!isMobile && (
             <div className="flex flex-wrap items-center gap-2 mb-4">
-              {Object.entries(availableFilters).map(([groupKey, options]) => 
-                options.filter(opt => searchParams.getAll(opt.urlKey).includes(opt.value)).map((opt) => (
-
-                  <Badge
-                    key={`${groupKey}-${opt.value}`}
-                    variant="secondary"
-                    className="bg-[#FFF5F1] text-black hover:bg-[#FFE4D9] border-none px-3 py-1 rounded-full flex items-center gap-2 cursor-pointer"
-                    onClick={() => toggleFilter(opt.urlKey, opt.value)}
-                  >
-                    <span className="text-xs font-medium">{opt.label.split(" (")[0]}</span>
-                    <XIcon className="size-3" />
-                  </Badge>
-                ))
-              )}
+              {Object.entries(availableFilters).map(([groupKey, options]) => (
+                <Fragment key={groupKey}>
+                  {options.filter(opt => searchParams.getAll(opt.urlKey).includes(opt.value)).map((opt) => (
+                    <Badge
+                      key={`${groupKey}-${opt.value}`}
+                      variant="secondary"
+                      className="bg-[#FFF5F1] text-black hover:bg-[#FFE4D9] border-none px-3 py-1 rounded-full flex items-center gap-2 cursor-pointer"
+                      onClick={() => toggleFilter(opt.urlKey, opt.value)}
+                    >
+                      <span className="text-xs font-medium">{opt.label.split(" (")[0]}</span>
+                      <XIcon className="size-3" />
+                    </Badge>
+                  ))}
+                </Fragment>
+              ))}
               {Object.entries(availableFilters).some(([groupKey, options]) => 
                 options.some(opt => searchParams.getAll(opt.urlKey).includes(opt.value))
               ) && (

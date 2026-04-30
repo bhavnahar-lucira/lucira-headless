@@ -15,6 +15,8 @@ export default function DashboardHeader() {
             <Link href="/dashboard/variants" className="hover:text-white transition-colors">Variants</Link>
             <Link href="/dashboard/pages" className="hover:text-white transition-colors">Pages</Link>
             <Link href="/dashboard/blogs" className="hover:text-white transition-colors">Blogs</Link>
+            <Link href="/dashboard/styled-videos" className="hover:text-white transition-colors">Styled Videos</Link>
+            <Link href="/dashboard/curated-looks" className="hover:text-white transition-colors">Curated Looks</Link>
             <Link href="/dashboard/reviews" className="hover:text-white transition-colors">Reviews</Link>
             <Link href="/dashboard/stores" className="hover:text-white transition-colors">Stores</Link>
             <Link href="/dashboard/pincodes" className="hover:text-white transition-colors">Pincodes</Link>

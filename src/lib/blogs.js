@@ -171,9 +171,9 @@ export async function getArticleByBlogAndHandleAdminRest(blogHandle, articleHand
         authorV2: article.author ? { name: article.author } : null,
         image: article.image?.src
           ? {
-              url: article.image.src,
-              altText: article.image.alt || article.title,
-            }
+            url: article.image.src,
+            altText: article.image.alt || article.title,
+          }
           : null,
         blogId: `gid://shopify/Blog/${adminBlogId}`,
         blogHandle,
@@ -267,6 +267,17 @@ function extractDivsByClass(html, className) {
 }
 
 export async function getArticlesByBlogHandle(blogHandle) {
+  // Try Storefront API first to get tags and latest data
+  try {
+    const storefrontArticles = await getArticlesByBlogHandleStorefront(blogHandle);
+    if (storefrontArticles && storefrontArticles.length > 0) {
+      return serialize(storefrontArticles);
+    }
+  } catch (error) {
+    console.error("Error fetching articles from Storefront:", error);
+  }
+
+  // Fallback to MongoDB
   const client = await clientPromise;
   const db = client.db();
 
@@ -277,6 +288,50 @@ export async function getArticlesByBlogHandle(blogHandle) {
     .toArray();
 
   return serialize(articles) || [];
+}
+
+export async function getArticlesByBlogHandleStorefront(blogHandle) {
+  const query = `
+    query GetBlogArticles($blogHandle: String!) {
+      blog(handle: $blogHandle) {
+        id
+        title
+        handle
+        articles(first: 100, sortKey: PUBLISHED_AT, reverse: true) {
+          edges {
+            node {
+              id
+              title
+              handle
+              publishedAt
+              excerpt
+              excerptHtml
+              content
+              contentHtml
+              tags
+              image {
+                url
+                altText
+              }
+              authorV2 {
+                name
+              }
+            }
+          }
+        }
+      }
+    }
+  `;
+
+  const data = await shopifyStorefrontFetch(query, { blogHandle });
+  const articles = data?.blog?.articles?.edges?.map(edge => ({
+    ...edge.node,
+    blogId: data.blog.id,
+    blogTitle: data.blog.title,
+    blogHandle: data.blog.handle
+  }));
+
+  return articles || [];
 }
 
 export async function getMostViewedArticles(limit = 4) {

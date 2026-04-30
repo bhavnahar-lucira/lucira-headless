@@ -133,6 +133,23 @@ export const FILE_CREATE_MUTATION = `
   }
 `;
 
+export const FILE_QUERY = `
+  query getFile($id: ID!) {
+    node(id: $id) {
+      ... on MediaImage {
+        fileStatus
+        image {
+          url
+        }
+      }
+      ... on GenericFile {
+        fileStatus
+        url
+      }
+    }
+  }
+`;
+
 export const CUSTOMER_METAFIELD_UPDATE_MUTATION = `
   mutation customerUpdate($input: CustomerInput!) {
     customerUpdate(input: $input) {
