@@ -355,7 +355,7 @@ export default function CuratedLooks() {
                 return (
                   <div
                     key={spot.id}
-                    className="absolute z-10"
+                    className="absolute z-10 hover:z-50"
                     style={{ left: spot.x, top: spot.y }}
                   >
                     <div className="group relative">
