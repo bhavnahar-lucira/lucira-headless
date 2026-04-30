@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import LazyImage from "../common/LazyImage";
@@ -184,11 +184,33 @@ export default function CuratedLooks() {
   const isMobile = useMediaQuery("(max-width: 768px)");
   const swiperRef = useRef(null);
   const [activeHotspot, setActiveHotspot] = useState({ slideIndex: null, hotspotId: null });
+  const [looks, setLooks] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchLooks() {
+      try {
+        const res = await fetch("/api/curated-looks");
+        const data = await res.json();
+        if (data.success) {
+          setLooks(data.looks || []);
+        }
+      } catch (err) {
+        console.error("Error fetching curated looks:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchLooks();
+  }, []);
+
+  if (loading) return <div className="py-20 text-center"><div className="w-8 h-8 border-4 border-black border-t-transparent rounded-full animate-spin mx-auto" /></div>;
+  if (!looks.length) return null;
 
   // Group looks for mobile: 2 items per slide (vertical stack)
   const groupedLooks = [];
-  for (let i = 0; i < LOOKS.length; i += 2) {
-    groupedLooks.push(LOOKS.slice(i, i + 2));
+  for (let i = 0; i < looks.length; i += 2) {
+    groupedLooks.push(looks.slice(i, i + 2));
   }
 
   if (isMobile) {
@@ -224,13 +246,13 @@ export default function CuratedLooks() {
                       const globalLookIdx = groupIdx * 2 + lookIdxInGroup;
                       return (
                         <div 
-                          key={look.id}
+                          key={look._id || look.id}
                           className="relative aspect-[4/4.3] overflow-hidden rounded-xl bg-gray-100 shadow-md"
                           onClick={() => setActiveHotspot({ slideIndex: null, hotspotId: null })}
                         >
                           <LazyImage src={look.image} alt={look.name} fill className="object-cover" />
 
-                          {look.hotspots.map((spot) => (
+                          {look.hotspots?.map((spot) => (
                             <div key={spot.id} className="absolute z-10" style={{ left: spot.x, top: spot.y }}>
                               <button
                                 onClick={(e) => {
@@ -241,16 +263,13 @@ export default function CuratedLooks() {
                               >
                                 <span className="absolute h-7 w-7 animate-ping rounded-full bg-white/30" />
                                 <Image src="/images/icons/hotspot-icon.svg" alt="Hotspot" width={20} height={20} />
-                                {/* <span className="absolute h-4 w-0.5 bg-white" />
-                                <span className="absolute h-0.5 w-4 bg-white" />
-                                <span className="relative z-10 h-3 w-3 rounded-full bg-white" /> */}
                               </button>
                             </div>
                           ))}
 
                           {activeHotspot.slideIndex === globalLookIdx && (
                             <div className="absolute bottom-3 left-3 right-3 z-20 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                              {look.hotspots.find(h => h.id === activeHotspot.hotspotId) && (
+                              {look.hotspots?.find(h => h.id === activeHotspot.hotspotId) && (
                                 <Link 
                                   href={look.hotspots.find(h => h.id === activeHotspot.hotspotId).product.href}
                                   onClick={(e) => e.stopPropagation()}
@@ -263,7 +282,9 @@ export default function CuratedLooks() {
                                     <h4 className="text-white text-[11px] font-bold leading-tight line-clamp-1 mb-0.5">{look.hotspots.find(h => h.id === activeHotspot.hotspotId).product.name}</h4>
                                     <div className="flex items-center gap-2">
                                       <span className="text-white font-black text-xs">{look.hotspots.find(h => h.id === activeHotspot.hotspotId).product.price}</span>
-                                      <span className="text-white/50 text-[9px] line-through">{look.hotspots.find(h => h.id === activeHotspot.hotspotId).product.oldPrice}</span>
+                                      {look.hotspots.find(h => h.id === activeHotspot.hotspotId).product.oldPrice && (
+                                        <span className="text-white/50 text-[9px] line-through">{look.hotspots.find(h => h.id === activeHotspot.hotspotId).product.oldPrice}</span>
+                                      )}
                                     </div>
                                   </div>
                                   <div className="w-7 h-7 rounded-full bg-white flex items-center justify-center text-black shrink-0">
@@ -312,9 +333,9 @@ export default function CuratedLooks() {
         </div>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4">
-          {LOOKS.map((occ, index) => (
+          {looks.map((occ, index) => (
             <div
-              key={index}
+              key={occ._id || index}
               className="relative aspect-3/4 overflow-visible rounded-sm bg-gray-100"
             >
               <Link href={occ.href} className="block h-full w-full">
@@ -326,7 +347,7 @@ export default function CuratedLooks() {
                 />
               </Link>
 
-              {occ.hotspots.map((spot) => {
+              {occ.hotspots?.map((spot) => {
                 const xNum = parseFloat(spot.x);
                 const alignRight = xNum > 70;
                 const alignLeft = xNum < 30;
@@ -340,73 +361,72 @@ export default function CuratedLooks() {
                     <div className="group relative">
                       <button
                         type="button"
-                        aria-label={spot.product.name}
+                        aria-label={spot.product?.name}
                         className="relative flex h-7 w-7 -translate-x-1/2 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-white/80 bg-white/20 backdrop-blur-sm"
                       >
                         <span className="absolute h-7 w-7 animate-ping rounded-full bg-white/30" />
                         <Image src="/images/icons/hotspot-icon.svg" alt="Hotspot" width={20} height={20} />
-                                {/* <span className="absolute h-4 w-0.5 bg-white" />
-                                <span className="absolute h-0.5 w-4 bg-white" />
-                                <span className="relative z-10 h-3 w-3 rounded-full bg-white" /> */}
                       </button>
 
-                      <div
-                        className={[
-                          "invisible pointer-events-none absolute top-full z-30 w-60 pt-3 opacity-0 transition-all duration-300 group-hover:visible group-hover:pointer-events-auto group-hover:opacity-100",
-                          alignRight
-                            ? "right-0"
-                            : alignLeft
-                              ? "left-0"
-                              : "left-1/2 -translate-x-1/2",
-                        ].join(" ")}
-                      >
-                        <div className="relative rounded-lg bg-[#4E3A35]/95 p-2 shadow-xl">
-                          <Link
-                            href={spot.product.href}
-                            className="flex items-center gap-3"
-                          >
-                            <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-md bg-white">
-                              <LazyImage
-                                src={spot.product.image}
-                                alt={spot.product.name}
-                                fill
-                                className="object-cover"
-                              />
-                            </div>
-
-                            <div className="min-w-0 flex-1">
-                              <p className="line-clamp-2 text-sm font-bold leading-4 text-white">
-                                {spot.product.name}
-                              </p>
-                              <div className="mt-1 flex items-center gap-2">
-                                <span className="text-sm font-bold text-white">
-                                  {spot.product.price}
-                                </span>
-                                {spot.product.oldPrice && (
-                                  <span className="text-xs text-white/70 line-through mt-1">
-                                    {spot.product.oldPrice}
-                                  </span>
-                                )}
+                      {spot.product && (
+                        <div
+                          className={[
+                            "invisible pointer-events-none absolute top-full z-30 w-60 pt-3 opacity-0 transition-all duration-300 group-hover:visible group-hover:pointer-events-auto group-hover:opacity-100",
+                            alignRight
+                              ? "right-0"
+                              : alignLeft
+                                ? "left-0"
+                                : "left-1/2 -translate-x-1/2",
+                          ].join(" ")}
+                        >
+                          <div className="relative rounded-lg bg-[#4E3A35]/95 p-2 shadow-xl">
+                            <Link
+                              href={spot.product.href}
+                              className="flex items-center gap-3"
+                            >
+                              <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-md bg-white">
+                                <LazyImage
+                                  src={spot.product.image}
+                                  alt={spot.product.name}
+                                  fill
+                                  className="object-cover"
+                                />
                               </div>
-                            </div>
 
-                            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white text-black">
-                              <ArrowRight size={14} />
-                            </div>
-                          </Link>
+                              <div className="min-w-0 flex-1">
+                                <p className="line-clamp-2 text-sm font-bold leading-4 text-white">
+                                  {spot.product.name}
+                                </p>
+                                <div className="mt-1 flex items-center gap-2">
+                                  <span className="text-sm font-bold text-white">
+                                    {spot.product.price}
+                                  </span>
+                                  {spot.product.oldPrice && (
+                                    <span className="text-xs text-white/70 line-through mt-1">
+                                      {spot.product.oldPrice}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
 
-                          <span
-                            className={[
-                              "absolute top-0 h-3 w-3 -translate-y-1/2 rotate-45 bg-[#4E3A35]/95",
-                              alignRight
-                                ? "right-4"
-                                : alignLeft
-                                  ? "left-4"
-                                  : "left-1/2 -translate-x-1/2",
-                            ].join(" ")}
-                          />
+                              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white text-black">
+                                <ArrowRight size={14} />
+                              </div>
+                            </Link>
+
+                            <span
+                              className={[
+                                "absolute top-0 h-3 w-3 -translate-y-1/2 rotate-45 bg-[#4E3A35]/95",
+                                alignRight
+                                  ? "right-4"
+                                  : alignLeft
+                                    ? "left-4"
+                                    : "left-1/2 -translate-x-1/2",
+                              ].join(" ")}
+                            />
+                          </div>
                         </div>
-                      </div>
+                      )}
                     </div>
                   </div>
                 );
