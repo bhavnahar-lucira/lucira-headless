@@ -19,11 +19,12 @@ function InstaSlide({ item, onClick, idx }) {
         src={item.image}
         alt={`Instagram Feed ${item.id}`}
         fill
+        sizes="(max-width: 640px) 80vw, (max-width: 1024px) 40vw, (max-width: 1440px) 25vw, 20vw"
         className={`object-cover transition-all duration-1000 group-hover:scale-110 group-hover:rotate-1`}
       />
       
       {/* Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-end p-6">
+      <div className="absolute inset-0 bg-linear-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-end p-6">
           <p className="text-white text-[10px] font-black uppercase tracking-widest leading-relaxed line-clamp-2">
               {item.caption}
           </p>
@@ -71,7 +72,7 @@ export default function InstagramFeed() {
       <section className="w-full mt-15 py-20 bg-white">
         <div className="container-main grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
           {[1, 2, 3, 4, 5, 6].map(i => (
-            <div key={i} className="aspect-[4/5] bg-gray-100 animate-pulse rounded-lg"></div>
+            <div key={i} className="aspect-4/5 bg-gray-100 animate-pulse rounded-lg"></div>
           ))}
         </div>
       </section>
@@ -117,7 +118,7 @@ export default function InstagramFeed() {
               spaceBetween: 24,
             }
           }}
-          className="insta-swiper !overflow-visible"
+          className="insta-swiper overflow-visible!"
         >
           {feedData.map((item, idx) => (
             <SwiperSlide key={item.id}>
