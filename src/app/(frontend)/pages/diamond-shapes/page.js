@@ -278,7 +278,7 @@ const CollectionProducts = ({ collectionHandle }) => {
               key={product.id || product.handle || i}
               className={isHiddenOnMobile ? "hidden md:block" : ""}
             >
-              <ProductCard product={product} />
+              <ProductCard product={product} index={i + 1} />
             </div>
           );
         })}

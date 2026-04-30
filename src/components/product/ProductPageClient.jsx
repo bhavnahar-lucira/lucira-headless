@@ -72,7 +72,7 @@ import {
 import { addRecentlyViewed, selectRecentlyViewed } from "@/redux/features/recentlyViewed/recentlyViewedSlice";
 import AtcBar from "@/components/AtcBar";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
-import { pushProductView, pushAddToCart, pushAddToWishlist, pushRemoveFromWishlist, formatGtmPrice } from "@/lib/gtm";
+import { pushProductView, pushAddToCart, pushAddToWishlist, pushRemoveFromWishlist, formatGtmPrice, getNumericId, getStandardWishlistPayload } from "@/lib/gtm";
 
 import {
   Sheet,
@@ -573,6 +573,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
         variantId: activeVariant.id,
         variantTitle: activeVariant.title,
         price: activeVariant.price,
+        sku: activeVariant.sku || "",
         image: getValidSrc(activeVariant.image || product.featuredImage || (product.media && product.media[0]?.url)),
         quantity: 1,
         inStock: Boolean(activeVariant.inStock),
@@ -656,19 +657,24 @@ export default function ProductPageClient({ product, complementaryProducts = [],
 
     setWishlistLoading(true);
     try {
+      const currentOrigin = typeof window !== 'undefined' ? window.location.origin : "";
+      const thumbnailImage = getValidSrc(product.images?.[0]?.url || product.featuredImage || (product.media && product.media[0]?.url));
+      const commonTrackingData = getStandardWishlistPayload(product, activeVariant, currentOrigin, thumbnailImage);
+
       if (isWishlisted) {
         if (user?.id) {
           await dispatch(removeWishlistItem(productId)).unwrap();
         } else {
           dispatch(removeGuestWishlistItem(productId));
         }
+        pushRemoveFromWishlist(commonTrackingData);
         toast.success("Removed from wishlist");
       } else {
         const payload = {
           productId,
           productHandle: product.handle || "",
           title: product.title,
-          image: getValidSrc(product.images?.[0]?.url || product.featuredImage || (product.media && product.media[0]?.url)),
+          image: thumbnailImage,
           price: activeVariant?.price || product.price || "",
           comparePrice: activeVariant?.compare_price || product.compare_price || "",
           reviews: product.reviews || null,
@@ -682,15 +688,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
           dispatch(addGuestWishlistItem(payload));
         }
 
-        const currentOrigin = typeof window !== 'undefined' ? window.location.origin : "";
-        pushAddToWishlist({
-          productName: product.title,
-          product_url: `${currentOrigin}/products/${product.handle}?variant=${activeVariant?.id || activeVariant?.shopifyId}`,
-          price: Number(activeVariant?.compare_price || activeVariant?.compareAtPrice || product.compare_price || product.compareAtPrice || activeVariant?.price || product.price || 0),
-          offer_price: Number(activeVariant?.price || product.price || 0),
-          thumbnail_image: getValidSrc(product.images?.[0]?.url || product.featuredImage || (product.media && product.media[0]?.url)),
-          currency: "INR"
-        });
+        pushAddToWishlist(commonTrackingData);
         toast.success("Saved to wishlist");
       }
     } catch (err) {
@@ -745,14 +743,14 @@ export default function ProductPageClient({ product, complementaryProducts = [],
           productName: product.title,
           productType: product.type || "",
           category: product.type || "",
-          subCategory: "0",
+          //subCategory: "0",
           productUrl: currentUrl,
           productUrlw: `/products/${product.handle}`,
           thumbnailImage: productImageUrl,
           image: productImageUrl,
           price: originalPrice,
           offerPrice: sellingPrice,
-          productPersona: null
+          //productPersona: null
         });
       }
     }, [activeVariant, product]);

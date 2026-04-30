@@ -57,6 +57,45 @@ export const pushAddToCart = (data) => {
   });
 };
 
+export const getNumericId = (gid) => {
+  if (!gid) return 0;
+  if (typeof gid === 'number') return gid;
+  const match = String(gid).match(/\d+$/);
+  return match ? Number(match[0]) : 0;
+};
+
+export const getStandardWishlistPayload = (product, variant, currentOrigin, thumbnailImage) => {
+  const getNumeric = (val) => {
+    const num = Number(val);
+    return isNaN(num) ? 0 : num;
+  };
+
+  // Robust SKU resolution
+  const sku = variant?.sku || product?.sku || variant?.variantSku || product?.variantSku || (product?.variants && product?.variants[0]?.sku) || "";
+
+  // Robust Product ID resolution
+  const rawProductId = product?.shopifyId || product?.id || product?.productId || "";
+  const productId = String(getNumericId(rawProductId)) === "0" ? String(rawProductId) : String(getNumericId(rawProductId));
+
+  // Robust Category/Type resolution
+  const productType = product?.type || product?.productType || "";
+  const productCategory = product?.category || product?.productCategory || productType || "";
+
+  return {
+    sku: sku,
+    productId: productId,
+    productName: product?.title || product?.productName || "",
+    brand: 'LuciraJewelry',
+    productCategory: productCategory,
+    productType: productType,
+    price: getNumeric(variant?.price || product?.price || 0),
+    quantity: 1,
+    productUrl: `${currentOrigin}/products/${product?.handle || ""}?variant=${variant?.id || variant?.shopifyId || variant?.variantId || ""}`,
+    thumbnailImage: thumbnailImage || variant?.image || product?.image?.url || product?.image || "",
+    currency: "INR"
+  };
+};
+
 export const pushAddToWishlist = (data) => {
   pushToDataLayer({
     event: "addToWishlist",
