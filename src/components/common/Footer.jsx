@@ -74,18 +74,18 @@ export default function Footer() {
                 </AccordionTrigger>
                 <AccordionContent className="pb-6">
                   <ul className="grid grid-cols-2 gap-y-3 gap-x-4 font-figtree text-[13px]">
-                    <li><Link href="#">Best Sellers</Link></li>
-                    <li><Link href="#">Engagement Rings</Link></li>
+                    <li><Link href="/collections/bestsellers">Best Sellers</Link></li>
+                    <li><Link href="/collections/engagement-rings">Engagement Rings</Link></li>
                     <li><Link href="#">Wedding Rings</Link></li>
-                    <li><Link href="#">Earrings</Link></li>
-                    <li><Link href="#">Bracelets</Link></li>
-                    <li><Link href="#">Necklaces</Link></li>
-                    <li><Link href="#">Nosepins</Link></li>
-                    <li><Link href="#">Men's Rings</Link></li>
-                    <li><Link href="#">Men's Studs</Link></li>
-                    <li><Link href="#">Men's Bracelets</Link></li>
-                    <li><Link href="#">Collections</Link></li>
-                    <li><Link href="#">Gifting</Link></li>
+                    <li><Link href="/collections/earrings">Earrings</Link></li>
+                    <li><Link href="/collections/all-bracelets">Bracelets</Link></li>
+                    <li><Link href="/collections/solitaires-necklaces">Necklaces</Link></li>
+                    <li><Link href="/collections/all-nosepins">Nosepins</Link></li>
+                    <li><Link href="/collections/mens-ring">Men's Rings</Link></li>
+                    <li><Link href="/collections/mens-stud">Men's Studs</Link></li>
+                    <li><Link href="/collections/mens-bracelets">Men's Bracelets</Link></li>
+                    <li><Link href="/collections/akshaya-tritiya-gold-diamond-jewellery">Collections</Link></li>
+                    <li><Link href="/collections/all">Gifting</Link></li>
                   </ul>
                 </AccordionContent>
               </AccordionItem>
@@ -151,7 +151,7 @@ export default function Footer() {
                   <ul className="space-y-3 font-figtree text-[13px]">
                     <li><Link href="/pages/careers">Careers</Link></li>
                     <li><Link href="/pages/franchise-page">Franchise</Link></li>
-                    <li><Link href="store-packaging">Packaging</Link></li>
+                    <li><Link href="/pages/store-packaging">Packaging</Link></li>
                   </ul>
                 </AccordionContent>
               </AccordionItem>
@@ -162,15 +162,15 @@ export default function Footer() {
           <div className="w-full mt-10 mb-8 flex items-center gap-4">
             <span className="font-abhaya text-lg font-bold">Follow Us</span>
             <div className="flex items-center gap-5">
-              <Link href="#"><Facebook size={20} /></Link>
-              <Link href="#"><Instagram size={20} /></Link>
-              <Link href="#"><Youtube size={22} /></Link>
-              <Link href="#">
+              <Link href="https://www.facebook.com/lucirajewelry" target="_blank"><Facebook size={20} /></Link>
+              <Link href="https://www.instagram.com/lucirajewelry" target="_blank"><Instagram size={20} /></Link>
+              <Link href="https://www.youtube.com/@Lucira_Jewelry" target="_blank"><Youtube size={22} /></Link>
+              <Link href="https://in.pinterest.com/Lucira_Jewelry/_created" target="_blank">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.162-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.965 1.406-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.126-2.914 1.002 0 1.485.753 1.485 1.656 0 1.007-.644 2.512-.975 3.907-.276 1.169.587 2.122 1.74 2.122 2.088 0 3.691-2.197 3.691-5.371 0-2.808-2.015-4.776-4.907-4.776-3.344 0-5.305 2.508-5.305 5.1 0 1.011.39 2.096.875 2.69.096.118.11.222.081.334l-.324 1.32c-.052.214-.173.26-.399.162-1.488-.693-2.417-2.868-2.417-4.618 0-3.76 2.731-7.213 7.876-7.213 4.132 0 7.34 2.944 7.34 6.88 0 4.106-2.587 7.41-6.177 7.41-1.206 0-2.34-.627-2.729-1.362l-.744 2.834c-.269 1.027-1 2.316-1.492 3.111 1.052.325 2.16.501 3.31.501 6.621 0 11.988-5.367 11.988-11.987C24.005 5.367 18.639 0 12.017 0z"/>
                 </svg>
               </Link>
-              <Link href="#"><Linkedin size={20} /></Link>
+              <Link href="https://www.linkedin.com/company/lucira-jewelry" target="_blank"><Linkedin size={20} /></Link>
             </div>
           </div>
 
@@ -179,8 +179,6 @@ export default function Footer() {
             <Link href="/pages/privacy-policy">Privacy policy</Link>
             <span className="opacity-40">|</span>
             <Link href="/pages/terms-condition">Terms of service</Link>
-            <span className="opacity-40">|</span>
-            <Link href="#">Cookie Settings</Link>
           </div>
 
           {/* COPYRIGHT */}
@@ -222,19 +220,18 @@ export default function Footer() {
             <div>
               <h4 className="mb-4 text-lg font-extrabold font-abhaya">Shop All</h4>
               <ul className="space-y-2.5 text-sm text-white font-figtree">
-                <li><Link href="#">Best Sellers</Link></li>
-                <li><Link href="#">Engagement Rings</Link></li>
+                <li><Link href="/collections/bestsellers">Best Sellers</Link></li>
+                <li><Link href="/collections/engagement-rings">Engagement Rings</Link></li>
                 <li><Link href="#">Wedding Rings</Link></li>
-                <li><Link href="#">Earrings</Link></li>
-                <li><Link href="#">Bracelets</Link></li>
-                <li><Link href="#">Necklaces</Link></li>
-                <li><Link href="#">Nosepins</Link></li>
-                <li><Link href="#">Men's Rings</Link></li>
-                <li><Link href="#">Men's Studs</Link></li>
-                <li><Link href="#">Men's Bracelets</Link></li>
-                <li><Link href="#">Collections</Link></li>
-                <li><Link href="#">Gifting</Link></li>
-                <li><Link href="#">9KT Collection</Link></li>
+                <li><Link href="/collections/earrings">Earrings</Link></li>
+                <li><Link href="/collections/all-bracelets">Bracelets</Link></li>
+                <li><Link href="/collections/solitaires-necklaces">Necklaces</Link></li>
+                <li><Link href="/collections/all-nosepins">Nosepins</Link></li>
+                <li><Link href="/collections/mens-ring">Men's Rings</Link></li>
+                <li><Link href="/collections/mens-stud">Men's Studs</Link></li>
+                <li><Link href="/collections/mens-bracelets">Men's Bracelets</Link></li>
+                <li><Link href="/collections/akshaya-tritiya-gold-diamond-jewellery">Collections</Link></li>
+                <li><Link href="/collections/all">Gifting</Link></li>
               </ul>
             </div>
 
@@ -262,7 +259,7 @@ export default function Footer() {
               <ul className="space-y-2.5 text-sm text-white font-figtree">
                 <li><Link href="/pages/about-our-company">About Our Company</Link></li>
                 <li><Link href="/pages/purpose-and-value">Purpose & Value</Link></li>
-                <li><Link href="#">Blogs</Link></li>
+                <li><Link href="/blogs/stories">Blogs</Link></li>
                 <li><Link href="/pages/rewards">Rewards</Link></li>
                 <li><Link href="/pages/featured-in">Featured In</Link></li>
                 <li><Link href="/pages/sitemap">Sitemap</Link></li>
@@ -298,12 +295,12 @@ export default function Footer() {
               <div className="space-y-2.5 text-sm text-white font-figtree">
                 <div className="flex items-center gap-2">
                   <Mail size={16} />
-                  <a href="mailto:care@lucirajewelry.com">care@lucirajewelry.com</a>
+                  <a href="mailto:care@lucirajewelry.com" target="_blank">care@lucirajewelry.com</a>
                 </div>
 
                 <div className="flex items-center gap-2">
                   <Phone size={16} />
-                  <a href="tel:+91 9004436052">+91 9004436052</a>
+                  <a href="tel:+91 9004436052" target="_blank">+91 9004436052</a>
                 </div>
               </div>
 
@@ -314,7 +311,7 @@ export default function Footer() {
                 <ul className="space-y-2.5 text-sm text-white font-figtree">
                   <li><Link href="/pages/careers">Careers</Link></li>
                   <li><Link href="/pages/franchise-page">Franchise</Link></li>
-                  <li><Link href="#">Bespoke</Link></li>
+                  <li><Link href="/pages/customized-jewelry">Bespoke</Link></li>
                   <li><Link href="store-packaging">Packaging</Link></li>
                 </ul>
               </div>
@@ -327,21 +324,21 @@ export default function Footer() {
           <p className="text-lg font-extraboldfont-abhaya">Follow Us</p>
 
           <div className="flex items-center gap-4">
-            <Link href="https://www.facebook.com/lucirajewelry">
+            <Link href="https://www.facebook.com/lucirajewelry" target="_balnk">
               <Facebook size={18} />
             </Link>
-            <Link href="https://www.instagram.com/lucirajewelry">
+            <Link href="https://www.instagram.com/lucirajewelry" target="_blank">
               <Instagram size={18} />
             </Link>
-            <Link href="https://www.youtube.com/@Lucira_Jewelry">
+            <Link href="https://www.youtube.com/@Lucira_Jewelry" target="_blank">
               <Youtube size={18} />
             </Link>
-            <Link href="#">
+            <Link href="https://in.pinterest.com/Lucira_Jewelry/_created/" target="_blank">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.162-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.965 1.406-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.126-2.914 1.002 0 1.485.753 1.485 1.656 0 1.007-.644 2.512-.975 3.907-.276 1.169.587 2.122 1.74 2.122 2.088 0 3.691-2.197 3.691-5.371 0-2.808-2.015-4.776-4.907-4.776-3.344 0-5.305 2.508-5.305 5.1 0 1.011.39 2.096.875 2.69.096.118.11.222.081.334l-.324 1.32c-.052.214-.173.26-.399.162-1.488-.693-2.417-2.868-2.417-4.618 0-3.76 2.731-7.213 7.876-7.213 4.132 0 7.34 2.944 7.34 6.88 0 4.106-2.587 7.41-6.177 7.41-1.206 0-2.34-.627-2.729-1.362l-.744 2.834c-.269 1.027-1 2.316-1.492 3.111 1.052.325 2.16.501 3.31.501 6.621 0 11.988-5.367 11.988-11.987C24.005 5.367 18.639 0 12.017 0z"/>
               </svg>
             </Link>
-            <Link href="https://www.linkedin.com/company/lucira-jewelry">
+            <Link href="https://www.linkedin.com/company/lucira-jewelry" target="_blank">
               <Linkedin size={18} />
             </Link>
           </div>
@@ -358,8 +355,6 @@ export default function Footer() {
             <Link href="/pages/privacy-policy">Privacy policy</Link>
             <span>|</span>
             <Link href="/pages/terms-condition">Terms of service</Link>
-            <span>|</span>
-            <Link href="#">Cookie Settings</Link>
           </div>
         </div>
       </div>

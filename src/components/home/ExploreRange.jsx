@@ -16,10 +16,10 @@ const CATEGORIES = [
   { name: "Earrings", image: "/images/range/Earrings.jpg", href: "/collections/earrings" },
   { name: "Bracelets", image: "/images/range/Bracelets.jpg", href: "/collections/bracelets" },
   { name: "Necklaces", image: "/images/range/Necklaces.jpg", href: "/collections/all-necklaces" },
-  { name: "Nosepins", image: "/images/range/5.jpg", href: "/collections/all-nosepins" },
+  { name: "Nosepins", image: "/images/range/Nosepin.jpg", href: "/collections/all-nosepins" },
   { name: "Mangalsutra", image: "/images/range/Mangalsutra.jpg", href: "/collections/mangalsutra" },
-  { name: "Men's Ring", image: "/images/range/Mens-ring.jpg", href: "/collections/mens-ring" },
-  { name: "Men's Stud", image: "/images/range/Mens-Stud.jpg", href: "/collections/mens-stud" },
+  { name: "Men's Ring", image: "/images/range/MensRing.jpg", href: "/collections/mens-ring" },
+  { name: "Men's Stud", image: "/images/range/MensStud.jpg", href: "/collections/mens-stud" },
 ];
 
 export default function ExploreRange() {
