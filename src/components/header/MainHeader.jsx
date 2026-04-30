@@ -1,22 +1,22 @@
 "use client";
 import { useState, useEffect } from "react";
-import { Search, Store, Heart, ShoppingBag, CirclePile, LogOut, User as UserIcon } from "lucide-react";
+import { LogOut } from "lucide-react";
 import Image from "next/image";
-import { AuthDialog } from "@/components/auth/AuthDialog";
-import { useSelector, useDispatch } from "react-redux";
-import { logout, setAvatar } from "@/redux/features/user/userSlice";
-import { fetchCart, clearCart } from "@/redux/features/cart/cartSlice";
-import {
-  mergeGuestWishlist,
-  restoreGuestWishlist,
-  clearWishlist,
-} from "@/redux/features/wishlist/wishlistSlice";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Link from "next/link";
 import SearchPopup from "./SearchPopup";
 import { AnimatePresence, motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { pushLogout, pushViewCart } from "@/lib/gtm";
+import { useAuth } from "@/hooks/useAuth";
+import { useDispatch, useSelector } from "react-redux";
+import { setAvatar } from "@/redux/features/user/userSlice";
+import { fetchCart, clearCart } from "@/redux/features/cart/cartSlice";
+import {
+  mergeGuestWishlist,
+  restoreGuestWishlist,
+  clearWishlist,
+} from "@/redux/features/wishlist/wishlistSlice";
 
 const INSURANCE_VARIANT_ID = "gid://shopify/ProductVariant/47709366026458";
 const GOLDCOIN_VARIANT_ID = "gid://shopify/ProductVariant/47661824082138";
@@ -73,7 +73,7 @@ const SEARCH_PLACEHOLDERS = [
 
 export default function MainHeader() {
   const router = useRouter();
-  const [open, setOpen] = useState(false);
+  const { user, logout: authLogout, openLogin } = useAuth();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -82,7 +82,6 @@ export default function MainHeader() {
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
 
   const dispatch = useDispatch();
-  const { user } = useSelector((state) => state.user);
   const { totalQuantity, totalAmount, items } = useSelector((state) => state.cart);
   const wishlistItems = useSelector((state) => state.wishlist.items);
   const guestWishlistItems = useSelector((state) => state.wishlist.guestItems);
@@ -233,7 +232,7 @@ export default function MainHeader() {
     } catch (err) {
       console.error("Logout request failed:", err);
     } finally {
-      dispatch(logout());
+      authLogout();
       dispatch(clearCart());
       dispatch(restoreGuestWishlist());
       router.push("/");
@@ -358,7 +357,7 @@ export default function MainHeader() {
               onClick={() => {
                 const path = window.location.pathname;
                 if (path !== "/login" && path !== "/register") {
-                  setOpen(true);
+                  openLogin();
                 }
               }} 
             >
@@ -381,7 +380,7 @@ export default function MainHeader() {
               onClick={() => {
                 const path = window.location.pathname;
                 if (path !== "/login" && path !== "/register") {
-                  setOpen(true);
+                  openLogin();
                 }
               }} 
               className="relative group p-1"
@@ -409,7 +408,6 @@ export default function MainHeader() {
         </div>
       </div>
 
-      <AuthDialog open={open} onOpenChange={setOpen} />
     </div>
   );
 }
