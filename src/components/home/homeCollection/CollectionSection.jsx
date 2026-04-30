@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
 
-export default function CollectionSection ({ title, subtitle, tabs = [], children, page, colCat, onTabChange, loading }) {
+export default function CollectionSection ({ title, subtitle, tabs = [], children, page, colCat, colLink, onTabChange, loading }) {
   const [activeTab, setActiveTab] = useState(tabs[0] || "");
 
   const handleTabClick = (tab) => {
@@ -46,8 +46,8 @@ export default function CollectionSection ({ title, subtitle, tabs = [], childre
           {children}
         </div>
 
-        {page === "home" && colCat && (
-          <Link href="/collections/gemstone-jewelry" className="flex justify-center mt-4 md:mt-2">
+        {page === "home" && colCat && colLink && (
+          <Link href={colLink} className="flex justify-center mt-4 md:mt-2">
             <Button className="w-full md:w-auto px-7 py-3 h-auto text-sm md:text-base font-bold uppercase rounded-sm bg-primary hover:bg-[#4A3934] text-white transition-colors">
               {colCat}
             </Button>

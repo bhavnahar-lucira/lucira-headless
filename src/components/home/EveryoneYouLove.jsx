@@ -32,6 +32,7 @@ export default function EveryoneYouLove() {
                 src={occ.image} 
                 alt={occ.name} 
                 fill 
+                sizes="(max-width: 768px) 50vw, 25vw"
                 className="object-cover transition-transform duration-700 group-hover:scale-105"
               />
               <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/5 to-transparent pointer-events-none" />

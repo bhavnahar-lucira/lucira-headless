@@ -303,7 +303,7 @@ export default function CuratedLooks() {
     <section className="mt-16 w-full bg-[#FEF5F1] py-10">
       <div className="container-main">
         <div className="mb-6 text-center">
-          <h2 className="main-title mb-2 font-abhaya font-extrabold">
+          <h2 className="text-3xl md:text-4xl mb-2 font-abhaya font-extrabold">
             Curated Looks For You
           </h2>
           <p className="text-base text-black">

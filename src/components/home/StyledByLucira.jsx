@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useMemo } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules";
 import StyledVideoCard from "./StyledCard";
@@ -9,7 +9,7 @@ import VideoPopup from "./VideoPopup";
 import "swiper/css";
 import "swiper/css/navigation";
 
-const videoData = [
+const VIDEO_DATA = [
   {
     video: "https://www.lucirajewelry.com/cdn/shop/videos/c/vp/6f8b91e03c4740e6b497e9fd12cfb809/6f8b91e03c4740e6b497e9fd12cfb809.HD-1080p-4.8Mbps-66567656.mp4",
     products: [
@@ -180,6 +180,13 @@ export default function StyledByLucira() {
   const [popupState, setPopupState] = useState({ isOpen: false, index: 0 });
   const swiperRef = useRef(null);
 
+  // Close popup handler
+  const handleClose = () => setPopupState((prev) => ({ ...prev, isOpen: false }));
+
+  // Open popup handler
+  const handleOpen = (index) => setPopupState({ isOpen: true, index });
+
+
   return (
     <section className="w-full my-10 md:my-15 bg-white overflow-hidden">
       <div className="container-main">
@@ -190,45 +197,32 @@ export default function StyledByLucira() {
         <div className="relative w-full group/slider">
           <Swiper
             modules={[Navigation]}
-            onSwiper={(swiper) => {
-              swiperRef.current = swiper;
-            }}
+            onSwiper={(swiper) => (swiperRef.current = swiper)}
             navigation={{
               prevEl: ".main-prev",
               nextEl: ".main-next",
             }}
             slidesPerView={1.2}
             centeredSlides={true}
-            loop={true}
+            loop={VIDEO_DATA.length > 5}
             slidesPerGroup={1}
             spaceBetween={15}
             speed={600}
             grabCursor={true}
             breakpoints={{
-              360: {
-                slidesPerView: 1.2,
-                centeredSlides: true,
-              },
-              640: {
-                slidesPerView: 2.5,
-                centeredSlides: false
-              },
-              1023: {
-                slidesPerView: 4,
-                centeredSlides: true
-              },
-              1370: {
-                slidesPerView: 5,
-                centeredSlides: true
-              },
+              320: { slidesPerView: 1.2 },
+              640: { slidesPerView: 2.5 },
+              1024: { slidesPerView: 4 },
+              1280: { slidesPerView: 5 },
             }}
             className="lucira-swiper overflow-visible!"
           >
-            {videoData.map((item, i) => (
-              <SwiperSlide key={`styled-v-${i}`}>
+            {VIDEO_DATA.map((item, i) => (
+              <SwiperSlide key={`styled-v-${i}`} className="h-full">
                 <StyledVideoCard 
                   video={item.video} 
-                  onClick={() => setPopupState({ isOpen: true, index: i })}
+                  onClick={() => handleOpen(i)}
+                  imageSizes="(max-width: 640px) 80vw, (max-width: 1024px) 40vw, 20vw"
                 />
               </SwiperSlide>
             ))}
@@ -246,8 +240,8 @@ export default function StyledByLucira() {
 
       <VideoPopup 
         isOpen={popupState.isOpen}
-        onClose={() => setPopupState({ ...popupState, isOpen: false })}
-        videoData={videoData}
+        onClose={handleClose}
+        videoData={VIDEO_DATA}
         initialIndex={popupState.index}
       />
     </section>

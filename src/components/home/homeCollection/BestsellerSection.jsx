@@ -42,6 +42,7 @@ export default function BestsellerSection() {
       ]}
       page="home"
       colCat="Shop All Bestsellers"
+      colLink="/collections/bestsellers"
       onTabChange={(tab) => setActiveTab(tab)}
       loading={loading}
     >        
