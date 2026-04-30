@@ -1129,10 +1129,16 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                         return metalOrder.indexOf(a.metal) - metalOrder.indexOf(b.metal);
                       });
 
+                      const colorMap = {
+                        yellow: "linear-gradient(147.45deg, #c59922 17.98%, #ead59e 48.14%, #c59922 83.84%)",
+                        rose: "linear-gradient(154.36deg, #f2b5b5 10.36%, #f8dbdb 68.09%)",
+                        white: "linear-gradient(143.06deg, #dfdfdf 29.61%, #f3f3f3 48.83%, #dfdfdf 66.43%)",
+                      };
+
                       return combinations.map(({ karat, metal }) => {
-                        let colorClass = "bg-[#EBC15C]";
-                        if (metal.includes("White")) colorClass = "bg-[#E5E5E5]";
-                        if (metal.includes("Rose")) colorClass = "bg-[#F6C7C7]";
+                        let colorClass = colorMap.yellow;
+                        if (metal.includes("White")) colorClass = colorMap.white;
+                        if (metal.includes("Rose")) colorClass = colorMap.rose;
                         
                         return (
                           <GoldOption 
@@ -2177,7 +2183,7 @@ function GoldOption({ metal, karat, color, active, onClick, inStock }) {
       className={`border rounded-lg py-2 px-4 cursor-pointer relative flex flex-col items-center gap-3 transition-all ${active ? "border-primary bg-white ring-1 ring-primary shadow-sm" : "border-gray-200 bg-[#F9F9F9] hover:border-gray-300"}`}
     >
       {inStock && <span className={`absolute top-2 left-2 w-1.5 h-1.5 rounded-full bg-[#2DB36F]`}></span>}
-      <div className={`w-7 h-7 rounded-full border border-gray-100 shadow-inner ${color}`}></div>
+      <div className={`w-7 h-7 rounded-full border border-gray-100 shadow-inner`} style={{ background: color }}></div>
       <div className={`text-sm text-center text-black leading-tight uppercase tracking-tight flex flex-col gap-1 ${active ? "font-semibold" : "font-normal"}`}>
         <span>{karat}</span>
         <span>{metal}</span>

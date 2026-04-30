@@ -24,10 +24,10 @@ export function ProductCustomizerMobile({
 }) {
   const [isOpen, setIsOpen] = useState(false);
 
-  const getGoldColorClass = (metal) => {
-    if (metal.includes("White")) return "bg-gradient-to-tr from-[#E5E5E5] to-[#FFFFFF] border border-gray-200";
-    if (metal.includes("Rose")) return "bg-gradient-to-tr from-[#F6C7C7] to-[#FFF0F0] border border-[#FADEDE]";
-    return "bg-gradient-to-tr from-[#EBC15C] to-[#FFF2D0] border border-[#F3E0B5]";
+  const getGoldColor = (metal) => {
+    if (metal.includes("White")) return "linear-gradient(143.06deg, #dfdfdf 29.61%, #f3f3f3 48.83%, #dfdfdf 66.43%)";
+    if (metal.includes("Rose")) return "linear-gradient(154.36deg, #f2b5b5 10.36%, #f8dbdb 68.09%)";
+    return "linear-gradient(147.45deg, #c59922 17.98%, #ead59e 48.14%, #c59922 83.84%)";
   };
 
   const combinations = [];
@@ -65,9 +65,8 @@ export function ProductCustomizerMobile({
         <div className="flex items-center justify-center gap-4 mb-4">
           <div className="flex items-center gap-2">
             <div
-              className={`w-4 h-4 rounded-full ${getGoldColorClass(
-                activeColor
-              )}`}
+              className={`w-4 h-4 rounded-full border border-gray-100 shadow-inner`}
+              style={{ background: getGoldColor(activeColor) }}
             ></div>
             <span className="text-sm font-medium text-gray-900">
               {activeKarat} {activeColor}
@@ -126,9 +125,8 @@ export function ProductCustomizerMobile({
                             <span className="absolute top-2 left-2 w-1.5 h-1.5 rounded-full bg-[#2DB36F]"></span>
                           )}
                           <div
-                            className={`w-7 h-7 rounded-full ${getGoldColorClass(
-                              metal
-                            )}`}
+                            className={`w-7 h-7 rounded-full border border-gray-100 shadow-inner`}
+                            style={{ background: getGoldColor(metal) }}
                           ></div>
                           <div className="text-[11px] text-center text-black leading-tight uppercase font-bold flex flex-col gap-0.5">
                             <span>{karat}</span>

@@ -33,11 +33,11 @@ const CATEGORY_IMAGES = {
 };
 
 const METAL_COLORS = {
-  "Yellow Gold": "linear-gradient(147.45deg, #C59922 17.98%, #EAD59E 48.14%, #C59922 83.84%)",
-  "White Gold": "linear-gradient(143.06deg, #DFDFDF 29.61%, #F3F3F3 48.83%, #DFDFDF 66.43%)",
-  "Rose Gold": "linear-gradient(154.36deg, #F2B5B5 10.36%, #F8DBDB 68.09%)",
+  "Yellow Gold": "linear-gradient(147.45deg, #c59922 17.98%, #ead59e 48.14%, #c59922 83.84%)",
+  "White Gold": "linear-gradient(143.06deg, #dfdfdf 29.61%, #f3f3f3 48.83%, #dfdfdf 66.43%)",
+  "Rose Gold": "linear-gradient(154.36deg, #f2b5b5 10.36%, #f8dbdb 68.09%)",
   "Platinum": "linear-gradient(154.03deg, #DDDDDD 27.25%, #FFFFFF 47.58%, #DDDDDD 74.61%)",
-  "Silver": "linear-gradient(143.06deg, #DFDFDF 29.61%, #F3F3F3 48.83%, #DFDFDF 66.43%)",
+  "Silver": "linear-gradient(143.06deg, #dfdfdf 29.61%, #f3f3f3 48.83%, #dfdfdf 66.43%)",
 };
 
 const STYLE_ICON_FALLBACK = (label) => `/images/styles/${label.toLowerCase().replace(/ /g, "")}.png`;
