@@ -397,7 +397,7 @@ export default function CollectionPage({ params: paramsPromise }) {
         <div className="bg-[#FFF5F1] overflow-hidden">
           <div className="container-main flex flex-col md:flex-row items-center">
             {/* Left Content */}
-            <div className="flex-1 px-6 py-8 md:py-12 md:pr-12">
+            <div className="flex-1">
               <h1 className="text-3xl md:text-4xl font-serif font-bold mb-4 capitalize">
                 {displayTitle}
               </h1>
