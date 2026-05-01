@@ -1,6 +1,32 @@
 const SHOP = "luciraonline";
 const SHOP_DOMAIN = process.env.SHOPIFY_STORE || `${process.env.SHOPIFYSTORE || SHOP}.myshopify.com`;
 
+async function fetchWithRetry(url, options, maxRetries = 5) {
+  let lastError;
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      const res = await fetch(url, options);
+      
+      if (res.status === 429) {
+        // Shopify REST API uses 429 for rate limiting. 
+        // Standard limit is 4/sec, we wait and retry.
+        const waitTime = (i + 1) * 1000 + Math.random() * 500;
+        console.warn(`⚠️ Shopify 429 Rate Limit. Retrying in ${Math.round(waitTime)}ms... (Attempt ${i + 1}/${maxRetries})`);
+        await new Promise(resolve => setTimeout(resolve, waitTime));
+        continue;
+      }
+      
+      return res;
+    } catch (err) {
+      lastError = err;
+      if (i === maxRetries - 1) throw err;
+      const waitTime = (i + 1) * 1000;
+      await new Promise(resolve => setTimeout(resolve, waitTime));
+    }
+  }
+  throw lastError || new Error("Max retries reached");
+}
+
 export async function shopifyStorefrontFetch(query, variables = {}) {
   if (!process.env.STOREFRONT_TOKEN) {
     throw new Error("STOREFRONT_TOKEN not configured");
@@ -34,7 +60,7 @@ export async function shopifyAdminFetch(query, variables = {}) {
     throw new Error("ADMIN_TOKEN or SHOPIFY_ADMIN_TOKEN not configured");
   }
 
-  const res = await fetch(
+  const res = await fetchWithRetry(
     `https://${SHOP_DOMAIN}/admin/api/2024-10/graphql.json`,
     {
       method: "POST",
@@ -49,6 +75,11 @@ export async function shopifyAdminFetch(query, variables = {}) {
   const data = await res.json();
 
   if (data.errors) {
+    // Shopify GraphQL 429s often come back with 200 OK but with errors array 
+    // containing "Throttled" if it's a cost-based limit.
+    if (data.errors.some(e => e.message?.includes("Throttled") || e.extensions?.code === "THROTTLED")) {
+       console.warn("⚠️ Shopify GraphQL Throttled. You might need to reduce query cost or add specific GraphQL retry logic.");
+    }
     console.error("GraphQL Errors:", data.errors);
     throw new Error(data.errors[0]?.message || "GraphQL error");
   }
@@ -69,7 +100,7 @@ export async function shopifyAdminRestFetch(endpoint, params = {}) {
     }
   });
 
-  const res = await fetch(url.toString(), {
+  const res = await fetchWithRetry(url.toString(), {
     method: "GET",
     headers: {
       "Content-Type": "application/json",

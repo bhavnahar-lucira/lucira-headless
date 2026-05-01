@@ -1,6 +1,8 @@
 import { shopifyStorefrontFetch } from "@/lib/shopify";
 import CollectionPageClient from "./CollectionPageClient";
 
+export const revalidate = 3600; // Revalidate every hour
+
 async function getCollectionMetadata(handle) {
   const query = `
     query CollectionSEO($handle: String!) {

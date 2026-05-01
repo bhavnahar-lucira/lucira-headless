@@ -7,6 +7,8 @@ import GoldRatePage from "@/components/pages/gold-rate/GoldRatePage";
 import SilverRatePage from "@/components/pages/silver-rate/SilverRatePage";
 import PlatinumRatePage from "@/components/pages/platinum-rate/PlatinumRatePage";
 
+export const revalidate = 3600; // Revalidate every hour
+
 export default async function Page({ params }) {
   const { handle } = await params;
 

@@ -273,7 +273,11 @@ export async function GET(req) {
       }
     }
 
-    return NextResponse.json(results);
+    return NextResponse.json(results, {
+      headers: {
+        "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=3600",
+      }
+    });
   } catch (error) {
     console.error("❌ Filters Error:", error);
     return NextResponse.json({}, { status: 500 });

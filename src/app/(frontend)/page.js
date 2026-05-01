@@ -6,6 +6,8 @@ import FeatureBar from "@/components/home/FeatureBar";
 import ShopByCategory from "@/components/home/ShopByCategory";
 import JewelryBlogContainer from "@/components/home/JewelryBlogContainer";
 
+export const revalidate = 3600; // Revalidate every hour
+
 // Lazy load below-the-fold components
 const StyledByLucira = dynamic(() => import("@/components/home/StyledByLucira"), { suspense: true });
 const LuxuryMarquee = dynamic(() => import("@/components/product/LuxuryMarquee"), { suspense: true });

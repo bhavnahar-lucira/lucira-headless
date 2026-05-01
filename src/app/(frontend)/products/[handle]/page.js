@@ -2,6 +2,8 @@ import clientPromise from "@/lib/mongodb";
 import { notFound } from "next/navigation";
 import ProductPageClient from "@/components/product/ProductPageClient";
 
+export const revalidate = 3600; // Revalidate every hour
+
 export async function generateMetadata({ params }) {
   const { handle } = await params;
   const product = await getProduct(handle);

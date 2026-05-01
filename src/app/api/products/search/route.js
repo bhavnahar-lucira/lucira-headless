@@ -233,6 +233,10 @@ export async function GET(request) {
         reviews: p.reviews || p.reviewStats || null
       })),
       pagination: { total, page, limit, totalPages: Math.ceil(total / limit) }
+    }, {
+      headers: {
+        "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=3600",
+      }
     });
 
   } catch (error) {

@@ -7,6 +7,8 @@ import {
 import BlogArticleClient from "@/components/blogs/BlogArticleClient";
 import "./blog-article.css";
 
+export const revalidate = 3600; // Revalidate every hour
+
 function stripHtml(value) {
   return value?.replace(/<[^>]*>?/gm, "").replace(/\s+/g, " ").trim() || "";
 }
