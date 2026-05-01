@@ -6,7 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { useSelector, useDispatch } from "react-redux";
-import { logout } from "@/redux/features/user/userSlice";
+import { logout, openAuthDialog, closeAuthDialog, selectIsAuthDialogOpen } from "@/redux/features/user/userSlice";
 import { clearCart } from "@/redux/features/cart/cartSlice";
 import { restoreGuestWishlist } from "@/redux/features/wishlist/wishlistSlice";
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle, SheetClose } from "@/components/ui/sheet";
@@ -100,7 +100,11 @@ export default function MobileHeader() {
   const dispatch = useDispatch();  
   const isProductPage = pathname.startsWith('/products/');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isAuthOpen, setIsAuthOpen] = useState(false);
+  const isAuthOpen = useSelector(selectIsAuthDialogOpen);
+  const setIsAuthOpen = (open) => {
+    if (open) dispatch(openAuthDialog());
+    else dispatch(closeAuthDialog());
+  };
   const [searchQuery, setSearchQuery] = useState("");
   const [showSearch, setShowSearch] = useState(false);
   const [searchResults, setSearchResults] = useState([]);

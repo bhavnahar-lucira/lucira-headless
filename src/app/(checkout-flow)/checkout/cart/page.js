@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import { openAuthDialog, closeAuthDialog, selectIsAuthDialogOpen } from "@/redux/features/user/userSlice";
 import Link from "next/link";
 import CartItem from "@/components/cart/CartItem";
 import CartSummary from "@/components/cart/CartSummary";
@@ -16,9 +17,14 @@ const GOLDCOIN_VARIANT_ID = "gid://shopify/ProductVariant/47661824082138";
 
 export default function CartPage() {
   const router = useRouter();
+  const dispatch = useDispatch();
   const { items, totalQuantity, totalAmount, appliedCoupon } = useSelector((state) => state.cart);  
   const { isAuthenticated } = useSelector((state) => state.user);
-  const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
+  const isAuthDialogOpen = useSelector(selectIsAuthDialogOpen);
+  const setIsAuthDialogOpen = (open) => {
+    if (open) dispatch(openAuthDialog());
+    else dispatch(closeAuthDialog());
+  };
   const summaryRef = useRef(null);
 
   const scrollToSummary = () => {

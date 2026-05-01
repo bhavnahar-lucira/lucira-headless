@@ -4,7 +4,13 @@ import { Search, Store, Heart, ShoppingBag, CirclePile, LogOut, User as UserIcon
 import Image from "next/image";
 import { AuthDialog } from "@/components/auth/AuthDialog";
 import { useSelector, useDispatch } from "react-redux";
-import { logout, setAvatar } from "@/redux/features/user/userSlice";
+import { 
+  logout, 
+  setAvatar, 
+  openAuthDialog, 
+  closeAuthDialog, 
+  selectIsAuthDialogOpen 
+} from "@/redux/features/user/userSlice";
 import { fetchCart, clearCart } from "@/redux/features/cart/cartSlice";
 import {
   mergeGuestWishlist,
@@ -73,7 +79,12 @@ const SEARCH_PLACEHOLDERS = [
 
 export default function MainHeader() {
   const router = useRouter();
-  const [open, setOpen] = useState(false);
+  const dispatch = useDispatch();
+  const isAuthDialogOpen = useSelector(selectIsAuthDialogOpen);
+  const setOpen = (val) => {
+    if (val) dispatch(openAuthDialog());
+    else dispatch(closeAuthDialog());
+  };
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -81,7 +92,6 @@ export default function MainHeader() {
   const [isSearching, setIsSearching] = useState(false);
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
 
-  const dispatch = useDispatch();
   const { user } = useSelector((state) => state.user);
   const { totalQuantity, totalAmount, items } = useSelector((state) => state.cart);
   const wishlistItems = useSelector((state) => state.wishlist.items);
@@ -409,7 +419,7 @@ export default function MainHeader() {
         </div>
       </div>
 
-      <AuthDialog open={open} onOpenChange={setOpen} />
+      <AuthDialog open={isAuthDialogOpen} onOpenChange={setOpen} />
     </div>
   );
 }

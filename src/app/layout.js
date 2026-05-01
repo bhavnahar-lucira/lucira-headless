@@ -89,6 +89,7 @@ export default function RootLayout({ children }) {
           </noscript>
         )}
         <ReduxProvider>
+          <AutoAuthTrigger />
           <QueryProvider> 
             {isProd && (
               <Suspense fallback={null}>
@@ -102,6 +103,10 @@ export default function RootLayout({ children }) {
         </ReduxProvider>
         <ToastProvider />
       </body>
+    </html>
+  );
+}
+    </body>
     </html>
   );
 }
