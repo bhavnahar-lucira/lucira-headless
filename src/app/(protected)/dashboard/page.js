@@ -422,48 +422,9 @@ export default function Dashboard() {
               </button>
             </div>
           </div>
-          </div>
+        </div>
 
-          {/* Product Table Section */}
-          <div className="bg-white dark:bg-zinc-950 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm overflow-hidden p-6 space-y-4">
-          <div className="flex items-center gap-3">
-            <RefreshCw className={`text-zinc-400 ${warming ? 'animate-spin' : ''}`} size={24} />
-            <h2 className="text-xl font-bold">Manual Cache Warmer</h2>
-          </div>
-          <p className="text-sm text-zinc-500">Paste a URL below to force the server to refresh its cache for that specific page.</p>
-
-          <div className="flex flex-col sm:flex-row gap-4">
-            <input
-              type="text"
-              placeholder="https://www.lucirajewelry.com/products/your-product"
-              value={warmUrl}
-              onChange={(e) => setWarmUrl(e.target.value)}
-              className="flex-1 px-4 py-2 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-zinc-200 dark:focus:ring-zinc-800 transition-all"
-            />
-            <button
-              onClick={handleWarmCache}
-              disabled={warming || !warmUrl}
-              className={`px-8 py-2 bg-black dark:bg-white text-white dark:text-black rounded-xl font-bold text-sm uppercase tracking-widest transition-all ${warming || !warmUrl ? 'opacity-50 cursor-not-allowed' : 'hover:scale-[1.02] active:scale-[0.98]'}`}
-            >
-              {warming ? "Warming..." : "Warm Cache"}
-            </button>
-          </div>
-
-          {warmResult && (
-            <div className={`mt-4 p-4 rounded-xl border ${warmResult.error ? 'bg-red-50 border-red-100 text-red-600' : 'bg-green-50 border-green-100 text-green-600'} text-xs font-medium`}>
-              {warmResult.error ? (
-                <p>❌ {warmResult.error}</p>
-              ) : (
-                <div className="flex justify-between items-center">
-                  <p>✅ {warmResult.message}</p>
-                  <span className="font-mono text-[10px] opacity-70">Duration: {warmResult.duration}ms | Status: {warmResult.status}</span>
-                </div>
-              )}
-            </div>
-          )}
-          </div>
-
-          {/* Product Table Section */}
+        {/* Product Table Section */}
         <div className="bg-white dark:bg-zinc-950 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm overflow-hidden">
           <div className="p-6 border-b border-zinc-100 dark:border-zinc-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <h2 className="text-xl font-bold">Imported Inventory</h2>

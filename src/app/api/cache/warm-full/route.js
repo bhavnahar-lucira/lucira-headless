@@ -39,7 +39,7 @@ export async function POST() {
     return NextResponse.json({ error: "A cache warming session is already running" }, { status: 400 });
   }
 
-  const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+  const BASE_URL = (process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000').replace(/\/$/, '');
   const startedAt = new Date();
   
   // 1. Collect all URLs
