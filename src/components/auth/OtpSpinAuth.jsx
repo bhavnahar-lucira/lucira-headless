@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useMemo } from "react";
-import { useRouter } from "next/navigation";
-import { useDispatch } from "react-redux";
+import { useRouter, usePathname } from "next/navigation";
+import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { motion, useAnimation, AnimatePresence } from "framer-motion";
 import {
@@ -14,6 +14,7 @@ import {
 import { login, setAvatar } from "@/redux/features/user/userSlice";
 import { mergeGuestWishlist } from "@/redux/features/wishlist/wishlistSlice";
 import { mergeCart } from "@/redux/features/cart/cartSlice";
+import { pushLogin, pushSignup } from "@/lib/gtm";
 
 const SPIN_PRIZES = [
   { label: "₹1,500 OFF", value: "1500_off", chance: 33.33 },
@@ -50,8 +51,21 @@ export function OtpSpinAuth({
   overrideSubtext = ""
 }) {
   const router = useRouter();
+  const pathname = usePathname();
   const dispatch = useDispatch();
   const controls = useAnimation();
+  const authRedirectPath = useSelector((state) => state.user.authRedirectPath);
+  const redirectTargetRef = useRef(null);
+
+  useEffect(() => {
+    // Priority: Redux > localStorage > Current Path
+    const storedPath = localStorage.getItem("auth_redirect_path");
+    if (authRedirectPath) {
+      redirectTargetRef.current = authRedirectPath;
+    } else if (storedPath) {
+      redirectTargetRef.current = storedPath;
+    }
+  }, [authRedirectPath]);
 
   const [step, setStep] = useState(initialStep); // login, otp, register, success
   const [mobile, setMobile] = useState(initialMobile);
@@ -132,13 +146,27 @@ export function OtpSpinAuth({
   };
 
   const loginSuccess = async (data, skipRedirect = false) => {
+    const target = redirectTargetRef.current || localStorage.getItem("auth_redirect_path") || pathname || "/";
+    localStorage.removeItem("auth_redirect_path"); // Clean up
+    
     const user = data.user || data.customer;
     const userId = user?.id;
+
+    // Track login in GTM
+    pushLogin({
+      id: userId,
+      mobile: mobile,
+      email: user?.email,
+      name: user?.first_name ? `${user.first_name} ${user.last_name || ""}`.trim() : "User"
+    });
     
     dispatch(
       login({
         id: userId,
         mobile,
+        email: user?.email,
+        first_name: user?.first_name,
+        last_name: user?.last_name,
         name:
           user?.first_name && user?.last_name
             ? `${user.first_name} ${user.last_name}`
@@ -159,8 +187,8 @@ export function OtpSpinAuth({
 
     if (!skipRedirect) {
       toast.success("Login Successful");
-      if (onSuccess) onSuccess();
-      else router.push("/");
+      if (onSuccess) onSuccess(target);
+      else router.push(target);
       router.refresh();
     }
   };
@@ -583,8 +611,10 @@ export function OtpSpinAuth({
             <button 
               className="text-white h-[45px] w-full font-normal text-base cursor-pointer transition-opacity uppercase tracking-[0.3px] border-none mt-4 bg-[#b55670] rounded-lg" 
               onClick={() => {
-                if (onSuccess) onSuccess();
-                else router.push("/");
+                const target = redirectTargetRef.current || localStorage.getItem("auth_redirect_path") || pathname || "/";
+                localStorage.removeItem("auth_redirect_path");
+                if (onSuccess) onSuccess(target);
+                else router.push(target);
                 router.refresh();
               }}
             >

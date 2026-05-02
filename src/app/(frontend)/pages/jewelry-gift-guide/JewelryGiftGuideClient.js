@@ -185,11 +185,12 @@ const CollectionSection = ({ settings, products = [], index }) => {
         {displayProducts.length > 0 && (
           <div className="mt-12 md:mt-16">
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-10 md:gap-x-8 md:gap-y-16">
-              {displayProducts.map((product) => (
+              {displayProducts.map((product, idx) => (
                 <ProductCard
                   key={product.id}
                   product={product}
                   collectionHandle={settings.collection}
+                  index={idx + 1}
                 />
               ))}
             </div>

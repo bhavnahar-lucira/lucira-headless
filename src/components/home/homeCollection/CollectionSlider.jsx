@@ -67,9 +67,9 @@ export default function CollectionSlider ({ products = [], loading = false }) {
           }}
           className="w-full overflow-visible!"
         >
-          {displayProducts.map((product) => (
+          {displayProducts.map((product, idx) => (
             <SwiperSlide key={product.id}>
-              <ProductCard product={product} />
+              <ProductCard product={product} index={idx + 1} />
             </SwiperSlide>
           ))}
         </Swiper>

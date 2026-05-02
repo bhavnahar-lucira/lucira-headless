@@ -9,6 +9,7 @@ import {
   registerCustomer,
 } from "@/lib/api";
 import { login, setAvatar } from "@/redux/features/user/userSlice";
+import { pushSignup, pushLogin } from "@/lib/gtm";
 import { mergeGuestWishlist } from "@/redux/features/wishlist/wishlistSlice";
 import { mergeCart } from "@/redux/features/cart/cartSlice";
 
@@ -77,7 +78,50 @@ export function RegisterForm() {
   }, [step, countdown, router]);
 
   const loginSuccess = async (data) => {
-    // ... same as before
+    const user = data.user || data.customer;
+    const userId = user?.id;
+
+    // Track Signup and Login in GTM
+    pushSignup({
+      id: userId,
+      mobile: mobile,
+      email: email,
+      name: `${firstName} ${lastName}`.trim()
+    });
+
+    pushLogin({
+      id: userId,
+      mobile: mobile,
+      email: email,
+      name: `${firstName} ${lastName}`.trim()
+    });
+    
+    dispatch(
+      login({
+        id: userId,
+        mobile,
+        email: user?.email || email,
+        first_name: user?.first_name || firstName,
+        last_name: user?.last_name || lastName,
+        name:
+          (user?.first_name || firstName) && (user?.last_name || lastName)
+            ? `${user?.first_name || firstName} ${user?.last_name || lastName}`
+            : "User",
+      })
+    );
+
+    try {
+      const avRes = await fetch("/api/customer/profile/avatar");
+      if (avRes.ok) {
+        const avData = await avRes.json();
+        if (avData.avatar) dispatch(setAvatar(avData.avatar));
+      }
+    } catch (err) {}
+
+    await dispatch(mergeCart({ userId })).unwrap();
+    await dispatch(mergeGuestWishlist()).unwrap();
+
+    toast.success("Registration Successful");
   };
 
   const handleSpinAndRegister = async () => {

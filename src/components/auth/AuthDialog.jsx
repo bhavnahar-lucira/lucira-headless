@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Dialog,
   DialogContent,
@@ -21,6 +22,8 @@ export function AuthDialog({
   overrideSubtext = ""
 }) {
   const isMobile = useMediaQuery("(max-width: 768px)");
+  const router = useRouter();
+  const pathname = usePathname();
   const [currentStep, setCurrentStep] = useState(initialStep);
 
   useEffect(() => {
@@ -29,9 +32,12 @@ export function AuthDialog({
     }
   }, [open, initialStep]);
 
-  const handleSuccess = () => {
+  const handleSuccess = (redirectPath) => {
     onOpenChange(false);
     if (onSuccess) onSuccess();
+    if (redirectPath && redirectPath !== pathname) {
+      router.push(redirectPath);
+    }
   };
 
   const handleStepChange = (step) => {
