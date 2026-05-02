@@ -4,6 +4,7 @@ const nextConfig = {
   reactCompiler: true,
   compress: true,
   images: {
+    minimumCacheTTL: 31536000, // Cache for 1 year
     formats: ['image/webp', 'image/avif'],
     remotePatterns: [
       {

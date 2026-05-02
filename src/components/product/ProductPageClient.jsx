@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useRef, Suspense, useCallback } from "react";
+import { useState, useEffect, useLayoutEffect, useRef, Suspense, useCallback } from "react";
+// ... (rest of imports)
 import Image from "next/image";
 import {
   Breadcrumb,
@@ -701,13 +702,12 @@ export default function ProductPageClient({ product, complementaryProducts = [],
     }
   };
 
-  // Smooth scroll to top on mount/refresh
-  useEffect(() => {
-    // Small timeout to ensure browser's default scroll restoration is bypassed
-    const timer = setTimeout(() => {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }, 100);
-    return () => clearTimeout(timer);
+  // Reset scroll to top on mount
+  useLayoutEffect(() => {
+    if ('scrollRestoration' in window.history) {
+      window.history.scrollRestoration = 'manual';
+    }
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
   }, []);
 
   // Update active variant when selection changes

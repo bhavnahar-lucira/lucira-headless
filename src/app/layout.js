@@ -64,6 +64,13 @@ export const metadata = {
 export default function RootLayout({ children }) {
   const isProd = process.env.NODE_ENV === "production";
 
+  // Prevent scroll jumping on navigation
+  if (typeof window !== 'undefined') {
+    if ('scrollRestoration' in window.history) {
+      window.history.scrollRestoration = 'manual';
+    }
+  }
+
   return (
     <html lang="en">
       <head>
