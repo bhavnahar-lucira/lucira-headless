@@ -500,17 +500,7 @@ export default function CustomerReviews({
           ))}
         </div>
 
-        {/* Load More Button */}
-        {/* {filteredAndSortedReviews && filteredAndSortedReviews.length > visibleCount && (
-          <div className="mt-12 text-center">
-            <button
-              onClick={() => setVisibleCount(prev => prev + 12)}
-              className="px-10 py-4 bg-white border-2 border-[#5A413F] text-[#5A413F] font-black text-xs uppercase tracking-[0.2em] rounded shadow-sm hover:bg-[#5A413F] hover:text-white transition-all active:scale-95"
-            >
-              Load More Reviews
-            </button>
-          </div>
-        )} */}
+      
 
         {/* Empty State */}
         {!loading && filteredAndSortedReviews.length === 0 && (
