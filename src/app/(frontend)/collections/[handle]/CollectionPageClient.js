@@ -10,7 +10,7 @@ import ProductCardSkeleton from "@/components/product/ProductCardSkeleton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ChevronDown, XIcon, ChevronsDown, Hammer, Filter as FilterIcon, LayoutDashboard, ShoppingBag, Loader2, ListFilter, ArrowUpDown, LayoutGrid, X, SlidersHorizontal } from "lucide-react";
+import { ChevronDown, XIcon, ChevronsDown, Hammer, Filter as FilterIcon, LayoutDashboard, ShoppingBag, Loader2, ListFilter, ArrowUpDown, LayoutGrid, X, SlidersHorizontal, ChevronUp } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area"
 import {
@@ -499,7 +499,7 @@ export default function CollectionPage({ params: paramsPromise }) {
                             className="w-full flex items-center justify-between py-5 hover:opacity-70 transition-opacity"
                           >
                             <h4 className="font-medium text-sm capitalize">{groupKey}</h4>
-                            <ChevronDown
+                            <ChevronUp
                               size={18}
                               className={`transition-transform duration-300 ${
                                 isExpanded ? "rotate-0" : "rotate-180"
