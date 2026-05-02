@@ -8,7 +8,7 @@ import {
   addWishlistItem, 
   removeWishlistItem,
 } from "@/redux/features/wishlist/wishlistSlice";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { toast } from "react-toastify";
 import { pushRemoveFromCart, pushAddToWishlist, getNumericId, getStandardWishlistPayload } from "@/lib/gtm";
 import {
@@ -103,6 +103,7 @@ export default function CartItem({ item, onAuthRequired }) {
 
   const handleMoveToWishlist = async () => {
     if (!isAuthenticated) {
+      localStorage.setItem("pending_wishlist_move", item.variantId);
       toast.info("Please login to move items to wishlist");
       onAuthRequired?.();
       return;
@@ -167,6 +168,16 @@ export default function CartItem({ item, onAuthRequired }) {
       setMovingToWishlist(false);
     }
   };
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      const pendingMoveId = localStorage.getItem("pending_wishlist_move");
+      if (pendingMoveId === item.variantId) {
+        localStorage.removeItem("pending_wishlist_move");
+        handleMoveToWishlist();
+      }
+    }
+  }, [isAuthenticated, item.variantId]);
 
   const handleUpdate = async (type, value) => {
     setUpdating(true);
