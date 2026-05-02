@@ -648,21 +648,8 @@ export default function ShippingPage() {
     const grandTotalValue = subtotalValue + insuranceValue - couponDiscountAmount;
 
     const shippingData = {
-      shipping_tier: deliveryMethod === "ship" ? "Standard Shipping" : "Store Pickup",
       value: grandTotalValue,
       currency: "INR",
-      coupon: couponDetails?.code || "NA",
-      address: deliveryMethod === "ship" ? {
-        first_name: selectedAddress?.firstName || "",
-        last_name: selectedAddress?.lastName || "",
-        address1: selectedAddress?.address1 || "",
-        city: selectedAddress?.city || "",
-        zip: selectedAddress?.zip || "",
-        country: selectedAddress?.country || "India"
-      } : {
-        store_name: selectedStore?.name || "",
-        store_code: selectedStore?.code || ""
-      },
       items: (cartItems || []).map((item, idx) => {
         const lowerTitle = (item.title || "").toLowerCase();
         let category = item.type || item.productType || "";
@@ -676,18 +663,18 @@ export default function ShippingPage() {
         }
 
         return {
-          item_id: String(getNumericId(item.productId || item.shopifyId || item.id)),
-          sku: item.sku || "",
-          variant_id: String(getNumericId(item.variantId)),
+          item_id: getNumericId(item.productId || item.shopifyId || item.id),
           item_name: item.title,
           item_variant: item.variantTitle || "",
           item_brand: "Lucira Jewelry",
+          item_category: "",
           price: Number(item.price || 0),
           quantity: item.quantity,
           category: category,
           index: idx
         };
-      })
+      }),
+      coupon: couponDetails?.code || "NA"
     };
 
     pushAddShippingInfo(shippingData);

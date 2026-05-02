@@ -57,8 +57,8 @@ export default function CartPage() {
           else if (item.variantId === INSURANCE_VARIANT_ID) category = "Insurance";
         }
         return {
-          item_id: String(getNumericId(item.productId || item.shopifyId || item.id)),
-          sku: item.sku || "",
+          item_id: getNumericId(item.productId || item.shopifyId || item.id),
+          shopify_product_id: item.sku || "",
           variant_id: String(getNumericId(item.variantId)),
           item_name: item.title,
           item_variant: item.variantTitle || `${item.karat || ""} ${item.color || ""}`.trim(),

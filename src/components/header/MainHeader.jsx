@@ -8,7 +8,6 @@ import SearchPopup from "./SearchPopup";
 import { AnimatePresence, motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { pushLogout, pushViewCart, getStandardCartItem } from "@/lib/gtm";
-import { pushLogout, pushViewCart } from "@/lib/gtm";
 import { useAuth } from "@/hooks/useAuth";
 import { useDispatch, useSelector } from "react-redux";
 import { setAvatar } from "@/redux/features/user/userSlice";

@@ -161,46 +161,29 @@ export const pushViewCart = (cartData) => {
   });
 };
 
-export const pushBeginCheckout = (checkoutData) => {
+const pushEventModel = (event, data) => {
   pushToDataLayer({
-    event: "begin_checkout",
-    eventModel: checkoutData
+    event,
+    eventModel: data
   });
 };
 
-export const pushAddShippingInfo = (shippingData) => {
+const pushEcommerceEvent = (event, data) => {
   pushToDataLayer({
-    event: "add_shipping_info",
-    eventModel: shippingData
+    event,
+    ecommerce: data
   });
 };
 
-export const pushAddPaymentInfo = (paymentData) => {
-  pushToDataLayer({
-    event: "add_payment_info",
-    eventModel: paymentData
-  });
-};
+export const pushBeginCheckout = (checkoutData) => pushEventModel("begin_checkout", checkoutData);
+export const pushAddShippingInfo = (shippingData) => pushEventModel("add_shipping_info", shippingData);
+export const pushAddPaymentInfo = (paymentData) => pushEventModel("add_payment_info", paymentData);
 
-export const pushPurchase = (purchaseData) => {
-  pushToDataLayer({
-    event: 'purchase',
-    ecommerce: purchaseData
-  });
-};
-
-export const pushPaymentFailure = (failureData) => {
-  pushToDataLayer({
-    event: 'Payment failure',
-    ecommerce: failureData
-  });
-};
+export const pushPurchase = (purchaseData) => pushEcommerceEvent("purchase", purchaseData);
+export const pushPaymentFailure = (failureData) => pushEcommerceEvent("Payment failure", failureData);
 
 export const pushRemoveFromCart = (data) => {
-  pushToDataLayer({
-    event: "removeFromCart",
-    cart: data
-  });
+  pushEcommerceEvent("removeFromCart", { product: data });
 };
 
 export const pushRemoveFromWishlist = (data) => {
@@ -243,14 +226,14 @@ export const pushSignup = (userData) => {
 export const pushLogout = (userData) => {
   pushToDataLayer({
     event: 'logout',
-    User: userData // Note uppercase 'User' as per spec
+    user: userData // Standardized to lowercase 'user'
   });
 };
 
 export const pushLogin = (userData) => {
   pushToDataLayer({
     event: 'login',
-    User: userData // Note uppercase 'User' as per spec
+    user: userData // Standardized to lowercase 'user'
   });
 };
 

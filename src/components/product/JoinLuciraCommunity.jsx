@@ -7,6 +7,7 @@ import LazyImage from "../common/LazyImage";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { toast } from "react-toastify";
 import { Loader2 } from "lucide-react";
+import { pushNewsletterSubscription } from "@/lib/gtm";
 
 export function JoinLuciraCommunity() {
   const isMobile = useMediaQuery("(max-width: 768px)");
@@ -40,6 +41,9 @@ export function JoinLuciraCommunity() {
       const data = await response.json();
 
       if (response.ok && data.success) {
+        // GTM tracking
+        pushNewsletterSubscription(email);
+        
         toast.success(data.message || "Successfully subscribed to our newsletter!");
         setEmail("");
       } else {
