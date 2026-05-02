@@ -52,6 +52,7 @@ export default function CustomerReviews({
   const [usedFallback, setUsedFallback] = useState(false);
   const [isWriteReviewOpen, setIsWriteReviewOpen] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [visibleCount, setVisibleCount] = useState(12);
 
   useEffect(() => {
     async function initReviews() {
@@ -490,7 +491,7 @@ export default function CustomerReviews({
 
         {/* Reviews Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 lg:gap-10">
-          {filteredAndSortedReviews?.map((review, idx) => (
+          {filteredAndSortedReviews?.slice(0, visibleCount).map((review, idx) => (
             <ReviewCard
               key={review.id || `review-${idx}`}
               review={review}
@@ -498,6 +499,18 @@ export default function CustomerReviews({
             />
           ))}
         </div>
+
+        {/* Load More Button */}
+        {/* {filteredAndSortedReviews && filteredAndSortedReviews.length > visibleCount && (
+          <div className="mt-12 text-center">
+            <button
+              onClick={() => setVisibleCount(prev => prev + 12)}
+              className="px-10 py-4 bg-white border-2 border-[#5A413F] text-[#5A413F] font-black text-xs uppercase tracking-[0.2em] rounded shadow-sm hover:bg-[#5A413F] hover:text-white transition-all active:scale-95"
+            >
+              Load More Reviews
+            </button>
+          </div>
+        )} */}
 
         {/* Empty State */}
         {!loading && filteredAndSortedReviews.length === 0 && (
