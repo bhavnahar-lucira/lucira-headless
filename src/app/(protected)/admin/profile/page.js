@@ -145,6 +145,8 @@ export default function MyProfilePage() {
         const result = await res.json();
         setProfileImage(result.url);
         toast.success("Profile image updated");
+        // Notify layout/header to refresh avatar
+        window.dispatchEvent(new Event("profile-updated"));
       } else {
         const error = await res.json();
         throw new Error(error.error || "Upload failed");
@@ -168,7 +170,7 @@ export default function MyProfilePage() {
   }
 
   return (
-    <div className="font-figtree space-y-6 md:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="font-figtree space-y-6 md:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 [&_*]:outline-none [&_*]:focus:outline-none [&_*]:focus-visible:outline-none">
 
       {/* ── Header ── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -220,38 +222,38 @@ export default function MyProfilePage() {
 
               {/* First Name */}
               <div className="space-y-2">
-                <label className="font-figtree text-[10px] font-semibold text-zinc-400 uppercase tracking-[0.13em] ml-1">
+                <label className="font-figtree text-xs font-bold text-zinc-400 uppercase tracking-widest ml-1">
                   First Name
                 </label>
                 <Input
                   value={formData.firstName}
                   onChange={(e) => handleInputChange("firstName", e.target.value)}
-                  className="font-figtree h-12 md:h-14 rounded-2xl border-zinc-100 bg-zinc-50/50 focus:bg-white transition-all font-medium text-zinc-900 text-sm"
+                  className="font-figtree h-12 md:h-14 rounded-2xl border-zinc-100 bg-zinc-50/50 focus:bg-white transition-all font-bold text-zinc-900 text-base"
                 />
               </div>
 
               {/* Last Name */}
               <div className="space-y-2">
-                <label className="font-figtree text-[10px] font-semibold text-zinc-400 uppercase tracking-[0.13em] ml-1">
+                <label className="font-figtree text-xs font-bold text-zinc-400 uppercase tracking-widest ml-1">
                   Last Name
                 </label>
                 <Input
                   value={formData.lastName}
                   onChange={(e) => handleInputChange("lastName", e.target.value)}
-                  className="font-figtree h-12 md:h-14 rounded-2xl border-zinc-100 bg-zinc-50/50 focus:bg-white transition-all font-medium text-zinc-900 text-sm"
+                  className="font-figtree h-12 md:h-14 rounded-2xl border-zinc-100 bg-zinc-50/50 focus:bg-white transition-all font-bold text-zinc-900 text-base"
                 />
               </div>
 
               {/* Email — disabled */}
               <div className="space-y-2">
-                <label className="font-figtree text-[10px] font-semibold text-zinc-400 uppercase tracking-[0.13em] ml-1">
+                <label className="font-figtree text-xs font-bold text-zinc-400 uppercase tracking-widest ml-1">
                   Email Address
                 </label>
                 <div className="relative">
                   <Input
                     value={formData.email}
                     disabled
-                    className="font-figtree h-12 md:h-14 rounded-2xl border-zinc-100 bg-zinc-50/50 font-medium text-zinc-400 pl-11 md:pl-12 cursor-not-allowed text-sm"
+                    className="font-figtree h-12 md:h-14 rounded-2xl border-zinc-100 bg-zinc-50/50 font-bold text-zinc-400 pl-11 md:pl-12 cursor-not-allowed text-base"
                   />
                   <Mail
                     className="absolute left-3.5 md:left-4 top-1/2 -translate-y-1/2 text-zinc-300"
@@ -262,14 +264,14 @@ export default function MyProfilePage() {
 
               {/* Phone */}
               <div className="space-y-2">
-                <label className="font-figtree text-[10px] font-semibold text-zinc-400 uppercase tracking-[0.13em] ml-1">
+                <label className="font-figtree text-xs font-bold text-zinc-400 uppercase tracking-widest ml-1">
                   Phone Number
                 </label>
                 <div className="relative">
                   <Input
                     value={formData.phone}
                     onChange={(e) => handleInputChange("phone", e.target.value)}
-                    className="font-figtree h-12 md:h-14 rounded-2xl border-zinc-100 bg-zinc-50/50 focus:bg-white transition-all font-medium text-zinc-900 pl-11 md:pl-12 text-sm"
+                    className="font-figtree h-12 md:h-14 rounded-2xl border-zinc-100 bg-zinc-50/50 focus:bg-white transition-all font-bold text-zinc-900 pl-11 md:pl-12 text-base"
                   />
                   <Phone
                     className="absolute left-3.5 md:left-4 top-1/2 -translate-y-1/2 text-zinc-300"

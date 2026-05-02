@@ -11,26 +11,31 @@ async function getCustomerAccessToken() {
 }
 
 async function getCustomerId(customerAccessToken) {
-  const data = await shopifyStorefrontFetch(`
-    query($customerAccessToken: String!) {
-      customer(customerAccessToken: $customerAccessToken) {
-        id
+  try {
+    const data = await shopifyStorefrontFetch(`
+      query($customerAccessToken: String!) {
+        customer(customerAccessToken: $customerAccessToken) {
+          id
+        }
       }
-    }
-  `, { customerAccessToken });
-  return data?.customer?.id;
+    `, { customerAccessToken });
+    return data?.customer?.id;
+  } catch (err) {
+    console.error("Error in getCustomerId:", err.message);
+    return null;
+  }
 }
 
 export async function POST(req) {
   try {
     const customerAccessToken = await getCustomerAccessToken();
     if (!customerAccessToken) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized: No token" }, { status: 401 });
     }
 
     const customerId = await getCustomerId(customerAccessToken);
     if (!customerId) {
-      return NextResponse.json({ error: "Customer not found" }, { status: 404 });
+      return NextResponse.json({ error: "Unauthorized: Could not fetch customer ID from Shopify" }, { status: 401 });
     }
 
     const formData = await req.formData();

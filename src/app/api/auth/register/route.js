@@ -110,11 +110,7 @@ export async function POST(req) {
         ?.customerAccessToken;
 
     if (token?.accessToken) {
-      const expiresAt = new Date(token.expiresAt);
-      const maxAge = Math.max(
-        0,
-        Math.floor((expiresAt.getTime() - Date.now()) / 1000)
-      );
+      const THIRTY_DAYS = 30 * 24 * 60 * 60;
       const res = NextResponse.json({
         status: "REGISTER_SUCCESS",
         user: customer,
@@ -123,7 +119,7 @@ export async function POST(req) {
       res.cookies.set("customerAccessToken", token.accessToken, {
         httpOnly: true,
         path: "/",
-        maxAge,
+        maxAge: THIRTY_DAYS,
         secure: process.env.NODE_ENV === "production",
         sameSite: "lax",
       });

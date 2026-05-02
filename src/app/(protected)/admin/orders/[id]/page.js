@@ -88,12 +88,15 @@ export default function OrderDetailsPage() {
   const fStatus = (order.financialStatus || "").toUpperCase();
 
   if (status === 'FULFILLED' || status === 'DELIVERED') {
-    currentStageIndex = 7;
+    currentStageIndex = stages.length - 1;
   } else if (status === 'IN_PROGRESS' || status === 'IN_TRANSIT') {
     currentStageIndex = 6;
   } else if (fStatus === 'PAID') {
     currentStageIndex = 1;
   }
+
+  // Ensure index is within bounds
+  const progressPct = Math.min(100, (currentStageIndex / (stages.length - 1)) * 100);
 
   return (
     <div className="font-figtree space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -129,23 +132,44 @@ export default function OrderDetailsPage() {
         </div>
 
         <div className="relative">
-          <div className="absolute top-5 left-0 w-full h-1 bg-zinc-100 hidden md:block" />
-          <div className="absolute top-5 left-0 h-1 bg-primary hidden md:block transition-all duration-1000" style={{ width: `${(currentStageIndex / (stages.length - 1)) * 100}%` }} />
+          {/* Desktop Timeline Track */}
+          <div className="absolute top-5 left-[20px] right-[20px] h-1 bg-zinc-100 hidden md:block rounded-full overflow-hidden">
+            <div 
+              className="h-full bg-primary transition-[width] duration-1000 ease-out" 
+              style={{ width: `${(currentStageIndex / (stages.length - 1)) * 100}%` }} 
+            />
+          </div>
+
+          {/* Mobile Timeline Track */}
+          <div className="absolute left-[20px] top-5 bottom-5 w-1 bg-zinc-100 md:hidden rounded-full overflow-hidden">
+            <div 
+              className="w-full bg-primary transition-[height] duration-1000 ease-out" 
+              style={{ height: `${(currentStageIndex / (stages.length - 1)) * 100}%` }} 
+            />
+          </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-8 gap-6 relative z-10">
+          <div className="flex flex-col md:flex-row relative z-10 w-full">
             {stages.map((stage, index) => {
               const isCompleted = index <= currentStageIndex;
               const isCurrent = index === currentStageIndex;
               
               return (
-                <div key={stage} className="flex flex-row md:flex-col items-center gap-4 md:text-center">
-                  <div className={`size-10 rounded-full flex items-center justify-center border-4 transition-all duration-500 shrink-0 ${
+                <div key={stage} className={`flex flex-row md:flex-col gap-4 flex-1 items-center ${
+                  index === 0 ? "md:items-start" : 
+                  index === stages.length - 1 ? "md:items-end" : 
+                  "md:items-center"
+                }`}>
+                  <div className={`size-10 rounded-full flex items-center justify-center border-4 transition-all duration-500 shrink-0 z-20 ${
                     isCompleted ? "bg-primary border-primary text-white" : "bg-white border-zinc-100 text-zinc-300"
                   } ${isCurrent ? "scale-125 shadow-lg shadow-primary/20 ring-4 ring-primary/10" : ""}`}>
                     {isCompleted ? <CheckCircle2 size={16} /> : <div className="size-2 bg-current rounded-full" />}
                   </div>
-                  <div className="space-y-1">
-                    <p className={`text-[10px] font-bold uppercase tracking-widest mb-4 ${isCompleted ? "text-zinc-900" : "text-zinc-400"}`}>
+                  <div className={`space-y-1 ${
+                    index === 0 ? "md:text-left" : 
+                    index === stages.length - 1 ? "md:text-right" : 
+                    "md:text-center"
+                  }`}>
+                    <p className={`text-[10px] font-bold uppercase tracking-widest ${isCompleted ? "text-zinc-900" : "text-zinc-400"}`}>
                       {stage}
                     </p>
                     {index === 0 && (

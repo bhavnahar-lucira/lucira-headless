@@ -55,6 +55,11 @@ export function OtpSpinAuth({
   const [step, setStep] = useState(initialStep); // login, otp, register, success
   const [mobile, setMobile] = useState(initialMobile);
 
+  const handleStepChange = (newStep) => {
+    if (onStepChange) onStepChange(newStep);
+    else setStep(newStep);
+  };
+
   useEffect(() => {
     setStep(initialStep);
   }, [initialStep]);
@@ -72,6 +77,7 @@ export function OtpSpinAuth({
   const [wonPrize, setWonPrize] = useState(null);
   const [isSpinning, setIsSpinning] = useState(false);
   const [consent, setConsent] = useState(true);
+  const [pendingRegister, setPendingRegister] = useState(false);
 
   const otpRefs = [useRef(), useRef(), useRef(), useRef()];
   const mobileRef = useRef();
@@ -164,7 +170,7 @@ export function OtpSpinAuth({
     try {
       await sendOtpApi(mobile);
       toast.success("OTP Sent");
-      setStep("otp");
+      handleStepChange("otp");
       setTimer(30);
     } catch (err) {
       toast.error(err.message || "Failed to send OTP");
@@ -180,7 +186,24 @@ export function OtpSpinAuth({
     try {
       const data = await verifyOtpApi(mobile, otpValue);
       if (data.status === "REGISTER_REQUIRED" || data.type === "register") {
-        setStep("register");
+        if (pendingRegister) {
+          // Verification success, now complete the pending registration
+          const regData = await registerCustomer({
+            firstName,
+            lastName,
+            email,
+            mobile,
+            wonPrize: wonPrize?.value,
+            prizeLabel: wonPrize?.label,
+          });
+          if (regData.status === "REGISTER_SUCCESS" || regData.type === "success") {
+            loginSuccess(regData, true);
+            handleStepChange("success");
+            setPendingRegister(false);
+          }
+        } else {
+          handleStepChange("register");
+        }
       } else if (data.status === "LOGIN" || data.type === "success") {
         loginSuccess(data);
       }
@@ -261,21 +284,13 @@ export function OtpSpinAuth({
     setTimeout(async () => {
       try {
         setLoading(true);
-        const data = await registerCustomer({
-          firstName,
-          lastName,
-          email,
-          mobile,
-          wonPrize: prize.value,
-          prizeLabel: prize.label,
-        });
-
-        if (data.status === "REGISTER_SUCCESS" || data.type === "success") {
-          loginSuccess(data, true);
-          setStep("success");
-        }
+        await sendOtpApi(mobile);
+        toast.success("OTP Sent for verification");
+        setPendingRegister(true);
+        handleStepChange("otp");
+        setTimer(30);
       } catch (err) {
-        toast.error(err.message || "Registration failed");
+        toast.error(err.message || "Failed to send OTP");
         setIsSpinning(false);
       } finally {
         setLoading(false);
@@ -344,7 +359,7 @@ export function OtpSpinAuth({
           </div>
         </div>
       ) : (
-        (step === "login" || step === "otp" || step === "success") && (
+        /* (step === "login" || step === "otp" || step === "success") && (
           <div 
             className="w-full h-[175px] md:h-full md:w-[55%] bg-center bg-cover bg-no-repeat"
             style={{ 
@@ -353,25 +368,28 @@ export function OtpSpinAuth({
                 : 'url("https://www.lucirajewelry.com/cdn/shop/files/Jan-Popup-Desktop-New_2.jpg?v=1769844544")' 
             }}
           />
-        )
+        ) */
+        null
       )}
 
       <div className={`flex flex-col w-full p-5 md:p-8 md:justify-center ${!showWheel ? "md:w-[50%]" : "md:w-[50%]"}`}>
-        <div className="text-center mb-4">
-          <img
-            src="https://www.lucirajewelry.com/cdn/shop/files/LJ_Logo_Pink.svg"
-            width="120"
-            height="49"
-            alt="lucira jewelry logo"
-            className="mx-auto"
-          />
-        </div>
+        {!(isMobileView && step === "register") && (
+          <div className="text-center mb-4">
+            <img
+              src="https://www.lucirajewelry.com/cdn/shop/files/LJ_Logo_Pink.svg"
+              width="120"
+              height="49"
+              alt="lucira jewelry logo"
+              className="mx-auto"
+            />
+          </div>
+        )}
 
         {step === "login" && (
           <>
-            <p className="mb-2 text-center text-xl leading-tight font-medium text-black uppercase mx-auto mt-4">{overrideHeading || "WELCOME TO LUCIRA"}</p>
-            <p className="text-base font-medium text-[#5B5B5B] text-center mb-5 tracking-wider leading-relaxed capitalize max-w-[300px] mx-auto">{overrideSubtext || "Welcome To The Jewelry World Of Lucira!"}</p>
-            <div className="flex items-center border border-[#e2e2e2] h-[45px] px-4 rounded-lg bg-white">
+            <p className="mb-2 text-center text-xl leading-tight font-medium text-black uppercase mx-auto mt-0">{overrideHeading || "WELCOME TO LUCIRA"}</p>
+            <p className="text-base font-medium text-[#5B5B5B] text-center mb-3 tracking-wider leading-relaxed capitalize max-w-[100%] mx-auto">{overrideSubtext || "Welcome To The Jewelry World Of Lucira!"}</p>
+            <div className="flex items-center border border-[#e2e2e2] h-[45px] px-4 rounded-sm bg-white">
               <span className="text-base font-normal mr-2.5 pr-3 border-r border-[#d0d0d0]">+91</span>
               <input
                 ref={mobileRef}
@@ -411,16 +429,16 @@ export function OtpSpinAuth({
               <span>100% Secured & Spam Free</span>
             </div>
             <p className="text-center text-base mt-2.5 text-[#5B5B5B]">
-              New user? <span className="cursor-pointer font-bold underline text-[#5a413f]" onClick={() => onStepChange ? onStepChange("register") : setStep("register")}>Register</span>
+              New user? <span className="cursor-pointer font-bold underline text-[#5a413f]" onClick={() => handleStepChange("register")}>Register</span>
             </p>
           </>
         )}
 
         {step === "otp" && (
           <>
-            <p className="mb-2 text-center text-base leading-tight font-medium text-black uppercase mx-auto mt-4">{overrideHeading || "VERIFY OTP"}</p>
-            <p className="text-base font-medium text-[#5B5B5B] text-center mb-5 tracking-wider leading-relaxed capitalize max-w-[300px] mx-auto">{overrideSubtext || `Sent to +91 ${mobile}`}</p>
-            <div className="flex justify-center gap-2 mt-4 mb-4">
+            <p className="mb-2 text-center text-xl leading-tight font-medium text-black uppercase mx-auto mt-0">{overrideHeading || "VERIFY OTP"}</p>
+            <p className="text-base font-medium text-[#5B5B5B] text-center mb-5 tracking-wider leading-relaxed capitalize max-w-[100%] mx-auto">{overrideSubtext || `Sent to +91 ${mobile}`}</p>
+            <div className="flex justify-center gap-2 mt-2 mb-2">
               {otp.map((digit, i) => (
                 <input
                   key={i}
@@ -457,16 +475,16 @@ export function OtpSpinAuth({
 
         {step === "register" && (
           <div className="overflow-hidden">
-            <p className="mb-2 text-center text-base leading-tight font-medium text-black uppercase mx-auto mt-4">Register to Win a Reward</p>
-            <p className="text-base font-medium text-[#5B5B5B] text-center mb-5 tracking-wider leading-relaxed capitalize max-w-[300px] mx-auto">Try Your Luck! Win a Diamond Pendant</p>
+            <p className="mb-2 text-center text-xl leading-tight font-medium text-black uppercase mx-auto mt-0">Register to Win a Reward</p>
+            <p className="text-base font-medium text-[#5B5B5B] text-center mb-3 tracking-wider leading-relaxed capitalize max-w-[100%] mx-auto">Try Your Luck! Win a Diamond Pendant</p>
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-3.5">
+              <div className="grid grid-cols-2 gap-3.5 mb-2">
                 <div className="flex flex-col">
                   <label className="text-base flex mb-1.5 font-normal text-[#666]">First Name <span className="text-red-500 ml-1">*</span></label>
                   <input
                     ref={firstNameRef}
                     type="text"
-                    className="w-full h-10 px-4 text-base border border-[#e2e2e2] rounded-lg outline-none bg-white"
+                    className="w-full h-10 px-4 text-base border border-[#e2e2e2] rounded-sm outline-none bg-white"
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
                   />
@@ -475,17 +493,17 @@ export function OtpSpinAuth({
                   <label className="text-base flex mb-1.5 font-normal text-[#666]">Last Name <span className="text-red-500 ml-1">*</span></label>
                   <input
                     type="text"
-                    className="w-full h-10 px-4 text-base border border-[#e2e2e2] rounded-lg outline-none bg-white"
+                    className="w-full h-10 px-4 text-base border border-[#e2e2e2] rounded-sm outline-none bg-white"
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
                   />
                 </div>
               </div>
-              <div className="flex flex-col">
+              <div className="flex flex-col mb-2">
                 <label className="text-base flex mb-1.5 font-normal text-[#666]">Email Address <span className="text-red-500 ml-1">*</span></label>
                 <input
                   type="email"
-                  className="w-full h-10 px-4 text-base border border-[#e2e2e2] rounded-lg outline-none bg-white"
+                  className="w-full h-10 px-4 text-base border border-[#e2e2e2] rounded-lg outline-none bg-white rounded-sm"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                 />
@@ -493,7 +511,7 @@ export function OtpSpinAuth({
 
               <div className="flex flex-col">
                 <label className="text-base flex mb-1.5 font-normal text-[#666]">Phone Number</label>
-                <div className="flex items-center border border-[#e2e2e2] h-[45px] px-4 rounded-lg bg-white">
+                <div className="flex items-center border border-[#e2e2e2] h-[45px] px-4 rounded-sm bg-white">
                   <span className="text-base font-normal mr-2.5 pr-3 border-r border-[#d0d0d0]">+91</span>
                   <input
                     type="tel"
@@ -521,7 +539,7 @@ export function OtpSpinAuth({
               </div>
 
               <button
-                className="text-white h-[45px] w-full font-normal text-base cursor-pointer transition-opacity uppercase tracking-[0.3px] border-none mt-3 bg-[#b55670] rounded-lg disabled:opacity-50"
+                className="text-white h-[45px] w-full font-normal text-base cursor-pointer transition-opacity uppercase tracking-[0.3px] border-none mt-0 bg-[#b55670] rounded-lg disabled:opacity-50"
                 onClick={handleSpinAndRegister}
                 disabled={isSpinning || loading}
               >
@@ -534,7 +552,7 @@ export function OtpSpinAuth({
         {step === "success" && (
           <div className="text-center">
             <div className="text-4xl mb-4 text-center">🎉</div>
-            <p className="mb-2 text-center text-base leading-tight font-medium text-black uppercase mx-auto mt-4 max-w-[245px]">Your Account has been created Successfully</p>
+            <p className="mb-2 text-center text-xl leading-tight font-medium text-black uppercase mx-auto mt-0 max-w-[245px]">Your Account has been created Successfully</p>
             <p className="text-xs font-medium text-[#5B5B5B] text-center mb-3 tracking-wider leading-relaxed capitalize max-w-[280px] mx-auto mt-3">
               Your reward is ready, Apply this on checkout
             </p>
@@ -562,7 +580,7 @@ export function OtpSpinAuth({
             Already have an account?{" "}
             <span
               className="cursor-pointer font-bold underline text-[#5a413f]"
-              onClick={() => onStepChange ? onStepChange("register") : setStep("login")}
+              onClick={() => handleStepChange("login")}
             >
               Login
             </span>
