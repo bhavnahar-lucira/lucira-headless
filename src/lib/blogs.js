@@ -341,11 +341,30 @@ export async function getMostViewedArticles(limit = 4) {
   const articles = await db
     .collection("articles")
     .aggregate([
+      // Only include articles that have an image (avoids blank cards)
+      { $match: { "image.url": { $exists: true, $ne: null } } },
       {
         $addFields: {
-          viewsInt: { $toInt: { $ifNull: ["$views.value", "0"] } }
+          // Support both nested { views: { value: "123" } } and flat { views: "123" }
+          viewsInt: {
+            $toInt: {
+              $ifNull: [
+                "$views.value",
+                { $ifNull: ["$views", "0"] }
+              ]
+            }
+          }
         }
       },
+      { $sort: { viewsInt: -1, publishedAt: -1 } },
+      // Deduplicate by handle — keeps first occurrence (highest views)
+      {
+        $group: {
+          _id: "$handle",
+          doc: { $first: "$$ROOT" }
+        }
+      },
+      { $replaceRoot: { newRoot: "$doc" } },
       { $sort: { viewsInt: -1, publishedAt: -1 } },
       { $limit: limit }
     ])

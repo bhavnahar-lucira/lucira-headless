@@ -102,7 +102,7 @@ export default function SilverRatePage({ page }) {
             flip_founder_name: base.flip_founder_name || "Rupesh Jain",
             flip_founder_designation: base.flip_founder_designation || "Founder",
             rate_today: `₹ ${(Number(rates.silver_price) * 10 || parseInt(base.rate_today.replace(/[^\d]/g, ''))).toLocaleString('en-IN')}`,
-            rate_avg: `₹ ${(Number(rates.silver_price) * 100 || parseInt(base.rate_avg.replace(/[^\d]/g, ''))).toLocaleString('en-IN')}`,
+            rate_avg: `₹ ${(Number(rates.silver_price) * 1000 || parseInt(base.rate_avg.replace(/[^\d]/g, ''))).toLocaleString('en-IN')}`,
         };
     }, [rates]);
 
