@@ -20,6 +20,7 @@ const WeAreLucira = dynamic(() => import("@/components/home/WeAreLucira"), { sus
 const NoteFromFounder = dynamic(() => import("@/components/home/NoteFromFounder"), { suspense: true });
 const InstagramFeed = dynamic(() => import("@/components/home/InstagramFeed"), { suspense: true });
 const JoinLuciraCommunity = dynamic(() => import("@/components/product/JoinLuciraCommunity").then(mod => ({ default: mod.JoinLuciraCommunity })), { suspense: true });
+const HomeFAQSection = dynamic(() => import("@/components/home/HomeFAQSection"), { suspense: true });
 
 // Refactored Sections
 import BestsellerSection from "@/components/home/homeCollection/BestsellerSection";
@@ -81,14 +82,21 @@ export default function Home() {
       <Suspense fallback={<div className="h-20 bg-gray-100 animate-pulse"></div>}>
         <InstagramFeed />
       </Suspense>
-      
+
       <Suspense fallback={<div className="h-40 bg-gray-50 animate-pulse"></div>}>
         <JewelryBlogContainer />
       </Suspense>
 
+
+
       <Suspense fallback={<div className="h-20 bg-gray-100 animate-pulse"></div>}>
         <JoinLuciraCommunity />
       </Suspense>
+
+      <Suspense fallback={<div className="h-20 bg-gray-50 animate-pulse"></div>}>
+        <HomeFAQSection />
+      </Suspense>
+
     </div>
   );
 }

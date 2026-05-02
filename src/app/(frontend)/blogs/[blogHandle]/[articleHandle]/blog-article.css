@@ -649,7 +649,7 @@
 .lucira-blogs .view-details-text,
 .lucira-blogs .view-details-text * {
   text-decoration: none !important;
-  border-bottom: none !important;
+  /* border-bottom: none !important; */
   box-shadow: none !important;
 }
 
@@ -848,7 +848,7 @@
     scroll-snap-type: x mandatory;
     gap: 16px;
     padding: 10px 20px 10px;
-    margin-left: -20px;
+    margin-left: 0px;
     margin-right: -20px;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
