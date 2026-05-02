@@ -447,7 +447,7 @@ export default function ReviewsPage() {
         </div>
 
         {/* Empty State */}
-        {!loading && mappedReviews.length === 0 && (
+        {!loading && displayedReviews.length === 0 && (
           <div className="text-center py-32 bg-white/30 rounded-3xl border-2 border-dashed border-gray-200">
             <p className="text-gray-400 font-black uppercase tracking-widest mb-4">No reviews found for this rating.</p>
             <button onClick={() => setFilterRating("all")} className="text-[#5A413F] font-black text-xs uppercase tracking-widest border-b-2 border-[#5A413F] pb-1 hover:text-black hover:border-black transition-colors">Show all reviews</button>

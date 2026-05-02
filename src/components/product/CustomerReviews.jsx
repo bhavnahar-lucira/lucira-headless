@@ -12,6 +12,7 @@ import Image from "next/image";
 import { Separator } from "@/components/ui/separator"
 import { useState, useEffect, useMemo } from "react";
 import ReviewDetailedPopup from "@/components/review/ReviewDetailedPopup";
+import WriteReviewForm from "@/components/review/WriteReviewForm";
 import Link from "next/link";
 import {
   Select,
