@@ -481,9 +481,11 @@
   .footer-pages {
     font-family: var(--font-figtree), sans-serif !important;
   }
+
   .footer-pages * {
     font-family: inherit !important;
   }
+
   .footer-pages h2 {
     @apply text-2xl mb-4
   }
@@ -496,6 +498,7 @@
   .footer-pages h6 {
     font-family: var(--font-abhaya), serif !important;
   }
+
   .footer-pages p {
     @apply text-base my-4
   }
