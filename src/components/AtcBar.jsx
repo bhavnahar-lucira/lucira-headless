@@ -93,12 +93,12 @@ export default function AtcBar({
             </Button>
 
             <div className="hidden xl:flex items-center gap-2">
-              <Button asChild className="h-14 w-14 border border-accent text-accent rounded-lg flex items-center justify-center hover:bg-[#FFF5F5] transition-colors">
+              <Button asChild className="h-14 w-14 border border-accent text-accent rounded-lg flex items-center justify-center bg-white hover:bg-[#FFF5F5] transition-colors">
                 <a href="https://wa.me/919004435760?text=Hi,%20I%20want%20to%20book%20home%20trial%20" target="_blank">
                   <Home size={20} />
                 </a>
               </Button>
-              <Button asChild className="h-14 w-14 border border-[#A193E8] text-[#A193E8] rounded-lg flex items-center justify-center hover:bg-[#F5F5FF] transition-colors">
+              <Button asChild className="h-14 w-14 border border-[#A193E8] text-[#A193E8] rounded-lg flex items-center justify-center bg-white hover:bg-[#F5F5FF] transition-colors">
                 <a href="https://wa.me/919004435760?text=Hi,%20I%20want%20to%20book%20an%20appointment%20" target="_blank">
                   <StoreIcon size={20} />
                 </a>
