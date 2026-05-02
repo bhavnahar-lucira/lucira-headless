@@ -446,8 +446,10 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle,
                   try {
                     const currentOrigin = typeof window !== 'undefined' ? window.location.origin : "";
                     const thumbnailImage = galleryImages?.[0]?.url || product.image?.url || "";
+                    
+                    // Prioritize currentVariant's SKU, then product level
                     const commonTrackingData = getStandardWishlistPayload(product, currentVariant, currentOrigin, thumbnailImage);
-
+                    
                     if (isWishlisted) {
                       if (user?.id) {
                         await dispatch(removeWishlistItem(productId)).unwrap();

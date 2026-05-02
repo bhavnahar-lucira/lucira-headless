@@ -624,7 +624,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
         products: {
           productId: String(getNumericId(product.shopifyId || product.id)),
           variantId: getNumericId(activeVariant?.id || activeVariant?.shopifyId),
-          sku: activeVariant?.sku || "",
+          sku: activeVariant?.sku || product?.sku || activeVariant?.variantSku || product?.variantSku || (product?.variants && product?.variants[0]?.sku) || "",
           productName: product.title,
           productType: product.type || "",
           vendor: product.vendor || "Lucira Jewelry",

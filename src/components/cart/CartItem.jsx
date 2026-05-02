@@ -74,9 +74,12 @@ export default function CartItem({ item, onAuthRequired }) {
         lowerTitle.includes("bracelet") ? "Bracelets" : ""
       );
 
+      // Robust SKU resolution for cart items
+      const resolvedSku = item.sku || currentVariant?.sku || item.variantSku || item.item_sku || (variantOptions && variantOptions[0]?.sku) || "";
+
       pushRemoveFromCart({
         productId: String(getNumericId(item.productId || item.shopifyId || item.id)),
-        sku: item.sku || "",
+        sku: resolvedSku,
         variantId: String(getNumericId(item.variantId)),
         productName: item.title,
         productType: categoryFallback,
@@ -133,7 +136,7 @@ export default function CartItem({ item, onAuthRequired }) {
       );
 
       // Robust SKU resolution for cart items
-      const resolvedSku = item.sku || currentVariant?.sku || (variantOptions && variantOptions[0]?.sku) || "";
+      const resolvedSku = item.sku || currentVariant?.sku || item.variantSku || item.item_sku || (variantOptions && variantOptions[0]?.sku) || "";
 
       // Adapt cart item to standard product/variant structure for the helper
       const mockProduct = {

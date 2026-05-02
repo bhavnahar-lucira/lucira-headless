@@ -71,7 +71,16 @@ export const getStandardWishlistPayload = (product, variant, currentOrigin, thum
   };
 
   // Robust SKU resolution
-  const sku = variant?.sku || product?.sku || variant?.variantSku || product?.variantSku || (product?.variants && product?.variants[0]?.sku) || "";
+  const sku = 
+    variant?.sku || 
+    product?.sku || 
+    variant?.variantSku || 
+    product?.variantSku || 
+    variant?.item_sku ||
+    product?.item_sku ||
+    (product?.variants && product?.variants[0]?.sku) || 
+    (product?.variantOptions && product?.variantOptions[0]?.sku) ||
+    "";
 
   // Robust Product ID resolution
   const rawProductId = product?.shopifyId || product?.id || product?.productId || "";
@@ -93,6 +102,48 @@ export const getStandardWishlistPayload = (product, variant, currentOrigin, thum
     productUrl: `${currentOrigin}/products/${product?.handle || ""}?variant=${variant?.id || variant?.shopifyId || variant?.variantId || ""}`,
     thumbnailImage: thumbnailImage || variant?.image || product?.image?.url || product?.image || "",
     currency: "INR"
+  };
+};
+
+export const getStandardCartItem = (item, idx = 0) => {
+  const prodId = String(getNumericId(item.productId || item.shopifyId || item.id));
+  const lowerTitle = (item.title || "").toLowerCase();
+  
+  let category = item.type || item.productType || "";
+  if (!category) {
+    if (lowerTitle.includes("ring")) category = "Rings";
+    else if (lowerTitle.includes("earring") || lowerTitle.includes("bali")) category = "Earrings";
+    else if (lowerTitle.includes("pendant")) category = "Pendants";
+    else if (lowerTitle.includes("bracelet")) category = "Bracelets";
+  }
+
+  // Robust SKU resolution for cart items
+  const variantId = item.variantId || item.id || item.shopifyId || "";
+  const currentVariant = item.variantOptions?.find(v => 
+    String(getNumericId(v.variantId || v.id || v.shopifyId)) === String(getNumericId(variantId))
+  );
+
+  const sku = 
+    item.sku || 
+    currentVariant?.sku || 
+    item.variantSku || 
+    item.item_sku || 
+    (item.variantOptions && item.variantOptions[0]?.sku) || 
+    "";
+  
+  return {
+    id: prodId,
+    sku: sku,
+    variant_id: String(getNumericId(item.variantId)),
+    product_name: item.title,
+    product_type: category,
+    category: "Lucira Jewelry",
+    sub_category: item.variantTitle || category,
+    price: Number(item.comparePrice || item.price || 0),
+    offer_price: Number(item.price || 0),
+    quantity: item.quantity,
+    thumbnail_image: item.image,
+    index_position: idx + 1
   };
 };
 
