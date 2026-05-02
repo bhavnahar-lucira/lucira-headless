@@ -31,6 +31,29 @@ const CATEGORY_IMAGES = {
   "9KT COLLECTION": "/images/menu/candy.jpg",
 };
 
+const MENU_SLIDER_BANNERS = [
+  {
+    href: "/collections/bestsellers",
+    image: "https://cdn.shopify.com/s/files/1/0739/8516/3482/files/Best_Seller_V3.jpg_1.jpg?v=1776596789",
+    alt: "Best Sellers"
+  },
+  {
+    href: "/collections/hexa",
+    image: "https://cdn.shopify.com/s/files/1/0739/8516/3482/files/Hexa_V2.jpg?v=1762843077",
+    alt: "Hexa Collection"
+  },
+  {
+    href: "/collections/sports-collection",
+    image: "https://cdn.shopify.com/s/files/1/0739/8516/3482/files/Bezel_67fedcb7-1524-4b30-95c5-27986e403f21.jpg?v=1762841804",
+    alt: "Sports Collection"
+  },
+  {
+    href: "/collections/cotton-candy",
+    image: "https://cdn.shopify.com/s/files/1/0739/8516/3482/files/Cotton_Candy_Menu_bAr_v2.jpg?v=1766136159",
+    alt: "Cotton Candy"
+  }
+];
+
 const METAL_COLORS = {
   "Yellow Gold": "linear-gradient(147.45deg, #c59922 17.98%, #ead59e 48.14%, #c59922 83.84%)",
   "White Gold": "linear-gradient(143.06deg, #dfdfdf 29.61%, #f3f3f3 48.83%, #dfdfdf 66.43%)",
@@ -443,17 +466,19 @@ export default function MobileHeader() {
     openLogin();
   };
 
-  const renderMainMenu = () => {
+  const renderCollectionsGrid = (activeItem) => {
+    const items = activeItem.items || activeItem.cards || [];
     return (
       <div className="flex flex-col pb-8">
         <div className="grid grid-cols-2 gap-3 px-4 py-4">
-          {MEGA_MENU.map((item, index) => {
-            const label = item.label || item.title;
-            const image = item.mobileBanner || CATEGORY_IMAGES[label] || "/images/menu/engagement-ring.jpg";
+          {items.map((item, index) => {
+            const label = item.title || item.label;
+            const image = item.image || CATEGORY_IMAGES[label] || "/images/menu/engagement-ring.jpg";
             return (
-              <button
+              <Link
                 key={index}
-                onClick={() => handleItemClick(item, index)}
+                href={item.href || "#"}
+                onClick={() => setIsMenuOpen(false)}
                 className="relative aspect-[4/4] overflow-hidden rounded-lg group"
               >
                 <Image
@@ -468,6 +493,56 @@ export default function MobileHeader() {
                     {label}
                   </span>
                 </div>
+              </Link>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
+  const renderMainMenu = () => {
+    return (
+      <div className="flex flex-col pb-8">
+        {/* Horizontal Banner Slider */}
+        <div className="flex gap-3 px-4 pt-4 pb-2 overflow-x-auto" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}>
+          {MENU_SLIDER_BANNERS.map((banner, index) => (
+            <Link
+              key={index}
+              href={banner.href}
+              onClick={() => setIsMenuOpen(false)}
+              className="shrink-0"
+            >
+              <img
+                src={banner.image}
+                alt={banner.alt}
+                className="object-cover rounded-xl block"
+                style={{ width: 'auto', height: '180px' }}
+                loading="lazy"
+              />
+            </Link>
+          ))}
+        </div>
+
+        {/* Text Category Links Grid */}
+        <div className="grid grid-cols-2 gap-2 px-4 py-4">
+          {MEGA_MENU.map((item, index) => {
+            const label = item.label || item.title;
+            const is9kt = label.toLowerCase().includes('9kt');
+            return (
+              <button
+                key={index}
+                onClick={() => handleItemClick(item, index)}
+                className="bg-white border border-gray-200 rounded-sm px-3 py-2.5 text-left flex items-center justify-between gap-1 active:bg-gray-50 transition-colors"
+              >
+                <span className="text-[11px] font-semibold uppercase tracking-wider font-figtree text-black">
+                  {label}
+                </span>
+                {is9kt && (
+                  <span className="text-[9px] font-bold uppercase tracking-wider bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-sm">
+                    New
+                  </span>
+                )}
               </button>
             );
           })}
@@ -624,7 +699,11 @@ export default function MobileHeader() {
                 </SheetHeader>
 
                 <ScrollArea className="flex-grow h-full overflow-y-auto">
-                  {activeMenuPath.length === 0 ? renderMainMenu() : renderSubMenu(activeItem)}
+                  {activeMenuPath.length === 0 ? renderMainMenu() : (
+                    (activeItem?.type === 'image-grid' || (activeItem?.label || activeItem?.title || '').toLowerCase().trim() === 'collections')
+                      ? renderCollectionsGrid(activeItem)
+                      : renderSubMenu(activeItem)
+                  )}
                 </ScrollArea>
               </div>
             </SheetContent>
