@@ -400,7 +400,7 @@ export default function MobileHeader() {
                         );
                       }
 
-                      const iconPath = item.menuIcon || (isShape ? SHAPE_ICON_FALLBACK(item.label) : STYLE_ICON_FALLBACK(item.label));
+                      const iconPath = item.menuIcon || item.megaMenuImage || item.icon || (isShape ? SHAPE_ICON_FALLBACK(item.label) : STYLE_ICON_FALLBACK(item.label));
                       return (
                         <Link 
                           key={i} 
@@ -408,11 +408,11 @@ export default function MobileHeader() {
                           onClick={() => setIsMenuOpen(false)}
                           className="flex flex-col items-center gap-2"
                         >
-                          <div className="w-22 h-22 relative flex items-center justify-center overflow-hidden">
+                          <div className="w-20 h-20 relative flex items-center justify-center overflow-hidden">
                             <SafeImage 
                               src={iconPath} 
                               alt={item.label} 
-                              className="w-18 h-18 object-contain"
+                              className="w-16 h-16 object-contain"
                             />
                           </div>
                           <span className="text-[13px] font-figtree text-center font-normal leading-tight">{item.label}</span>
@@ -439,30 +439,64 @@ export default function MobileHeader() {
             </AccordionItem>
           ))}
 
-          {activeItem.featured && activeItem.featured.length > 0 && (
-            <AccordionItem value="featured" className="border-none">
-               <AccordionTrigger className="text-sm font-bold uppercase tracking-widest hover:no-underline py-4">
-                Featured
-              </AccordionTrigger>
-              <AccordionContent>
-                <div className="flex flex-col space-y-3 pt-2">
-                  {activeItem.featured.map((f, i) => (
-                    <Link key={i} href={f.href || "#"} onClick={() => setIsMenuOpen(false)} className="text-sm font-medium text-gray-700 flex items-center gap-3">
-                      {f.menuIcon && (
-                        <div className="w-8 h-8 relative flex items-center justify-center bg-gray-50 rounded-full overflow-hidden shrink-0">
-                          <SafeImage 
-                            src={f.menuIcon} 
-                            alt={f.label} 
-                            className="w-6 h-6 object-contain"
-                          />
-                        </div>
-                      )}
-                      {f.label}
-                    </Link>
-                  ))}
-                </div>
-              </AccordionContent>
-            </AccordionItem>
+          {activeItem.featured && (Array.isArray(activeItem.featured) ? activeItem.featured.length > 0 : activeItem.featured.items?.length > 0) && (
+            <>
+              <AccordionItem value="featured" className="border-none">
+                 <AccordionTrigger className="text-sm font-bold uppercase tracking-widest hover:no-underline py-4">
+                  {activeItem.featured.title || "Featured"}
+                </AccordionTrigger>
+                <AccordionContent>
+                  <div className="flex flex-col space-y-3 pt-2">
+                    {(Array.isArray(activeItem.featured) ? activeItem.featured : activeItem.featured.items).map((f, i) => {
+                      const fIcon = f.menuIcon || f.icon || f.megaMenuImage;
+                      return (
+                        <Link key={i} href={f.href || "#"} onClick={() => setIsMenuOpen(false)} className="text-sm font-medium text-gray-700 flex items-center gap-3">
+                          {fIcon && (
+                            <div className="w-8 h-8 relative flex items-center justify-center bg-gray-50 rounded-full overflow-hidden shrink-0">
+                              <SafeImage 
+                                src={fIcon} 
+                                alt={f.label} 
+                                className="w-6 h-6 object-contain"
+                              />
+                            </div>
+                          )}
+                          {f.label}
+                        </Link>
+                      )
+                    })}
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+
+              {!Array.isArray(activeItem.featured) && activeItem.featured.featuredIn && activeItem.featured.featuredIn.items?.length > 0 && (
+                <AccordionItem value="featuredIn" className="border-none">
+                   <AccordionTrigger className="text-sm font-bold uppercase tracking-widest hover:no-underline py-4">
+                    {activeItem.featured.featuredIn.title || "Featured In"}
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <div className="flex flex-col space-y-3 pt-2">
+                      {activeItem.featured.featuredIn.items.map((f, i) => {
+                        const fIcon = f.menuIcon || f.icon || f.megaMenuImage;
+                        return (
+                          <Link key={i} href={f.href || "#"} onClick={() => setIsMenuOpen(false)} className="text-sm font-medium text-gray-700 flex items-center gap-3">
+                            {fIcon && (
+                              <div className="w-8 h-8 relative flex items-center justify-center bg-gray-50 rounded-full overflow-hidden shrink-0">
+                                <SafeImage 
+                                  src={fIcon} 
+                                  alt={f.label} 
+                                  className="w-6 h-6 object-contain"
+                                />
+                              </div>
+                            )}
+                            {f.label}
+                          </Link>
+                        )
+                      })}
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              )}
+            </>
           )}
         </Accordion>
       </div>
