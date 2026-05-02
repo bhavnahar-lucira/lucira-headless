@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { shopifyStorefrontFetch, shopifyAdminFetch } from "@/lib/shopify";
 import { calculatePriceBreakup } from "@/lib/priceEngine";
+import clientPromise from "@/lib/mongodb";
 
 const SORT_MAP = {
   best_selling: { sortKey: "BEST_SELLING", reverse: false },
@@ -33,6 +34,13 @@ const parseFilters = (rawFilters) => {
 };
 
 const collectionCountCache = new Map();
+
+const firstPresent = (...values) => {
+  for (const value of values) {
+    if (value !== undefined && value !== null && value !== "") return value;
+  }
+  return null;
+};
 
 const getCollectionTotalCount = async (handle) => {
   const cacheKey = `collection-count:${handle}`;
@@ -83,6 +91,20 @@ export async function GET(req) {
       });
     }
 
+    // 1. Fetch Metadata from MongoDB first
+    const client = await clientPromise;
+    const db = client.db("next_local_db");
+    
+    // Build query with handle variations
+    const cleanHandle = handle.replace(/^all-/, "");
+    const queryHandles = [handle, cleanHandle];
+    
+    const mongoCollection = await db.collection("shopify_collections").findOne({ 
+      handle: { $in: queryHandles.map(h => new RegExp(`^${h}$`, "i")) } 
+    });
+    
+    console.log(`[API DEBUG] Handle: ${handle} | Clean: ${cleanHandle} | Found: ${!!mongoCollection} | Handle Found: ${mongoCollection?.handle}`);
+    
     const activeFilters = parseFilters(filters);
     const sortConfig = SORT_MAP[sort] || SORT_MAP.best_selling;
 
@@ -123,6 +145,9 @@ export async function GET(req) {
             url
             altText
           }
+          faqQuestion: metafield(namespace: "custom", key: "FaqQuestion") { value }
+          faqAnswers: metafield(namespace: "custom", key: "FaqAnswers") { value }
+          seoContent: metafield(namespace: "custom", key: "seocontent") { value }
           products(
             first: $first
             after: $after
@@ -441,10 +466,30 @@ export async function GET(req) {
     return NextResponse.json(
       {
         collection: {
-          title: collectionData?.title,
-          description: collectionData?.description,
+          title: mongoCollection?.title || collectionData?.title,
+          description: mongoCollection?.description || collectionData?.description,
           seo: collectionData?.seo,
-          image: collectionData?.image,
+          image: mongoCollection?.image || collectionData?.image,
+          faqQuestion: firstPresent(
+            mongoCollection?.faqQuestion,
+            mongoCollection?.faqQuestions,
+            mongoCollection?.faq_question,
+            mongoCollection?.faq_questions,
+            collectionData?.faqQuestion?.value
+          ),
+          faqAnswers: firstPresent(
+            mongoCollection?.faqAnswers,
+            mongoCollection?.faqAnswer,
+            mongoCollection?.faq_answers,
+            mongoCollection?.faq_answer,
+            collectionData?.faqAnswers?.value
+          ),
+          seoContent: firstPresent(
+            mongoCollection?.seoContent,
+            mongoCollection?.seo_content,
+            mongoCollection?.seocontent,
+            collectionData?.seoContent?.value
+          ),
         },
         products,
         filters: processedFilters,
@@ -453,8 +498,9 @@ export async function GET(req) {
       },
       {
         headers: {
-          "Cache-Control":
-            "public, s-maxage=3600, stale-while-revalidate=3600",
+          "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+          "Pragma": "no-cache",
+          "Expires": "0",
         },
       }
   );

@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import ProductTable from "./ProductTable";
-import { RefreshCw, LayoutDashboard, Store, MessageSquare, Menu, Search } from "lucide-react";
+import { RefreshCw, LayoutDashboard, Store, MessageSquare, Menu, Search, CheckCircle } from "lucide-react";
 
 export default function Dashboard() {
   const [syncing, setSyncing] = useState(false);
@@ -21,13 +21,32 @@ export default function Dashboard() {
 
   const [products, setProducts] = useState([]);
   const [menus, setMenus] = useState([]);
+  const [collections, setCollections] = useState([]);
+  const [collectionPagination, setCollectionPagination] = useState({ page: 1, limit: 10, total: 0, totalPages: 0 });
   const [selectedMenu, setSelectedMenu] = useState(null);
   const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0, totalPages: 0 });
   const [loadingProducts, setLoadingProducts] = useState(true);
   const [loadingMenus, setLoadingMenus] = useState(true);
+  const [loadingCollections, setLoadingCollections] = useState(true);
   const [productQuery, setProductQuery] = useState("");
+  const [collectionQuery, setCollectionQuery] = useState("");
 
-  // Fetch count of products available on Shopify
+  // Fetch collections from our MongoDB
+  const fetchCollections = useCallback(async (page = 1, q = "") => {
+    setLoadingCollections(true);
+    try {
+      const res = await fetch(`/api/collections/list?page=${page}&limit=10${q ? `&q=${encodeURIComponent(q)}` : ""}`);
+      const data = await res.json();
+      setCollections(data.collections || []);
+      setCollectionPagination(data.pagination || { page: 1, limit: 10, total: 0, totalPages: 0 });
+    } catch (e) {
+      console.error("Failed to fetch collections", e);
+    } finally {
+      setLoadingCollections(false);
+    }
+  }, []);
+
+  // Fetch menus from our MongoDB
   const fetchShopifyCount = async () => {
     try {
       const res = await fetch("/api/sync-shopify");
@@ -70,6 +89,7 @@ export default function Dashboard() {
   useEffect(() => {
     fetchShopifyCount();
     fetchMenus();
+    fetchCollections();
   }, []);
 
   useEffect(() => {
@@ -78,6 +98,13 @@ export default function Dashboard() {
     }, 500);
     return () => clearTimeout(timer);
   }, [productQuery, fetchLocalProducts]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fetchCollections(1, collectionQuery);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [collectionQuery, fetchCollections]);
 
   const startSync = async (type = "products", isRetry = false) => {
     setSyncing(true);
@@ -297,6 +324,103 @@ export default function Dashboard() {
           </div>
         </div>
 
+        {/* Collections Section */}
+        <div className="bg-white dark:bg-zinc-950 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm overflow-hidden">
+          <div className="p-6 border-b border-zinc-100 dark:border-zinc-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <h2 className="text-xl font-bold">Synced Collections</h2>
+            
+            <div className="flex items-center gap-4">
+              <div className="relative flex-1 sm:min-w-[300px]">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" size={18} />
+                <input
+                  type="text"
+                  placeholder="Search collections..."
+                  value={collectionQuery}
+                  onChange={(e) => setCollectionQuery(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-zinc-200 dark:focus:ring-zinc-800 transition-all"
+                />
+              </div>
+              {loadingCollections && <span className="text-xs text-zinc-500 animate-pulse whitespace-nowrap">Updating...</span>}
+            </div>
+          </div>
+          
+          <div className="p-0">
+            {collections.length === 0 && !loadingCollections ? (
+              <p className="text-zinc-500 text-center py-10">No collections synced yet. Go to General Sync to import collections.</p>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm text-left">
+                  <thead className="text-xs text-zinc-500 uppercase bg-zinc-50 dark:bg-zinc-900/50 border-b border-zinc-100 dark:border-zinc-800">
+                    <tr>
+                      <th className="px-6 py-4 font-bold">Collection</th>
+                      <th className="px-6 py-4 font-bold text-center">FAQ</th>
+                      <th className="px-6 py-4 font-bold text-center">SEO Content</th>
+                      <th className="px-6 py-4 font-bold">Last Updated</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
+                    {collections.map((col) => (
+                      <tr key={col.id} className="hover:bg-zinc-50 dark:hover:bg-zinc-900/40 transition-colors">
+                        <td className="px-6 py-4">
+                          <div className="flex flex-col">
+                            <span className="font-bold text-zinc-900 dark:text-white">{col.title}</span>
+                            <span className="text-xs text-zinc-400 font-mono">{col.handle}</span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 text-center">
+                          {col.hasFaq ? (
+                            <CheckCircle size={18} className="text-green-500 mx-auto" />
+                          ) : (
+                            <span className="text-zinc-300 dark:text-zinc-700">—</span>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 text-center">
+                          {col.hasSeo ? (
+                            <CheckCircle size={18} className="text-green-500 mx-auto" />
+                          ) : (
+                            <span className="text-zinc-300 dark:text-zinc-700">—</span>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 text-zinc-500">
+                          {new Date(col.updatedAt).toLocaleDateString()}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+
+          {/* Pagination Controls */}
+          {collectionPagination.totalPages > 1 && (
+            <div className="p-4 border-t border-zinc-100 dark:border-zinc-800 flex items-center justify-between bg-zinc-50/50 dark:bg-zinc-900/20">
+              <span className="text-xs text-zinc-500">
+                Showing {collections.length} of {collectionPagination.total} collections
+              </span>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => fetchCollections(collectionPagination.page - 1)}
+                  disabled={collectionPagination.page === 1 || loadingCollections}
+                  className="px-4 py-2 text-xs font-bold uppercase tracking-widest bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg disabled:opacity-30 hover:bg-zinc-50 transition-colors"
+                >
+                  Previous
+                </button>
+                <div className="flex items-center px-4 py-2 bg-zinc-100 dark:bg-zinc-800 rounded-lg text-xs font-bold font-mono">
+                  {collectionPagination.page} / {collectionPagination.totalPages}
+                </div>
+                <button
+                  onClick={() => fetchCollections(collectionPagination.page + 1)}
+                  disabled={collectionPagination.page === collectionPagination.totalPages || loadingCollections}
+                  className="px-4 py-2 text-xs font-bold uppercase tracking-widest bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg disabled:opacity-30 hover:bg-zinc-50 transition-colors"
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
         {/* Menus Section */}
         <div className="bg-white dark:bg-zinc-950 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm overflow-hidden">
           <div className="p-6 border-b border-zinc-100 dark:border-zinc-800 flex items-center justify-between">
@@ -400,3 +524,4 @@ function MenuTree({ items, level = 0 }) {
     </div>
   );
 }
+
