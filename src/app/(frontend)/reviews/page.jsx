@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Star, BadgeCheck, ChevronRight } from "lucide-react";
@@ -13,7 +13,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { loadNectorReviews } from "@/lib/nector";
 import ReviewDetailedPopup from "@/components/review/ReviewDetailedPopup";
+import WriteReviewForm from "@/components/review/WriteReviewForm";
 
 // Import Swiper styles
 import "swiper/css";
@@ -21,7 +23,6 @@ import "swiper/css/scrollbar";
 import "swiper/css/free-mode";
 
 export default function ReviewsPage() {
-  const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({ average: 0, total: 0, breakdown: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 } });
   const [gallery, setGallery] = useState([]);
@@ -30,26 +31,51 @@ export default function ReviewsPage() {
   const [filterRating, setFilterRating] = useState("all");
   const [sortBy, setSortBy] = useState("newest");
   const [loadedImages, setLoadedImages] = useState({});
+  const [allData, setAllData] = useState([]);
 
   // Popup State
   const [popupState, setPopupState] = useState({ isOpen: false, index: 0 });
+  const [isWriteReviewOpen, setIsWriteReviewOpen] = useState(false);
 
   useEffect(() => {
     async function fetchReviews() {
       setLoading(true);
       try {
-        const response = await fetch(`/api/all-reviews?page=${page}&limit=20&rating=${filterRating}&sort=${sortBy}`);
-        const data = await response.json();
+        const result = await loadNectorReviews();
         
-        if (page === 1) {
-          setReviews(data.reviews);
-          setStats(data.stats);
-          setGallery(data.gallery || []);
-        } else {
-          setReviews((prev) => [...prev, ...data.reviews]);
+        // Transform stats array to breakdown object if needed
+        const breakdown = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+        if (Array.isArray(result.stats)) {
+            result.stats.forEach(s => {
+                breakdown[s.rating] = parseInt(s.count);
+            });
         }
-        
-        setTotalPages(data.totalPages);
+
+        // Calculate average if not provided
+        let average = result.average || 0;
+        if (!average && result.items?.length > 0) {
+            const sum = result.items.reduce((s, r) => s + (parseFloat(r.rating) || 0), 0);
+            average = (sum / result.items.length).toFixed(1);
+        }
+
+        setStats({
+          total: result.count,
+          average: average,
+          breakdown: breakdown
+        });
+
+        // Extract gallery
+        const galleryItems = [];
+        result.items.forEach((r, idx) => {
+            const uploads = Array.isArray(r.uploads) ? r.uploads : (r.uploads?.uploads || []);
+            uploads.forEach(u => {
+                if (u?.link && u.type === 'image') {
+                    galleryItems.push({ url: u.link, reviewId: r._id || r.id });
+                }
+            });
+        });
+        setGallery(galleryItems);
+        setAllData(result.items);
       } catch (error) {
         console.error("Error fetching reviews:", error);
       } finally {
@@ -57,7 +83,47 @@ export default function ReviewsPage() {
       }
     }
     fetchReviews();
-  }, [page, filterRating, sortBy]);
+  }, []);
+
+  const filteredAndSortedReviews = useMemo(() => {
+    let result = [...(allData || [])];
+
+    // Filter by rating
+    if (filterRating !== "all") {
+      result = result.filter(r => Math.round(parseFloat(r.rating)) === parseInt(filterRating));
+    }
+
+    // Sort by
+    result.sort((a, b) => {
+      const dA = new Date(a.posted_at || a.created_at || 0);
+      const dB = new Date(b.posted_at || b.created_at || 0);
+      
+      if (sortBy === "newest") return dB - dA;
+      if (sortBy === "oldest") return dA - dB;
+      if (sortBy === "highest") return (parseFloat(b.rating) || 0) - (parseFloat(a.rating) || 0);
+      if (sortBy === "lowest") return (parseFloat(a.rating) || 0) - (parseFloat(b.rating) || 0);
+      
+      if (sortBy === "images") {
+        const aImgs = (Array.isArray(a.uploads) ? a.uploads : (a.uploads?.uploads || [])).length;
+        const bImgs = (Array.isArray(b.uploads) ? b.uploads : (b.uploads?.uploads || [])).length;
+        return bImgs - aImgs;
+      }
+      
+      // Featured/Default
+      return ((b.is_featured ? 1 : 0) - (a.is_featured ? 1 : 0)) || (dB - dA);
+    });
+
+    return result;
+  }, [allData, filterRating, sortBy]);
+
+  // Paginated reviews
+  const displayedReviews = useMemo(() => {
+    return filteredAndSortedReviews.slice(0, page * 20);
+  }, [filteredAndSortedReviews, page]);
+
+  useEffect(() => {
+    setTotalPages(Math.ceil(filteredAndSortedReviews.length / 20));
+  }, [filteredAndSortedReviews]);
 
   const handleFilterChange = (val) => {
     setFilterRating(val);
@@ -69,10 +135,14 @@ export default function ReviewsPage() {
     setPage(1);
   };
 
-  const openPopup = (reviewId) => {
-    const index = reviews.findIndex(r => r.id === reviewId);
-    if (index !== -1) {
-      setPopupState({ isOpen: true, index });
+  const openPopup = (idxOrId) => {
+    if (typeof idxOrId === 'string') {
+        const index = filteredAndSortedReviews.findIndex(r => (r._id || r.id) === idxOrId);
+        if (index !== -1) {
+            setPopupState({ isOpen: true, index });
+        }
+    } else {
+        setPopupState({ isOpen: true, index: idxOrId });
     }
   };
 
@@ -80,9 +150,28 @@ export default function ReviewsPage() {
     setLoadedImages(prev => ({ ...prev, [id]: true }));
   };
 
+  // Prepare mapped reviews for the popup
+  const mappedReviews = filteredAndSortedReviews?.map(r => {
+    const name = (r.name || 'Customer').trim();
+    const uploads = Array.isArray(r.uploads) ? r.uploads : (r.uploads?.uploads || []);
+    const images = uploads.filter(u => u?.link && (u.type === 'image' || !u.type)).map(u => u.link);
+    
+    return {
+        ...r,
+        productTitle: r.reference_product_name || "Product",
+        productImage: r.reference_product_image || "/images/product/1.jpg",
+        productHandle: r.reference_product_handle || "",
+        personName: name,
+        review: r.description || r.body || "",
+        images: images,
+        verified: r.is_verified === true
+    };
+  }) || [];
+
   // Calculate recommendation percentage
   const recommendCount = (stats.breakdown[4] || 0) + (stats.breakdown[5] || 0);
-  const recommendPercent = stats.total > 0 ? Math.round((recommendCount / stats.total) * 100) : 0;
+  const totalForRecommend = Object.values(stats.breakdown).reduce((a, b) => Number(a) + Number(b), 0);
+  const recommendPercent = totalForRecommend > 0 ? Math.round((recommendCount / totalForRecommend) * 100) : 0;
 
   return (
     <div className="bg-[#FEF5F1] min-h-screen pb-20 pt-16">
@@ -136,7 +225,10 @@ export default function ReviewsPage() {
             </div>
           </div>
 
-          <button className="mt-10 px-12 py-4 bg-[#5A413F] text-white font-black text-xs uppercase tracking-[0.2em] rounded shadow-lg hover:bg-[#4a3533] transition-all active:scale-95">
+          <button 
+            onClick={() => setIsWriteReviewOpen(true)}
+            className="mt-10 px-12 py-4 bg-[#5A413F] text-white font-black text-xs uppercase tracking-[0.2em] rounded shadow-lg hover:bg-[#4a3533] transition-all active:scale-95"
+          >
             Write A Review
           </button>
         </div>
@@ -191,6 +283,7 @@ export default function ReviewsPage() {
 
         {/* Filters and Sorting */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-10 border-b border-gray-200 pb-8">
+                      <span className="text-lg font-bold text-black uppercase tracking-[0.2em]">{stats.total} verified reviews</span>
           <div className="flex items-center gap-8">
             <div className="flex items-center gap-3">
               <span className="text-sm font-semibold text-gray-600">Rating:</span>
@@ -208,7 +301,6 @@ export default function ReviewsPage() {
                 </SelectContent>
               </Select>
             </div>
-            <span className="text-lg font-bold text-black uppercase tracking-[0.2em]">{stats.total} verified reviews</span>
           </div>
 
           <div className="flex items-center gap-3">
@@ -231,121 +323,131 @@ export default function ReviewsPage() {
 
         {/* Reviews Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
-          {reviews.map((review, idx) => (
-            <div 
-              key={`${review.id}-${idx}`}
-              onClick={() => setPopupState({ isOpen: true, index: idx })}
-              className="bg-white rounded-2xl p-8 border border-gray-50 shadow-[0_4px_30px_-10px_rgba(0,0,0,0.04)] flex flex-col h-full cursor-pointer hover:shadow-md transition-all group"
-            >
-              <div className="flex items-start justify-between mb-6">
-                <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 rounded-full bg-primary text-white flex items-center justify-center font-bold text-xl uppercase border-4 border-white shadow-sm relative overflow-hidden flex-shrink-0">
-                    {review.personImage ? (
-                        <div className="relative w-full h-full">
-                            {!loadedImages[`avatar-${idx}`] && (
-                                <div className="absolute inset-0 flex items-center justify-center bg-primary z-[5]">
-                                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                                </div>
-                            )}
-                            <Image 
-                                src={review.personImage} 
-                                alt={review.personName} 
-                                fill 
-                                onLoad={() => handleImageLoad(`avatar-${idx}`)}
-                                className={`object-cover transition-opacity duration-300 ${loadedImages[`avatar-${idx}`] ? "opacity-100" : "opacity-0"}`} 
-                            />
-                        </div>
-                    ) : (
-                        review.personName.charAt(0)
-                    )}
+          {displayedReviews.map((review, idx) => {
+            const name = (review.name || 'Customer').trim();
+            const rating = parseFloat(review.rating) || 0;
+            const text = review.description || review.body || "";
+            const uploads = Array.isArray(review.uploads) ? review.uploads : (review.uploads?.uploads || []);
+            const images = uploads.filter(u => u?.link && (u.type === 'image' || !u.type)).map(u => u.link);
+            
+            return (
+              <div 
+                key={`${review._id || idx}`}
+                onClick={() => openPopup(idx)}
+                className="bg-white rounded-2xl p-8 border border-gray-50 shadow-[0_4px_30px_-10px_rgba(0,0,0,0.04)] flex flex-col h-full cursor-pointer hover:shadow-md transition-all group"
+              >
+                <div className="flex items-start justify-between mb-6">
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 rounded-full bg-primary text-white flex items-center justify-center font-bold text-xl uppercase border-4 border-white shadow-sm relative overflow-hidden flex-shrink-0">
+                      {review.personImage ? (
+                          <div className="relative w-full h-full">
+                              {!loadedImages[`avatar-${idx}`] && (
+                                  <div className="absolute inset-0 flex items-center justify-center bg-primary z-[5]">
+                                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                  </div>
+                              )}
+                              <Image 
+                                  src={review.personImage} 
+                                  alt={name} 
+                                  fill 
+                                  onLoad={() => handleImageLoad(`avatar-${idx}`)}
+                                  className={`object-cover transition-opacity duration-300 ${loadedImages[`avatar-${idx}`] ? "opacity-100" : "opacity-0"}`} 
+                              />
+                          </div>
+                      ) : (
+                          name.charAt(0)
+                      )}
+                    </div>
+                    <div>
+                      <h3 className="font-black text-gray-900 flex items-center gap-2 text-sm uppercase tracking-widest">
+                          {name}
+                          {review.is_verified && (
+                              <div className="flex items-center gap-1 text-[9px] text-accent font-black uppercase tracking-widest">
+                                  <BadgeCheck size={14} className="fill-accent text-white" />
+                                  Verified
+                              </div>
+                          )}
+                      </h3>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="font-black text-gray-900 flex items-center gap-2 text-sm uppercase tracking-widest">
-                        {review.personName}
-                        <div className="flex items-center gap-1 text-[9px] text-accent font-black uppercase tracking-widest">
-                            <BadgeCheck size={14} className="fill-accent text-white" />
-                            Verified
-                        </div>
-                    </h3>
+                  <div className="flex flex-col items-end">
+                      <div className="flex gap-0.5 text-amber-400">
+                          {Array.from({ length: 5 }).map((_, i) => (
+                          <Star 
+                              key={i} 
+                              size={14} 
+                              fill={i < Math.round(rating) ? "currentColor" : "none"} 
+                              className={i < Math.round(rating) ? "" : "text-zinc-200"} 
+                          />
+                          ))}
+                          <span className="ml-2 text-xs font-black text-gray-900 tracking-tighter">({rating}.0)</span>
+                      </div>
                   </div>
                 </div>
-                <div className="flex flex-col items-end">
-                    <div className="flex gap-0.5 text-amber-400">
-                        {Array.from({ length: 5 }).map((_, i) => (
-                        <Star 
-                            key={i} 
-                            size={14} 
-                            fill={i < Math.round(review.rating) ? "currentColor" : "none"} 
-                            className={i < Math.round(review.rating) ? "" : "text-zinc-200"} 
-                        />
-                        ))}
-                        <span className="ml-2 text-xs font-black text-gray-900 tracking-tighter">({review.rating}.0)</span>
-                    </div>
+                
+                <div className="mb-6 flex-grow">
+                  <h4 className="font-black text-gray-900 text-lg mb-3 leading-tight uppercase tracking-tight group-hover:text-primary transition-colors">{review.title}</h4>
+                  <p className="text-gray-500 leading-relaxed text-sm italic line-clamp-4">
+                      "{text}"
+                  </p>
+                  {(review.posted_at || review.created_at) && (
+                      <div className="mt-4 text-[10px] text-gray-400 font-black uppercase tracking-[0.2em]">
+                          {new Date(review.posted_at || review.created_at).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })}
+                      </div>
+                  )}
                 </div>
-              </div>
-              
-              <div className="mb-6 flex-grow">
-                <h4 className="font-black text-gray-900 text-lg mb-3 leading-tight uppercase tracking-tight group-hover:text-primary transition-colors">{review.title || "Brilliant Purchase"}</h4>
-                <p className="text-gray-500 leading-relaxed text-sm italic line-clamp-4">
-                    "{review.review}"
-                </p>
-                {review.date && (
-                    <div className="mt-4 text-[10px] text-gray-400 font-black uppercase tracking-[0.2em]">
-                        {new Date(review.date).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })}
-                    </div>
+
+                {/* Review Images */}
+                {images.length > 0 && (
+                  <div className="flex gap-2.5 mt-2 mb-8">
+                      {images.slice(0, 3).map((img, i) => (
+                          <div key={i} className="relative w-20 h-20 rounded-xl overflow-hidden border border-gray-100 shadow-sm bg-gray-50">
+                              {!loadedImages[`review-img-${idx}-${i}`] && (
+                                  <div className="absolute inset-0 flex items-center justify-center z-[5]">
+                                      <Image src="/images/loader.gif" alt="Loading..." width={20} height={20} className="object-contain" />
+                                  </div>
+                              )}
+                              <Image 
+                                  src={img} 
+                                  alt="Review" 
+                                  fill 
+                                  onLoad={() => handleImageLoad(`review-img-${idx}-${i}`)}
+                                  className={`object-cover group-hover:scale-105 transition-all duration-500 ${loadedImages[`review-img-${idx}-${i}`] ? "opacity-100" : "opacity-0"}`} 
+                              />
+                          </div>
+                      ))}
+                  </div>
                 )}
-              </div>
 
-              {/* Review Images */}
-              {review.images && review.images.length > 0 && (
-                <div className="flex gap-2.5 mt-2 mb-8">
-                    {review.images.slice(0, 3).map((img, i) => (
-                        <div key={i} className="relative w-20 h-20 rounded-xl overflow-hidden border border-gray-100 shadow-sm bg-gray-50">
-                            {!loadedImages[`review-img-${idx}-${i}`] && (
-                                <div className="absolute inset-0 flex items-center justify-center z-[5]">
-                                    <Image src="/images/loader.gif" alt="Loading..." width={20} height={20} className="object-contain" />
-                                </div>
-                            )}
-                            <Image 
-                                src={img} 
-                                alt="Review" 
-                                fill 
-                                onLoad={() => handleImageLoad(`review-img-${idx}-${i}`)}
-                                className={`object-cover group-hover:scale-105 transition-all duration-500 ${loadedImages[`review-img-${idx}-${i}`] ? "opacity-100" : "opacity-0"}`} 
-                            />
-                        </div>
-                    ))}
+                {/* Related Product Link */}
+                <div className="mt-auto pt-6 border-t border-gray-100 flex items-center justify-between group/link">
+                  <Link 
+                      href={`/products/${review.reference_product_slug || ''}`} 
+                      onClick={(e) => e.stopPropagation()}
+                      className="flex items-center gap-3 flex-1 min-w-0"
+                  >
+                      {/* <div className="w-10 h-10 bg-gray-50 rounded-lg border border-gray-100 overflow-hidden relative flex-shrink-0">
+                          <Image src={review.reference_product_image || "/images/product/1.jpg"} alt={review.reference_product_name || "Product"} fill className="object-cover group-hover/link:scale-110 transition-transform duration-500" />
+                      </div> */}
+                      <span className="text-sm font-bold text-black group-hover/link:text-gray-900 transition-colors truncate tracking-widest">
+                          {review.reference_product_name}
+                      </span>
+                  </Link>
+                  <Link 
+                      href={`/products/${review.reference_product_slug || ''}`}
+                      onClick={(e) => e.stopPropagation()}
+                      className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center text-gray-300 group-hover/link:bg-black group-hover/link:text-white transition-all ml-2"
+                  >
+                      <ChevronRight size={16} />
+                  </Link>
                 </div>
-              )}
-
-              {/* Related Product Link */}
-              <div className="mt-auto pt-6 border-t border-gray-100 flex items-center justify-between group/link">
-                <Link 
-                    href={`/products/${review.productHandle}`} 
-                    onClick={(e) => e.stopPropagation()}
-                    className="flex items-center gap-3 flex-1 min-w-0"
-                >
-                    <div className="w-10 h-10 bg-gray-50 rounded-lg border border-gray-100 overflow-hidden relative flex-shrink-0">
-                        <Image src={review.productImage || "/images/product/1.jpg"} alt={review.productTitle} fill className="object-cover group-hover/link:scale-110 transition-transform duration-500" />
-                    </div>
-                    <span className="text-sm font-bold text-black group-hover/link:text-gray-900 transition-colors truncate tracking-widest">
-                        {review.productTitle}
-                    </span>
-                </Link>
-                <Link 
-                    href={`/products/${review.productHandle}`}
-                    onClick={(e) => e.stopPropagation()}
-                    className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center text-gray-300 group-hover/link:bg-black group-hover/link:text-white transition-all ml-2"
-                >
-                    <ChevronRight size={16} />
-                </Link>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         {/* Empty State */}
-        {!loading && reviews.length === 0 && (
+        {!loading && displayedReviews.length === 0 && (
           <div className="text-center py-32 bg-white/30 rounded-3xl border-2 border-dashed border-gray-200">
             <p className="text-gray-400 font-black uppercase tracking-widest mb-4">No reviews found for this rating.</p>
             <button onClick={() => setFilterRating("all")} className="text-[#5A413F] font-black text-xs uppercase tracking-widest border-b-2 border-[#5A413F] pb-1 hover:text-black hover:border-black transition-colors">Show all reviews</button>
@@ -377,9 +479,14 @@ export default function ReviewsPage() {
       <ReviewDetailedPopup 
         isOpen={popupState.isOpen}
         onClose={() => setPopupState({ ...popupState, isOpen: false })}
-        reviews={reviews}
+        reviews={mappedReviews}
         activeIndex={popupState.index}
         onIndexChange={(index) => setPopupState({ ...popupState, index })}
+      />
+
+      <WriteReviewForm 
+        isOpen={isWriteReviewOpen}
+        onClose={() => setIsWriteReviewOpen(false)}
       />
 
       <style jsx global>{`
