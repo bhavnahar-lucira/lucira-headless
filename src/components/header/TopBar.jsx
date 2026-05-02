@@ -58,12 +58,12 @@ export default function TopBar() {
             {item.url ? (
               <Link 
                 href={item.url}
-                className="text-center font-medium text-[14px] leading-none tracking-[0.7px] flex items-center justify-center h-full w-full px-12 hover:underline transition-all"
+                className="text-center font-medium text-sm leading-none tracking-[0.7px] flex items-center justify-center h-full w-full px-12 hover:underline transition-all"
               >
                 {item.text}
               </Link>
             ) : (
-              <p className="text-center font-medium text-[14px] leading-none tracking-[0.7px] flex items-center justify-center h-full w-full px-12">
+              <p className="text-center font-medium text-sm leading-none tracking-[0.7px] flex items-center justify-center h-full w-full px-12">
                 {item.text}
               </p>
             )}
