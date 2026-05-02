@@ -77,6 +77,8 @@ function transformMenu(shopifyMenu) {
                         return {
                             label: f.title,
                             href: f.url.replace(/https:\/\/[^/]+/, ""),
+                            icon: getFileUrl(getMetafield(fMeta, "custom", "icon")),
+                            megaMenuImage: getFileUrl(getMetafield(fMeta, "custom", "mega_menu_image")),
                             menuIcon: getFileUrl(getMetafield(fMeta, "custom", "menu_links_image_icon")),
                         };
                     });
@@ -91,7 +93,9 @@ function transformMenu(shopifyMenu) {
                           return {
                               label: f.title,
                               href: f.url.replace(/https:\/\/[^/]+/, ""),
-                              icon: getFileUrl(getMetafield(fMeta, "custom", "menu_links_image_icon")) || getFileUrl(getMetafield(fMeta, "custom", "icon")),
+                              icon: getFileUrl(getMetafield(fMeta, "custom", "icon")),
+                              megaMenuImage: getFileUrl(getMetafield(fMeta, "custom", "mega_menu_image")),
+                              menuIcon: getFileUrl(getMetafield(fMeta, "custom", "menu_links_image_icon")),
                           };
                       })
                   };
@@ -127,33 +131,39 @@ function transformMenu(shopifyMenu) {
                 const isMetal = child.title.toLowerCase().includes("metal") || child.title.toLowerCase().includes("material");
                 const isIcon = child.title.toLowerCase().includes("style") || child.title.toLowerCase().includes("shape");
 
+                const processedItems = (() => {
+                    const seen = new Set();
+                    // Filter out duplicates and items that match the parent title
+                    return (child.items || [])
+                        .filter(sub => {
+                            const label = sub.title.toLowerCase().trim();
+                            if (label === child.title.toLowerCase().trim() || seen.has(label)) {
+                                return false;
+                            }
+                            seen.add(label);
+                            return true;
+                        })
+                        .map(sub => {
+                            const subResource = sub.resource || {};
+                            const subMeta = subResource.metafields?.nodes || [];
+                            return {
+                                label: sub.title,
+                                href: sub.url.replace(/https:\/\/[^/]+/, ""),
+                                icon: getFileUrl(getMetafield(subMeta, "custom", "icon")),
+                                megaMenuImage: getFileUrl(getMetafield(subMeta, "custom", "mega_menu_image")),
+                                menuIcon: getFileUrl(getMetafield(subMeta, "custom", "menu_links_image_icon")),
+                            };
+                        });
+                })();
+
+                const explicitType = getMetafield(childMetafields, "custom", "column_type")?.value;
+                const isText = child.title.toLowerCase().includes("price") || child.title.toLowerCase().includes("occasion") || child.title.toLowerCase().includes("shop for");
+                const finalType = isMetal ? "metal" : (explicitType || (!isText ? "icon" : "text"));
+
                 columns.push({
                     title: child.title,
-                    type: isMetal ? "metal" : (isIcon ? "icon" : (getMetafield(childMetafields, "custom", "column_type")?.value || "text")),
-                    items: (() => {
-                        const seen = new Set();
-                        // Filter out duplicates and items that match the parent title
-                        return (child.items || [])
-                            .filter(sub => {
-                                const label = sub.title.toLowerCase().trim();
-                                if (label === child.title.toLowerCase().trim() || seen.has(label)) {
-                                    return false;
-                                }
-                                seen.add(label);
-                                return true;
-                            })
-                            .map(sub => {
-                                const subResource = sub.resource || {};
-                                const subMeta = subResource.metafields?.nodes || [];
-                                return {
-                                    label: sub.title,
-                                    href: sub.url.replace(/https:\/\/[^/]+/, ""),
-                                    icon: getFileUrl(getMetafield(subMeta, "custom", "icon")),
-                                    megaMenuImage: getFileUrl(getMetafield(subMeta, "custom", "mega_menu_image")),
-                                    menuIcon: getFileUrl(getMetafield(subMeta, "custom", "menu_links_image_icon")),
-                                };
-                            });
-                    })()
+                    type: finalType,
+                    items: processedItems
                 });
             }
         });

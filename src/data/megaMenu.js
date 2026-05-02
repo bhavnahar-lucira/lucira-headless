@@ -251,7 +251,7 @@ export const MEGA_MENU = [
         columns: [
             {
                 title: "Bracelets",
-                type: "text",
+                type: "icon",
                 items: [
                     { label: "Chain Bracelets", href: "/collections/chain-bracelets" },
                     { label: "Cuff Bracelets", href: "/collections/cuff-bracelets" },
@@ -263,7 +263,7 @@ export const MEGA_MENU = [
 
             {
                 title: "Necklaces & Chains",
-                type: "text",
+                type: "icon",
                 items: [
                     { label: "Chain Necklaces", href: "/collections/chain-necklaces" },
                     { label: "Pendant Necklaces", href: "/collections/pendant-necklaces" },
@@ -275,7 +275,7 @@ export const MEGA_MENU = [
 
             {
                 title: "Nosepin",
-                type: "text",
+                type: "icon",
                 items: [
                     { label: "Stud Nosepins", href: "/collections/all-nosepins" },
                     { label: "Ring Nosepins", href: "/collections/all-nosepins" },
@@ -286,7 +286,7 @@ export const MEGA_MENU = [
 
             {
                 title: "Mangalsutra",
-                type: "text",
+                type: "icon",
                 items: [
                     { label: "Mangalsutra Necklaces", href: "/collections/mangalsutra-necklaces" },
                     { label: "Mangalsutra Bracelets", href: "/collections/mangalsutra-bracelets" },
