@@ -1,4 +1,4 @@
-import { Figtree, Abhaya_Libre, Lobster, Yellowtail, Satisfy, ABeeZee } from "next/font/google";
+import { Figtree, Abhaya_Libre } from "next/font/google";
 import "./globals.css";
 import { Suspense } from "react";
 import ReduxProvider from "@/redux/provider";
@@ -21,34 +21,6 @@ const abhaya = Abhaya_Libre({
   subsets: ["latin"],
   weight: ["400","500","600","700","800"],
   variable: "--font-abhaya",
-  display: "swap",
-});
-
-const lobster = Lobster({
-  subsets: ["latin"],
-  weight: ["400"],
-  variable: "--font-lobster",
-  display: "swap",
-});
-
-const yellowtail = Yellowtail({
-  subsets: ["latin"],
-  weight: ["400"],
-  variable: "--font-yellowtail",
-  display: "swap",
-});
-
-const satisfy = Satisfy({
-  subsets: ["latin"],
-  weight: ["400"],
-  variable: "--font-satisfy",
-  display: "swap",
-});
-
-const abeezee = ABeeZee({
-  subsets: ["latin"],
-  weight: ["400"],
-  variable: "--font-abeezee",
   display: "swap",
 });
 
@@ -78,7 +50,7 @@ export default function RootLayout({ children }) {
           </Script>
         )}
       </head>
-      <body className={`${figtree.variable} ${abhaya.variable} ${lobster.variable} ${yellowtail.variable} ${satisfy.variable} ${abeezee.variable} font-figtree antialiased`}>
+      <body className={`${figtree.variable} ${abhaya.variable} font-figtree antialiased`}>
         {isProd && (
           <noscript>
             <iframe 

@@ -80,10 +80,41 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
+  SheetClose,
 } from "@/components/ui/sheet";
 import StyledByLucira from "../home/StyledByLucira";
 
 import { Sheet as MobileSheet } from "react-modal-sheet";
+
+import { Lobster, Yellowtail, Satisfy, ABeeZee } from "next/font/google";
+
+const lobster = Lobster({
+  subsets: ["latin"],
+  weight: ["400"],
+  variable: "--font-lobster",
+  display: "swap",
+});
+
+const yellowtail = Yellowtail({
+  subsets: ["latin"],
+  weight: ["400"],
+  variable: "--font-yellowtail",
+  display: "swap",
+});
+
+const satisfy = Satisfy({
+  subsets: ["latin"],
+  weight: ["400"],
+  variable: "--font-satisfy",
+  display: "swap",
+});
+
+const abeezee = ABeeZee({
+  subsets: ["latin"],
+  weight: ["400"],
+  variable: "--font-abeezee",
+  display: "swap",
+});
 
 const USER_PINCODE_COOKIE = "user_pincode";
 
@@ -891,8 +922,101 @@ export default function ProductPageClient({ product, complementaryProducts = [],
   const isMobileView = useMediaQuery("(max-width: 1023px)");
   if (!mounted) return null;
 
+  const renderEngravingContent = () => (
+    <div className="flex-1 overflow-y-auto">
+      {/* Ring Preview */}
+      <div className="relative w-full aspect-[16/9] bg-[#F9F9F9] flex items-center justify-center overflow-hidden">
+        <Image 
+          src="/images/engraving_bg.jpg" 
+          alt="Ring band preview" 
+          fill 
+          className="object-cover"
+        />
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          {engraving && (
+            <div 
+              style={{ 
+                fontFamily: `var(--font-${engravingFont.toLowerCase()})`,
+                textShadow: "1px 1px 1.5px rgba(255,255,255,0.8), -0.5px -0.5px 1px rgba(0,0,0,0.15)"
+              }} 
+              className="text-gray-800 text-xl sm:text-2xl tracking-[0.15em] opacity-80 italic -translate-y-9 sm:-translate-y-9"
+            >
+              {engraving}
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="p-6 space-y-8">
+        <div className="space-y-3">
+          <p className="text-sm font-medium text-black leading-relaxed">
+            <span className="font-bold text-gray-900">Note:</span> Text can only contain up to 8 English/alphanumeric characters (A-Z, a-z, 0-9) and special characters (heart and infinity).
+          </p>
+        </div>
+
+        <div className="space-y-4">
+          <h4 className="text-base font-bold text-gray-900">Choose a Font <span className="text-rose-500">*</span></h4>
+          <div className="grid grid-cols-2 gap-3">
+            {["Lobster", "Yellowtail", "Satisfy", "ABeeZee"].map((font) => (
+              <button
+                key={font}
+                onClick={() => setEngravingFont(font)}
+                className={`px-4 py-3 rounded-xl border text-sm transition-all duration-300 ${
+                  engravingFont === font 
+                    ? "border-black bg-zinc-900 text-white shadow-md scale-[1.02]" 
+                    : "border-gray-200 text-gray-600 hover:border-gray-400 bg-white"
+                }`}
+              >
+                <span style={{ fontFamily: `var(--font-${font.toLowerCase()})` }} className="text-lg">Aa - {font}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          <div className="flex justify-between items-center">
+            <h4 className="text-base font-bold text-gray-900">Inner Engraving <span className="text-rose-500">*</span></h4>
+            <div className="text-[11px] font-bold uppercase tracking-widest text-zinc-400">
+              {engraving.length}/8 Characters
+            </div>
+          </div>
+          
+          <div className="flex gap-3 items-center">
+            <div className="relative flex-1">
+              <Input
+                ref={engravingInputRef}
+                value={engraving}
+                maxLength={8}
+                onChange={(e) => setEngraving(e.target.value)}
+                placeholder="Type your text here"
+                className="h-14 border-gray-300 pr-4 text-lg focus-visible:ring-black rounded-xl"
+                style={{ fontFamily: `var(--font-${engravingFont.toLowerCase()})` }}
+              />
+            </div>
+            <div className="flex gap-2 shrink-0">
+              <button 
+                onClick={() => insertSymbol("♥")}
+                className="w-12 h-12 flex items-center justify-center border-2 border-zinc-100 rounded-xl hover:border-black hover:bg-zinc-50 transition-all active:scale-95"
+                title="Insert Heart"
+              >
+                <span className="text-2xl text-black">♥</span>
+              </button>
+              <button 
+                onClick={() => insertSymbol("∞")}
+                className="w-12 h-12 flex items-center justify-center border-2 border-zinc-100 rounded-xl hover:border-black hover:bg-zinc-50 transition-all active:scale-95"
+                title="Insert Infinity"
+              >
+                <span className="text-2xl text-black">∞</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
-    <div className="w-full">
+    <div className={`w-full ${lobster.variable} ${yellowtail.variable} ${satisfy.variable} ${abeezee.variable}`}>
       <AtcBar 
         isTopVisible={showTopAtc}
         isBottomVisible={showBottomAtc} 
@@ -1283,132 +1407,80 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                   </p>
                 </div>
 
-                <Sheet open={isEngravingDrawerOpen} onOpenChange={setIsEngravingDrawerOpen}>
-                  <SheetTrigger asChild>
-                    <div className="flex gap-4 items-center mt-4 group cursor-pointer">
-                      <div className="relative flex-1">
-                        <div className="h-12 bg-white border border-gray-300 rounded-md px-4 flex items-center text-gray-400 text-sm group-hover:border-primary transition-colors">
-                          {savedEngraving.text ? (
-                            <span style={{ fontFamily: `var(--font-${savedEngraving.font.toLowerCase()})` }} className="text-black text-base">
-                              {savedEngraving.text}
-                            </span>
-                          ) : (
-                            "Type your text here"
-                          )}
-                        </div>
-                        <Button variant="ghost" className="absolute right-2 top-1/2 -translate-y-1/2 text-sm font-bold text-gray-400 group-hover:text-primary">
-                          ENGRAVE
-                        </Button>
-                      </div>                
+                <div className="flex gap-4 items-center mt-4 group cursor-pointer" onClick={() => setIsEngravingDrawerOpen(true)}>
+                  <div className="relative flex-1">
+                    <div className="h-12 bg-white border border-gray-300 rounded-md px-4 flex items-center text-gray-400 text-sm group-hover:border-primary transition-colors">
+                      {savedEngraving.text ? (
+                        <span style={{ fontFamily: `var(--font-${savedEngraving.font.toLowerCase()})` }} className="text-black text-base">
+                          {savedEngraving.text}
+                        </span>
+                      ) : (
+                        "Type your text here"
+                      )}
                     </div>
-                  </SheetTrigger>
-                  <SheetContent side="right" className="w-full sm:max-w-[450px] p-0 flex flex-col">
-                    <SheetHeader className="p-6 border-b border-gray-100 flex flex-row items-center justify-between">
-                      <SheetTitle className="text-lg font-bold">Engraving</SheetTitle>
-                    </SheetHeader>
-                    
-                    <div className="flex-1 overflow-y-auto">
-                      {/* Ring Preview */}
-                      <div className="relative w-full aspect-[16/9] bg-[#F9F9F9] flex items-center justify-center overflow-hidden">
-                        <Image 
-                          src="/images/engraving_bg.jpg" 
-                          alt="Ring band preview" 
-                          fill 
-                          className="object-cover"
-                        />
-                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                          {engraving && (
-                            <div 
-                              style={{ 
-                                fontFamily: `var(--font-${engravingFont.toLowerCase()})`,
-                                textShadow: "1px 1px 1.5px rgba(255,255,255,0.8), -0.5px -0.5px 1px rgba(0,0,0,0.15)"
-                              }} 
-                              className="text-gray-800 text-xl sm:text-2xl tracking-[0.15em] opacity-80 italic -translate-y-9 sm:-translate-y-9"
+                    <Button variant="ghost" className="absolute right-2 top-1/2 -translate-y-1/2 text-sm font-bold text-gray-400 group-hover:text-primary">
+                      ENGRAVE
+                    </Button>
+                  </div>                
+                </div>
+
+                {isMobile ? (
+                  <MobileSheet
+                    isOpen={isEngravingDrawerOpen}
+                    onClose={() => setIsEngravingDrawerOpen(false)}
+                    detents={[0.9]}
+                  >
+                    <MobileSheet.Container className={`z-[9999] ${lobster.variable} ${yellowtail.variable} ${satisfy.variable} ${abeezee.variable}`}>
+                      <MobileSheet.Header />
+                      <MobileSheet.Content>
+                        <div className="flex flex-col h-full">
+                          <div className="flex items-center justify-between px-4 pb-4 border-b border-gray-100">
+                            <h2 className="text-lg font-bold">Engraving</h2>
+                            <button onClick={() => setIsEngravingDrawerOpen(false)} className="p-2">
+                              <X size={20} className="text-gray-400" />
+                            </button>
+                          </div>
+                          {renderEngravingContent()}
+                          <div className="p-3 border-t border-gray-100">
+                            <Button 
+                              onClick={handleSaveEngraving}
+                              className="w-full h-12 font-bold rounded-full uppercase tracking-wider disabled:opacity-50"
+                              disabled={!engraving}
                             >
-                              {engraving}
-                            </div>
-                          )}
+                              SAVE
+                            </Button>
+                          </div>
                         </div>
+                      </MobileSheet.Content>
+                    </MobileSheet.Container>
+                    <MobileSheet.Backdrop />
+                  </MobileSheet>
+                ) : (
+                  <Sheet open={isEngravingDrawerOpen} onOpenChange={setIsEngravingDrawerOpen}>
+                    <SheetContent showCloseButton={false} side="right" className={`w-full sm:max-w-[450px] p-0 flex flex-col ${lobster.variable} ${yellowtail.variable} ${satisfy.variable} ${abeezee.variable}`}>
+                      <SheetHeader className="p-6 border-b border-gray-100 flex flex-row items-center justify-between space-y-0">
+                        <SheetTitle className="text-lg font-bold">Engraving</SheetTitle>
+                        <SheetClose asChild>
+                          <button className="text-zinc-400 hover:text-black transition-colors hover:cursor-pointer p-1">
+                            <X size={22} strokeWidth={1.5} />
+                          </button>
+                        </SheetClose>
+                      </SheetHeader>
+                      
+                      {renderEngravingContent()}
+
+                      <div className="p-6 border-t border-gray-100">
+                        <Button 
+                          onClick={handleSaveEngraving}
+                          className="w-full h-12 font-bold rounded-full uppercase tracking-wider disabled:opacity-50"
+                          disabled={!engraving}
+                        >
+                          SAVE
+                        </Button>
                       </div>
-
-                      <div className="p-6 space-y-8">
-                        <div className="space-y-3">
-                          <p className="text-sm font-medium text-black leading-relaxed">
-                            <span className="font-bold text-gray-900">Note:</span> Text can only contain up to 8 English/alphanumeric characters (A-Z, a-z, 0-9) and special characters (heart and infinity).
-                          </p>
-                        </div>
-
-                        <div className="space-y-4">
-                          <h4 className="text-base font-bold text-gray-900">Choose a Font <span className="text-rose-500">*</span></h4>
-                          <div className="grid grid-cols-2 gap-3">
-                            {["Lobster", "Yellowtail", "Satisfy", "ABeeZee"].map((font) => (
-                              <button
-                                key={font}
-                                onClick={() => setEngravingFont(font)}
-                                className={`px-4 py-3 rounded-xl border text-sm transition-all duration-300 ${
-                                  engravingFont === font 
-                                    ? "border-black bg-zinc-900 text-white shadow-md scale-[1.02]" 
-                                    : "border-gray-200 text-gray-600 hover:border-gray-400 bg-white"
-                                }`}
-                              >
-                                <span style={{ fontFamily: `var(--font-${font.toLowerCase()})` }} className="text-lg">Aa - {font}</span>
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-
-                        <div className="space-y-4">
-                          <div className="flex justify-between items-center">
-                            <h4 className="text-base font-bold text-gray-900">Inner Engraving <span className="text-rose-500">*</span></h4>
-                            <div className="text-[11px] font-bold uppercase tracking-widest text-zinc-400">
-                              {engraving.length}/8 Characters
-                            </div>
-                          </div>
-                          
-                          <div className="flex gap-3 items-center">
-                            <div className="relative flex-1">
-                              <Input
-                                ref={engravingInputRef}
-                                value={engraving}
-                                maxLength={8}
-                                onChange={(e) => setEngraving(e.target.value)}
-                                placeholder="Type your text here"
-                                className="h-14 border-gray-300 pr-4 text-lg focus-visible:ring-black rounded-xl"
-                                style={{ fontFamily: `var(--font-${engravingFont.toLowerCase()})` }}
-                              />
-                            </div>
-                            <div className="flex gap-2 shrink-0">
-                              <button 
-                                onClick={() => insertSymbol("♥")}
-                                className="w-12 h-12 flex items-center justify-center border-2 border-zinc-100 rounded-xl hover:border-black hover:bg-zinc-50 transition-all active:scale-95"
-                                title="Insert Heart"
-                              >
-                                <span className="text-2xl text-black">♥</span>
-                              </button>
-                              <button 
-                                onClick={() => insertSymbol("∞")}
-                                className="w-12 h-12 flex items-center justify-center border-2 border-zinc-100 rounded-xl hover:border-black hover:bg-zinc-50 transition-all active:scale-95"
-                                title="Insert Infinity"
-                              >
-                                <span className="text-2xl text-black">∞</span>
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="p-6 border-t border-gray-100">
-                      <Button 
-                        onClick={handleSaveEngraving}
-                        className="w-full h-12 font-bold rounded-full uppercase tracking-wider disabled:opacity-50"
-                        disabled={!engraving}
-                      >
-                        SAVE
-                      </Button>
-                    </div>
-                  </SheetContent>
-                </Sheet>
+                    </SheetContent>
+                  </Sheet>
+                )}
 
                 {savedEngraving.text && (
                   <div className="mt-3 flex items-center gap-2 text-primary font-semibold text-sm bg-primary/5 w-fit px-3 py-1.5 rounded-full border border-primary/10">
