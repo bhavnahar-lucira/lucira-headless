@@ -4,13 +4,13 @@ import { Check, X, RefreshCw, Sparkle } from "lucide-react";
 
 export default function DiamondComparison() {
   const rows = [
-    { label: "Chemically and physically a real diamond", lab: true, mined: true },
-    { label: "Graded by global certification standards (cut, color, clarity, carat)", lab: true, mined: true },
-    { label: "Better value for the same quality (40–70% more affordable)", lab: true, mined: false },
-    { label: "Environmentally responsible and conflict-free", lab: true, mined: false },
-    { label: "Durable and suitable for everyday, lifetime wear", lab: true, mined: true },
-    { label: "Wider flexibility in shapes, sizes, and design options", lab: true, mined: false },
-    { label: "Ethically produced without human rights concerns", lab: true, mined: false },
+    { id: "lab1", label: "Chemically and physically a real diamond", lab: true, mined: true },
+    { id: "lab2", label: "Graded by global certification standards (cut, color, clarity, carat)", lab: true, mined: true },
+    { id: "lab3", label: "Better value for the same quality (40–70% more affordable)", lab: true, mined: false },
+    { id: "lab4", label: "Environmentally responsible and conflict-free", lab: true, mined: false },
+    { id: "lab5", label: "Durable and suitable for everyday, lifetime wear", lab: true, mined: true },
+    { id: "lab6", label: "Wider flexibility in shapes, sizes, and design options", lab: true, mined: false },
+    { id: "lab7", label: "Ethically produced without human rights concerns", lab: true, mined: false },
   ];
 
   const CheckIcon = () => (
@@ -53,8 +53,8 @@ export default function DiamondComparison() {
             </div>
 
             {/* Table Rows */}
-            {rows.map((row, i) => (
-              <React.Fragment key={i}>
+            {rows.map((row) => (
+              <div key={row.id}>
                 <div className="py-4 md:py-6 px-2 border-t border-zinc-200 text-[12px] md:text-base lg:text-[17px] font-semibold text-black leading-tight flex items-center">
                   {row.label}
                 </div>
@@ -64,7 +64,7 @@ export default function DiamondComparison() {
                 <div className="py-4 md:py-6 border-t border-zinc-200 flex items-center justify-center">
                   {row.mined ? <CheckIcon /> : <XIcon />}
                 </div>
-              </React.Fragment>
+              </div>
             ))}
           </div>
         </div>
