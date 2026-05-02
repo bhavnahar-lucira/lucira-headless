@@ -11,11 +11,14 @@ import Link from "next/link";
 import Image from "next/image";
 
 const CATEGORIES = [
-  { id: 1, name: "Earrings", handle: "all-earrings", image: "/images/product/category/earrings.jpg" },
-  { id: 2, name: "Bracelets", handle: "all-bracelets", image: "/images/product/category/bracelets.jpg" },
-  { id: 3, name: "Necklaces", handle: "all-necklaces", image: "/images/product/category/necklaces.jpg" },
-  { id: 4, name: "Mangalsutra", handle: "mangalsutra", image: "/images/product/category/mangalsutra.jpg" },
-  { id: 5, name: "Nosepins", handle: "all-nosepins", image: "/images/product/category/nosepins.jpg" },
+  { id: 1, name: "Rings", handle: "all-rings", image: "/images/range/Rings.jpg" },
+  { id: 2, name: "Earrings", handle: "all-earrings", image: "/images/range/Earrings.jpg" },
+  { id: 3, name: "Bracelets", handle: "all-bracelets", image: "/images/range/Bracelets.jpg" },
+  { id: 4, name: "Necklaces", handle: "all-necklaces", image: "/images/range/Necklaces.jpg" },
+  { id: 5, name: "Nosepins", handle: "all-nosepins", image: "/images/range/Nosepin.jpg" },
+  { id: 6, name: "Mangalsutra", handle: "all-mangalsutra", image: "/images/range/Mangalsutra.jpg" },
+  { id: 7, name: "Men's Ring", handle: "all-mens-ring", image: "/images/range/MensRing.jpg" },
+  { id: 8, name: "Men's Stud", handle: "all-mens-stud", image: "/images/range/MensStud.jpg" },
 ];
 
 export default function CategorySlider() {
