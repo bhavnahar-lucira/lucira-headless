@@ -85,6 +85,18 @@ import StyledByLucira from "../home/StyledByLucira";
 
 import { Sheet as MobileSheet } from "react-modal-sheet";
 
+const USER_PINCODE_COOKIE = "user_pincode";
+
+function getCookieValue(name) {
+  if (typeof document === "undefined") return "";
+
+  const value = document.cookie
+    .split("; ")
+    .find((row) => row.startsWith(`${name}=`));
+
+  return value ? decodeURIComponent(value.split("=").slice(1).join("=")) : "";
+}
+
 function useMounted() {
   const [mounted, setMounted] = useState(false);
 
@@ -321,6 +333,25 @@ export default function ProductPageClient({ product, complementaryProducts = [],
     // We only want this to run once when the page loads
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    const applyPincode = (value) => {
+      const cookiePincode = String(value || "").match(/\b\d{6}\b/)?.[0] || "";
+      if (!cookiePincode || cookiePincode === pincode) return;
+
+      setPincode(cookiePincode);
+      handlePincodeCheck(cookiePincode);
+    };
+
+    applyPincode(getCookieValue(USER_PINCODE_COOKIE));
+
+    const handleUserPincode = (event) => {
+      applyPincode(event.detail?.pincode);
+    };
+
+    window.addEventListener("lucira:user-pincode", handleUserPincode);
+    return () => window.removeEventListener("lucira:user-pincode", handleUserPincode);
+  }, [handlePincodeCheck, pincode]);
 
   // Update dispatch message when variant changes (size/color)
   useEffect(() => {

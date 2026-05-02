@@ -78,7 +78,8 @@ export default function CartPage() {
     if (isAuthenticated) {
       router.push("/checkout/shipping");
     } else {
-      openLogin();
+      localStorage.setItem("auth_redirect_path", "/checkout/shipping");
+      openLogin("/checkout/shipping");
     }
   };
 

@@ -4,12 +4,10 @@ import Link from "next/link";
 import Image from "next/image";
 import { Lock, ArrowLeft } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
-import { useSelector } from "react-redux";
 
 export default function CheckoutHeader() {
   const pathname = usePathname();
   const router = useRouter();
-  const { user } = useSelector((state) => state.user);
 
   const steps = [
     { name: "Cart", path: "/checkout/cart" },
@@ -40,7 +38,7 @@ export default function CheckoutHeader() {
           </div>
 
           {/* Center: Progress Bar */}
-          <div className="flex flex-col items-center justify-center flex-[2]">
+          <div className="flex flex-col items-center justify-center flex-2">
             <div className="flex items-center w-full max-w-md">
               {steps.map((step, index) => {
                 const isActive = index === currentStepIndex;
@@ -49,7 +47,7 @@ export default function CheckoutHeader() {
                 return (
                   <div key={step.name} className="flex-1 flex flex-col items-center">
                     {/* Step Label */}
-                    <span className={`text-[11px] font-bold uppercase tracking-[0.1em] mb-2 font-figtree transition-colors duration-300 ${
+                    <span className={`text-[11px] font-bold uppercase tracking-widest mb-2 font-figtree transition-colors duration-300 ${
                       isActive ? "text-primary" : "text-zinc-400"
                     }`}>
                       {step.name}
@@ -59,7 +57,7 @@ export default function CheckoutHeader() {
                     <div className="relative flex items-center justify-center w-full">
                       {/* Connector Line */}
                       {index < steps.length - 1 && (
-                        <div className="absolute left-[50%] w-full h-[1px] bg-zinc-200">
+                        <div className="absolute left-[50%] w-full h-px bg-zinc-200">
                            <div 
                             className="h-full bg-green-600 transition-all duration-500 ease-in-out" 
                             style={{ width: isCompleted ? '100%' : '0%' }}
@@ -68,7 +66,7 @@ export default function CheckoutHeader() {
                       )}
 
                       {/* Step Circle */}
-                      <div className={`w-[18px] h-[18px] rounded-full border-2 z-10 bg-white transition-colors duration-300 flex items-center justify-center ${
+                      <div className={`w-4.5 h-4.5 rounded-full border-2 z-10 bg-white transition-colors duration-300 flex items-center justify-center ${
                         isActive || isCompleted ? "border-green-600" : "border-zinc-300"
                       }`}>
                         {(isActive || isCompleted) && (
@@ -83,16 +81,7 @@ export default function CheckoutHeader() {
           </div>
 
           {/* Right: Security & Login */}
-          <div className="flex-1 flex items-center justify-end gap-4">
-            {!user && (
-              <>
-                <Link href="/login" className="text-zinc-500 text-xs font-bold uppercase tracking-widest hover:text-black transition-colors">
-                  Login
-                </Link>
-                <span className="text-zinc-300">|</span>
-              </>
-            )}
-            
+          <div className="flex-1 flex items-center justify-end gap-4">            
             <div className="flex items-center gap-2 text-zinc-500">
               <Lock size={16} className="text-zinc-400" />
               <span className="text-[10px] font-bold uppercase tracking-[0.2em] whitespace-nowrap">
@@ -104,7 +93,7 @@ export default function CheckoutHeader() {
       </header>
 
       {/* MOBILE HEADER (SM/MD) */}
-      <header className="lg:hidden h-16 bg-white border-b border-gray-100 flex items-center justify-between px-4 sticky top-0 z-[100]">
+      <header className="lg:hidden h-16 bg-white border-b border-gray-100 flex items-center justify-between px-4 sticky top-0 z-100">
         <div className="flex items-center gap-4">
           <button 
             onClick={() => router.back()}
@@ -112,19 +101,10 @@ export default function CheckoutHeader() {
           >
             <ArrowLeft size={24} strokeWidth={2} />
           </button>
-          
-          <Link href="/" className="shrink-0">
-             <Image 
-              src="/images/icons/small-logo.svg" 
-              alt="L" 
-              width={24} 
-              height={24} 
-            />
-          </Link>
         </div>
 
         <div className="absolute left-1/2 -translate-x-1/2 text-center">
-          <h1 className="text-[15px] font-bold text-[#443360] tracking-tight">
+          <h1 className="text-[15px] font-bold text-[#443360] tracking-tight uppercase">
             {currentStep.name}
           </h1>
         </div>

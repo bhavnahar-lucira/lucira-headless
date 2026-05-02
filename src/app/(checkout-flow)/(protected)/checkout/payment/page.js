@@ -321,7 +321,7 @@ export default function PaymentPage() {
         makeDefault,
       });
       
-      setAddresses(payload.addresses || []);
+      applyAddressPayload(payload);
       
       const newAddress = payload.addresses.find(a => 
         a.address1 === addressForm.address1 && a.zip === addressForm.zip
@@ -1124,10 +1124,9 @@ export default function PaymentPage() {
             {isDesktop && (
               <div className="space-y-10">
                 <div className="border border-zinc-200 rounded-xl overflow-hidden bg-white">
-                  <div className="p-4 grid grid-cols-[140px_1fr_60px] items-center gap-4 text-sm border-b border-zinc-100">
+                  <div className="p-4 grid grid-cols-[140px_1fr] items-center gap-4 text-sm border-b border-zinc-100">
                     <span className="text-zinc-500 whitespace-nowrap">Contact</span>
                     <span className="text-zinc-900 font-medium truncate">{customer?.email || checkoutSelection?.customerEmail || "techamitjha@gmail.com"}</span>
-                    <Link href="/checkout/shipping?method=ship" className="text-black font-semibold text-right underline">Change</Link>
                   </div>
                   <div className="p-4 grid grid-cols-[140px_1fr_60px] items-center gap-4 text-sm border-b border-zinc-100">
                     <span className="text-zinc-500 whitespace-nowrap">{isPickup ? "Pickup location" : "Ship to"}</span>
