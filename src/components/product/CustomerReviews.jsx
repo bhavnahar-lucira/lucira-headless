@@ -283,7 +283,7 @@ export default function CustomerReviews({
         </div>
 
         {/* Stats Summary */}
-        <div className="flex flex-col md:flex-row items-center justify-between gap-12 bg-white/30 p-8 rounded-2xl backdrop-blur-sm border border-white/20 shadow-sm mb-16">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-12 bg-white/30 p-8 rounded-2xl backdrop-blur-sm border border-white/20 shadow-sm mb-10">
           <div className="flex flex-col items-center">
             <span className="text-4xl font-black text-gray-700 mb-2">
               {data.average}
@@ -388,25 +388,12 @@ export default function CustomerReviews({
         )}
 
         {/* Filter Bar */}
-        <div className="flex flex-col md:flex-row justify-between gap-6 mb-10 border-b border-gray-200 pb-8 px-2">
+        <div className="flex flex-row flex-wrap md:flex-nowrap justify-between gap-6 mb-8 border-b border-gray-200 pb-6">
           
-
-          <div className="flex-1 text-center hidden md:block">
-            <span className="text-lg font-bold text-black uppercase tracking-[0.2em]">
-              {data.count} Verified Reviews
-            </span>
-          </div>
-
-          <div className="md:hidden w-full">
-            <span className="text-lg font-bold text-black uppercase tracking-[0.2em]">
-              {data.count} Verified Reviews
-            </span>
-          </div>
-
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 md:gap-3 order-1 md:order-0">
             <span className="text-sm font-semibold text-gray-600">Rating:</span>
             <Select value={filterRating} onValueChange={handleFilterChange}>
-              <SelectTrigger className="w-auto min-w-[120px] border-none bg-transparent font-bold text-sm uppercase focus:ring-0 focus:ring-offset-0 p-0 h-auto cursor-pointer gap-2">
+              <SelectTrigger className="w-auto min-w-20 md:min-w-30 border-none bg-transparent font-bold text-sm uppercase focus:ring-0 focus:ring-offset-0 p-0 h-auto cursor-pointer gap-2">
                 <SelectValue placeholder="All Ratings" />
               </SelectTrigger>
               <SelectContent className="rounded-xl border-gray-100 shadow-xl">
@@ -438,12 +425,18 @@ export default function CustomerReviews({
             </Select>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="text-center order-0 md:order-1 basis-full lg:basis-auto">
+            <span className="text-lg font-bold text-black uppercase tracking-[0.2em]">
+              {data.count} Verified Reviews
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2 md:gap-3 order-2">
             <span className="text-sm font-semibold text-gray-600">
               Sort by:
             </span>
             <Select value={sortBy} onValueChange={handleSortChange}>
-              <SelectTrigger className="w-auto min-w-[140px] border-none bg-transparent font-bold text-sm uppercase focus:ring-0 focus:ring-offset-0 p-0 h-auto cursor-pointer gap-2">
+              <SelectTrigger className="w-auto min-w-30 md;min-w-35 border-none bg-transparent font-bold text-sm uppercase focus:ring-0 focus:ring-offset-0 p-0 h-auto cursor-pointer gap-2">
                 <SelectValue placeholder="Featured" />
               </SelectTrigger>
               <SelectContent className="rounded-xl border-gray-100 shadow-xl">
