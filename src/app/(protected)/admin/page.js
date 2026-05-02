@@ -129,7 +129,7 @@ export default function CustomerDashboard() {
                   <h3 className="text-2xl font-bold text-primary">{stat.value}</h3>
                 </div>
               </div>
-              <p className="text-xs font-bold text-primary flex items-center gap-1 cursor-pointer hover:underline">
+              <p className="text-base font-bold text-primary flex items-center gap-1 cursor-pointer hover:underline">
                 {stat.subtitle} <ChevronRight size={14} />
               </p>
             </Link>
@@ -174,7 +174,7 @@ export default function CustomerDashboard() {
                         #{order.orderNumber}
                       </span>
                       <span
-                        className={`w-fit mx-auto md:mx-0 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                        className={`w-fit mx-auto md:mx-0 px-2 py-0.5 rounded-full text-[12px] font-bold uppercase tracking-wider ${
                           order.status === "Delivered"
                             ? "bg-emerald-50 text-emerald-600"
                             : "bg-blue-50 text-blue-600"

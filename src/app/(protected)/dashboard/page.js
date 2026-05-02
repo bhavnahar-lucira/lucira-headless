@@ -226,8 +226,8 @@ export default function Dashboard() {
             >
               <Store size={20} className="text-zinc-400" />
               <div className="flex flex-col text-left">
-                <span className="text-xs text-zinc-500 font-medium uppercase tracking-wider">Shopify Products</span>
-                <span className="text-lg font-bold tabular-nums leading-tight">{shopifyTotal}</span>
+                <span className="text-lg text-zinc-500 font-medium uppercase tracking-wider">Shopify Products</span>
+                <span className="text-xl font-bold text-black">{shopifyTotal}</span>
               </div>
               <div className={`ml-4 p-2 rounded-lg ${syncing && syncType === "products" ? 'animate-spin' : ''}`}>
                 <RefreshCw size={18} />
