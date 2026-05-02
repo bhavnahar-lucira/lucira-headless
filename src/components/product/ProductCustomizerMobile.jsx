@@ -80,7 +80,7 @@ export function ProductCustomizerMobile({
 
         <button 
           onClick={() => setIsOpen(true)}
-          className="w-full py-3 bg-[#F9F9F9] rounded-xl text-[#A67C7C] font-bold text-sm uppercase tracking-widest"
+          className="w-full py-3 bg-accent rounded-sm text-white font-bold text-sm uppercase tracking-widest"
         >
           CUSTOMIZE
         </button>
