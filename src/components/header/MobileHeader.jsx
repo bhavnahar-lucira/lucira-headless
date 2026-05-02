@@ -464,7 +464,7 @@ export default function MobileHeader() {
                 />
                 <div className="drawer-menu-image absolute inset-0 bg-black/10 group-active:bg-black/20 transition-colors" />
                 <div className="absolute bottom-4 left-4 right-4">
-                  <span className="absolute bottom-0 left-0 text-white text-[14px] leading-none tracking-normal font-medium capitalize font-figtree sm:static sm:text-base sm:leading-normal sm:tracking-wide">
+                  <span className="absolute bottom-0 left-0 text-white text-sm leading-none tracking-normal font-medium capitalize font-figtree sm:static sm:text-base sm:leading-normal sm:tracking-wide">
                     {label}
                   </span>
                 </div>
