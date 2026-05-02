@@ -96,6 +96,21 @@ export default function Dashboard() {
     }
   };
 
+  // Fetch products from our MongoDB
+  const fetchLocalProducts = useCallback(async (page = 1, q = "") => {
+    setLoadingProducts(true);
+    try {
+      const res = await fetch(`/api/products/search?page=${page}&limit=10${q ? `&q=${encodeURIComponent(q)}` : ""}`);
+      const data = await res.json();
+      setProducts(data.products || []);
+      setPagination(data.pagination);
+    } catch (e) {
+      console.error("Failed to fetch local products", e);
+    } finally {
+      setLoadingProducts(false);
+    }
+  }, []);
+
   // Products Sync Polling State
   const [productsSyncStatus, setProductsSyncStatus] = useState(null);
   const [pollingProducts, setPollingProducts] = useState(false);
@@ -149,21 +164,6 @@ export default function Dashboard() {
       setLoadingMenus(false);
     }
   };
-
-  // Fetch products from our MongoDB
-  const fetchLocalProducts = useCallback(async (page = 1, q = "") => {
-    setLoadingProducts(true);
-    try {
-      const res = await fetch(`/api/products/search?page=${page}&limit=10${q ? `&q=${encodeURIComponent(q)}` : ""}`);
-      const data = await res.json();
-      setProducts(data.products || []);
-      setPagination(data.pagination);
-    } catch (e) {
-      console.error("Failed to fetch local products", e);
-    } finally {
-      setLoadingProducts(false);
-    }
-  }, []);
 
   useEffect(() => {
     fetchShopifyStatus();
