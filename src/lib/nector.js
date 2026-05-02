@@ -4,7 +4,8 @@ const PROXY_URL = 'https://api.lucirajewelry.com/nector-reviews/nector-proxy.php
  * GET reviews via proxy
  */
 export async function apiFetch(url) {
-  const res = await fetch(url);
+  // Add cache: 'no-store' to ensure we get fresh data after submission
+  const res = await fetch(url, { cache: 'no-store' });
   if (!res.ok) throw new Error('Proxy HTTP ' + res.status);
   return res.json();
 }
@@ -107,10 +108,13 @@ export async function fetchAllPages(baseProxyUrl) {
  */
 export async function loadNectorReviews(productId) {
   try {
+    // Extract numeric ID if it's a Shopify GID
+    const cleanId = productId ? productId.toString().split('/').pop() : null;
+
     // If productId is provided, try fetching product-specific reviews first
-    if (productId) {
+    if (cleanId) {
       const productUrlObj = new URL(PROXY_URL);
-      productUrlObj.searchParams.set('product_id', productId);
+      productUrlObj.searchParams.set('product_id', cleanId);
       const parsed = await fetchAllPages(productUrlObj.toString());
 
       if (parsed.items.length > 0) {
@@ -121,7 +125,7 @@ export async function loadNectorReviews(productId) {
     // Fallback: all reviews
     const fallback = await fetchAllPages(PROXY_URL);
     if (fallback.items.length > 0) {
-      return { ...fallback, isProductView: false, usedFallback: !!productId };
+      return { ...fallback, isProductView: false, usedFallback: !!cleanId };
     }
     
     return { items: [], count: 0, stats: [], isProductView: false, usedFallback: false };
@@ -132,11 +136,18 @@ export async function loadNectorReviews(productId) {
 }
 
 export const fetchNectorReviews = async (productId) => {
-    // Legacy support wrapper or refactored for new logic
     const data = await loadNectorReviews(productId);
     
-    // Convert to the format expected by the existing CustomerReviews component if needed
-    // or update the component to use the new format.
-    // For now, let's return the new format and update components.
-    return data;
+    // Calculate average if not provided
+    let average = data.average || 0;
+    if (!average && data.items?.length > 0) {
+        const sum = data.items.reduce((s, r) => s + (parseFloat(r.rating) || 0), 0);
+        average = (sum / data.items.length).toFixed(1);
+    }
+
+    return {
+        ...data,
+        average,
+        list: data.items // For legacy compatibility with API routes
+    };
 };

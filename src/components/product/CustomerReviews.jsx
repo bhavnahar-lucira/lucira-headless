@@ -21,6 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { loadNectorReviews } from "@/lib/nector";
 
 // Helper to ensure image src is a valid string URL
 const getValidSrc = (src, fallback = "/images/product/1.jpg") => {
@@ -38,11 +39,20 @@ export default function CustomerReviews({ reviews, productId, productTitle, prod
   const [filterRating, setFilterRating] = useState("all");
   const [sortBy, setSortBy] = useState("featured");
   const [usedFallback, setUsedFallback] = useState(false);
+  const [isWriteReviewOpen, setIsWriteReviewOpen] = useState(false);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   useEffect(() => {
     async function initReviews() {
       setLoading(true);
       try {
+        console.log("[CustomerReviews] Loading reviews for:", productId);
+        // Use the imported function
+        if (typeof loadNectorReviews === 'undefined') {
+          console.error("[CustomerReviews] loadNectorReviews is UNDEFINED!");
+          return;
+        }
+        
         const result = await loadNectorReviews(productId);
         
         // Transform stats array to breakdown object if needed
@@ -90,7 +100,7 @@ export default function CustomerReviews({ reviews, productId, productTitle, prod
     }
 
     initReviews();
-  }, [productId]);
+  }, [productId, refreshTrigger]);
 
   const filteredAndSortedReviews = useMemo(() => {
     if (isGlobal) return data.list;
@@ -132,7 +142,32 @@ export default function CustomerReviews({ reviews, productId, productTitle, prod
       <div className="w-8 h-8 border-4 border-[#5A413F] border-t-transparent rounded-full animate-spin"></div>
     </div>
   );
-  if (data.count === 0) return null;
+
+  if (data.count === 0) return (
+    <section className="w-full md:py-20 py-15 bg-[#FEF5F1] mt-15" id="reviews">
+      <div className="container-main text-center">
+        <h2 className="text-3xl md:text-4xl font-extrabold mb-4 font-abhaya">Customer Reviews</h2>
+        <div className="py-20 bg-white/30 rounded-3xl border-2 border-dashed border-gray-200 max-w-2xl mx-auto">
+          <p className="text-gray-400 font-black uppercase tracking-widest mb-6">No reviews yet for this product.</p>
+          <button 
+            onClick={() => setIsWriteReviewOpen(true)}
+            className="px-10 py-4 bg-[#5A413F] text-white font-black text-xs uppercase tracking-[0.2em] rounded shadow-lg hover:bg-[#4a3533] transition-all active:scale-95"
+          >
+            Be the first to review
+          </button>
+        </div>
+      </div>
+      <WriteReviewForm 
+        isOpen={isWriteReviewOpen}
+        onClose={() => setIsWriteReviewOpen(false)}
+        productId={productId}
+        onSuccess={() => setRefreshTrigger(prev => prev + 1)}
+        productTitle={productTitle}
+        productImage={productImage}
+        productHandle={productHandle}
+      />
+    </section>
+  );
 
   const handleFilterChange = (val) => {
     setFilterRating(val);
@@ -188,15 +223,23 @@ export default function CustomerReviews({ reviews, productId, productTitle, prod
       <div className="container-main">
         
         {/* Heading */}
-        <div className="md:mb-16 mb:10 text-center">
-            <h2 className="text-3xl md:text-4xl font-extrabold mb-4 font-abhaya">
-            {isGlobal ? "Customer Stories" : "Customer Reviews"}
-            </h2>
-            {isGlobal && (
-                <p className="text-gray-500 font-black text-[10px] uppercase tracking-[0.2em]">
-                    Showing top experiences from across our collections
-                </p>
-            )}
+        <div className="md:mb-16 mb:10 flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="flex-1 text-center md:text-left">
+              <h2 className="text-3xl md:text-4xl font-extrabold mb-2 font-abhaya">
+                {isGlobal ? "Customer Stories" : "Customer Reviews"}
+              </h2>
+              {isGlobal && (
+                  <p className="text-gray-500 font-black text-[10px] uppercase tracking-[0.2em]">
+                      Showing top experiences from across our collections
+                  </p>
+              )}
+            </div>
+            <button 
+              onClick={() => setIsWriteReviewOpen(true)}
+              className="px-8 py-4 bg-[#5A413F] text-white font-black text-[10px] uppercase tracking-[0.2em] rounded shadow-lg hover:bg-[#4a3533] transition-all active:scale-95 shrink-0"
+            >
+              Write a Review
+            </button>
         </div>
 
         {/* Stats Summary */}
@@ -369,6 +412,16 @@ export default function CustomerReviews({ reviews, productId, productTitle, prod
         onIndexChange={(index) => setPopupState({ ...popupState, index })}
       />
 
+      <WriteReviewForm 
+        isOpen={isWriteReviewOpen}
+        onClose={() => setIsWriteReviewOpen(false)}
+        productId={productId}
+        onSuccess={() => setRefreshTrigger(prev => prev + 1)}
+        productTitle={productTitle}
+        productImage={productImage}
+        productHandle={productHandle}
+      />
+
       <style jsx global>{`
         .product-review-scrollbar .swiper-scrollbar-drag {
           background: #5A413F !important;
@@ -446,10 +499,10 @@ function ReviewCard({ review, onClick }) {
       
       <div className="space-y-2 md:space-y-3 flex-grow">
         <h4 className="text-base sm:text-lg font-bold text-black leading-tight tracking-tight group-hover:text-primary transition-colors">
-          {review.title || "Brilliant Purchase"}
+          {review.title}
         </h4>
         <p className="text-gray-500 leading-relaxed text-xs sm:text-sm italic line-clamp-4">
-          "{text}"
+          &quot;{text}&quot;
         </p>
       </div>
       

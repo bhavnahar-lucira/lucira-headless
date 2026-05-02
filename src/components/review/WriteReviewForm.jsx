@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { submitReview, uploadSingleImage, extractReviewId } from "@/lib/nector";
 
-export default function WriteReviewForm({ isOpen, onClose, productId }) {
+export default function WriteReviewForm({ isOpen, onClose, productId, onSuccess, productTitle, productImage, productHandle }) {
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [formData, setFormData] = useState({
@@ -73,9 +73,15 @@ export default function WriteReviewForm({ isOpen, onClose, productId }) {
     if (validate()) {
       setIsSubmitting(true);
       try {
+        const cleanId = productId ? productId.toString().split('/').pop() : 'all';
+        const productUrl = productHandle ? `https://www.lucirajewelry.com/products/${productHandle}` : '';
+
         const payload = {
           reference_product_source : 'shopify',
-          reference_product_id     : productId || 'all',
+          reference_product_id     : cleanId,
+          reference_product_name   : productTitle || '',
+          reference_product_image  : productImage || '',
+          reference_product_url    : productUrl,
           name: formData.name,
           rating,
           description : formData.review,
@@ -115,6 +121,7 @@ export default function WriteReviewForm({ isOpen, onClose, productId }) {
         }
 
         alert("Review submitted successfully!");
+        onSuccess?.();
         onClose();
         // Reset form
         setFormData({
