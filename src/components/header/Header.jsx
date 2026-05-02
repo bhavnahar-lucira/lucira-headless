@@ -44,7 +44,7 @@ export default function Header() {
   return (
     <>
       {/* Placeholder to prevent layout jump */}
-      <div style={{ height: 147 }} />
+      <div style={{ height: 142 }} />
 
       <header className={cn("fixed top-0 left-0 w-full z-[100] bg-white border-b border-gray-100", hideTop && "sticky-header-active")}>
 

@@ -55,7 +55,7 @@ export default function Navbar({ hideTop }) {
 
   return (
     <nav className="relative bg-white border-b border-gray-100 z-[90]">
-      <div className="container-main relative flex items-center min-h-[45px]">
+      <div className="container-main relative flex items-center min-h-[40px]">
         {/* Left: Sticky Logo */}
         <motion.div
           initial={false}
