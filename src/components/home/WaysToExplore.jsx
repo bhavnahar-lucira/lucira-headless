@@ -4,7 +4,7 @@ import React, { useState, useRef } from "react";
 import LazyImage from "../common/LazyImage";
 import { Button } from "@/components/ui/button";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Navigation, Pagination } from "swiper/modules";
+import { Pagination } from "swiper/modules";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import ExploreBottomSheet from "./ExploreBottomSheet";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
@@ -42,9 +42,8 @@ const WAYS = [
 
 export default function WaysToExplore() { 
   const isMobile = useMediaQuery("(max-width: 768px)");
-  const [activeSheet, setActiveSheet] = useState(null); // mobile bottom sheet
+  const [activeSheet, setActiveSheet] = useState(null);
   
-  // Desktop Popup States
   const [isVideoCallPopupOpen, setIsVideoCallPopupOpen] = useState(false);
   const [isTryAtHomePopupOpen, setIsTryAtHomePopupOpen] = useState(false);
   const [isBookAppointmentPopupOpen, setIsBookAppointmentPopupOpen] = useState(false);
@@ -63,15 +62,19 @@ export default function WaysToExplore() {
     }
   };
 
+  const SectionHeader = () => (
+    <div className="text-left lg:text-center mb-8 px-4">
+      <h2 className="text-3xl md:text-4xl font-extrabold font-abhaya mb-2 text-black">More Ways To Explore</h2>
+      <p className="text-zinc-600 text-base font-normal">Experience Lucira your way, online or at our showrooms.</p>
+    </div>
+  );
+
   return (
     <section className={`w-full ${isMobile ? "mt-12 bg-[#FEF5F1] py-12" : "mt-16 bg-[#FEF5F1] py-16"} overflow-hidden`}>
       <div className="container-main mx-auto">
         {isMobile ? (
           <>
-            <div className="text-center mb-6 px-1 md:px-0">
-              <h2 className="text-3xl md:text-4xl font-extrabold font-abhaya mb-2 text-black">More Ways To Explore</h2>
-              <p className="text-black text-base md:text-base font-normal">Experience Lucira your way, online or at our showrooms.</p>
-            </div>
+            <SectionHeader />
 
             <div className="relative group px-4">
               <Swiper
@@ -92,17 +95,18 @@ export default function WaysToExplore() {
                 {WAYS.map((way, index) => (
                   <SwiperSlide key={index} className="h-auto">
                     <div className="flex flex-col h-full bg-white rounded-2xl overflow-hidden group p-5 shadow-sm border border-zinc-100">
-                      <div className="relative aspect-[395/295] overflow-hidden rounded-xl mb-6">
+                      <div className="relative aspect-395/295 overflow-hidden rounded-xl mb-6">
                         <LazyImage 
                           src={way.image} 
                           alt={way.title} 
                           fill 
+                          sizes="(max-width: 768px) 90vw, 33vw"
                           className="object-cover transition-transform duration-700 group-hover:scale-105"
                         />
                       </div>
-                      <div className="flex flex-col items-start gap-3 flex-grow">
-                        <h3 className="text-xl font-bold text-gray-900 tracking-tight">{way.title}</h3>
-                        <p className="text-zinc-600 text-sm leading-relaxed mb-6">
+                      <div className="flex flex-col items-start gap-3 grow">
+                        <h3 className="text-xl font-bold text-black">{way.title}</h3>
+                        <p className="text-black text-base font-normal mb-4">
                           {way.desc}
                         </p>
                         <div className="mt-auto w-full">
@@ -150,22 +154,20 @@ export default function WaysToExplore() {
           </>
         ) : (
           <>
-            <div className="text-center mb-6 px-1 md:px-0">
-              <h2 className="text-3xl md:text-4xl font-extrabold font-abhaya mb-2 text-black">More Ways To Explore</h2>
-              <p className="text-black text-base md:text-base font-normal">Experience Lucira your way, online or at our showrooms.</p>
-            </div>
+            <SectionHeader />
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-6 lg:gap-8">
               {WAYS.map((way, index) => (
                 <div key={index} className="flex flex-col h-full bg-white rounded-sm overflow-hidden group p-5 md:p-4 lg:p-5 shadow-sm">
-                  <div className="relative aspect-[395/295] overflow-hidden rounded-sm mb-3">
+                  <div className="relative aspect-395/295 overflow-hidden rounded-sm mb-3">
                     <LazyImage 
                       src={way.image} 
                       alt={way.title} 
                       fill 
+                      sizes="(max-width: 768px) 100vw, 33vw"
                       className="object-cover transition-transform duration-700 group-hover:scale-105"
                     />
                   </div>
-                  <div className="flex flex-col items-start gap-2 flex-grow">
+                  <div className="flex flex-col items-start gap-2 grow">
                     <h3 className="text-xl font-bold text-black">{way.title}</h3>
                     <p className="text-black text-base mb-4">
                       {way.desc}

@@ -1,4 +1,3 @@
-
 :root {
   --blog-primary: #a05a64;
   --blog-text-dark: #1a1a1a;
@@ -173,8 +172,8 @@
   font-weight: 700;
   text-transform: none;
   /* Removed uppercase for a more elegant look */
-  margin-top: 24px;
-  margin-bottom: 24px;
+  margin-top: 6px;
+  margin-bottom: 6px;
   color: var(--blog-text-dark);
   line-height: 1.3;
 }
@@ -508,73 +507,68 @@
   }
 }
 
+.lucira-blogs .image-text-products-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin: 24px 0;
+}
+
+/* Mobile Vertical Layout (2-column) */
 .lucira-blogs .image-text-product-card {
   display: flex !important;
-  flex-direction: row !important;
-  align-items: center !important;
-  gap: 16px !important;
-  padding: 12px !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  gap: 8px !important;
+  padding: 10px !important;
   background: #fff;
-  border: 1px solid #ececec;
-  border-radius: 12px;
+  border: 1px solid #f0f0f0;
+  border-radius: 8px;
   text-decoration: none !important;
   color: inherit !important;
-  transition: all 0.3s ease;
-  margin-bottom: 12px;
-  min-height: 100px;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
+  height: 100%;
 }
 
 .lucira-blogs .image-text-product-card:hover {
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
-  border-color: #e0e0e0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border-color: #e5e5e5;
+  transform: translateY(-2px);
 }
 
 .lucira-blogs .image-text-product-image {
-  flex: 0 0 80px;
-  width: 80px;
-  height: 80px;
-  background-color: #fcfcfc;
-  border-radius: 8px;
+  width: 100%;
+  aspect-ratio: 1/1;
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
-}
-
-@media (max-width: 480px) {
-  .lucira-blogs .image-text-product-card {
-    gap: 8px !important;
-    padding: 8px !important;
-  }
-
-  .lucira-blogs .image-text-product-image {
-    flex: 0 0 60px;
-    width: 60px;
-    height: 60px;
-  }
+  border-radius: 4px;
+  background-color: #fcfcfc;
+  flex-shrink: 0;
 }
 
 .lucira-blogs .image-text-product-image img {
-  max-width: 85%;
-  max-height: 85%;
+  max-width: 90%;
+  max-height: 90%;
   object-fit: contain;
 }
 
 .lucira-blogs .image-text-product-info {
   flex: 1;
   display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 4px 12px;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  text-align: left;
 }
 
 .lucira-blogs .image-text-product-rating {
-  flex: 0 0 100%;
   display: flex;
   align-items: center;
-  gap: 6px;
-  margin-bottom: 2px;
+  justify-content: flex-start;
+  gap: 4px;
 }
 
 .lucira-blogs .star-rating {
@@ -584,79 +578,135 @@
 
 .lucira-blogs .star {
   color: #ffb400;
-  font-size: 14px;
+  font-size: 9px;
 }
 
 .lucira-blogs .rating-text {
   font-family: var(--font-figtree), sans-serif;
-  font-size: 13px;
-  color: #555;
+  font-size: 9px;
+  color: #777;
   font-weight: 500;
 }
 
 .lucira-blogs .image-text-product-title {
-  flex: 0 0 100%;
-  font-family: var(--font-abhaya), serif;
-  font-size: 19px;
-  font-weight: 600;
+  font-family: var(--font-figtree), sans-serif !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  color: #1a1a1a;
+  line-height: 1.3;
   margin: 0;
-  line-height: 1.25;
-  color: #111;
   display: -webkit-box;
   -webkit-line-clamp: 1;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  margin-bottom: 4px;
+  text-decoration: none !important;
+}
+
+.lucira-blogs .image-text-product-price-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  margin-top: auto;
+  padding-top: 4px;
 }
 
 .lucira-blogs .image-text-product-price {
-  flex: 0 0 auto;
   display: flex;
-  align-items: center;
-  gap: 8px;
+  align-items: baseline;
+  gap: 4px;
 }
 
 .lucira-blogs .current-price {
-  font-family: var(--font-figtree), sans-serif;
-  font-size: 18px;
+  font-size: 12px;
   font-weight: 700;
-  color: #111;
+  color: #1a1a1a;
+  font-family: var(--font-figtree), sans-serif;
 }
 
 .lucira-blogs .compare-price {
-  font-family: var(--font-figtree), sans-serif;
-  font-size: 14px;
-  color: #aaa;
+  font-size: 10px;
+  color: #999;
   text-decoration: line-through;
-}
-
-.lucira-blogs .image-text-product-cta {
-  flex: 0 0 auto;
-  margin-left: auto;
-  white-space: nowrap;
+  font-family: var(--font-figtree), sans-serif;
 }
 
 .lucira-blogs .view-details-text {
   font-family: var(--font-figtree), sans-serif;
-  font-size: 13px;
-  color: var(--blog-primary);
-  font-weight: 500;
-  text-decoration: none;
-  display: flex;
+  font-size: 10px;
+  font-weight: 600;
+  color: #a68380;
+  text-decoration: none !important;
+  border-bottom: none !important;
+  display: inline-flex;
   align-items: center;
-  gap: 4px;
+  white-space: nowrap;
 }
 
-.lucira-blogs .view-details-text::after {
-  content: '›';
-  font-size: 18px;
-  line-height: 1;
+.lucira-blogs .image-text-product-card,
+.lucira-blogs .image-text-product-card *,
+.lucira-blogs .view-details-text,
+.lucira-blogs .view-details-text * {
+  text-decoration: none !important;
+  border-bottom: none !important;
+  box-shadow: none !important;
 }
 
-.lucira-blogs .arrow-icon {
-  font-size: 13px;
-  margin-left: 4px;
-  display: none;
+.lucira-blogs .view-details-text::after,
+.lucira-blogs .view-details-text span,
+.lucira-blogs .view-details-text i {
+  display: none !important;
+}
+
+/* Desktop Horizontal Restoration */
+@media (min-width: 768px) {
+  .lucira-blogs .image-text-product-card {
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 16px !important;
+    padding: 16px !important;
+  }
+
+  .lucira-blogs .image-text-product-image {
+    flex: 0 0 100px;
+    width: 100px;
+    height: 100px;
+    aspect-ratio: auto;
+  }
+
+  .lucira-blogs .image-text-product-info {
+    text-align: left;
+    gap: 6px;
+  }
+
+  .lucira-blogs .image-text-product-rating {
+    justify-content: flex-start;
+  }
+
+  .lucira-blogs .image-text-product-title {
+    font-size: 16px !important;
+    -webkit-line-clamp: 2;
+  }
+
+  .lucira-blogs .image-text-product-price-row {
+    flex-direction: row;
+    justify-content: space-between;
+    margin-top: 4px;
+  }
+
+  .lucira-blogs .current-price {
+    font-size: 16px;
+  }
+
+  .lucira-blogs .view-details-text {
+    font-size: 12px;
+    margin-top: 0;
+  }
+}
+
+.lucira-blogs .view-details-text:hover {
+  opacity: 1;
 }
 
 /* Author Testimonial Card */

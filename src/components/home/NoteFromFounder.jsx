@@ -6,13 +6,14 @@ export default function NoteFromFounder() {
   return (
     <section className="w-full mt-15 bg-white overflow-hidden">
       <div className="container-main">
-        <div className="grid grid-cols-1 md:grid-cols-2 bg-[#FAF5F2] shadow-sm rounded-sm overflow-hidden min-h-[450px]">
+        <div className="grid grid-cols-1 md:grid-cols-2 bg-[#FAF5F2] shadow-sm rounded-sm overflow-hidden min-h-112.5">
           {/* Left Column: Image */}
-          <div className="relative aspect-[4/3] md:aspect-auto">
+          <div className="relative aspect-4/3 md:aspect-auto">
             <LazyImage
               src="/images/founder.jpg" // Using existing founder placeholder image
               alt="Rupesh Jain - Founder & CEO"
               fill
+              sizes="(max-width: 768px) 100vw, 50vw"
               className="object-cover"
             />
           </div>
@@ -31,12 +32,12 @@ export default function NoteFromFounder() {
             </div>
 
             {/* Signature Image */}
-            <div className="absolute bottom-2 right-6 md:bottom-12 md:right-16 opacity-90">
+            <div className="absolute bottom-2 right-6 xl:bottom-12 xl:right-16 opacity-90">
                <LazyImage 
                 src="/images/signature.png" 
                 alt="Rupesh Jain Signature" 
-                width={84} 
-                height={106} 
+                width={70} 
+                height={90} 
                 className="object-contain"
                />
             </div>
