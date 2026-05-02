@@ -129,7 +129,7 @@ export default function CustomerDashboard() {
                   <h3 className="text-2xl font-bold text-primary">{stat.value}</h3>
                 </div>
               </div>
-              <p className="text-xs font-bold text-primary flex items-center gap-1 cursor-pointer hover:underline">
+              <p className="text-base font-bold text-primary flex items-center gap-1 cursor-pointer hover:underline">
                 {stat.subtitle} <ChevronRight size={14} />
               </p>
             </Link>
@@ -152,7 +152,7 @@ export default function CustomerDashboard() {
 
           <div className="space-y-4">
             {loading ? (
-              <div className="text-center py-10 text-zinc-500 font-medium">Loading orders...</div>
+              <div className="text-center py-10 text-zinc-500 font-bold uppercase tracking-widest text-xs">Loading orders...</div>
             ) : orders.length > 0 ? (
               orders.slice(0, 3).map((order) => (
                 <div
@@ -170,7 +170,7 @@ export default function CustomerDashboard() {
                   </div>
                   <div className="flex-1 space-y-1 text-center md:text-left">
                     <div className="flex flex-col md:flex-row md:items-center gap-2 mb-1">
-                      <span className="text-xs font-bold text-primary uppercase tracking-widest">
+                      <span className="text-xs font-bold text-primary uppercase tracking-widest px-2 py-0.5 bg-primary/5 rounded-full">
                         #{order.orderNumber}
                       </span>
                       <span
@@ -184,7 +184,7 @@ export default function CustomerDashboard() {
                       </span>
                     </div>
                     <h4 className="font-bold text-zinc-900">{order.product}</h4>
-                    <p className="text-xs text-zinc-500 font-medium">{order.date}</p>
+                    <p className="text-xs text-zinc-500 font-bold">{order.date}</p>
                   </div>
                   <div className="text-right flex flex-col items-center md:items-end gap-3">
                     <p className="text-lg font-bold text-primary">{order.amount}</p>
@@ -200,7 +200,7 @@ export default function CustomerDashboard() {
             ) : (
               <div className="bg-white rounded-3xl border border-zinc-100 p-10 text-center shadow-sm">
                 <ShoppingBag size={40} className="mx-auto mb-4 text-zinc-200" />
-                <p className="text-zinc-500 font-bold">No orders found yet</p>
+                <p className="text-zinc-500 font-bold uppercase tracking-widest text-sm">No orders found yet</p>
                 <Link
                   href="/collections/all"
                   className="text-primary text-xs font-bold uppercase tracking-widest mt-2 block hover:underline"

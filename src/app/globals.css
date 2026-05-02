@@ -51,10 +51,6 @@
   /*font-family*/
   --font-abhaya: var(--font-abhaya);
   --font-figtree: var(--font-figtree);
-  --font-lobster: var(--font-lobster);
-  --font-yellowtail: var(--font-yellowtail);
-  --font-satisfy: var(--font-satisfy);
-  --font-abeezee: var(--font-abeezee);
   --color-success: var(--success);
 }
 
@@ -482,10 +478,24 @@
 /*swiper*/
 
 @layer components {
+  .footer-pages {
+    font-family: var(--font-figtree), sans-serif !important;
+  }
+  .footer-pages * {
+    font-family: inherit !important;
+  }
   .footer-pages h2 {
     @apply text-2xl mb-4
   }
 
+  .footer-pages h1,
+  .footer-pages h2,
+  .footer-pages h3,
+  .footer-pages h4,
+  .footer-pages h5,
+  .footer-pages h6 {
+    font-family: var(--font-abhaya), serif !important;
+  }
   .footer-pages p {
     @apply text-base my-4
   }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Dialog,
   DialogContent,
@@ -21,6 +22,8 @@ export function AuthDialog({
   overrideSubtext = ""
 }) {
   const isMobile = useMediaQuery("(max-width: 768px)");
+  const router = useRouter();
+  const pathname = usePathname();
   const [currentStep, setCurrentStep] = useState(initialStep);
 
   useEffect(() => {
@@ -29,22 +32,16 @@ export function AuthDialog({
     }
   }, [open, initialStep]);
 
-  const handleSuccess = () => {
+  const handleSuccess = (redirectPath) => {
     onOpenChange(false);
     if (onSuccess) onSuccess();
+    if (redirectPath && redirectPath !== pathname) {
+      router.push(redirectPath);
+    }
   };
 
   const handleStepChange = (step) => {
-    if (isMobile) {
-      // First close, then switch, then open again to trigger animation
-      onOpenChange(false);
-      setTimeout(() => {
-        setCurrentStep(step);
-        onOpenChange(true);
-      }, 300);
-    } else {
-      setCurrentStep(step);
-    }
+    setCurrentStep(step);
   };
 
   if (isMobile) {

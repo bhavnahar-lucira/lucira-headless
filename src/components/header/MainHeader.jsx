@@ -7,7 +7,7 @@ import Link from "next/link";
 import SearchPopup from "./SearchPopup";
 import { AnimatePresence, motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { pushLogout, pushViewCart } from "@/lib/gtm";
+import { pushLogout, pushViewCart, getStandardCartItem } from "@/lib/gtm";
 import { useAuth } from "@/hooks/useAuth";
 import { useDispatch, useSelector } from "react-redux";
 import { setAvatar } from "@/redux/features/user/userSlice";
@@ -117,42 +117,7 @@ export default function MainHeader() {
         total_quantity: totalQuantity,
         total_product: items.length,
         coupon_code: "",
-        items: items.map((item, idx) => {
-          const getNumericId = (gid) => {
-            if (!gid) return 0;
-            if (typeof gid === 'number') return gid;
-            const match = String(gid).match(/\d+$/);
-            return match ? Number(match[0]) : 0;
-          };
-
-          const prodId = String(getNumericId(item.productId || item.shopifyId || item.id));
-          const lowerTitle = (item.title || "").toLowerCase();
-          
-          let category = item.type || item.productType || "";
-          if (!category) {
-            if (lowerTitle.includes("ring")) category = "Rings";
-            else if (lowerTitle.includes("earring") || lowerTitle.includes("bali")) category = "Earrings";
-            else if (lowerTitle.includes("pendant")) category = "Pendants";
-            else if (lowerTitle.includes("bracelet")) category = "Bracelets";
-            else if (item.variantId === GOLDCOIN_VARIANT_ID) category = "Gold Coin";
-            else if (item.variantId === INSURANCE_VARIANT_ID) category = "Insurance";
-          }
-          
-          return {
-            id: prodId,
-            sku: item.sku || "",
-            variant_id: String(getNumericId(item.variantId)),
-            product_name: item.title,
-            product_type: category,
-            category: "Lucira Jewelry",
-            sub_category: item.sub_category || category,
-            price: Number(item.comparePrice || item.price || 0),
-            offer_price: Number(item.price || 0),
-            quantity: item.quantity,
-            thumbnail_image: item.image,
-            index_position: idx + 1
-          };
-        })
+        items: items.map((item, idx) => getStandardCartItem(item, idx))
       });
     }
     };

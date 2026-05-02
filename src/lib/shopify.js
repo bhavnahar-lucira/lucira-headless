@@ -1,31 +1,37 @@
 const SHOP = "luciraonline";
-const SHOP_DOMAIN = process.env.SHOPIFY_STORE || `${process.env.SHOPIFYSTORE || SHOP}.myshopify.com`;
+const rawStore = process.env.SHOPIFY_STORE || process.env.SHOPIFYSTORE || SHOP;
+const SHOP_DOMAIN = rawStore.includes(".") ? rawStore : `${rawStore}.myshopify.com`;
 
 export async function shopifyStorefrontFetch(query, variables = {}) {
   if (!process.env.STOREFRONT_TOKEN) {
     throw new Error("STOREFRONT_TOKEN not configured");
   }
 
-  const res = await fetch(
-    `https://${SHOP_DOMAIN}/api/2024-10/graphql.json`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-Shopify-Storefront-Access-Token": process.env.STOREFRONT_TOKEN,
-      },
-      body: JSON.stringify({ query, variables }),
+  try {
+    const res = await fetch(
+      `https://${SHOP_DOMAIN}/api/2024-10/graphql.json`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Shopify-Storefront-Access-Token": process.env.STOREFRONT_TOKEN,
+        },
+        body: JSON.stringify({ query, variables }),
+      }
+    );
+
+    const data = await res.json();
+
+    if (data.errors) {
+      console.error("GraphQL Errors:", JSON.stringify(data.errors, null, 2));
+      throw new Error(data.errors[0]?.message || "GraphQL error");
     }
-  );
 
-  const data = await res.json();
-
-  if (data.errors) {
-    console.error("GraphQL Errors:", data.errors);
-    throw new Error(data.errors[0]?.message || "GraphQL error");
+    return data.data;
+  } catch (err) {
+    console.error(`Storefront Fetch Error (${SHOP_DOMAIN}):`, err.message);
+    throw err;
   }
-
-  return data.data;
 }
 
 export async function shopifyAdminFetch(query, variables = {}) {

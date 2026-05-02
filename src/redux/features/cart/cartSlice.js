@@ -180,7 +180,11 @@ const cartSlice = createSlice({
         state.totalQuantity = action.payload.totalQuantity || 0;
         state.totalAmount = action.payload.totalAmount || 0;
       })
+      .addCase(mergeCart.pending, (state) => {
+        state.loading = true;
+      })
       .addCase(mergeCart.fulfilled, (state, action) => {
+        state.loading = false;
         state.items = action.payload.items || [];
         state.totalQuantity = action.payload.totalQuantity || 0;
         state.totalAmount = action.payload.totalAmount || 0;

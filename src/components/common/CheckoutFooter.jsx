@@ -31,22 +31,21 @@ export default function CheckoutFooter() {
     { name: "MASTERCARD", src: "/images/icons/mastercard.svg" },
     { name: "RUPAY", src: "/images/icons/rupay.svg" },
     { name: "UPI", src: "/images/icons/upi.svg" },
-    { name: "COD", src: "/images/icons/cod.png" }, // Generic COD icon
   ];
 
   return (
-    <footer className="mt-auto border-t bg-[#F9F9FB] py-8 mb-[80px] lg:mb-0">
+    <footer className="mt-auto border-t bg-zinc-50 py-8 mb-20 lg:mb-0">
       <div className="container-main flex flex-col xl:flex-row items-center justify-between gap-8">
         
         {/* Left: Trust Badges */}
-        <div className="flex flex-wrap items-center justify-center lg:justify-start gap-8 md:gap-12">
+        <div className="grid w-full grid-cols-2 gap-x-3 gap-y-4 lg:flex lg:w-auto lg:flex-wrap lg:items-center lg:justify-start lg:gap-8 xl:gap-12">
           {trustBadges.map((badge, index) => (
-            <div key={index} className="flex items-center gap-3">
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${badge.bgColor}`}>
+            <div key={index} className="flex items-center gap-1 lg:gap-3">
+              <div className={`w-8 h-8 lg:w-10 lg:h-10 rounded-full flex items-center justify-center shrink-0 ${badge.bgColor}`}>
                 {badge.icon}
               </div>
               <div className="flex flex-col">
-                <span className="text-sm font-bold text-[#443360] uppercase tracking-tight font-figtree leading-tight">
+                <span className="text-xs lg:text-sm font-bold text-black/70 uppercase tracking-tight font-figtree leading-tight">
                   {badge.text}
                 </span>
               </div>

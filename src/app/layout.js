@@ -1,4 +1,4 @@
-import { Figtree, Abhaya_Libre, Lobster, Yellowtail, Satisfy, ABeeZee } from "next/font/google";
+import { Figtree, Abhaya_Libre } from "next/font/google";
 import "./globals.css";
 import { Suspense } from "react";
 import ReduxProvider from "@/redux/provider";
@@ -24,34 +24,6 @@ const abhaya = Abhaya_Libre({
   display: "swap",
 });
 
-const lobster = Lobster({
-  subsets: ["latin"],
-  weight: ["400"],
-  variable: "--font-lobster",
-  display: "swap",
-});
-
-const yellowtail = Yellowtail({
-  subsets: ["latin"],
-  weight: ["400"],
-  variable: "--font-yellowtail",
-  display: "swap",
-});
-
-const satisfy = Satisfy({
-  subsets: ["latin"],
-  weight: ["400"],
-  variable: "--font-satisfy",
-  display: "swap",
-});
-
-const abeezee = ABeeZee({
-  subsets: ["latin"],
-  weight: ["400"],
-  variable: "--font-abeezee",
-  display: "swap",
-});
-
 export const metadata = {
   title: "India's Best Lab Grown Diamond Jewellery Brand - Lucira Jewelry",
   description: "Shop premium diamond jewellery online in India at Lucira Jewelry. Discover elegant lab grown diamond designs, certified quality, modern craftsmanship, and timeless styles crafted for every occasion. Shop now.",
@@ -63,8 +35,8 @@ export const metadata = {
 };
 
 export default function RootLayout({ children }) {
-  const isProd = process.env.NODE_ENV === "production";
-
+  //const isProd = process.env.NODE_ENV === "production";
+    const isProd = true;
   return (
     <html lang="en">
       <head>
@@ -78,7 +50,7 @@ export default function RootLayout({ children }) {
           </Script>
         )}
       </head>
-      <body className={`${figtree.variable} ${abhaya.variable} ${lobster.variable} ${yellowtail.variable} ${satisfy.variable} ${abeezee.variable} font-figtree antialiased`}>
+      <body className={`${figtree.variable} ${abhaya.variable} font-figtree antialiased`}>
         {isProd && (
           <noscript>
             <iframe 

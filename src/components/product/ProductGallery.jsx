@@ -262,7 +262,7 @@ export default function ProductGallery({ media = [], title = "", activeColor = "
                 <>
                   <div className="absolute top-4 left-4 flex flex-col gap-2 z-10">
                     {displayLabels.map((label, index) => (
-                      <span key={index} className="bg-accent/90 px-3 py-1.5 rounded-sm text-[10px] font-semibold uppercase tracking-[0.05em] shadow-sm w-fit">{label}</span>
+                      <span key={index} className="bg-[#E2C07E] px-3 py-1.5 text-[10px] font-semibold uppercase w-fit">{label}</span>
                     ))}
                   </div>
                   <div onClick={(e) => e.stopPropagation()}>
@@ -352,7 +352,7 @@ export default function ProductGallery({ media = [], title = "", activeColor = "
           {/* Badges Overlay */}
           <div className="absolute top-4 left-2 flex flex-col gap-2 z-10 pointer-events-none">
             {displayLabels.map((label, index) => (
-              <span key={index} className="bg-accent/90 text-black px-3 py-1.5 rounded-sm text-[10px] font-semibold uppercase tracking-[0.05em] shadow-sm w-fit">{label}</span>
+              <span key={index} className="bg-[#E2C07E] text-black px-3 py-1.5 text-[10px] font-semibold uppercase w-fit">{label}</span>
             ))}
           </div>
 

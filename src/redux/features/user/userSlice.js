@@ -4,6 +4,7 @@ const initialState = {
   user: null,
   isAuthenticated: false,
   isAuthModalOpen: false,
+  authRedirectPath: null,
   pincode: "",
   referralLink: "",
   referralLoading: false,
@@ -31,14 +32,17 @@ const userSlice = createSlice({
         state.user.avatar = action.payload;
       }
     },
-    openAuthModal: (state) => {
+    openAuthModal: (state, action) => {
       state.isAuthModalOpen = true;
+      state.authRedirectPath = action.payload || null;
     },
     closeAuthModal: (state) => {
       state.isAuthModalOpen = false;
+      state.authRedirectPath = null;
     },
     toggleAuthModal: (state) => {
       state.isAuthModalOpen = !state.isAuthModalOpen;
+      if (!state.isAuthModalOpen) state.authRedirectPath = null;
     },
     setReferralLoading: (state, action) => {
       state.referralLoading = action.payload;

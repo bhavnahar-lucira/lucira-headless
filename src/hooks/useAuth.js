@@ -17,7 +17,7 @@ export const useAuth = () => {
   const user = useSelector(selectUser);
   const isAuthenticated = useSelector(selectIsAuthenticated);
 
-  const openLogin = () => dispatch(openAuthModal());
+  const openLogin = (redirectPath = null) => dispatch(openAuthModal(redirectPath));
   const closeLogin = () => dispatch(closeAuthModal());
   const toggleLogin = () => dispatch(toggleAuthModal());
   

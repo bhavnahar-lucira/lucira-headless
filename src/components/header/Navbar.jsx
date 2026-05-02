@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -121,13 +121,18 @@ export default function Navbar({ hideTop }) {
         </ul>
       </div>
 
-      {activeMenu !== null &&
-        hasDropdown(MEGA_MENU[activeMenu]) && (
-          <motion.div
-            onMouseEnter={() => handleEnter(activeMenu)}
-            onMouseLeave={handleLeave}
-            className="absolute left-0 top-full w-full bg-white shadow-xl z-50 border-t border-gray-200"
-          >
+      <AnimatePresence>
+        {activeMenu !== null &&
+          hasDropdown(MEGA_MENU[activeMenu]) && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.3, ease: [0.33, 1, 0.68, 1] }}
+              onMouseEnter={() => handleEnter(activeMenu)}
+              onMouseLeave={handleLeave}
+              className="absolute left-0 top-full w-full bg-white shadow-xl z-50 border-t border-gray-200"
+            >
             <div className="container-main mx-auto py-8">
               {(() => {
                 const menu = MEGA_MENU[activeMenu];
@@ -369,6 +374,7 @@ export default function Navbar({ hideTop }) {
             </div>
           </motion.div>
         )}
+      </AnimatePresence>
     </nav>
   );
 }
