@@ -752,7 +752,7 @@ export default function ShippingPage() {
                   <p className="text-sm text-zinc-500 leading-relaxed pr-8">
                     {store.address}, {store.city} {store.state}
                   </p>
-                  <div className="flex items-center gap-2 text-zinc-400 text-xs">
+                  <div className="flex items-center gap-2 text-zinc-400 text-base">
                     <Clock size={14} />
                     <span>{store.readyTime}</span>
                   </div>

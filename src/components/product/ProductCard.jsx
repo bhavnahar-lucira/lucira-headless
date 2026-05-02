@@ -38,9 +38,9 @@ import { pushProductClick, pushAddToWishlist, pushRemoveFromWishlist, formatGtmP
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 
 const colorMap = {
-  yellow: "#E2C07E",
-  rose: "#E9B4AB",
-  white: "#E5E4E2",
+  yellow: "linear-gradient(147.45deg, #c59922 17.98%, #ead59e 48.14%, #c59922 83.84%)",
+  rose: "linear-gradient(154.36deg, #f2b5b5 10.36%, #f8dbdb 68.09%)",
+  white: "linear-gradient(143.06deg, #dfdfdf 29.61%, #f3f3f3 48.83%, #dfdfdf 66.43%)",
 };
 
 const parseOrnaverseComponent = (val) => {
@@ -420,17 +420,18 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle,
               )}
             </Link>
 
-            {/* Video Play Button */}
             {videoMedia && (
               <button 
                 onClick={(e) => { e.preventDefault(); setShowVideoPopup(true); }}
-                className="absolute bottom-4 left-2 lg:left-4 z-10 w-7 h-7 lg:w-9 lg:h-9 flex items-center justify-center rounded-full bg-white/90 backdrop-blur-sm border border-zinc-200 text-zinc-900 shadow-sm hover:bg-black hover:text-white transition-all duration-300"
+                className="absolute bottom-4 left-2 lg:left-4 z-10 w-6 h-6 lg:w-8 lg:h-8 flex items-center justify-center rounded-full bg-white/90 backdrop-blur-sm border border-zinc-200 text-zinc-900 shadow-sm hover:bg-black hover:text-white transition-all duration-300"
               >
-                <Play fill="currentColor" className="w-3 lg:w-4" />
+                <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+                  <path d="M11.084 18.1814V9.81869C11.0842 9.71406 11.1125 9.6114 11.166 9.52147C11.2194 9.43155 11.2961 9.35766 11.388 9.30756C11.4798 9.25745 11.5835 9.23298 11.688 9.2367C11.7926 9.24042 11.8943 9.27219 11.9823 9.32869L18.4877 13.5089C18.57 13.5616 18.6378 13.6343 18.6847 13.7201C18.7317 13.8059 18.7563 13.9022 18.7563 14C18.7563 14.0979 18.7317 14.1941 18.6847 14.2799C18.6378 14.3658 18.57 14.4384 18.4877 14.4912L11.9823 18.6725C11.8943 18.729 11.7926 18.7608 11.688 18.7645C11.5835 18.7682 11.4798 18.7438 11.388 18.6937C11.2961 18.6436 11.2194 18.5697 11.166 18.4797C11.1125 18.3898 11.0842 18.2872 11.084 18.1825V18.1814Z" fill="currentColor"/>
+                  <path d="M1.16602 14.0001C1.16602 6.91258 6.91185 1.16675 13.9993 1.16675C21.0868 1.16675 26.8327 6.91258 26.8327 14.0001C26.8327 21.0876 21.0868 26.8334 13.9993 26.8334C6.91185 26.8334 1.16602 21.0876 1.16602 14.0001ZM13.9993 2.91675C11.0599 2.91675 8.24078 4.08445 6.16225 6.16298C4.08372 8.24151 2.91602 11.0606 2.91602 14.0001C2.91602 16.9396 4.08372 19.7587 6.16225 21.8372C8.24078 23.9157 11.0599 25.0834 13.9993 25.0834C16.9388 25.0834 19.7579 23.9157 21.8364 21.8372C23.915 19.7587 25.0827 16.9396 25.0827 14.0001C25.0827 11.0606 23.915 8.24151 21.8364 6.16298C19.7579 4.08445 16.9388 2.91675 13.9993 2.91675Z" fill="currentColor"/>
+                </svg>
               </button>
             )}
 
-             {/* Wishlist Icon */}
             <button
               type="button"
               onClick={(e) => {
@@ -498,7 +499,7 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle,
 
             {/* Product Labels (with Seamless Vertical Slide) */}
             {displayLabels.length > 0 && (
-              <div className="absolute top-0 lg:top-3 left-0 z-10 w-24 lg:w-28 h-6 lg:h-7 overflow-hidden bg-[#E2C07E]">
+              <div className="absolute top-0 lg:top-3 left-0 z-10 w-24 lg:w-28 h-6 lg:h-7 overflow-hidden bg-[#F1E4D1]">
                 <AnimatePresence initial={false}>
                   <motion.div
                     key={displayLabels[currentLabelIndex]}
@@ -520,9 +521,13 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle,
                 <DrawerTrigger asChild>
                   <button 
                     onClick={(e) => { e.preventDefault(); fetchSimilar(); }}
-                    className="absolute bottom-4 right-2 lg:right-4 z-10 w-7 h-7 lg:w-9 lg:h-9 flex items-center justify-center rounded-full bg-white/90 backdrop-blur-sm border border-zinc-200 text-zinc-900 shadow-sm hover:bg-black hover:text-white transition-all duration-300"
+                    className="absolute bottom-4 right-2 lg:right-4 z-10 w-6 h-6 lg:w-8 lg:h-8 flex items-center justify-center rounded-full bg-white/90 backdrop-blur-sm border border-zinc-200 text-zinc-900 shadow-sm hover:bg-black hover:text-white transition-all duration-300"
                   >
-                    <Copy className="w-3 lg:w-4" />
+                    <svg width="34" height="34" viewBox="0 0 34 34" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+                      <path d="M11.4322 10.4118C11.4293 10.2235 11.5012 10.0417 11.6321 9.90627C11.763 9.77087 11.9422 9.69288 12.1305 9.6894L21.4657 9.52505C21.6544 9.5214 21.8368 9.59284 21.9728 9.72366C22.1088 9.85448 22.1872 10.034 22.1909 10.2226L22.4232 23.5881C22.4262 23.7767 22.3542 23.9588 22.223 24.0943C22.0917 24.2299 21.9121 24.3078 21.7234 24.3109L12.3883 24.4752C12.1998 24.4785 12.0177 24.4068 11.882 24.2759C11.7463 24.1451 11.668 23.9657 11.6645 23.7772L11.4322 10.4118Z" stroke="currentColor" strokeWidth="1.17241" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M11.5349 11.5293L6.05123 12.9986C5.89057 13.0417 5.75356 13.1468 5.67029 13.2908C5.58702 13.4348 5.56428 13.606 5.60707 13.7667L8.65801 25.1594C8.70135 25.3201 8.80674 25.457 8.95101 25.5401C9.09527 25.6231 9.26661 25.6455 9.42735 25.6022L13.8263 24.4235" stroke="currentColor" strokeWidth="1.17241" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M22.4632 11.5293L27.9468 12.9986C28.1075 13.0417 28.2445 13.1468 28.3278 13.2908C28.411 13.4348 28.4338 13.606 28.391 13.7667L25.34 25.1594C25.2967 25.3201 25.1913 25.457 25.047 25.5401C24.9028 25.6231 24.7314 25.6455 24.5707 25.6022L19.8192 24.3291" stroke="currentColor" strokeWidth="1.17241" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
                   </button>
                 </DrawerTrigger>
                 <DrawerContent className="max-h-[90vh] h-[90vh] bg-white rounded-t-[20px] flex flex-col">
@@ -635,7 +640,7 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle,
                         >
                           <span
                             className="w-full h-full rounded-full"
-                            style={{ backgroundColor: colorMap[base] }}
+                            style={{ background: colorMap[base] }}
                           />
                         </button>
                       );

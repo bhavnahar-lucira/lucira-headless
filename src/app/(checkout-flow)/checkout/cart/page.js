@@ -7,9 +7,9 @@ import CartItem from "@/components/cart/CartItem";
 import CartSummary from "@/components/cart/CartSummary";
 import { Button } from "@/components/ui/button";
 import { ShoppingBag, ArrowRight, MapPin } from "lucide-react";
-import { AuthDialog } from "@/components/auth/AuthDialog";
 import { useRouter } from "next/navigation";
 import { pushViewCart, pushBeginCheckout } from "@/lib/gtm";
+import { useAuth } from "@/hooks/useAuth";
 
 const INSURANCE_VARIANT_ID = "gid://shopify/ProductVariant/47709366026458";
 const GOLDCOIN_VARIANT_ID = "gid://shopify/ProductVariant/47661824082138";
@@ -17,8 +17,7 @@ const GOLDCOIN_VARIANT_ID = "gid://shopify/ProductVariant/47661824082138";
 export default function CartPage() {
   const router = useRouter();
   const { items, totalQuantity, totalAmount, appliedCoupon } = useSelector((state) => state.cart);  
-  const { isAuthenticated } = useSelector((state) => state.user);
-  const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
+  const { isAuthenticated, openLogin } = useAuth();
   const summaryRef = useRef(null);
 
   const scrollToSummary = () => {
@@ -79,7 +78,7 @@ export default function CartPage() {
     if (isAuthenticated) {
       router.push("/checkout/shipping");
     } else {
-      setIsAuthDialogOpen(true);
+      openLogin();
     }
   };
 
@@ -129,7 +128,7 @@ export default function CartPage() {
                   <CartItem 
                     key={item.variantId || index} 
                     item={item} 
-                    onAuthRequired={() => setIsAuthDialogOpen(true)}
+                    onAuthRequired={openLogin}
                   />
                 ))}
               </div>
@@ -169,15 +168,6 @@ export default function CartPage() {
           </Button>
         </div>
       </div>
-
-      <AuthDialog 
-        open={isAuthDialogOpen} 
-        onOpenChange={setIsAuthDialogOpen} 
-        onSuccess={() => {
-          setIsAuthDialogOpen(false);
-          router.push("/checkout/shipping");
-        }}
-      />
     </div>
   );
 }
