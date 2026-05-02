@@ -31,7 +31,7 @@ export default function LuxuryMarquee({ prop = [] }) {
           {items.map((item, i) => (
             <span
               key={`item-${i}`}
-              className="text-base font-medium tracking-wide"
+              className="text-md font-medium tracking-wide"
             >
               {item}
             </span>
@@ -39,7 +39,7 @@ export default function LuxuryMarquee({ prop = [] }) {
           {items.map((item, i) => (
             <span
               key={`dup-${i}`}
-              className="text-base font-medium tracking-wide"
+              className="text-md font-medium tracking-wide"
             >
               {item}
             </span>

@@ -3,7 +3,6 @@ import dynamic from "next/dynamic";
 import HeroSliderImage from "@/components/home/HeroSliderImage";
 import ExploreRange from "@/components/home/ExploreRange";
 import FeatureBar from "@/components/home/FeatureBar";
-import DiamondCuts from "@/components/home/DiamondCuts"
 import ShopByCategory from "@/components/home/ShopByCategory";
 import JewelryBlogContainer from "@/components/home/JewelryBlogContainer";
 
@@ -39,8 +38,7 @@ export default function Home() {
 
       <BestsellerSection />
 
-      <DiamondCuts />
-      {/* <ShopByCategory /> */}
+      <ShopByCategory />
       <Suspense fallback={<div className="h-20 bg-gray-100 animate-pulse"></div>}>
         <StyledByLucira />
       </Suspense>
@@ -74,9 +72,9 @@ export default function Home() {
       <Suspense fallback={<div className="h-20 bg-gray-100 animate-pulse"></div>}>
         <CustomerReview />
       </Suspense>
-      {/* <Suspense fallback={<div className="h-20 bg-gray-100 animate-pulse"></div>}>
+      <Suspense fallback={<div className="h-20 bg-gray-100 animate-pulse"></div>}>
         <WeAreLucira />
-      </Suspense> */}
+      </Suspense>
 
       <Suspense fallback={<div className="h-20 bg-gray-100 animate-pulse"></div>}>
         <NoteFromFounder />

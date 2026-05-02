@@ -76,7 +76,7 @@ export default function WaysToExplore() {
           <>
             <SectionHeader />
 
-            <div className="relative group">
+            <div className="relative group px-4">
               <Swiper
                 modules={[Pagination]}
                 onSwiper={(swiper) => {
@@ -111,7 +111,7 @@ export default function WaysToExplore() {
                         </p>
                         <div className="mt-auto w-full">
                           <Button asChild
-                            className="w-fit h-10 px-8 text-sm font-bold uppercase bg-primary hover:bg-primary text-white transition-all rounded-sm"
+                            className="w-full h-10 px-8 text-sm font-bold uppercase bg-primary hover:bg-primary text-white transition-all rounded-lg"
                           >
                             <a href={way.url} target="_blank">{way.buttonText}</a>
                           </Button>
