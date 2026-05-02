@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo, useRef } from "react";
+import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import Link from "next/link";
 import LazyImage from "../common/LazyImage";
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -34,7 +34,7 @@ import {
   DialogPortal,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { pushProductClick, pushAddToWishlist, pushRemoveFromWishlist, formatGtmPrice } from "@/lib/gtm";
+import { pushProductClick, pushAddToWishlist, pushRemoveFromWishlist, formatGtmPrice, getNumericId, getStandardWishlistPayload } from "@/lib/gtm";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 
 const colorMap = {
@@ -147,7 +147,7 @@ function getPrioritizedVariant(product, collectionHandle) {
     if (nineKT.length > 0) {
       const inStock9KT = nineKT.find(v => 
         v.inStock === true || 
-        v.inStock === "true" ||
+        v.inStock === "true" || 
         (v.inventory_quantity !== undefined && v.inventory_quantity > 0)
       );
       if (inStock9KT) return inStock9KT;
@@ -171,13 +171,13 @@ function getPrioritizedVariant(product, collectionHandle) {
   return variants[0];
 }
 
-const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle }) => {
+const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle, index }) => {
   const isMobile = useMediaQuery("(max-width: 1023px)");
   const baseColors = getUniqueBaseColors(product.colors || product.variants?.map((v) => v.color) || []);
-  
+
   // Apply Global Variant Priority Hierarchy
   const prioritizedVariant = useMemo(() => getPrioritizedVariant(product, collectionHandle), [product, collectionHandle]);
-  
+
   const initialBase = useMemo(() => {
     if (product.selectedColor) return getBaseColor(product.selectedColor);
     if (prioritizedVariant) return getBaseColor(prioritizedVariant.color || prioritizedVariant.title);
@@ -235,16 +235,16 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle 
   const displayLabels = useMemo(() => {
     const labels = [];
     if (product.label) labels.push(product.label);
-    
+
     const tags = Array.isArray(product.tags) ? product.tags : [];
     const lowerTags = tags.map(t => String(t).toLowerCase());
-    
+
     // Priority order: Fast Shipping > Best Seller > New Arrival > Trending
     if (lowerTags.some(t => t.includes("fast shipping") || t.includes("fastshipping"))) labels.push("Fast Shipping");
     if (lowerTags.some(t => t.includes("best seller"))) labels.push("Best Seller");
     if (lowerTags.some(t => t.includes("new arrival") || t === "new")) labels.push("New Arrival");
     if (lowerTags.some(t => t.includes("trending"))) labels.push("Trending");
-    
+
     return [...new Set(labels)].slice(0, 2);
   }, [product.label, product.tags]);
 
@@ -301,7 +301,7 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle 
       setShowSimilar(true);
       return;
     }
-    
+
     setLoadingSimilar(true);
     setShowSimilar(true);
     try {
@@ -325,6 +325,38 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle 
     return () => { document.body.style.overflow = "unset"; };
   }, [showSimilar, showVideoPopup]);
 
+  const handleProductClick = useCallback(() => {
+    const getNumericId = (gid) => {
+      if (!gid) return 0;
+      if (typeof gid === 'number') return gid;
+      const match = String(gid).match(/\d+$/);
+      return match ? Number(match[0]) : 0;
+    };
+    const currentOrigin = typeof window !== 'undefined' ? window.location.origin : "";
+
+    const clickData = {
+      productId: String(getNumericId(product.shopifyId || product.id)),
+      variantId: String(getNumericId(currentVariant?.id || currentVariant?.shopifyId)),
+      sku: currentVariant?.sku || "",
+      productName: product.title,
+      productType: product.type || "",
+      productCategory: product.category || product.type || "",
+      category: product.category || product.type || "",
+      subCategory: product.type || "",
+      productUrl: `${currentOrigin}/products/${product.handle}`,
+      thumbnailImage: galleryImages?.[0]?.url || product.image?.url || "",
+      purity: currentVariant?.metafields?.metal_purity || "",
+      price: String(Number(displayComparePrice || displayPrice || 0)),
+      offerPrice: String(Number(displayPrice || 0)),
+    };
+
+    if (index !== undefined && index !== null && index !== "") {
+      clickData.indexPosition = String(index);
+    }
+
+    pushProductClick(clickData);
+  }, [product, currentVariant, galleryImages, displayPrice, displayComparePrice, index]);
+
   return (
     <>
       <div className="space-y-4">
@@ -333,31 +365,7 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle 
               <Link 
                 href={`/products/${product.handle}`} 
                 className="block w-full h-full mix-blend-multiply"
-                onClick={() => {
-                  const getNumericId = (gid) => {
-                    if (!gid) return 0;
-                    if (typeof gid === 'number') return gid;
-                    const match = String(gid).match(/\d+$/);
-                    return match ? Number(match[0]) : 0;
-                  };
-                  const currentOrigin = typeof window !== 'undefined' ? window.location.origin : "";
-                  pushProductClick({
-                    productId: String(getNumericId(product.shopifyId || product.id)),
-                    variantId: String(getNumericId(currentVariant?.id || currentVariant?.shopifyId)),
-                    sku: currentVariant?.sku || "",
-                    productName: product.title,
-                    productType: product.type || "",
-                    productCategory: product.category || product.type || "",
-                    category: product.category || product.type || "",
-                    subCategory: product.type || "",
-                    productUrl: `${currentOrigin}/products/${product.handle}`,
-                    thumbnailImage: galleryImages?.[0]?.url || product.image?.url || "",
-                    purity: currentVariant?.metafields?.metal_purity || "",
-                    price: String(Number(displayComparePrice || displayPrice || 0)),
-                    offerPrice: String(Number(displayPrice || 0)),
-                    indexPosition: ""
-                  });
-                }}
+                onClick={handleProductClick}
               >
 
               {galleryImages.length > 0 ? (
@@ -430,30 +438,33 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle 
                 e.preventDefault();
 
                 const handleWishlistToggle = async () => {
+                  const getNumeric = (val) => {
+                    const num = Number(val);
+                    return isNaN(num) ? 0 : num;
+                  };
+
                   setIsWishlistAnimating(true);
                   try {
+                    const currentOrigin = typeof window !== 'undefined' ? window.location.origin : "";
+                    const thumbnailImage = galleryImages?.[0]?.url || product.image?.url || "";
+                    
+                    // Prioritize currentVariant's SKU, then product level
+                    const commonTrackingData = getStandardWishlistPayload(product, currentVariant, currentOrigin, thumbnailImage);
+                    
                     if (isWishlisted) {
                       if (user?.id) {
                         await dispatch(removeWishlistItem(productId)).unwrap();
                       } else {
                         dispatch(removeGuestWishlistItem(productId));
                       }
-                      const currentOrigin = typeof window !== 'undefined' ? window.location.origin : "";
-                      pushRemoveFromWishlist({
-                        productName: product.title,
-                        product_url: `${currentOrigin}/products/${product.handle}?variant=${currentVariant?.id || currentVariant?.shopifyId}`,
-                        price: Number(displayComparePrice || displayPrice || 0),
-                        offer_price: Number(displayPrice || 0),
-                        thumbnail_image: galleryImages?.[0]?.url || product.image?.url || "",
-                        currency: "INR"
-                      });
+                      pushRemoveFromWishlist(commonTrackingData);
                       toast.success("Removed from wishlist");
                     } else {
                       const payload = {
                         productId,
                         productHandle,
                         title: product.title,
-                        image: galleryImages?.[0]?.url || product.image?.url || "",
+                        image: thumbnailImage,
                         price: displayPrice,
                         comparePrice: displayComparePrice || "",
                         reviews: product.reviews || null,
@@ -466,15 +477,7 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle 
                       } else {
                         dispatch(addGuestWishlistItem(payload));
                       }
-                      const currentOrigin = typeof window !== 'undefined' ? window.location.origin : "";
-                      pushAddToWishlist({
-                        productName: product.title,
-                        product_url: `${currentOrigin}/products/${product.handle}?variant=${currentVariant?.id || currentVariant?.shopifyId}`,
-                        price: Number(displayComparePrice || displayPrice || 0),
-                        offer_price: Number(displayPrice || 0),
-                        thumbnail_image: galleryImages?.[0]?.url || product.image?.url || "",
-                        currency: "INR"
-                      });
+                      pushAddToWishlist(commonTrackingData);
                       toast.success("Saved to wishlist");
                     }
                   } catch (err) {
@@ -537,7 +540,7 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle 
                         </button>
                       </DrawerClose>
                     </DrawerHeader>
-                    
+
                     <div className="sm:px-10 sm:py-10 px-5 py-5 overflow-y-auto flex-1">
                       {loadingSimilar ? (
                         <div className="flex flex-col items-center justify-center py-20 gap-4 w-full">
@@ -687,38 +690,13 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle 
               {/* Product Title */}
               <Link 
                 href={`/products/${product.handle}`}
-                onClick={() => {
-                  const getNumericId = (gid) => {
-                    if (!gid) return 0;
-                    if (typeof gid === 'number') return gid;
-                    const match = String(gid).match(/\d+$/);
-                    return match ? Number(match[0]) : 0;
-                  };
-                  const currentOrigin = typeof window !== 'undefined' ? window.location.origin : "";
-                  pushProductClick({
-                    productId: String(getNumericId(product.shopifyId || product.id)),
-                    variantId: String(getNumericId(currentVariant?.id || currentVariant?.shopifyId)),
-                    sku: currentVariant?.sku || "",
-                    productName: product.title,
-                    productType: product.type || "",
-                    productCategory: product.category || product.type || "",
-                    category: product.category || product.type || "",
-                    subCategory: product.type || "",
-                    productUrl: `${currentOrigin}/products/${product.handle}`,
-                    thumbnailImage: galleryImages?.[0]?.url || product.image?.url || "",
-                    purity: currentVariant?.metafields?.metal_purity || "",
-                    price: String(Number(displayComparePrice || displayPrice || 0)),
-                    offerPrice: String(Number(displayPrice || 0)),
-                    indexPosition: ""
-                  });
-                }}
+                onClick={handleProductClick}
               >
 
                 <h3 className="text-sm font-figtree font-semibold hover:underline underline-offset-4 decoration-1 leading-snug hover:text-gray-700 transition-colors line-clamp-1 min-h-5">
                   {product.title}
                 </h3>
               </Link>
-
               {/* dynamic card details based on product/variant metafields */}
               <div className="flex flex-col justify-center items-start gap-2">
                 {(() => {

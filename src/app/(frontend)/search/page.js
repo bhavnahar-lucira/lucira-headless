@@ -295,6 +295,7 @@ export default function SearchPage() {
         <ProductCard
           key={prod.shopifyId || prod.id || `search-prod-${idx}`}
           product={prod}
+          index={idx + 1}
         />
       );
     });

@@ -13,6 +13,7 @@ import {
 import { login, setAvatar } from "@/redux/features/user/userSlice";
 import { mergeGuestWishlist } from "@/redux/features/wishlist/wishlistSlice";
 import { mergeCart } from "@/redux/features/cart/cartSlice";
+import { pushLogin, pushSignup } from "@/lib/gtm";
 
 const SPIN_PRIZES = [
   { label: "₹1,500 OFF", value: "1500_off", chance: 33.33 },
@@ -127,11 +128,22 @@ export function OtpSpinAuth({
   const loginSuccess = async (data, skipRedirect = false) => {
     const user = data.user || data.customer;
     const userId = user?.id;
+
+    // Track login in GTM
+    pushLogin({
+      id: userId,
+      mobile: mobile,
+      email: user?.email,
+      name: user?.first_name ? `${user.first_name} ${user.last_name || ""}`.trim() : "User"
+    });
     
     dispatch(
       login({
         id: userId,
         mobile,
+        email: user?.email,
+        first_name: user?.first_name,
+        last_name: user?.last_name,
         name:
           user?.first_name && user?.last_name
             ? `${user.first_name} ${user.last_name}`
@@ -271,6 +283,14 @@ export function OtpSpinAuth({
         });
 
         if (data.status === "REGISTER_SUCCESS" || data.type === "success") {
+          // Track signup in GTM
+          pushSignup({
+            id: data.user?.id || data.customer?.id,
+            mobile: mobile,
+            email: email,
+            name: `${firstName} ${lastName}`.trim()
+          });
+
           loginSuccess(data, true);
           setStep("success");
         }

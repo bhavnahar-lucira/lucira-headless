@@ -586,6 +586,7 @@ export default function PaymentPage() {
         affiliation: "Lucira Jewelry",
         transaction_id: `temp_${Date.now()}`,
         coupon: couponDetails?.code || "NA",
+        send_to: "G-K6H0NZ4YJ8",
         items: (items || []).map((item, idx) => {
           const lowerTitle = (item.title || "").toLowerCase();
           let category = item.type || item.productType || "";
@@ -599,11 +600,12 @@ export default function PaymentPage() {
           }
 
           return {
-            item_id: String(getNumericId(item.productId || item.shopifyId || item.id)),
+            item_id: getNumericId(item.productId || item.shopifyId || item.id),
             item_name: item.title,
             price: Number(item.price || 0),
             item_brand: "Lucira Jewelry",
-            item_category: category,
+            item_category: "",
+            category: category,
             item_variant: item.variantTitle || "",
             quantity: item.quantity,
             index: idx
@@ -618,6 +620,7 @@ export default function PaymentPage() {
         currency: "INR",
         coupon: couponDetails?.code || "NA",
         loyalty_points: loyaltyPoints,
+        send_to: "G-K6H0NZ4YJ8",
         items: (items || []).map((item, idx) => {
           const lowerTitle = (item.title || "").toLowerCase();
           let category = item.type || item.productType || "";
@@ -631,12 +634,11 @@ export default function PaymentPage() {
           }
 
           return {
-            item_id: String(getNumericId(item.productId || item.shopifyId || item.id)),
-            sku: item.sku || "",
-            variant_id: String(getNumericId(item.variantId)),
+            item_id: getNumericId(item.productId || item.shopifyId || item.id),
             item_name: item.title,
             item_variant: item.variantTitle || "",
             item_brand: "Lucira Jewelry",
+            item_category: "",
             price: Number(item.price || 0),
             quantity: item.quantity,
             category: category,
@@ -709,6 +711,7 @@ export default function PaymentPage() {
               affiliation: "Lucira Jewelry",
               transaction_id: response.razorpay_payment_id,
               coupon: couponDetails?.code || "NA",
+              send_to: "G-K6H0NZ4YJ8",
               items: (items || []).map((item, idx) => {
                 const lowerTitle = (item.title || "").toLowerCase();
                 let category = item.type || item.productType || "";
@@ -722,11 +725,12 @@ export default function PaymentPage() {
                 }
 
                 return {
-                  item_id: String(getNumericId(item.productId || item.shopifyId || item.id)),
+                  item_id: getNumericId(item.productId || item.shopifyId || item.id),
                   item_name: item.title,
                   price: Number(item.price || 0),
                   item_brand: "Lucira Jewelry",
-                  item_category: category,
+                  item_category: "",
+                  category: category,
                   item_variant: item.variantTitle || "",
                   quantity: item.quantity,
                   index: idx
@@ -865,6 +869,7 @@ export default function PaymentPage() {
           value: grandTotalValue,
           error_message: reason,
           coupon: couponDetails?.code || "NA",
+          send_to: "G-K6H0NZ4YJ8",
           items: (items || []).map((item, idx) => {
             const lowerTitle = (item.title || "").toLowerCase();
             let category = item.type || item.productType || "";
@@ -878,12 +883,14 @@ export default function PaymentPage() {
             }
 
             return {
-              item_id: String(getNumericId(item.productId || item.shopifyId || item.id)),
+              item_id: getNumericId(item.productId || item.shopifyId || item.id),
               item_name: item.title,
-              price: Number(item.price || 0),
+              item_variant: item.variantTitle || "",
               item_brand: "Lucira Jewelry",
-              item_category: category,
+              item_category: "",
+              price: Number(item.price || 0),
               quantity: item.quantity,
+              category: category,
               index: idx
             };
           })

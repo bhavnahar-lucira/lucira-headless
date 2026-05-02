@@ -10,7 +10,7 @@ import {
 } from "@/redux/features/wishlist/wishlistSlice";
 import { useState, useMemo } from "react";
 import { toast } from "react-toastify";
-import { pushRemoveFromCart, pushAddToWishlist } from "@/lib/gtm";
+import { pushRemoveFromCart, pushAddToWishlist, getNumericId, getStandardWishlistPayload } from "@/lib/gtm";
 import {
   Select,
   SelectContent,
@@ -74,9 +74,12 @@ export default function CartItem({ item, onAuthRequired }) {
         lowerTitle.includes("bracelet") ? "Bracelets" : ""
       );
 
+      // Robust SKU resolution for cart items
+      const resolvedSku = item.sku || currentVariant?.sku || item.variantSku || item.item_sku || (variantOptions && variantOptions[0]?.sku) || "";
+
       pushRemoveFromCart({
         productId: String(getNumericId(item.productId || item.shopifyId || item.id)),
-        sku: item.sku || "",
+        sku: resolvedSku,
         variantId: String(getNumericId(item.variantId)),
         productName: item.title,
         productType: categoryFallback,
@@ -124,14 +127,37 @@ export default function CartItem({ item, onAuthRequired }) {
       }
 
       const currentOrigin = typeof window !== 'undefined' ? window.location.origin : "";
-      pushAddToWishlist({
-        productName: item.title,
-        product_url: `${currentOrigin}/products/${item.handle}?variant=${item.variantId}`,
-        price: Number(item.comparePrice || item.price || 0),
-        offer_price: Number(item.price || 0),
-        thumbnail_image: item.image || "",
-        currency: "INR"
-      });
+      
+      const lowerTitle = (item.title || "").toLowerCase();
+      const productTypeFallback = item.type || (
+        lowerTitle.includes("ring") ? "Rings" : 
+        (lowerTitle.includes("earring") || lowerTitle.includes("bali")) ? "Earrings" : 
+        lowerTitle.includes("pendant") ? "Pendants" : 
+        lowerTitle.includes("bracelet") ? "Bracelets" : ""
+      );
+
+      // Robust SKU resolution for cart items
+      const resolvedSku = item.sku || currentVariant?.sku || item.variantSku || item.item_sku || (variantOptions && variantOptions[0]?.sku) || "";
+
+      // Adapt cart item to standard product/variant structure for the helper
+      const mockProduct = {
+        shopifyId: item.productId || item.shopifyId || item.id,
+        title: item.title,
+        handle: item.handle,
+        category: item.category || productTypeFallback,
+        type: item.type || productTypeFallback,
+        price: item.price,
+        sku: resolvedSku // Pass SKU at product level too for fallback
+      };
+      const mockVariant = {
+        sku: resolvedSku,
+        id: item.variantId,
+        price: item.price
+      };
+
+      const commonTrackingData = getStandardWishlistPayload(mockProduct, mockVariant, currentOrigin, item.image);
+      pushAddToWishlist(commonTrackingData);
+
       await dispatch(removeFromCart({ userId: user?.id, variantId: item.variantId })).unwrap();
       toast.success("Moved to wishlist");
     } catch (err) {
