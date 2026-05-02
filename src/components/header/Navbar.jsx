@@ -55,7 +55,7 @@ export default function Navbar({ hideTop }) {
 
   return (
     <nav className="relative bg-white border-b border-gray-100 z-[90]">
-      <div className="container-main relative flex items-center min-h-[45px]">
+      <div className="container-main relative flex items-center min-h-[40px]">
         {/* Left: Sticky Logo */}
         <motion.div
           initial={false}
@@ -99,7 +99,7 @@ export default function Navbar({ hideTop }) {
                   href={menu.href}
                   onClick={closeMenu}
                   className={cn(
-                    "block py-4 tracking-normal transition-all duration-200 uppercase text-[14px] leading-none font-medium font-figtree",
+                    "block py-4 tracking-normal transition-all duration-200 uppercase text-sm leading-none font-medium font-figtree",
                     isActive || isHovered
                       ? "text-primary"
                       : "text-gray-700 hover:text-primary",
@@ -194,7 +194,7 @@ export default function Navbar({ hideTop }) {
                             <p className="text-lg font-semibold">
                               {item.title}
                             </p>
-                            <p className="text-xs mt-1 opacity-90">
+                            <p className="text-xs mt-1 opacity-90 w-[90%]">
                               {item.subtitle || item.description}
                             </p>
                           </div>
@@ -229,7 +229,7 @@ export default function Navbar({ hideTop }) {
                             {(menu.featured.items || (Array.isArray(menu.featured) ? menu.featured : [])).map((item, i) => (
                               <li key={i}>
                                 <Link href={item.href || "#"} onClick={closeMenu} className="group block">
-                                  <span className="text-lg font-medium text-zinc-900 group-hover:text-primary transition-colors">{item.label}</span>
+                                  <span className="text-base font-medium text-zinc-900 group-hover:text-primary transition-colors">{item.label}</span>
                                 </Link>
                               </li>
                             ))}
@@ -246,7 +246,7 @@ export default function Navbar({ hideTop }) {
 
                         return (
                           <div key={i} className={cn(isGridCol && "col-span-1")}>
-                            <h4 className="mb-4 font-figtree font-semibold text-[14px] leading-none text-black uppercase">
+                            <h4 className="mb-6 font-figtree font-semibold text-base leading-none text-black uppercase">
                               {col.title}
                             </h4>
 
@@ -271,7 +271,7 @@ export default function Navbar({ hideTop }) {
                                     {/* ✅ METAL SWATCH */}
                                     {col.type === "metal" ? (
                                       <span
-                                        className={`w-8 h-8 rounded-full border border-zinc-200 ${
+                                        className={`w-6 h-6 rounded-full border border-zinc-200 ${
                                           item.label.toLowerCase().includes("yellow")
                                             ? "bg-[linear-gradient(147.45deg,_#C59922_17.98%,_#EAD59E_48.14%,_#C59922_83.84%)]"
                                             : item.label.toLowerCase().includes("rose")
@@ -297,7 +297,7 @@ export default function Navbar({ hideTop }) {
                                       </div>
                                     ) : null}
 
-                                    <span className="text-lg font-medium text-zinc-900 group-hover:text-primary transition-colors">{item.label}</span>
+                                    <span className="text-base font-medium text-zinc-900 group-hover:text-primary transition-colors">{item.label}</span>
                                   </Link>
                                 </li>
                               ))}
@@ -343,7 +343,7 @@ export default function Navbar({ hideTop }) {
                     {featuredIn && (
                       <div className="mt-10 pt-8 border-t border-zinc-100">
                         <div className="flex items-center gap-8">
-                          <h4 className="font-figtree font-semibold text-[13px] leading-none text-zinc-400 uppercase tracking-widest shrink-0">
+                          <h4 className="font-figtree font-semibold text-sm leading-none text-zinc-400 uppercase tracking-widest shrink-0">
                             {featuredIn.title}
                           </h4>
                           <div className="flex flex-wrap items-center gap-x-10 gap-y-4">
@@ -354,7 +354,7 @@ export default function Navbar({ hideTop }) {
                                     <Image src={item.icon} alt={item.label} fill className="object-contain p-2" />
                                   </div>
                                 )}
-                                <span className="text-[13px] text-zinc-600 font-semibold group-hover:text-primary uppercase transition-colors whitespace-nowrap tracking-wide">
+                                <span className="text-sm text-zinc-600 font-semibold group-hover:text-primary uppercase transition-colors whitespace-nowrap tracking-wide">
                                   {item.label}
                                 </span>
                               </Link>

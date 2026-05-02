@@ -6,11 +6,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { useSelector, useDispatch } from "react-redux";
-import { logout } from "@/redux/features/user/userSlice";
 import { clearCart } from "@/redux/features/cart/cartSlice";
 import { restoreGuestWishlist } from "@/redux/features/wishlist/wishlistSlice";
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle, SheetClose } from "@/components/ui/sheet";
-import { AuthDialog } from "@/components/auth/AuthDialog";
 import { useMenu } from "@/hooks/useMenu";
 import { MEGA_MENU as STATIC_MENU } from "@/data/megaMenu";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -19,6 +17,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import LuciraLogo from "./LuciraLogo";
 import { AnimatePresence, motion } from "framer-motion";
 import { Sheet as MobileSheet } from "react-modal-sheet";
+import { useAuth } from "@/hooks/useAuth";
 
 const CATEGORY_IMAGES = {
   "BEST SELLERS": "/images/menu/engagement-ring.jpg",
@@ -33,11 +32,11 @@ const CATEGORY_IMAGES = {
 };
 
 const METAL_COLORS = {
-  "Yellow Gold": "linear-gradient(147.45deg, #C59922 17.98%, #EAD59E 48.14%, #C59922 83.84%)",
-  "White Gold": "linear-gradient(143.06deg, #DFDFDF 29.61%, #F3F3F3 48.83%, #DFDFDF 66.43%)",
-  "Rose Gold": "linear-gradient(154.36deg, #F2B5B5 10.36%, #F8DBDB 68.09%)",
+  "Yellow Gold": "linear-gradient(147.45deg, #c59922 17.98%, #ead59e 48.14%, #c59922 83.84%)",
+  "White Gold": "linear-gradient(143.06deg, #dfdfdf 29.61%, #f3f3f3 48.83%, #dfdfdf 66.43%)",
+  "Rose Gold": "linear-gradient(154.36deg, #f2b5b5 10.36%, #f8dbdb 68.09%)",
   "Platinum": "linear-gradient(154.03deg, #DDDDDD 27.25%, #FFFFFF 47.58%, #DDDDDD 74.61%)",
-  "Silver": "linear-gradient(143.06deg, #DFDFDF 29.61%, #F3F3F3 48.83%, #DFDFDF 66.43%)",
+  "Silver": "linear-gradient(143.06deg, #dfdfdf 29.61%, #f3f3f3 48.83%, #dfdfdf 66.43%)",
 };
 
 const STYLE_ICON_FALLBACK = (label) => `/images/styles/${label.toLowerCase().replace(/ /g, "")}.png`;
@@ -100,7 +99,6 @@ export default function MobileHeader() {
   const dispatch = useDispatch();  
   const isProductPage = pathname.startsWith('/products/');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [showSearch, setShowSearch] = useState(false);
   const [searchResults, setSearchResults] = useState([]);
@@ -110,7 +108,7 @@ export default function MobileHeader() {
   const { menuData } = useMenu("main-menu-official");
   const MEGA_MENU = menuData || STATIC_MENU;
 
-  const { user } = useSelector((state) => state.user);
+  const { user, logout: authLogout, openLogin } = useAuth();
   const { totalQuantity } = useSelector((state) => state.cart);
   const wishlistItems = useSelector((state) => state.wishlist.items);
 
@@ -280,7 +278,7 @@ export default function MobileHeader() {
     } catch (err) {
       console.error("Logout request failed:", err);
     } finally {
-      dispatch(logout());
+      authLogout();
       dispatch(clearCart());
       dispatch(restoreGuestWishlist());
       router.push("/");
@@ -442,7 +440,7 @@ export default function MobileHeader() {
 
   const handleAuthTrigger = () => {
     if (isAuthPage) return;
-    setIsAuthOpen(true);
+    openLogin();
   };
 
   const renderMainMenu = () => {
@@ -713,8 +711,6 @@ export default function MobileHeader() {
         </MobileSheet.Container>
         <MobileSheet.Backdrop />
       </MobileSheet>
-
-      <AuthDialog open={isAuthOpen} onOpenChange={setIsAuthOpen} />
     </div>
   );
 }
