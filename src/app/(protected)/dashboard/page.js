@@ -96,16 +96,45 @@ export default function Dashboard() {
     }
   };
 
-  // Fetch count of products available on Shopify
-  const fetchShopifyCount = async () => {
+  // Products Sync Polling State
+  const [productsSyncStatus, setProductsSyncStatus] = useState(null);
+  const [pollingProducts, setPollingProducts] = useState(false);
+
+  // Fetch count of products available on Shopify and sync session status
+  const fetchShopifyStatus = useCallback(async () => {
     try {
       const res = await fetch("/api/sync-shopify");
       const data = await res.json();
       setShopifyTotal(data.count || 0);
+      setProductsSyncStatus(data.session);
+      
+      if (data.session && data.session.status === "running") {
+        setPollingProducts(true);
+        setSyncing(true);
+        setSyncType("products");
+        setStatus(data.session.message || "Syncing...");
+        setProgress(data.session.progress || 0);
+      } else {
+        setPollingProducts(false);
+        if (syncType === "products" && syncing) {
+          setSyncing(false);
+          setStatus(data.session?.status === "completed" ? "Sync Complete!" : (data.session?.message || ""));
+          if (data.session?.status === "error") setError(data.session?.message);
+          fetchLocalProducts(1);
+        }
+      }
     } catch (e) {
-      console.error("Failed to fetch Shopify count", e);
+      console.error("Failed to fetch Shopify count and status", e);
     }
-  };
+  }, [syncType, syncing, fetchLocalProducts]);
+
+  useEffect(() => {
+    let interval;
+    if (pollingProducts) {
+      interval = setInterval(fetchShopifyStatus, 3000);
+    }
+    return () => clearInterval(interval);
+  }, [pollingProducts, fetchShopifyStatus]);
 
   // Fetch menus from our MongoDB
   const fetchMenus = async () => {
@@ -137,9 +166,9 @@ export default function Dashboard() {
   }, []);
 
   useEffect(() => {
-    fetchShopifyCount();
+    fetchShopifyStatus();
     fetchMenus();
-  }, []);
+  }, [fetchShopifyStatus]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -174,18 +203,35 @@ export default function Dashboard() {
       return;
     }
 
+    if (type === "products") {
+      try {
+        const response = await fetch("/api/sync-shopify", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ isRetry })
+        });
+        const data = await response.json();
+        if (response.ok && data.success) {
+          fetchShopifyStatus();
+        } else {
+          throw new Error(data.error || "Failed to start products sync");
+        }
+      } catch (err) {
+        setError(err.message);
+        setSyncing(false);
+      }
+      return;
+    }
+
+    // Handles other types like "reviews"
     const apiPaths = {
-      products: "/api/sync-shopify",
       reviews: "/api/sync-reviews"
     };
     const apiPath = apiPaths[type];
     
     const body = {};
     if (isRetry) {
-      if (type === "products") {
-        body.cursor = lastSyncData.products.cursor;
-        body.totalProcessed = lastSyncData.products.totalProcessed;
-      } else if (type === "reviews") {
+      if (type === "reviews") {
         body.skip = lastSyncData.reviews.skip;
       }
     }
@@ -216,12 +262,7 @@ export default function Dashboard() {
             
             // Save progress for retries
             if (data.status === "progress") {
-              if (type === "products" && data.cursor) {
-                setLastSyncData(prev => ({
-                  ...prev,
-                  products: { cursor: data.cursor, totalProcessed: data.totalProcessed }
-                }));
-              } else if (type === "reviews" && data.skip !== undefined) {
+              if (type === "reviews" && data.skip !== undefined) {
                 setLastSyncData(prev => ({
                   ...prev,
                   reviews: { skip: data.skip }
@@ -238,9 +279,8 @@ export default function Dashboard() {
               setSyncing(false);
               setLastSyncData(prev => ({
                 ...prev,
-                [type]: type === "products" ? { cursor: null, totalProcessed: 0 } : { skip: 0 }
+                [type]: { skip: 0 }
               }));
-              if (type === "products") fetchLocalProducts(1);
             }
           } catch (e) {
             console.error("Error parsing JSON chunk", e);

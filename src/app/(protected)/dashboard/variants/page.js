@@ -8,10 +8,12 @@ export default function VariantsSyncPage() {
   const [status, setStatus] = useState("");
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState(null);
-  const [lastSkip, setLastSkip] = useState(0);
   
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // Polling State
+  const [pollingVariants, setPollingVariants] = useState(false);
 
   const fetchLocalProducts = useCallback(async () => {
     setLoading(true);
@@ -30,6 +32,42 @@ export default function VariantsSyncPage() {
     fetchLocalProducts();
   }, [fetchLocalProducts]);
 
+  const fetchVariantsStatus = useCallback(async () => {
+    try {
+      const res = await fetch("/api/sync-variants");
+      const data = await res.json();
+      
+      if (data.session && data.session.status === "running") {
+        setPollingVariants(true);
+        setSyncing(true);
+        setStatus(data.session.message || "Syncing...");
+        setProgress(data.session.progress || 0);
+        setError(null);
+      } else {
+        setPollingVariants(false);
+        if (syncing) {
+          setSyncing(false);
+          setStatus(data.session?.status === "completed" ? "Sync Complete!" : (data.session?.message || ""));
+          if (data.session?.status === "error") setError(data.session?.message);
+        }
+      }
+    } catch (e) {
+      console.error("Failed to fetch variants sync status", e);
+    }
+  }, [syncing]);
+
+  useEffect(() => {
+    let interval;
+    if (pollingVariants) {
+      interval = setInterval(fetchVariantsStatus, 3000);
+    }
+    return () => clearInterval(interval);
+  }, [pollingVariants, fetchVariantsStatus]);
+
+  useEffect(() => {
+    fetchVariantsStatus();
+  }, [fetchVariantsStatus]);
+
   const startSync = async (isRetry = false) => {
     setSyncing(true);
     setStatus(isRetry ? "Resuming variant sync..." : "Initiating variant sync...");
@@ -40,40 +78,13 @@ export default function VariantsSyncPage() {
       const response = await fetch("/api/sync-variants", { 
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ skip: isRetry ? lastSkip : 0 })
+        body: JSON.stringify({ isRetry })
       });
-      if (!response.ok) throw new Error("Failed to start sync");
-
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        const chunk = decoder.decode(value, { stream: true });
-        const lines = chunk.split("\n").filter((l) => l.trim());
-
-        for (const line of lines) {
-          try {
-            const data = JSON.parse(line);
-            setStatus(data.message);
-            if (data.progress !== undefined) setProgress(data.progress);
-            if (data.skip !== undefined) setLastSkip(data.skip);
-
-            if (data.status === "error") {
-              setError(data.message);
-              setSyncing(false);
-              return;
-            }
-            if (data.status === "complete") {
-              setSyncing(false);
-              setLastSkip(0);
-            }
-          } catch (e) {
-            console.error("Error parsing JSON chunk", e);
-          }
-        }
+      const data = await response.json();
+      if (response.ok && data.success) {
+        fetchVariantsStatus();
+      } else {
+        throw new Error(data.error || "Failed to start variant sync");
       }
     } catch (err) {
       setError(err.message);

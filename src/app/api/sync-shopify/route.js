@@ -1,27 +1,45 @@
 import clientPromise from "@/lib/mongodb";
 import { NextResponse } from "next/server";
 import { fetchNectorReviews } from "@/lib/nector";
+import { startVariantsBackgroundSync } from "../sync-variants/syncLogic";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  const SHOPIFY_DOMAIN = process.env.SHOPIFY_STORE || process.env.SHOPIFYSTORE;
-  const ACCESS_TOKEN = process.env.ADMIN_TOKEN || process.env.SHOPIFY_ADMIN_TOKEN;
-  if (!SHOPIFY_DOMAIN || !ACCESS_TOKEN) return NextResponse.json({ error: "Missing credentials" }, { status: 500 });
-
   try {
-    const response = await fetch(`https://${SHOPIFY_DOMAIN}/admin/api/2024-01/products/count.json?status=active`, {
-      headers: { "Content-Type": "application/json", "X-Shopify-Access-Token": ACCESS_TOKEN },
-    });
+    const client = await clientPromise;
+    const db = client.db("next_local_db");
     
-    if (!response.ok) {
-        const text = await response.text();
-        throw new Error(`Shopify Count Error (${response.status})`);
+    // Return count and status
+    const SHOPIFY_DOMAIN = process.env.SHOPIFY_STORE || process.env.SHOPIFYSTORE;
+    const ACCESS_TOKEN = process.env.ADMIN_TOKEN || process.env.SHOPIFY_ADMIN_TOKEN;
+    
+    let count = 0;
+    if (SHOPIFY_DOMAIN && ACCESS_TOKEN) {
+      try {
+        const response = await fetch(`https://${SHOPIFY_DOMAIN}/admin/api/2024-01/products/count.json?status=active`, {
+          headers: { "Content-Type": "application/json", "X-Shopify-Access-Token": ACCESS_TOKEN },
+        });
+        if (response.ok) {
+          const result = await response.json();
+          count = result.count || 0;
+        }
+      } catch(e) {}
     }
-    
-    const result = await response.json();
-    return NextResponse.json({ count: result.count || 0 });
-  } catch (error) { return NextResponse.json({ error: error.message }, { status: 500 }); }
+
+    const session = await db.collection("sync_sessions")
+      .find({ type: "products" })
+      .sort({ startedAt: -1 })
+      .limit(1)
+      .toArray();
+
+    return NextResponse.json({ 
+      count,
+      session: session[0] || { status: "idle" }
+    });
+  } catch (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
 }
 
 export async function POST(req) {
@@ -32,52 +50,66 @@ export async function POST(req) {
     return NextResponse.json({ error: "Missing Shopify credentials (ADMIN_TOKEN and SHOPIFY_STORE)" }, { status: 500 });
   }
 
-  let startCursor = null;
-  let startProcessed = 0;
+  let isRetry = false;
   try {
     const body = await req.json().catch(() => ({}));
-    startCursor = body.cursor || null;
-    startProcessed = body.totalProcessed || 0;
+    isRetry = body.isRetry || false;
   } catch (e) {}
+
+  const client = await clientPromise;
+  const db = client.db("next_local_db");
+
+  const activeSession = await db.collection("sync_sessions").findOne({ type: "products", status: "running" });
+  if (activeSession) {
+    return NextResponse.json({ error: "A products sync session is already running" }, { status: 400 });
+  }
+
+  // Get previous session if retry
+  let startCursor = null;
+  let startProcessed = 0;
+  if (isRetry) {
+    const lastSession = await db.collection("sync_sessions").findOne({ type: "products" }, { sort: { startedAt: -1 } });
+    if (lastSession && lastSession.cursor) {
+      startCursor = lastSession.cursor;
+      startProcessed = lastSession.totalProcessed || 0;
+    }
+  }
+
+  const sessionId = Date.now().toString();
+  await db.collection("sync_sessions").insertOne({
+    sessionId,
+    type: "products",
+    status: "running",
+    startedAt: new Date(),
+    message: startCursor ? `Resuming Sync from ${startProcessed} products...` : "Fetching Products...",
+    progress: 0,
+    cursor: startCursor,
+    totalProcessed: startProcessed
+  });
 
   const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-  const encoder = new TextEncoder();
-  const stream = new ReadableStream({
-    async start(controller) {
-      const sendUpdate = (data) => {
-        try {
-          controller.enqueue(encoder.encode(JSON.stringify(data) + "\n"));
-        } catch (e) {}
-      };
-      
+  // Background process
+  (async () => {
+    try {
+      const productsCollection = db.collection("products");
+      let totalToSync = 0;
       try {
-        const client = await clientPromise;
-        const db = client.db("next_local_db");
-        const productsCollection = db.collection("products");
-        
-        sendUpdate({ 
-          status: "starting", 
-          message: startCursor ? `Resuming Sync from ${startProcessed} products...` : "Fetching Products...", 
-          progress: 0
+        const countRes = await fetch(`https://${SHOPIFY_DOMAIN}/admin/api/2024-01/products/count.json?status=active`, {
+          headers: { "X-Shopify-Access-Token": ACCESS_TOKEN }
         });
+        if (countRes.ok) {
+          const countData = await countRes.json();
+          totalToSync = countData.count || 0;
+        }
+      } catch (e) { console.error("Count fetch failed", e); }
 
-        let totalToSync = 0;
+      let hasNextPage = true;
+      let cursor = startCursor;
+      let totalProcessed = startProcessed;
+
+      while (hasNextPage) {
         try {
-          const countRes = await fetch(`https://${SHOPIFY_DOMAIN}/admin/api/2024-01/products/count.json?status=active`, {
-            headers: { "X-Shopify-Access-Token": ACCESS_TOKEN }
-          });
-          if (countRes.ok) {
-            const countData = await countRes.json();
-            totalToSync = countData.count || 0;
-          }
-        } catch (e) { console.error("Count fetch failed", e); }
-
-        let hasNextPage = true;
-        let cursor = startCursor;
-        let totalProcessed = startProcessed;
-
-        while (hasNextPage) {
           const query = `
             query getProducts($cursor: String) {
               products(first: 4, after: $cursor, query: "status:active") {
@@ -141,18 +173,11 @@ export async function POST(req) {
           });
 
           if (!response.ok) {
-            const errorText = await response.text();
             throw new Error(`Shopify API responded with status ${response.status}.`);
-          }
-
-          const contentType = response.headers.get("content-type");
-          if (!contentType || !contentType.includes("application/json")) {
-            throw new Error("Shopify returned an invalid response. Please retry.");
           }
 
           const result = await response.json();
           if (result.errors) {
-            console.error("Shopify GraphQL Errors:", result.errors);
             throw new Error(result.errors[0]?.message || "Shopify GraphQL error");
           }
 
@@ -207,7 +232,6 @@ export async function POST(req) {
               const finalVariants = variants.map(newV => {
                 const existingV = existingVariants.find(ev => ev.id === newV.id);
                 if (existingV) {
-                  // Deep merge metafields to protect gemstones, diamonds, etc.
                   return { 
                     ...existingV, 
                     ...newV,
@@ -258,7 +282,7 @@ export async function POST(req) {
                 description: p.descriptionHtml,
                 vendor: p.vendor,
                 type: p.productType,
-                status: p.status, // This will be "ACTIVE", "DRAFT", etc.
+                status: p.status, 
                 isPublished: !!p.publishedAt,
                 isVisible: p.status === "ACTIVE" && !!p.publishedAt,
                 tags: p.tags,
@@ -288,58 +312,93 @@ export async function POST(req) {
                 lastReviewsUpdated: new Date()
               };
 
-              // Always update/upsert the product. Never delete it here.
               await productsCollection.updateOne({ shopifyId: p.id }, { $set: mappedProduct }, { upsert: true });
             }
 
             totalProcessed += products.length;
             cursor = result.data?.products?.pageInfo?.endCursor;
             
-            sendUpdate({ 
-              status: "progress", 
-              message: `Synced ${totalProcessed} products...`, 
-              progress: totalToSync ? Math.min(Math.round((totalProcessed / totalToSync) * 100), 99) : 50,
-              cursor: cursor,
-              totalProcessed: totalProcessed
-            });
+            await db.collection("sync_sessions").updateOne(
+              { sessionId },
+              { 
+                $set: { 
+                  message: `Synced ${totalProcessed} products...`, 
+                  progress: totalToSync ? Math.min(Math.round((totalProcessed / totalToSync) * 100), 99) : 50,
+                  cursor: cursor,
+                  totalProcessed: totalProcessed
+                } 
+              }
+            );
           }
           hasNextPage = result.data?.products?.pageInfo?.hasNextPage;
           if (hasNextPage) await sleep(2000);
+        } catch (fetchError) {
+          console.error("Error during product fetch batch, retrying...", fetchError);
+          // Wait and retry the same cursor
+          await sleep(5000);
+          // Do not update hasNextPage, so it stays true and retries
         }
-
-        // 4. Tag Bestsellers
-        sendUpdate({ status: "progress", message: "Updating Bestseller tags...", progress: 99 });
-        try {
-          const storefrontRes = await fetch(`https://${SHOPIFY_DOMAIN}/api/2024-10/graphql.json`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "X-Shopify-Storefront-Access-Token": process.env.STOREFRONT_TOKEN,
-            },
-            body: JSON.stringify({
-              query: `{ products(first: 50, sortKey: BEST_SELLING) { edges { node { id } } } }`
-            }),
-          });
-          const sfData = await storefrontRes.json();
-          const bsIds = sfData.data?.products?.edges?.map(e => e.node.id) || [];
-          if (bsIds.length > 0) {
-            await productsCollection.updateMany(
-              { shopifyId: { $in: bsIds } },
-              { $addToSet: { tags: "best seller" } }
-            );
-          }
-        } catch (bsErr) {
-          console.error("Bestseller tagging failed", bsErr);
-        }
-
-        sendUpdate({ status: "complete", message: `Sync Complete!`, count: totalProcessed, progress: 100 });
-        controller.close();
-      } catch (error) {
-        console.error("Critical Sync Error:", error);
-        sendUpdate({ status: "error", message: `Sync Stopped: ${error.message}` });
-        controller.close();
       }
+
+      await db.collection("sync_sessions").updateOne(
+        { sessionId },
+        { $set: { message: "Updating Bestseller tags...", progress: 99 } }
+      );
+      
+      try {
+        const storefrontRes = await fetch(`https://${SHOPIFY_DOMAIN}/api/2024-10/graphql.json`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-Shopify-Storefront-Access-Token": process.env.STOREFRONT_TOKEN,
+          },
+          body: JSON.stringify({
+            query: `{ products(first: 50, sortKey: BEST_SELLING) { edges { node { id } } } }`
+          }),
+        });
+        const sfData = await storefrontRes.json();
+        const bsIds = sfData.data?.products?.edges?.map(e => e.node.id) || [];
+        if (bsIds.length > 0) {
+          await productsCollection.updateMany(
+            { shopifyId: { $in: bsIds } },
+            { $addToSet: { tags: "best seller" } }
+          );
+        }
+      } catch (bsErr) {
+        console.error("Bestseller tagging failed", bsErr);
+      }
+
+      await db.collection("sync_sessions").updateOne(
+        { sessionId },
+        { 
+          $set: { 
+            status: "completed", 
+            message: `Sync Complete!`, 
+            progress: 100,
+            endedAt: new Date()
+          } 
+        }
+      );
+
+      // Start Variants sync automatically!
+      if (startVariantsBackgroundSync) {
+        await startVariantsBackgroundSync();
+      }
+
+    } catch (error) {
+      console.error("Critical Sync Error:", error);
+      await db.collection("sync_sessions").updateOne(
+        { sessionId },
+        { 
+          $set: { 
+            status: "error", 
+            message: `Sync Stopped: ${error.message}`,
+            endedAt: new Date()
+          } 
+        }
+      );
     }
-  });
-  return new Response(stream, { headers: { "Content-Type": "application/x-ndjson", "Cache-Control": "no-cache" } });
+  })();
+
+  return NextResponse.json({ success: true, message: "Products sync started in background" });
 }
