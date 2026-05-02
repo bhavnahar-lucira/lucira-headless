@@ -285,7 +285,7 @@ export default function CustomerReviews({
         {/* Stats Summary */}
         <div className="flex flex-col md:flex-row items-center justify-between gap-12 bg-white/30 p-8 rounded-2xl backdrop-blur-sm border border-white/20 shadow-sm mb-16">
           <div className="flex flex-col items-center">
-            <span className="text-6xl font-black text-gray-900 mb-2">
+            <span className="text-4xl font-black text-gray-700 mb-2">
               {data.average}
             </span>
             <div className="flex gap-1 mb-2 text-amber-400">
@@ -300,7 +300,7 @@ export default function CustomerReviews({
                 />
               ))}
             </div>
-            <span className="text-sm font-bold text-gray-600 uppercase">
+            <span className="text-sm font-bold text-gray-500 uppercase">
               {data.count} reviews
             </span>
           </div>
@@ -335,7 +335,7 @@ export default function CustomerReviews({
           </div>
 
           <div className="flex flex-col items-center">
-            <span className="text-5xl font-black text-gray-900 mb-2">
+            <span className="text-3xl font-black text-gray-900 mb-2">
               {recommendPercent}%
             </span>
             <p className="text-xs font-black text-gray-600 max-w-[120px] uppercase tracking-widest leading-relaxed text-center">
@@ -437,7 +437,7 @@ export default function CustomerReviews({
               </SelectContent>
             </Select>
           </div>
-          
+
           <div className="flex items-center gap-3">
             <span className="text-sm font-semibold text-gray-600">
               Sort by:
