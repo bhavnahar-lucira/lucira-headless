@@ -283,6 +283,7 @@ export default function ReviewsPage() {
 
         {/* Filters and Sorting */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-10 border-b border-gray-200 pb-8">
+                      <span className="text-lg font-bold text-black uppercase tracking-[0.2em]">{stats.total} verified reviews</span>
           <div className="flex items-center gap-8">
             <div className="flex items-center gap-3">
               <span className="text-sm font-semibold text-gray-600">Rating:</span>
@@ -300,7 +301,6 @@ export default function ReviewsPage() {
                 </SelectContent>
               </Select>
             </div>
-            <span className="text-lg font-bold text-black uppercase tracking-[0.2em]">{stats.total} verified reviews</span>
           </div>
 
           <div className="flex items-center gap-3">
@@ -426,9 +426,9 @@ export default function ReviewsPage() {
                       onClick={(e) => e.stopPropagation()}
                       className="flex items-center gap-3 flex-1 min-w-0"
                   >
-                      <div className="w-10 h-10 bg-gray-50 rounded-lg border border-gray-100 overflow-hidden relative flex-shrink-0">
+                      {/* <div className="w-10 h-10 bg-gray-50 rounded-lg border border-gray-100 overflow-hidden relative flex-shrink-0">
                           <Image src={review.reference_product_image || "/images/product/1.jpg"} alt={review.reference_product_name || "Product"} fill className="object-cover group-hover/link:scale-110 transition-transform duration-500" />
-                      </div>
+                      </div> */}
                       <span className="text-sm font-bold text-black group-hover/link:text-gray-900 transition-colors truncate tracking-widest">
                           {review.reference_product_name}
                       </span>
