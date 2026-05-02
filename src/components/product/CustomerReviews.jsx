@@ -389,6 +389,20 @@ export default function CustomerReviews({
 
         {/* Filter Bar */}
         <div className="flex flex-col md:flex-row justify-between gap-6 mb-10 border-b border-gray-200 pb-8 px-2">
+          
+
+          <div className="flex-1 text-center hidden md:block">
+            <span className="text-lg font-bold text-black uppercase tracking-[0.2em]">
+              {data.count} Verified Reviews
+            </span>
+          </div>
+
+          <div className="md:hidden w-full">
+            <span className="text-lg font-bold text-black uppercase tracking-[0.2em]">
+              {data.count} Verified Reviews
+            </span>
+          </div>
+
           <div className="flex items-center gap-3">
             <span className="text-sm font-semibold text-gray-600">Rating:</span>
             <Select value={filterRating} onValueChange={handleFilterChange}>
@@ -423,19 +437,7 @@ export default function CustomerReviews({
               </SelectContent>
             </Select>
           </div>
-
-          <div className="flex-1 text-center hidden md:block">
-            <span className="text-lg font-bold text-black uppercase tracking-[0.2em]">
-              {data.count} Verified Reviews
-            </span>
-          </div>
-
-          <div className="md:hidden w-full">
-            <span className="text-lg font-bold text-black uppercase tracking-[0.2em]">
-              {data.count} Verified Reviews
-            </span>
-          </div>
-
+          
           <div className="flex items-center gap-3">
             <span className="text-sm font-semibold text-gray-600">
               Sort by:
