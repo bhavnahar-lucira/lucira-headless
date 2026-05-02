@@ -7,9 +7,9 @@ import CartItem from "@/components/cart/CartItem";
 import CartSummary from "@/components/cart/CartSummary";
 import { Button } from "@/components/ui/button";
 import { ShoppingBag, ArrowRight, MapPin } from "lucide-react";
-import { AuthDialog } from "@/components/auth/AuthDialog";
 import { useRouter } from "next/navigation";
 import { pushViewCart, pushBeginCheckout } from "@/lib/gtm";
+import { useAuth } from "@/hooks/useAuth";
 
 const INSURANCE_VARIANT_ID = "gid://shopify/ProductVariant/47709366026458";
 const GOLDCOIN_VARIANT_ID = "gid://shopify/ProductVariant/47661824082138";
@@ -17,8 +17,7 @@ const GOLDCOIN_VARIANT_ID = "gid://shopify/ProductVariant/47661824082138";
 export default function CartPage() {
   const router = useRouter();
   const { items, totalQuantity, totalAmount, appliedCoupon } = useSelector((state) => state.cart);  
-  const { isAuthenticated } = useSelector((state) => state.user);
-  const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
+  const { isAuthenticated, openLogin } = useAuth();
   const summaryRef = useRef(null);
 
   const scrollToSummary = () => {
@@ -58,8 +57,8 @@ export default function CartPage() {
           else if (item.variantId === INSURANCE_VARIANT_ID) category = "Insurance";
         }
         return {
-          item_id: String(getNumericId(item.productId || item.shopifyId || item.id)),
-          sku: item.sku || "",
+          item_id: getNumericId(item.productId || item.shopifyId || item.id),
+          shopify_product_id: item.sku || "",
           variant_id: String(getNumericId(item.variantId)),
           item_name: item.title,
           item_variant: item.variantTitle || `${item.karat || ""} ${item.color || ""}`.trim(),
@@ -79,7 +78,8 @@ export default function CartPage() {
     if (isAuthenticated) {
       router.push("/checkout/shipping");
     } else {
-      setIsAuthDialogOpen(true);
+      localStorage.setItem("auth_redirect_path", "/checkout/shipping");
+      openLogin("/checkout/shipping");
     }
   };
 
@@ -129,7 +129,7 @@ export default function CartPage() {
                   <CartItem 
                     key={item.variantId || index} 
                     item={item} 
-                    onAuthRequired={() => setIsAuthDialogOpen(true)}
+                    onAuthRequired={openLogin}
                   />
                 ))}
               </div>
@@ -169,15 +169,6 @@ export default function CartPage() {
           </Button>
         </div>
       </div>
-
-      <AuthDialog 
-        open={isAuthDialogOpen} 
-        onOpenChange={setIsAuthDialogOpen} 
-        onSuccess={() => {
-          setIsAuthDialogOpen(false);
-          router.push("/checkout/shipping");
-        }}
-      />
     </div>
   );
 }

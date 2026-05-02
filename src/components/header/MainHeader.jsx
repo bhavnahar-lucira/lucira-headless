@@ -1,22 +1,22 @@
 "use client";
 import { useState, useEffect } from "react";
-import { Search, Store, Heart, ShoppingBag, CirclePile, LogOut, User as UserIcon } from "lucide-react";
+import { LogOut } from "lucide-react";
 import Image from "next/image";
-import { AuthDialog } from "@/components/auth/AuthDialog";
-import { useSelector, useDispatch } from "react-redux";
-import { logout, setAvatar } from "@/redux/features/user/userSlice";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import Link from "next/link";
+import SearchPopup from "./SearchPopup";
+import { AnimatePresence, motion } from "framer-motion";
+import { useRouter } from "next/navigation";
+import { pushLogout, pushViewCart, getStandardCartItem } from "@/lib/gtm";
+import { useAuth } from "@/hooks/useAuth";
+import { useDispatch, useSelector } from "react-redux";
+import { setAvatar } from "@/redux/features/user/userSlice";
 import { fetchCart, clearCart } from "@/redux/features/cart/cartSlice";
 import {
   mergeGuestWishlist,
   restoreGuestWishlist,
   clearWishlist,
 } from "@/redux/features/wishlist/wishlistSlice";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import Link from "next/link";
-import SearchPopup from "./SearchPopup";
-import { AnimatePresence, motion } from "framer-motion";
-import { useRouter } from "next/navigation";
-import { pushLogout, pushViewCart } from "@/lib/gtm";
 
 const INSURANCE_VARIANT_ID = "gid://shopify/ProductVariant/47709366026458";
 const GOLDCOIN_VARIANT_ID = "gid://shopify/ProductVariant/47661824082138";
@@ -73,7 +73,7 @@ const SEARCH_PLACEHOLDERS = [
 
 export default function MainHeader() {
   const router = useRouter();
-  const [open, setOpen] = useState(false);
+  const { user, logout: authLogout, openLogin } = useAuth();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -82,7 +82,6 @@ export default function MainHeader() {
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
 
   const dispatch = useDispatch();
-  const { user } = useSelector((state) => state.user);
   const { totalQuantity, totalAmount, items } = useSelector((state) => state.cart);
   const wishlistItems = useSelector((state) => state.wishlist.items);
   const guestWishlistItems = useSelector((state) => state.wishlist.guestItems);
@@ -118,42 +117,7 @@ export default function MainHeader() {
         total_quantity: totalQuantity,
         total_product: items.length,
         coupon_code: "",
-        items: items.map((item, idx) => {
-          const getNumericId = (gid) => {
-            if (!gid) return 0;
-            if (typeof gid === 'number') return gid;
-            const match = String(gid).match(/\d+$/);
-            return match ? Number(match[0]) : 0;
-          };
-
-          const prodId = String(getNumericId(item.productId || item.shopifyId || item.id));
-          const lowerTitle = (item.title || "").toLowerCase();
-          
-          let category = item.type || item.productType || "";
-          if (!category) {
-            if (lowerTitle.includes("ring")) category = "Rings";
-            else if (lowerTitle.includes("earring") || lowerTitle.includes("bali")) category = "Earrings";
-            else if (lowerTitle.includes("pendant")) category = "Pendants";
-            else if (lowerTitle.includes("bracelet")) category = "Bracelets";
-            else if (item.variantId === GOLDCOIN_VARIANT_ID) category = "Gold Coin";
-            else if (item.variantId === INSURANCE_VARIANT_ID) category = "Insurance";
-          }
-          
-          return {
-            id: prodId,
-            sku: item.sku || "",
-            variant_id: String(getNumericId(item.variantId)),
-            product_name: item.title,
-            product_type: category,
-            category: "Lucira Jewelry",
-            sub_category: item.sub_category || category,
-            price: Number(item.comparePrice || item.price || 0),
-            offer_price: Number(item.price || 0),
-            quantity: item.quantity,
-            thumbnail_image: item.image,
-            index_position: idx + 1
-          };
-        })
+        items: items.map((item, idx) => getStandardCartItem(item, idx))
       });
     }
     };
@@ -233,7 +197,7 @@ export default function MainHeader() {
     } catch (err) {
       console.error("Logout request failed:", err);
     } finally {
-      dispatch(logout());
+      authLogout();
       dispatch(clearCart());
       dispatch(restoreGuestWishlist());
       router.push("/");
@@ -268,7 +232,7 @@ export default function MainHeader() {
               <input
                 type="text"
                 placeholder=""
-                className="w-full h-[40px] pl-[45px] pr-[10px] py-[8px] rounded-sm bg-[#F9F9F9] text-[16px] font-medium outline-none focus:bg-white focus:ring-1 focus:ring-gray-200 transition-all relative z-20"
+                className="w-full h-[40px] pl-[45px] pr-[10px] py-[8px] rounded-sm bg-[#F9F9F9] text-base font-medium outline-none focus:bg-white focus:ring-1 focus:ring-gray-200 transition-all relative z-20"
                 onFocus={() => setIsFocused(true)}
                 onBlur={() => {
                   setTimeout(() => setIsFocused(false), 200);
@@ -282,7 +246,7 @@ export default function MainHeader() {
               {/* Animated Placeholder Ticker */}
               {!isFocused && !searchQuery && (
                 <div className="absolute inset-0 flex items-center pointer-events-none z-30 overflow-hidden pl-[45px]">
-                  <span className="text-[16px] text-gray-500 font-medium whitespace-nowrap">Search for&nbsp;</span>
+                  <span className="text-base text-gray-500 font-medium whitespace-nowrap">Search for&nbsp;</span>
                   <div className="relative h-full flex items-center overflow-hidden">
                     <AnimatePresence mode="wait">
                       <motion.span
@@ -291,7 +255,7 @@ export default function MainHeader() {
                         animate={{ y: 0, opacity: 1 }}
                         exit={{ y: -20, opacity: 0 }}
                         transition={{ duration: 0.5, ease: "easeInOut" }}
-                        className="text-[16px] text-gray-500 font-medium whitespace-nowrap"
+                        className="text-base text-gray-500 font-medium whitespace-nowrap"
                       >
                         {SEARCH_PLACEHOLDERS[placeholderIndex]}...
                       </motion.span>
@@ -317,7 +281,7 @@ export default function MainHeader() {
         {/* Right Icons */}
         <div className="flex items-center justify-end lg:gap-3 xl:gap-6 text-sm">
 
-           <Link href="/pages/store-locator" className="hidden lg:flex items-center justify-center gap-[6px] cursor-pointer transition-colors hover:text-primary text-[14px] leading-[130%] tracking-normal font-normal text-black">
+           <Link href="/pages/store-locator" className="hidden lg:flex items-center justify-center gap-[6px] cursor-pointer transition-colors hover:text-primary text-sm leading-[130%] tracking-normal font-normal text-black">
             <StoreIcon />
             <span>Find a Store</span>
           </Link>
@@ -358,7 +322,7 @@ export default function MainHeader() {
               onClick={() => {
                 const path = window.location.pathname;
                 if (path !== "/login" && path !== "/register") {
-                  setOpen(true);
+                  openLogin();
                 }
               }} 
             >
@@ -381,7 +345,7 @@ export default function MainHeader() {
               onClick={() => {
                 const path = window.location.pathname;
                 if (path !== "/login" && path !== "/register") {
-                  setOpen(true);
+                  openLogin();
                 }
               }} 
               className="relative group p-1"
@@ -409,7 +373,6 @@ export default function MainHeader() {
         </div>
       </div>
 
-      <AuthDialog open={open} onOpenChange={setOpen} />
     </div>
   );
 }

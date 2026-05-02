@@ -224,8 +224,8 @@ export default function ExploreOtherRings() {
             ))
           ) : (
             // Show 8 products
-            GRID_PRODUCTS.map((product) => (
-              <ProductCard key={product.id} product={product} />
+            GRID_PRODUCTS.map((product, idx) => (
+              <ProductCard key={product.id} product={product} index={idx + 1} />
             ))
           )}
         </div>

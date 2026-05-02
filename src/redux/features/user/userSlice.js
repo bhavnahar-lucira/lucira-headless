@@ -3,6 +3,8 @@ import { createSlice } from "@reduxjs/toolkit";
 const initialState = {
   user: null,
   isAuthenticated: false,
+  isAuthModalOpen: false,
+  authRedirectPath: null,
   pincode: "",
   referralLink: "",
   referralLoading: false,
@@ -16,6 +18,7 @@ const userSlice = createSlice({
     login: (state, action) => {
       state.user = action.payload;
       state.isAuthenticated = true;
+      state.isAuthModalOpen = false;
     },
     setPincode: (state, action) => {
       state.pincode = action.payload;
@@ -28,6 +31,18 @@ const userSlice = createSlice({
       if (state.user) {
         state.user.avatar = action.payload;
       }
+    },
+    openAuthModal: (state, action) => {
+      state.isAuthModalOpen = true;
+      state.authRedirectPath = action.payload || null;
+    },
+    closeAuthModal: (state) => {
+      state.isAuthModalOpen = false;
+      state.authRedirectPath = null;
+    },
+    toggleAuthModal: (state) => {
+      state.isAuthModalOpen = !state.isAuthModalOpen;
+      if (!state.isAuthModalOpen) state.authRedirectPath = null;
     },
     setReferralLoading: (state, action) => {
       state.referralLoading = action.payload;
@@ -42,9 +57,20 @@ const userSlice = createSlice({
   },
 });
 
-export const { login, setPincode, logout, setAvatar, setReferralLoading, setReferralLink, setReferralError } = userSlice.actions;
+export const { 
+  login, 
+  setPincode, 
+  logout, 
+  setAvatar, 
+  openAuthModal, 
+  closeAuthModal, 
+  toggleAuthModal,
+  setReferralLoading, 
+  setReferralLink, 
+  setReferralError 
+} = userSlice.actions;
 export default userSlice.reducer;
 
 export const selectUser = (state) => state.user.user;
-export const selectIsAuthenticated = (state) =>
-  state.user.isAuthenticated;
+export const selectIsAuthenticated = (state) => state.user.isAuthenticated;
+export const selectIsAuthModalOpen = (state) => state.user.isAuthModalOpen;

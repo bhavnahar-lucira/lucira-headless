@@ -50,6 +50,7 @@ export function ProductSlider({ title, subtitle, products = [], preservePriceOnC
               <SwiperSlide key={product.shopifyId || product.id || product.handle || idx}>
                 <ProductCard
                   product={product}
+                  index={idx + 1}
                   fixedPrice={preservePriceOnColorChange ? product.price : undefined}
                   fixedComparePrice={preservePriceOnColorChange ? (product.compare_price || product.compareAtPrice) : undefined}
                 />
