@@ -288,17 +288,17 @@ export default function StoreLocatorSection() {
 
             <div className="space-y-3">
                <div className="grid grid-cols-2 gap-3">
-                 <Button asChild variant="outline" className="h-14 rounded-sm border-primary bg-transparent text-black font-medium text-sm sm:text-lg uppercase shadow-sm">
+                 <Button asChild variant="outline" className="h-12 rounded-sm border-primary bg-transparent text-black font-medium text-sm sm:text-base uppercase shadow-sm">
                    <a href={activeStore.mapLink} target="_blank" rel="noopener noreferrer"><MapPinned className="mr-2 h-4 w-4" /> DIRECT ME</a>
                  </Button>
-                 <Button asChild variant="outline" className="h-14 rounded-sm border-primary bg-transparent text-black font-medium text-sm sm:text-lg uppercase shadow-sm">
+                 <Button asChild variant="outline" className="h-12 rounded-sm border-primary bg-transparent text-black font-medium text-sm sm:text-base uppercase shadow-sm">
                    <a href={activeStore.callLink}><Phone className="mr-2 h-4 w-4" /> CALL US</a>
                  </Button>
                </div>
-               <Button asChild variant="outline" className="h-14 w-full rounded-sm border-primary bg-transparent text-black font-medium text-sm sm:text-lg uppercase shadow-sm">
+               <Button asChild variant="outline" className="h-12 w-full rounded-sm border-primary bg-transparent text-black font-medium text-sm sm:text-base uppercase shadow-sm">
                  <a href={activeStore.designLink}>VIEW AVAILABLE DESIGNS</a>
                </Button>
-               <Button asChild className="h-14 w-full rounded-sm bg-[#5A413F] text-white font-medium text-sm sm:text-lg uppercase shadow-lg">
+               <Button asChild className="h-12 w-full rounded-sm bg-[#5A413F] text-white font-medium text-sm sm:text-base uppercase shadow-lg">
                  <a href={activeStore.appointmentLink} target="_blank"><CalendarDays className="mr-2 h-4 w-4" />BOOK APPOINTMENT</a>
                </Button>
             </div>
@@ -390,22 +390,22 @@ export default function StoreLocatorSection() {
             </div>
 
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <Button asChild variant="outline" className="h-12 border-primary bg-transparent text-black font-medium text-sm sm:text-lg uppercase shadow-sm">
+              <Button asChild variant="outline" className="h-12 border-primary bg-transparent text-black font-medium text-sm sm:text-base uppercase shadow-sm">
                 <a href={activeStore.mapLink} target="_blank" rel="noopener noreferrer"><MapPinned className="mr-2 h-6 w-6" /> DIRECT ME</a>
               </Button>
-              <Button asChild variant="outline" className="h-12 border-primary bg-transparent text-black font-medium text-sm sm:text-lg uppercase shadow-sm">
+              <Button asChild variant="outline" className="h-12 border-primary bg-transparent text-black font-medium text-sm sm:text-base uppercase shadow-sm">
                 <a href={activeStore.callLink}><Phone className="mr-2 h-6 w-6" /> CALL US</a>
               </Button>
             </div>
 
             <div className="mt-3">
-              <Button asChild variant="outline" className="h-12 w-full border-primary bg-transparent text-black font-medium text-sm sm:text-lg uppercase shadow-sm">
+              <Button asChild variant="outline" className="h-12 w-full border-primary bg-transparent text-black font-medium text-sm sm:text-base uppercase shadow-sm">
                 <a href={activeStore.designLink}>VIEW AVAILABLE DESIGNS</a>
               </Button>
             </div>
 
             <div className="mt-3">
-              <Button asChild className="h-12 w-full text-white font-medium text-sm sm:text-lg uppercase">
+              <Button asChild className="h-12 w-full text-white font-medium text-sm sm:text-base uppercase">
                 <a href={activeStore.appointmentLink} target="_blank"><CalendarDays className="mr-2 h-6 w-6" /> BOOK APPOINTMENT</a>
               </Button>
             </div>
