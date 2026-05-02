@@ -41,16 +41,7 @@ export function AuthDialog({
   };
 
   const handleStepChange = (step) => {
-    if (isMobile) {
-      // First close, then switch, then open again to trigger animation
-      onOpenChange(false);
-      setTimeout(() => {
-        setCurrentStep(step);
-        onOpenChange(true);
-      }, 300);
-    } else {
-      setCurrentStep(step);
-    }
+    setCurrentStep(step);
   };
 
   if (isMobile) {

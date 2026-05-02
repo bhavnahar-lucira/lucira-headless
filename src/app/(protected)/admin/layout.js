@@ -102,7 +102,7 @@ export default function CustomerDashboardLayout({ children }) {
   useEffect(() => {
     async function fetchAvatar() {
       try {
-        const res = await fetch("/api/customer/profile/avatar");
+        const res = await fetch(`/api/customer/profile/avatar?t=${Date.now()}`);
         if (res.ok) {
           const data = await res.json();
           if (data.avatar) setAvatar(data.avatar);
@@ -112,6 +112,10 @@ export default function CustomerDashboardLayout({ children }) {
       }
     }
     fetchAvatar();
+
+    // Listen for profile updates from other components
+    window.addEventListener("profile-updated", fetchAvatar);
+    return () => window.removeEventListener("profile-updated", fetchAvatar);
   }, [pathname]);
 
   const handleSignOut = async () => {
@@ -154,8 +158,8 @@ export default function CustomerDashboardLayout({ children }) {
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 flex flex-col min-h-screen w-full min-w-0">
-          <div className="p-4 sm:p-8 flex-1 bg-[#F8FAFC] overflow-x-hidden">
+        <main className="flex-1 flex flex-col min-h-screen w-full min-w-0 outline-none focus:outline-none">
+          <div className="p-4 sm:p-8 flex-1 bg-[#F8FAFC] overflow-x-hidden outline-none focus:outline-none">
             {children}
           </div>
         </main>

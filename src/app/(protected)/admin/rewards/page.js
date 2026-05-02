@@ -193,10 +193,10 @@ function MilestoneBar({ completedSteps, profileComplete }) {
   return (
     <div style={{ position:"relative", marginBottom:"8px" }}>
       {/* bg track */}
-      <div style={{ position:"absolute", top:"28px", left:0, right:0, height:"10px", background:"#fff", borderRadius:"3rem" }} />
+      <div style={{ position:"absolute", top:"31px", left:0, right:0, height:"10px", background:"#fff", borderRadius:"3rem" }} />
       {/* fill */}
       <div style={{
-        position:"absolute", top:"28px", left:0, height:"10px",
+        position:"absolute", top:"31px", left:0, height:"10px",
         background: T.blush, borderRadius:"3rem",
         width:`${pct}%`, transition:"width .8s cubic-bezier(.4,0,.2,1)",
       }} />
@@ -221,7 +221,7 @@ function MilestoneBar({ completedSteps, profileComplete }) {
                 }
               </div>
               <span style={{
-                fontSize:"9px", letterSpacing:"1px", textTransform:"uppercase",
+                fontSize:"12px", letterSpacing:"1px", textTransform:"uppercase",
                 fontWeight: done || current ? 600 : 400,
                 color: done || current ? "#1c1410" : T.muted,
                 whiteSpace:"nowrap",
@@ -605,7 +605,7 @@ export default function EarnRewardsPage() {
      RENDER
   ──────────────────────────────────────────────────────── */
   return (
-    <div style={{ fontFamily:"inherit", animation:"fadeSlide .35s ease" }}>
+    <div className="font-inherit animate-[fadeSlide_0.35s_ease]">
       <style>{`
         @keyframes fadeSlide { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
         @keyframes spin { to { transform: rotate(360deg); } }
@@ -639,22 +639,18 @@ export default function EarnRewardsPage() {
       `}</style>
 
       {/* Page header */}
-      <div style={{ display:"flex", flexWrap:"wrap", alignItems:"flex-start", justifyContent:"space-between", gap:"16px", marginBottom:"24px" }}>
+      <div className="flex flex-wrap items-start justify-between gap-4 mb-6">
         <div>
-          <h2 style={{ fontSize:"28px", fontWeight:700, color:"#1c1410", margin:0, letterSpacing:".3px" }}>Earn Rewards</h2>
-          <p style={{ color:"#666", fontSize:"14px", margin:"4px 0 0" }}>Complete your profile to earn Lucira Coins and unlock exclusive benefits.</p>
+          <h2 className="font-figtree text-2xl md:text-3xl font-bold text-zinc-900 tracking-tight mb-1">Earn Rewards</h2>
+          <p className="text-[#666] text-sm mt-1">Complete your profile to earn Lucira Coins and unlock exclusive benefits.</p>
         </div>
 
         {/* Lucira Coins badge */}
-        <div style={{
-          display:"flex", alignItems:"center", gap:"12px",
-          background:`linear-gradient(135deg,${T.dark},#5c3d28)`,
-          borderRadius:"12px", padding:"12px 18px", boxShadow:"0 8px 24px rgba(28,20,16,.18)",
-        }}>
-          <Gift size={22} color="#d4aa5a" />
+        <div className="flex items-center gap-3 bg-gradient-to-br from-[#3d2a1e] to-[#5c3d28] rounded-xl px-[18px] py-3 shadow-[0_8px_24px_rgba(28,20,16,0.18)]">
+          <Gift size={22} className="text-[#d4aa5a]" />
           <div>
-            <p style={{ fontSize:"9px", letterSpacing:"2px", textTransform:"uppercase", color:"rgba(255,255,255,.45)", margin:0 }}>Lucira Coins</p>
-            <p style={{ fontSize:"24px", fontWeight:700, color:"#fff", margin:0, lineHeight:1.2 }}>
+            <p className="font-figtree text-base md:text-base font-semibold text-zinc-100 tracking-tight mb-1">Lucira Coins</p>
+            <p className="text-2xl font-bold text-white m-0 leading-[1.2]">
               {coinsLoading ? "..." : nectorCoins !== null ? nectorCoins.toLocaleString("en-IN") : "—"}
             </p>
           </div>
@@ -662,40 +658,36 @@ export default function EarnRewardsPage() {
       </div>
 
       {/* Two-column layout */}
-      <div className="rewards-layout" style={{ display:"grid", gridTemplateColumns:"1fr 210px", gap:"20px", alignItems:"start" }}>
+      <div className="rewards-layout grid grid-cols-[1fr_210px] gap-5 items-start">
 
         {/* ── MAIN CARD ── */}
-        <div style={{ background:"#fff", borderRadius:"4px", boxShadow:"0 2px 20px rgba(28,20,16,.07)", overflow:"hidden" }}>
+        <div className="bg-white rounded-[4px] shadow-[0_2px_20px_rgba(28,20,16,0.07)] overflow-hidden">
 
           {/* Milestone / pts bar */}
-          <div style={{ padding:"20px 28px 16px", background:"#F4F0F0", borderBottom:`1px solid ${T.ivory}` }}>
+          <div className="px-7 py-5 bg-[#F4F0F0] border-b border-[#f4f0f0]">
             <MilestoneBar completedSteps={state.completedSteps} profileComplete={state.profileComplete} />
-            <p style={{ fontSize:"14px", color:"#1a1a1a", marginTop:"10px", letterSpacing:".3px" }}>
+            <p className="text-sm text-[#1a1a1a] mt-2.5 tracking-[0.3px]">
               {state.profileComplete
-                ? <>🎉 <strong style={{ color: T.blush }}>Profile complete!</strong> You&apos;ve earned all your Lucira Coins.</>
-                : <>You are just <strong style={{ color: T.blush, fontSize:"14px" }}>{remaining} more step{remaining!==1?"s":""}</strong> away for Bonus Lucira Coins</>
+                ? <>🎉 <strong className="text-[#5A413F]">Profile complete!</strong> You&apos;ve earned all your Lucira Coins.</>
+                : <>You are just <strong className="text-[#5A413F] text-sm">{remaining} more step{remaining!==1?"s":""}</strong> away for Bonus Lucira Coins</>
               }
             </p>
           </div>
 
           {/* Step tabs */}
           {!state.profileComplete && (
-            <div className="step-tabs" style={{ display:"flex", borderBottom:`1px solid ${T.border}`, background: T.ivory }}>
+            <div className="step-tabs flex border-b border-[#e5ddd4] bg-[#f4f0f0]">
               {[1,2,3,4].map(n => {
                 const done   = state.completedSteps.includes(n);
                 const active = state.currentStep === n;
                 return (
                   <button key={n} type="button"
                     onClick={() => done && !active && setState(p => ({ ...p, currentStep:n }))}
-                    style={{
-                      flex:1, textAlign:"center", padding:"9px 4px",
-                      fontSize:"9px", letterSpacing:"1.5px", textTransform:"uppercase",
-                      fontFamily:"inherit", fontWeight:400,
-                      color: active ? T.blush : done ? "#1c1410" : T.muted,
-                      background: active ? "#fff" : "transparent",
-                      border:"none", borderBottom: active ? `2px solid ${T.blush}` : "2px solid transparent",
-                      cursor: done && !active ? "pointer" : "default", transition:"all .2s",
-                    }}>
+                    className={`flex-1 text-center py-[9px] px-1 text-[9px] tracking-[1.5px] uppercase font-normal transition-all duration-200 border-b-2 ${
+                      active ? "text-[#5A413F] bg-white border-[#5A413F]" : 
+                      done ? "text-[#1c1410] bg-transparent border-transparent cursor-pointer" : 
+                      "text-[#9a8f85] bg-transparent border-transparent cursor-default"
+                    }`}>
                     {STEP_NAMES[n]}
                   </button>
                 );
@@ -704,26 +696,26 @@ export default function EarnRewardsPage() {
           )}
 
           {/* Step body */}
-          <div className="main-card-body" style={{ padding:"20px 24px 24px" }}>
+          <div className="main-card-body px-6 py-6">
             {state.profileComplete ? (
               /* ── Completion screen ── */
-              <div style={{ textAlign:"center", padding:"28px 16px" }}>
-                <div style={{ width:"80px", height:"80px", borderRadius:"50%", border:`2px solid ${T.blush}`, display:"flex", alignItems:"center", justifyContent:"center", margin:"0 auto 20px", background:"#f4f0f0" }}>
-                  <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke={T.blush} strokeWidth="1.5">
+              <div className="text-center py-7 px-4">
+                <div className="w-20 h-20 rounded-full border-2 border-[#5A413F] flex items-center justify-center mx-auto mb-5 bg-[#f4f0f0]">
+                  <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#5A413F" strokeWidth="1.5">
                     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
                     <circle cx="12" cy="7" r="4"/>
                   </svg>
                 </div>
-                <h3 style={{ fontSize:"20px", fontWeight:600, color:"#1c1410", marginBottom:"6px" }}>You Have Completed Your Profile</h3>
-                <p style={{ color:"#666", fontSize:"14px", marginBottom:"28px" }}>Visit later if any question is added.</p>
+                <h3 className="text-xl font-semibold text-[#1c1410] mb-1.5">You Have Completed Your Profile</h3>
+                <p className="text-[#666] text-sm mb-7">Visit later if any question is added.</p>
                 <a href="/collections/all"
-                  style={{ display:"inline-block", background: T.blush, color:"#fff", padding:"13px 48px", borderRadius:"3rem", fontSize:"11px", letterSpacing:"2.5px", textTransform:"uppercase", textDecoration:"none", fontWeight:500 }}>
+                  className="inline-block bg-[#5A413F] text-white px-12 py-[13px] rounded-full text-[11px] tracking-[2.5px] uppercase no-underline font-medium">
                   Shop Now
                 </a>
-                <div style={{ marginTop:"24px", paddingTop:"16px", borderTop:`1px solid ${T.border}`, fontSize:"13px", color:"#666" }}>
+                <div className="mt-6 pt-4 border-t border-[#e5ddd4] text-[13px] text-[#666]">
                   Need Help?{" "}
                   <a href="https://api.whatsapp.com/send/?phone=%2B919004435760&text=Hi!+Can+you+tell+me+more+about+Lucira+Jewelry%E2%80%99s+collection%3F&type=phone_number&app_absent=0"
-                    style={{ color: T.blush, textDecoration:"none" }} target="_blank" rel="noopener noreferrer">
+                    className="text-[#5A413F] no-underline" target="_blank" rel="noopener noreferrer">
                     Chat with our Expert
                   </a>
                 </div>
@@ -731,14 +723,14 @@ export default function EarnRewardsPage() {
             ) : (
               <>
                 {/* Eyebrow */}
-                <p style={{ fontSize:"9px", letterSpacing:"2.5px", textTransform:"uppercase", color: T.blush, marginBottom:"5px", fontWeight:500 }}>
+                <p className="text-xs tracking-[2.5px] uppercase text-[#5A413F] mb-1.25 font-medium">
                   Step {state.currentStep} of {CONFIG.totalSteps}
                 </p>
-                <h3 style={{ fontSize:"20px", fontWeight:500, color:"#1c1410", marginBottom:"4px", lineHeight:1.5 }}>
+                <h3 className="text-xl font-medium text-[#1c1410] mb-1 leading-[1.5]">
                   {state.currentStep===1?"Let Us Know You Better":state.currentStep===2?"Gifting Behaviour":state.currentStep===3?"Your Wishlist":"Your Style"}
                 </h3>
                 {[1,3,4].includes(state.currentStep) && (
-                  <p style={{ color:"#666", fontSize:"14px", marginBottom:"18px", lineHeight:1.5 }}>
+                  <p className="text-[#666] text-sm mb-[18px] leading-[1.5]">
                     {state.currentStep===1?"Tell us a little about yourself so we can personalise your experience."
                       :state.currentStep===3?"Tell us what jewelry styles you're dreaming about."
                       :"Help us understand your aesthetic preferences."}
@@ -747,8 +739,8 @@ export default function EarnRewardsPage() {
 
                 {/* Validation errors */}
                 {errors.length > 0 && (
-                  <div style={{ background:"#ffe8e8", borderRadius:"8px", padding:"10px 16px", marginBottom:"14px" }}>
-                    {errors.map((e,i) => <p key={i} style={{ color:"#c40000", fontSize:"12px", margin:"2px 0" }}>• {e}</p>)}
+                  <div className="bg-[#ffe8e8] rounded-lg p-2.5 px-4 mb-3.5">
+                    {errors.map((e,i) => <p key={i} className="text-[#c40000] text-xs my-0.5">• {e}</p>)}
                   </div>
                 )}
 
@@ -759,30 +751,21 @@ export default function EarnRewardsPage() {
                 {state.currentStep===4 && <Step4 data={state.formData.step_4} onChange={(f,v)=>handleChange("step_4",f,v)} />}
 
                 {/* Actions */}
-                <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginTop:"24px", paddingTop:"18px", borderTop:`1px solid ${T.ivory}` }}>
+                <div className="flex items-center justify-between mt-6 pt-[18px] border-t border-[#f4f0f0]">
                   <button type="button"
                     disabled={state.currentStep===1}
                     onClick={() => goStep(state.currentStep-1)}
-                    style={{
-                      maxWidth:"145px", width:"100%", borderRadius:"3rem", fontSize:"12px",
-                      padding:"10px 20px", fontFamily:"inherit", cursor: state.currentStep===1 ? "default" : "pointer",
-                      background:"#fff", color: state.currentStep===1 ? T.border : T.blush,
-                      border:`1px solid ${state.currentStep===1 ? T.border : T.blush}`,
-                      opacity: state.currentStep===1 ? .4 : 1, transition:"all .2s",
-                    }}>
+                    className={`max-w-[145px] w-full rounded-full text-xs py-2.5 font-inherit transition-all duration-200 border ${
+                      state.currentStep===1 ? "bg-white text-[#e5ddd4] border-[#e5ddd4] opacity-40 cursor-default" : "bg-white text-[#5A413F] border-[#5A413F] opacity-100 cursor-pointer"
+                    }`}>
                     Back
                   </button>
 
                   <button type="button"
                     disabled={completing}
                     onClick={() => state.currentStep<CONFIG.totalSteps ? goStep(state.currentStep+1) : completeProfile()}
-                    style={{
-                      background: T.blush, color:"#fff", border:"none",
-                      padding:"11px 26px", borderRadius:"3rem", fontSize:"12px", letterSpacing:"1px",
-                      fontFamily:"inherit", cursor:"pointer", display:"flex", alignItems:"center", gap:"10px",
-                      boxShadow:`0 4px 16px rgb(90 65 63)`, transition:"all .2s",
-                    }}>
-                    {completing ? <Loader2 size={14} style={{ animation:"spin 1s linear infinite" }} /> : (
+                    className="bg-[#5A413F] text-white border-none px-[26px] py-[11px] rounded-full text-xs tracking-[1px] font-inherit cursor-pointer flex items-center gap-2.5 shadow-[0_4px_16px_rgb(90_65_63)] transition-all duration-200">
+                    {completing ? <Loader2 size={14} className="animate-spin" /> : (
                       <>{state.currentStep<CONFIG.totalSteps?"Save & Continue":"Complete Profile"}<ArrowRight size={12}/></>
                     )}
                   </button>
@@ -793,19 +776,19 @@ export default function EarnRewardsPage() {
         </div>
 
         {/* ── SIDEBAR ── */}
-        <div className="rewards-sidebar" style={{ display:"flex", flexDirection:"column", gap:"14px", position:"sticky", top:"80px" }}>
+        <div className="rewards-sidebar flex flex-col gap-3.5 sticky top-20">
 
           {/* Progress ring card */}
-          <div style={{ background:"#fff", borderRadius:"4px", padding:"22px 18px", textAlign:"center", boxShadow:"0 2px 20px rgba(28,20,16,.07)" }}>
+          <div className="bg-white rounded-[4px] px-[18px] py-[22px] text-center shadow-[0_2px_20px_rgba(28,20,16,0.07)]">
             <ProgressRing pct={ringPct} />
-            <p style={{ fontSize:"9.5px", letterSpacing:"2px", textTransform:"uppercase", color: T.muted, marginBottom:"16px" }}>Profile Completed</p>
-            <ul style={{ listStyle:"none", padding:0, margin:0, textAlign:"left", display:"flex", flexDirection:"column", gap:"10px", borderTop:`1px solid ${T.ivory}`, paddingTop:"14px" }}>
+            <p className="text-[9.5px] tracking-[2px] uppercase text-[#9a8f85] mb-4">Profile Completed</p>
+            <ul className="list-none p-0 m-0 text-left flex flex-col gap-2.5 border-t border-[#f4f0f0] pt-3.5">
               {[1,2,3,4].map(n => {
                 const done = state.profileComplete || state.completedSteps.includes(n);
                 return (
-                  <li key={n} style={{ display:"flex", alignItems:"center", gap:"9px", fontSize:"11.5px", color: done ? "#1c1410" : T.muted }}>
-                    <div style={{ width:"18px", height:"18px", borderRadius:"50%", border:`1.5px solid ${done ? "transparent" : T.border}`, background: done ? T.blush : "#fff", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
-                      {done ? <Check size={8} stroke="#fff" strokeWidth={3}/> : <div style={{ width:"6px", height:"6px", borderRadius:"50%", background: T.border }} />}
+                  <li key={n} className={`flex items-center gap-[9px] text-[11.5px] ${done ? "text-[#1c1410]" : "text-[#9a8f85]"}`}>
+                    <div className={`w-[18px] h-[18px] rounded-full border-[1.5px] flex items-center justify-center shrink-0 ${done ? "bg-[#5A413F] border-transparent" : "bg-white border-[#e5ddd4]"}`}>
+                      {done ? <Check size={8} className="text-white" strokeWidth={3}/> : <div className="w-1.5 h-1.5 rounded-full bg-[#e5ddd4]" />}
                     </div>
                     {STEP_NAMES[n]}
                   </li>
@@ -815,41 +798,26 @@ export default function EarnRewardsPage() {
           </div>
 
           {/* Coins earned card */}
-          <div style={{ background:`linear-gradient(135deg,${T.dark},#5c3d28)`, borderRadius:"4px", padding:"14px 16px", textAlign:"center", boxShadow:"0 8px 40px rgba(28,20,16,.12)" }}>
-            <p style={{ fontSize:"9px", letterSpacing:"2px", textTransform:"uppercase", color:"rgba(255,255,255,.45)", marginBottom:"6px" }}>Coins Earned</p>
-            <p style={{ fontSize:"26px", fontWeight:600, color:"#fff", lineHeight:1, margin:0 }}>{coins}</p>
-            <p style={{ fontSize:"10px", color:"rgba(255,255,255,.45)", letterSpacing:".5px", marginTop:"8px" }}>Lucira Coins</p>
+          <div className="bg-gradient-to-br from-[#3d2a1e] to-[#5c3d28] rounded-[4px] px-4 py-3.5 text-center shadow-[0_8px_40px_rgba(28,20,16,0.12)]">
+            <p className="text-xs tracking-[2px] uppercase text-white/45 mb-1.5">Coins Earned</p>
+            <p className="text-[26px] font-semibold text-white leading-none m-0">{coins}</p>
+            <p className="text-[10px] text-white/45 tracking-[0.5px] mt-2">Lucira Coins</p>
           </div>
         </div>
       </div>
 
       {/* Auto-save indicator */}
       {saveStatus && (
-        <div style={{
-          position:"fixed", bottom:"24px", right:"24px", background:"#fff",
-          border:`1px solid ${T.border}`, borderRadius:"3rem", padding:"7px 14px",
-          fontSize:"11px", color: T.muted, fontFamily:"inherit", letterSpacing:".5px",
-          boxShadow:"0 2px 20px rgba(28,20,16,.07)",
-          display:"flex", alignItems:"center", gap:"6px", zIndex:200,
-          animation:"fadeSlide .3s ease",
-        }}>
+        <div className="fixed bottom-6 right-6 bg-white border border-[#e5ddd4] rounded-full px-3.5 py-[7px] text-[11px] text-[#9a8f85] font-inherit tracking-[0.5px] shadow-[0_2px_20px_rgba(28,20,16,0.07)] flex items-center gap-1.5 z-[200] animate-[fadeSlide_0.3s_ease]">
           {saveStatus==="saving"
-            ? <><div style={{ width:"6px", height:"6px", borderRadius:"50%", background: T.blush, animation:"pulse 1.2s ease infinite" }} />Saving...</>
-            : <><Check size={10} color={T.blush}/>Saved</>
+            ? <><div className="w-1.5 h-1.5 rounded-full bg-[#5A413F] animate-pulse" />Saving...</>
+            : <><Check size={10} className="text-[#5A413F]"/>Saved</>
           }
-          <style>{`@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}`}</style>
         </div>
       )}
 
       {/* Mobile responsive */}
-      <style>{`
-        @media(max-width:700px){
-          div[style*="grid-template-columns: 1fr 210px"]{
-            grid-template-columns:1fr !important;
-          }
-          div[style*="position:sticky"]{position:static !important;}
-        }
-      `}</style>
+      {/* (Previously handled by media query in <style>, now mostly integrated via Tailwind but keeping the structure if needed for more complex things) */}
     </div>
   );
 }

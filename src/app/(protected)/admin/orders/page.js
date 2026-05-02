@@ -69,15 +69,15 @@ export default function MyOrdersPage() {
       {/* ── Header ── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="font-figtree text-2xl md:text-3xl font-bold text-zinc-900 tracking-tight mb-1">
+          <h2 className="font-figtree text-xl md:text-2xl font-bold text-primary tracking-tight mb-1">
             My Orders
           </h2>
-          <p className="font-figtree text-sm md:text-base text-zinc-500 font-normal leading-relaxed">
+          <p className="font-figtree text-sm md:text-base text-zinc-500 font-medium leading-relaxed">
             View your order history and track active deliveries.
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <div className="font-figtree px-4 py-2 bg-white border border-zinc-100 rounded-xl text-xs font-semibold text-zinc-400 uppercase tracking-[0.13em]">
+          <div className="font-figtree px-4 py-2 bg-white border border-zinc-100 rounded-xl text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
             {orders.length} Total Orders
           </div>
         </div>
@@ -165,20 +165,20 @@ export default function MyOrdersPage() {
 
                   {/* Product name + date */}
                   <div>
-                    <h4 className="font-figtree text-base md:text-xl font-semibold text-zinc-900 leading-tight">
+                    <h4 className="font-figtree text-base md:text-xl font-bold text-zinc-900 leading-tight">
                       {order.product}
                     </h4>
-                    <p className="font-figtree text-xs md:text-sm text-zinc-400 font-normal mt-1">
+                    <p className="font-figtree text-xs md:text-sm text-zinc-500 font-medium mt-1">
                       Ordered on {order.date}
                     </p>
                   </div>
 
                   {/* Price */}
                   <div>
-                    <p className="font-figtree text-[10px] font-semibold text-zinc-400 uppercase tracking-[0.13em] mb-0.5">
+                    <p className="font-figtree text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-0.5">
                       Price Paid
                     </p>
-                    <p className="font-figtree text-lg md:text-xl font-bold text-zinc-900">
+                    <p className="font-figtree text-lg md:text-xl font-bold text-primary">
                       {order.amount}
                     </p>
                   </div>

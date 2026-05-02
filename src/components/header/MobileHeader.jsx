@@ -31,6 +31,29 @@ const CATEGORY_IMAGES = {
   "9KT COLLECTION": "/images/menu/candy.jpg",
 };
 
+const MENU_SLIDER_BANNERS = [
+  {
+    href: "/collections/bestsellers",
+    image: "https://cdn.shopify.com/s/files/1/0739/8516/3482/files/Best_Seller_V3.jpg_1.jpg?v=1776596789",
+    alt: "Best Sellers"
+  },
+  {
+    href: "/collections/hexa",
+    image: "https://cdn.shopify.com/s/files/1/0739/8516/3482/files/Hexa_V2.jpg?v=1762843077",
+    alt: "Hexa Collection"
+  },
+  {
+    href: "/collections/sports-collection",
+    image: "https://cdn.shopify.com/s/files/1/0739/8516/3482/files/Bezel_67fedcb7-1524-4b30-95c5-27986e403f21.jpg?v=1762841804",
+    alt: "Sports Collection"
+  },
+  {
+    href: "/collections/cotton-candy",
+    image: "https://cdn.shopify.com/s/files/1/0739/8516/3482/files/Cotton_Candy_Menu_bAr_v2.jpg?v=1766136159",
+    alt: "Cotton Candy"
+  }
+];
+
 const METAL_COLORS = {
   "Yellow Gold": "linear-gradient(147.45deg, #c59922 17.98%, #ead59e 48.14%, #c59922 83.84%)",
   "White Gold": "linear-gradient(143.06deg, #dfdfdf 29.61%, #f3f3f3 48.83%, #dfdfdf 66.43%)",
@@ -93,6 +116,12 @@ const CartIcon = () => (
   </svg>
 );
 
+const UserIconCustom = () => (
+  <svg width="20" height="20" viewBox="0 0 18 17" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M17.3474 16.2092C15.9328 13.7635 13.6651 12.0936 11.0379 11.4916C15.1859 9.79213 15.9387 4.23958 12.3929 1.49701C8.84712 -1.24556 3.66208 0.878761 3.05984 5.3208C2.7035 7.94905 4.16824 10.486 6.62255 11.4916C3.9987 12.091 1.72767 13.7635 0.312981 16.2092C0.190761 16.4429 0.367305 16.7212 0.630763 16.7102C0.742782 16.7055 0.845425 16.6464 0.905569 16.5517C2.57888 13.6564 5.54355 11.9275 8.83021 11.9275C12.1169 11.9275 15.0815 13.6564 16.7548 16.5517C16.816 16.6576 16.9289 16.7229 17.0511 16.723C17.1113 16.7232 17.1705 16.7072 17.2224 16.6768C17.3859 16.5821 17.4418 16.3729 17.3474 16.2092ZM3.69212 6.1043C3.69212 2.149 7.97386 -0.323059 11.3993 1.65459C14.8246 3.63224 14.8246 8.57637 11.3993 10.554C10.6182 11.005 9.73213 11.2424 8.83021 11.2424C5.9939 11.2391 3.69543 8.94062 3.69212 6.1043Z" fill="black" stroke="black" strokeWidth="0.5459"></path>
+  </svg>
+);
+
 export default function MobileHeader() {
   const router = useRouter();
   const pathname = usePathname();
@@ -114,10 +143,12 @@ export default function MobileHeader() {
 
   const [activeMenuPath, setActiveMenuPath] = useState([]);
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
+  const [menuDirection, setMenuDirection] = useState(1);
 
   useEffect(() => {
     if (!isMenuOpen) {
       setActiveMenuPath([]);
+      setMenuDirection(1);
     }
   }, [isMenuOpen]);
 
@@ -321,11 +352,13 @@ export default function MobileHeader() {
   };
 
   const handleBack = () => {
+    setMenuDirection(-1);
     setActiveMenuPath(prev => prev.slice(0, -1));
   };
 
   const handleItemClick = (item, index) => {
     if (item.columns || item.items || (item.featured && Array.isArray(item.featured))) {
+      setMenuDirection(1);
       setActiveMenuPath(prev => [...prev, index]);
     } else if (item.href) {
       setIsMenuOpen(false);
@@ -443,17 +476,19 @@ export default function MobileHeader() {
     openLogin();
   };
 
-  const renderMainMenu = () => {
+  const renderCollectionsGrid = (activeItem) => {
+    const items = activeItem.items || activeItem.cards || [];
     return (
       <div className="flex flex-col pb-8">
         <div className="grid grid-cols-2 gap-3 px-4 py-4">
-          {MEGA_MENU.map((item, index) => {
-            const label = item.label || item.title;
-            const image = item.mobileBanner || CATEGORY_IMAGES[label] || "/images/menu/engagement-ring.jpg";
+          {items.map((item, index) => {
+            const label = item.title || item.label;
+            const image = item.image || CATEGORY_IMAGES[label] || "/images/menu/engagement-ring.jpg";
             return (
-              <button
+              <Link
                 key={index}
-                onClick={() => handleItemClick(item, index)}
+                href={item.href || "#"}
+                onClick={() => setIsMenuOpen(false)}
                 className="relative aspect-[4/4] overflow-hidden rounded-lg group"
               >
                 <Image
@@ -464,10 +499,60 @@ export default function MobileHeader() {
                 />
                 <div className="drawer-menu-image absolute inset-0 bg-black/10 group-active:bg-black/20 transition-colors" />
                 <div className="absolute bottom-4 left-4 right-4">
-                  <span className="absolute bottom-0 left-0 text-white text-[14px] leading-none tracking-normal font-medium capitalize font-figtree sm:static sm:text-base sm:leading-normal sm:tracking-wide">
+                  <span className="absolute bottom-0 left-0 text-white text-sm leading-none tracking-normal font-medium capitalize font-figtree sm:static sm:text-base sm:leading-normal sm:tracking-wide">
                     {label}
                   </span>
                 </div>
+              </Link>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
+  const renderMainMenu = () => {
+    return (
+      <div className="flex flex-col pb-8">
+        {/* Horizontal Banner Slider */}
+        <div className="flex px-4 pt-4 pb-2 overflow-x-auto snap-x snap-mandatory scroll-smooth gap-4" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}>
+          {MENU_SLIDER_BANNERS.map((banner, index) => (
+            <Link
+              key={index}
+              href={banner.href}
+              onClick={() => setIsMenuOpen(false)}
+              className="shrink-0 snap-center rounded-xl overflow-hidden"
+              style={{ width: 'calc(100% - 32px)' }}
+            >
+              <img
+                src={banner.image}
+                alt={banner.alt}
+                className="w-full h-[180px] object-cover rounded-xl block"
+                loading="lazy"
+              />
+            </Link>
+          ))}
+        </div>
+
+        {/* Text Category Links Grid */}
+        <div className="grid grid-cols-2 gap-2 px-4 py-4">
+          {MEGA_MENU.map((item, index) => {
+            const label = item.label || item.title;
+            const is9kt = label.toLowerCase().includes('9kt');
+            return (
+              <button
+                key={index}
+                onClick={() => handleItemClick(item, index)}
+                className="bg-[#f5f5f5] rounded-sm px-3 py-2.5 text-left flex items-center justify-between gap-1 active:bg-gray-200 transition-colors"
+              >
+                <span className="text-[12px] font-semibold uppercase tracking-wider font-figtree text-black">
+                  {label}
+                </span>
+                {is9kt && (
+                  <span className="text-[9px] font-bold uppercase tracking-wider bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-sm">
+                    New
+                  </span>
+                )}
               </button>
             );
           })}
@@ -607,24 +692,68 @@ export default function MobileHeader() {
               <div className="flex flex-col h-screen bg-[#fff] overflow-hidden">
                 <SheetHeader className="px-4 py-4 border-b border-gray-200 flex flex-row items-center justify-between sticky top-0 bg-white z-10 shrink-0">
                   <div className="flex items-center gap-2">
-                    {activeMenuPath.length > 0 && (
-                      <button onClick={handleBack} className="p-1 mr-1">
-                        <ChevronLeft size={20} />
-                      </button>
+                    {activeMenuPath.length > 0 ? (
+                      <>
+                        <button onClick={handleBack} className="p-1 mr-1">
+                          <ChevronLeft size={20} />
+                        </button>
+                        <SheetTitle className="text-sm font-semibold capitalize font-figtree tracking-widest font-figtree font-semibold text-base leading-none tracking-normal align-middle">
+                          {getMenuTitle()}
+                        </SheetTitle>
+                      </>
+                    ) : (
+                      <SheetTitle className="flex items-center">
+                        <Image
+                          src="/images/logo.svg"
+                          alt="Lucira Jewelry"
+                          width={100}
+                          height={40}
+                        />
+                      </SheetTitle>
                     )}
-                    <SheetTitle className="text-sm font-semibold capitalize font-figtree tracking-widest font-figtree font-semibold text-base leading-none tracking-normal align-middle">
-                      {getMenuTitle()}
-                    </SheetTitle>
                   </div>
-                  <SheetClose asChild>
-                    <button className="p-1">
-                      <X size={24} />
+                  <div className="flex items-center gap-4">
+                    <button onClick={() => { setIsMenuOpen(false); handleAuthTrigger(); }} className="p-1">
+                      <UserIconCustom />
                     </button>
-                  </SheetClose>
+                    <Link href="/checkout/cart" onClick={() => setIsMenuOpen(false)} className="relative p-1">
+                      <CartIcon />
+                      {totalQuantity > 0 && (
+                        <span className="absolute -top-1.5 -right-1.5 bg-primary text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center border border-white">
+                          {totalQuantity}
+                        </span>
+                      )}
+                    </Link>
+                    <SheetClose asChild>
+                      <button className="p-1">
+                        <X size={24} />
+                      </button>
+                    </SheetClose>
+                  </div>
                 </SheetHeader>
 
-                <ScrollArea className="flex-grow h-full overflow-y-auto">
-                  {activeMenuPath.length === 0 ? renderMainMenu() : renderSubMenu(activeItem)}
+                <ScrollArea className="flex-grow h-full overflow-y-auto overflow-x-hidden">
+                  <AnimatePresence mode="wait" initial={false} custom={menuDirection}>
+                    <motion.div
+                      key={activeMenuPath.join('-') || 'root'}
+                      custom={menuDirection}
+                      variants={{
+                        initial: (dir) => ({ x: dir === 1 ? '100%' : '-100%', opacity: 0.5 }),
+                        animate: { x: 0, opacity: 1 },
+                        exit: (dir) => ({ x: dir === 1 ? '-30%' : '100%', opacity: 0 }),
+                      }}
+                      initial="initial"
+                      animate="animate"
+                      exit="exit"
+                      transition={{ duration: 0.3, ease: [0.33, 1, 0.68, 1] }}
+                    >
+                      {activeMenuPath.length === 0 ? renderMainMenu() : (
+                        (activeItem?.type === 'image-grid' || (activeItem?.label || activeItem?.title || '').toLowerCase().trim() === 'collections')
+                          ? renderCollectionsGrid(activeItem)
+                          : renderSubMenu(activeItem)
+                      )}
+                    </motion.div>
+                  </AnimatePresence>
                 </ScrollArea>
               </div>
             </SheetContent>
@@ -648,9 +777,9 @@ export default function MobileHeader() {
             </button>
           )}
 
-          <Link href="/">
-            <Home size={22} strokeWidth={1.5} />
-          </Link>
+          <button onClick={handleAuthTrigger} className="p-1">
+            <UserIconCustom />
+          </button>
           <Link href={user ? "/admin/wishlist" : "#"} onClick={!user ? handleAuthTrigger : undefined} className="relative">
             <HeartIcon />
             {wishlistItems.length > 0 && (

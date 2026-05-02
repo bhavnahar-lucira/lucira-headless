@@ -12,7 +12,6 @@ import { login, setAvatar } from "@/redux/features/user/userSlice";
 import { pushSignup, pushLogin } from "@/lib/gtm";
 import { mergeGuestWishlist } from "@/redux/features/wishlist/wishlistSlice";
 import { mergeCart } from "@/redux/features/cart/cartSlice";
-import "./OtpSpinAuth.css";
 
 const SPIN_PRIZES = [
   { label: "₹1,500 OFF", value: "1500_off", chance: 33.33 },

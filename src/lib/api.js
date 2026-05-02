@@ -45,6 +45,12 @@ export const verifyOtpApi = (mobile, otp) =>
 
 /* ================= REGISTER ================= */
 
+export const checkCustomerApi = (payload) =>
+  apiFetch("/api/auth/check-customer", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+
 export const registerCustomer = (payload) =>
   apiFetch("/api/auth/register", {
     method: "POST",
