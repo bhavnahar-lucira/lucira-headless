@@ -112,6 +112,7 @@ export default function CartItem({ item, onAuthRequired }) {
           productId: productId,
           productHandle: item.handle || "",
           title: item.title,
+          sku: item.sku || "",
           image: item.image || "",
           price: item.price,
           comparePrice: item.comparePrice || "",

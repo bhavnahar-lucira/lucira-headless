@@ -34,7 +34,7 @@ export default function TopBar() {
   if (!hasLoaded || !settingsVisible || announcements.length === 0) return null;
 
   return (
-    <div className="bg-[#5a413f] text-white group relative h-11 overflow-hidden">
+    <div className="bg-[#5a413f] text-white group relative h-10 overflow-hidden">
       <button className="topbar-prev absolute left-4 z-20 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer top-1/2 -translate-y-1/2 flex items-center justify-center">
         <ChevronLeft size={16} />
       </button>
@@ -58,12 +58,12 @@ export default function TopBar() {
             {item.url ? (
               <Link 
                 href={item.url}
-                className="text-center font-medium text-[14px] leading-none tracking-[0.7px] flex items-center justify-center h-full w-full px-12 hover:underline transition-all"
+                className="text-center font-medium text-sm leading-none tracking-[0.7px] flex items-center justify-center h-full w-full px-12 hover:underline transition-all"
               >
                 {item.text}
               </Link>
             ) : (
-              <p className="text-center font-medium text-[14px] leading-none tracking-[0.7px] flex items-center justify-center h-full w-full px-12">
+              <p className="text-center font-medium text-sm leading-none tracking-[0.7px] flex items-center justify-center h-full w-full px-12">
                 {item.text}
               </p>
             )}

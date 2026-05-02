@@ -182,12 +182,12 @@ export default function ProductPage() {
                   Select Gold Color & Karat: <span className="text-gray-500 font-medium ml-1">14KT Yellow Gold</span>
                 </div>
                 <div className="grid grid-cols-3 gap-3">
-                  <GoldOption metal="White Gold" karat="14KT" color="bg-[#E5E5E5]" />
-                  <GoldOption metal="Yellow Gold" karat="14KT" active color="bg-[#EBC15C]"/>
-                  <GoldOption metal="Rose Gold" karat="14KT" color="bg-[#F6C7C7]"/>
-                  <GoldOption metal="White Gold" karat="18KT" color="bg-[#E5E5E5]"/>
-                  <GoldOption metal="Yellow Gold" karat="18KT" color="bg-[#EBC15C]"/>
-                  <GoldOption metal="Rose Gold" karat="18KT" color="bg-[#F6C7C7]"/>
+                  <GoldOption metal="White Gold" karat="14KT" color="linear-gradient(143.06deg, #dfdfdf 29.61%, #f3f3f3 48.83%, #dfdfdf 66.43%)" />
+                  <GoldOption metal="Yellow Gold" karat="14KT" active color="linear-gradient(147.45deg, #c59922 17.98%, #ead59e 48.14%, #c59922 83.84%)"/>
+                  <GoldOption metal="Rose Gold" karat="14KT" color="linear-gradient(154.36deg, #f2b5b5 10.36%, #f8dbdb 68.09%)"/>
+                  <GoldOption metal="White Gold" karat="18KT" color="linear-gradient(143.06deg, #dfdfdf 29.61%, #f3f3f3 48.83%, #dfdfdf 66.43%)"/>
+                  <GoldOption metal="Yellow Gold" karat="18KT" color="linear-gradient(147.45deg, #c59922 17.98%, #ead59e 48.14%, #c59922 83.84%)"/>
+                  <GoldOption metal="Rose Gold" karat="18KT" color="linear-gradient(154.36deg, #f2b5b5 10.36%, #f8dbdb 68.09%)"/>
                 </div>
               </div>
 
@@ -637,13 +637,11 @@ function GoldOption({ metal, karat, color, active }) {
       }`}
     >
       <span className={`absolute top-2 left-2 w-1.5 h-1.5 rounded-full bg-[#2DB36F]`}></span>
-      <div className={`w-7 h-7 rounded-full border border-gray-100 shadow-inner ${color}`}></div>
+      <div className={`w-7 h-7 rounded-full border border-gray-100 shadow-inner`} style={{ background: color }}></div>
       <div className={`text-sm text-center text-black leading-tight uppercase tracking-tight flex flex-col gap-1 ${active ? "font-semibold" : "font-normal"}`}>
         <span>{karat}</span>
         <span>{metal}</span>
       </div>
     </div>
-  );
-}   </div>
   );
 }

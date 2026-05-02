@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
-import { motion, useAnimation } from "framer-motion";
+import { motion, useAnimation, AnimatePresence } from "framer-motion";
 import {
   sendOtpApi,
   verifyOtpApi,
@@ -13,7 +13,6 @@ import {
 import { login, setAvatar } from "@/redux/features/user/userSlice";
 import { mergeGuestWishlist } from "@/redux/features/wishlist/wishlistSlice";
 import { mergeCart } from "@/redux/features/cart/cartSlice";
-import "./OtpSpinAuth.css";
 
 const SPIN_PRIZES = [
   { label: "₹1,500 OFF", value: "1500_off", chance: 33.33 },
@@ -39,7 +38,16 @@ const COUPON_MAP = {
   "1500_off": "GRAND1500",
 };
 
-export function OtpSpinAuth({ onSuccess, onClose, initialMobile = "", initialStep = "login", onStepChange }) {
+export function OtpSpinAuth({ 
+  onSuccess, 
+  onClose, 
+  initialMobile = "", 
+  initialStep = "login", 
+  onStepChange,
+  forceShowWheel = false,
+  overrideHeading = "",
+  overrideSubtext = ""
+}) {
   const router = useRouter();
   const dispatch = useDispatch();
   const controls = useAnimation();
@@ -184,6 +192,14 @@ export function OtpSpinAuth({ onSuccess, onClose, initialMobile = "", initialSte
   };
 
   const handleOtpChange = (index, value) => {
+    // Handle paste or autofill of the entire 4-digit code
+    if (value.length === 4 && /^\d+$/.test(value)) {
+      const newOtp = value.split("");
+      setOtp(newOtp);
+      setTimeout(() => handleVerifyOtp(value), 50);
+      return;
+    }
+
     if (!/^\d*$/.test(value)) return;
     const newOtp = [...otp];
     newOtp[index] = value.slice(-1);
@@ -193,12 +209,11 @@ export function OtpSpinAuth({ onSuccess, onClose, initialMobile = "", initialSte
       otpRefs[index + 1].current.focus();
     }
     
-    // Auto-verify if 4 digits are entered
+    // Auto-verify if 4 digits are entered manually
     if (index === 3 && value) {
       const finalOtp = [...newOtp];
       finalOtp[3] = value.slice(-1);
       if (finalOtp.every(d => d !== "")) {
-        // We call it after a tiny delay so the last digit is visible
         setTimeout(() => {
            const otpVal = finalOtp.join("");
            if (otpVal.length === 4) {
@@ -227,7 +242,6 @@ export function OtpSpinAuth({ onSuccess, onClose, initialMobile = "", initialSte
 
   const handleSpinAndRegister = async () => {
     if (!firstName || !lastName || !email) return toast.error("Please fill all fields");
-    if (!consent) return toast.error("Please accept T&Cs");
 
     setIsSpinning(true);
     const prize = getWeightedPrize();
@@ -275,10 +289,33 @@ export function OtpSpinAuth({ onSuccess, onClose, initialMobile = "", initialSte
     toast.success("Coupon copied!");
   };
 
+  const showWheel = step === "register" || forceShowWheel;
+
+  // Custom animation for mobile
+  const isMobileView = useMemo(() => typeof window !== "undefined" && window.innerWidth < 768, []);
+
   return (
-    <div className={`otp-spin-auth-wrapper ${step === "register" ? "signup-active" : "login-active"}`}>
+    <div 
+      className={`relative flex flex-col items-center w-full mx-auto overflow-hidden transition-all duration-300 bg-[#FFFEFC] 
+      ${showWheel 
+        ? "md:flex-row md:items-stretch md:w-[800px] md:max-w-[800px] md:min-h-[500px]" 
+        : "md:flex-row md:items-stretch md:w-[800px] md:max-w-[800px] md:h-[500px]"}
+      ${!showWheel ? "md:shadow-[0_0_10px_rgba(0,0,0,0.3)] md:max-w-[400px] md:rounded-sm" : "md:shadow-[0_0_10px_rgba(0,0,0,0.3)] md:rounded-sm"}
+      max-md:shadow-none max-md:rounded-none max-md:max-w-full
+      ${isMobileView ? "animate-[slideInBottom_0.45s_cubic-bezier(0.25,0.46,0.45,0.94)_forwards]" : ""}`}
+      style={{
+        animation: isMobileView ? "slideInBottom 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards" : "none"
+      }}
+    >
+      <style>{`
+        @keyframes slideInBottom {
+          from { transform: translateY(110%); }
+          to   { transform: translateY(0); }
+        }
+      `}</style>
+      
       <button 
-        className="close-button" 
+        className="absolute top-5 right-5 z-20 p-1 rounded-full text-black cursor-pointer border-none flex items-center justify-center bg-white/50 backdrop-blur-sm" 
         onClick={onClose || onSuccess}
         aria-label="Close"
       >
@@ -286,100 +323,131 @@ export function OtpSpinAuth({ onSuccess, onClose, initialMobile = "", initialSte
       </button>
 
       {/* Background/Side Image Container */}
-      {(step === "login" || step === "otp" || step === "success") && (
-        <div className="login-image-side" />
-      )}
-
-      {step === "register" && (
-        <div className="spin-wheel-wrapper">
-          <div className="wheel-container">
+      {showWheel ? (
+        <div 
+          className="flex flex-col items-center justify-center relative w-full h-[220px] md:h-full md:w-[60%] overflow-hidden bg-center bg-cover bg-no-repeat"
+          style={{ backgroundImage: 'url("https://cdn.shopify.com/s/files/1/0739/8516/3482/files/BG_1_1.png?v=1770198650")' }}
+        >
+          <div className="relative w-[90%] h-[290px] md:w-[380px] md:h-[380px] max-md:absolute max-md:top-[-75px]">
             <motion.img
               src="https://cdn.shopify.com/s/files/1/0739/8516/3482/files/Below_Banner_Trust_Icon_Strip_1_1.png?v=1770784760"
               alt="Spin the Wheel"
-              className="spin-wheel-image"
+              className="w-full h-full object-contain absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[1]"
               animate={controls}
               initial={{ rotate: 0 }}
             />
             <img
               src="https://cdn.shopify.com/s/files/1/0739/8516/3482/files/Spin_The_Wheel_Spinner_1.png?v=1769229971"
               alt="Spin CTA"
-              className="spin-wheel-cta"
+              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 pointer-events-none w-full max-w-[440px] h-auto"
             />
           </div>
-         
         </div>
+      ) : (
+        (step === "login" || step === "otp" || step === "success") && (
+          <div 
+            className="w-full h-[175px] md:h-full md:w-[55%] bg-center bg-cover bg-no-repeat"
+            style={{ 
+              backgroundImage: isMobileView 
+                ? 'url("https://cdn.shopify.com/s/files/1/0739/8516/3482/files/Jan-Popup-Mobile_jpg.jpg?v=1770010490")' 
+                : 'url("https://www.lucirajewelry.com/cdn/shop/files/Jan-Popup-Desktop-New_2.jpg?v=1769844544")' 
+            }}
+          />
+        )
       )}
 
-      <div className="otp-form-wrapper">
-        <div className="otp-heading">
+      <div className={`flex flex-col w-full p-5 md:p-8 md:justify-center ${!showWheel ? "md:w-[50%]" : "md:w-[50%]"}`}>
+        <div className="text-center mb-4">
           <img
-            src="/images/logo.svg"
+            src="https://www.lucirajewelry.com/cdn/shop/files/LJ_Logo_Pink.svg"
             width="120"
             height="49"
             alt="lucira jewelry logo"
+            className="mx-auto"
           />
         </div>
 
         {step === "login" && (
           <>
-            <p className="heading">WELCOME TO LUCIRA</p>
-            <p className="subtext">Welcome To The Jewelry World Of Lucira!</p>
-            <div className="mobile-wrap">
-              <span className="country-code">+91</span>
+            <p className="mb-2 text-center text-xl leading-tight font-medium text-black uppercase mx-auto mt-4">{overrideHeading || "WELCOME TO LUCIRA"}</p>
+            <p className="text-base font-medium text-[#5B5B5B] text-center mb-5 tracking-wider leading-relaxed capitalize max-w-[300px] mx-auto">{overrideSubtext || "Welcome To The Jewelry World Of Lucira!"}</p>
+            <div className="flex items-center border border-[#e2e2e2] h-[45px] px-4 rounded-lg bg-white">
+              <span className="text-base font-normal mr-2.5 pr-3 border-r border-[#d0d0d0]">+91</span>
               <input
+                ref={mobileRef}
                 type="tel"
                 placeholder="Enter Phone Number"
                 maxLength="10"
+                className="w-full h-full text-base border-none outline-none font-normal bg-transparent tracking-[0.3px]"
                 value={mobile}
                 onChange={(e) => setMobile(e.target.value.replace(/\D/g, ""))}
               />
             </div>
-            <div className="consent-wrapper">
-              <label className="consent-label">
+            <div className="my-3 max-w-full hidden">
+              <label className="flex items-start gap-2 text-xs leading-tight cursor-pointer text-[#000]">
                 <input
                   type="checkbox"
                   checked={consent}
                   onChange={(e) => setConsent(e.target.checked)}
+                  className="mt-0.5 accent-[#5a413f]"
                 />
                 <span>
                   I accept that I have read & understood Privacy Policy and T&Cs.
                 </span>
               </label>
             </div>
-            <button className="btn-primary" onClick={handleSendOtp} disabled={loading}>
+            <button 
+              className="text-white h-[45px] w-full font-normal text-base cursor-pointer transition-opacity uppercase tracking-[0.3px] border-none mt-3 bg-[#b55670] rounded-lg disabled:opacity-50" 
+              onClick={handleSendOtp} 
+              disabled={loading}
+            >
               {loading ? "SENDING..." : "REQUEST OTP"}
             </button>
-            <p className="register-link">
-              New user? <span className="cursor-pointer font-bold underline" onClick={() => onStepChange ? onStepChange("register") : setStep("register")}>Register</span>
+            <div className="flex items-center justify-center gap-2 text-base text-black mt-3">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" className="shrink-0">
+                <path d="M16.6668 10.8333C16.6668 15 13.7502 17.0833 10.2835 18.2916C10.102 18.3531 9.90478 18.3502 9.72516 18.2833C6.25016 17.0833 3.3335 15 3.3335 10.8333V4.99997C3.3335 4.77895 3.42129 4.56699 3.57757 4.41071C3.73385 4.25443 3.94582 4.16663 4.16683 4.16663C5.8335 4.16663 7.91683 3.16663 9.36683 1.89997C9.54337 1.74913 9.76796 1.66626 10.0002 1.66626C10.2324 1.66626 10.4569 1.74913 10.6335 1.89997C12.0918 3.17497 14.1668 4.16663 15.8335 4.16663C16.0545 4.16663 16.2665 4.25443 16.4228 4.41071C16.579 4.56699 16.6668 4.77895 16.6668 4.99997V10.8333Z" stroke="#008000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"></path>
+                <path d="M7.5 9.99992L9.16667 11.6666L12.5 8.33325" stroke="#008000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"></path>
+              </svg>
+              <span>100% Secured & Spam Free</span>
+            </div>
+            <p className="text-center text-base mt-2.5 text-[#5B5B5B]">
+              New user? <span className="cursor-pointer font-bold underline text-[#5a413f]" onClick={() => onStepChange ? onStepChange("register") : setStep("register")}>Register</span>
             </p>
           </>
         )}
 
         {step === "otp" && (
           <>
-            <p className="heading">VERIFY OTP</p>
-            <p className="subtext">Sent to +91 {mobile}</p>
-            <div className="otp-inputs">
+            <p className="mb-2 text-center text-base leading-tight font-medium text-black uppercase mx-auto mt-4">{overrideHeading || "VERIFY OTP"}</p>
+            <p className="text-base font-medium text-[#5B5B5B] text-center mb-5 tracking-wider leading-relaxed capitalize max-w-[300px] mx-auto">{overrideSubtext || `Sent to +91 ${mobile}`}</p>
+            <div className="flex justify-center gap-2 mt-4 mb-4">
               {otp.map((digit, i) => (
                 <input
                   key={i}
                   ref={otpRefs[i]}
                   type="tel"
+                  inputMode="numeric"
+                  autoComplete={i === 0 ? "one-time-code" : "off"}
                   maxLength="1"
+                  className="w-[20%] h-[50px] text-center text-lg border rounded-md border-[#ddd] focus:border-black outline-none font-extrabold"
                   value={digit}
                   onChange={(e) => handleOtpChange(i, e.target.value)}
                   onKeyDown={(e) => handleKeyDown(i, e)}
                 />
               ))}
             </div>
-            <button className="btn-primary" onClick={handleVerifyOtp} disabled={loading}>
+            <button 
+              className="text-white h-[45px] w-full font-normal text-base cursor-pointer transition-opacity uppercase tracking-[0.3px] border-none mt-3 bg-[#b55670] rounded-lg disabled:opacity-50" 
+              onClick={() => handleVerifyOtp()} 
+              disabled={loading}
+            >
               {loading ? "VERIFYING..." : "VERIFY OTP"}
             </button>
-            <p id="otp-timer">
+            <p className="text-center mt-2.5 text-base text-[#5B5B5B]">
               {timer > 0 ? (
                 `Resend OTP in 00:${timer < 10 ? `0${timer}` : timer}`
               ) : (
-                <span className="cursor-pointer underline font-bold" onClick={handleSendOtp}>
+                <span className="cursor-pointer underline font-bold text-[#b77766]" onClick={handleSendOtp}>
                   Resend OTP
                 </span>
               )}
@@ -388,56 +456,63 @@ export function OtpSpinAuth({ onSuccess, onClose, initialMobile = "", initialSte
         )}
 
         {step === "register" && (
-          <div className="signupSection">
-            <p className="heading">Register to Win Rewards</p>
-            <p className="subtext">Try Your Luck! Win a Diamond Pendant</p>
-            <div className="registration-form-inputs">
-              <div className="registration-form-row-wrapper">
-                <div className="grid-column">
-                  <label>First Name <span className="red-required">*</span></label>
+          <div className="overflow-hidden">
+            <p className="mb-2 text-center text-base leading-tight font-medium text-black uppercase mx-auto mt-4">Register to Win a Reward</p>
+            <p className="text-base font-medium text-[#5B5B5B] text-center mb-5 tracking-wider leading-relaxed capitalize max-w-[300px] mx-auto">Try Your Luck! Win a Diamond Pendant</p>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-3.5">
+                <div className="flex flex-col">
+                  <label className="text-base flex mb-1.5 font-normal text-[#666]">First Name <span className="text-red-500 ml-1">*</span></label>
                   <input
+                    ref={firstNameRef}
                     type="text"
-                    className="field-input"
+                    className="w-full h-10 px-4 text-base border border-[#e2e2e2] rounded-lg outline-none bg-white"
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
                   />
                 </div>
-                <div className="grid-column">
-                  <label>Last Name <span className="red-required">*</span></label>
+                <div className="flex flex-col">
+                  <label className="text-base flex mb-1.5 font-normal text-[#666]">Last Name <span className="text-red-500 ml-1">*</span></label>
                   <input
                     type="text"
-                    className="field-input"
+                    className="w-full h-10 px-4 text-base border border-[#e2e2e2] rounded-lg outline-none bg-white"
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
                   />
                 </div>
               </div>
-              <label>Email Address <span className="red-required">*</span></label>
-              <input
-                type="email"
-                className="field-input"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-
-              <label>Phone Number</label>
-              <div className="mobile-wrap mb-3">
-                <span className="country-code">+91</span>
+              <div className="flex flex-col">
+                <label className="text-base flex mb-1.5 font-normal text-[#666]">Email Address <span className="text-red-500 ml-1">*</span></label>
                 <input
-                  type="tel"
-                  placeholder="Enter Phone Number"
-                  maxLength="10"
-                  value={mobile}
-                  onChange={(e) => setMobile(e.target.value.replace(/\D/g, ""))}
+                  type="email"
+                  className="w-full h-10 px-4 text-base border border-[#e2e2e2] rounded-lg outline-none bg-white"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                 />
               </div>
 
-              <div className="consent-wrapper">
-                <label className="consent-label">
+              <div className="flex flex-col">
+                <label className="text-base flex mb-1.5 font-normal text-[#666]">Phone Number</label>
+                <div className="flex items-center border border-[#e2e2e2] h-[45px] px-4 rounded-lg bg-white">
+                  <span className="text-base font-normal mr-2.5 pr-3 border-r border-[#d0d0d0]">+91</span>
+                  <input
+                    type="tel"
+                    placeholder="Enter Phone Number"
+                    maxLength="10"
+                    className="w-full h-full text-base border-none outline-none font-normal bg-transparent tracking-[0.3px]"
+                    value={mobile}
+                    onChange={(e) => setMobile(e.target.value.replace(/\D/g, ""))}
+                  />
+                </div>
+              </div>
+
+              <div className="my-3 max-w-full">
+                <label className="flex items-start gap-2 text-xs leading-tight cursor-pointer text-[#000]">
                   <input
                     type="checkbox"
                     checked={consent}
                     onChange={(e) => setConsent(e.target.checked)}
+                    className="mt-0.5 accent-[#5a413f]"
                   />
                   <span>
                     I accept that I have read & understood Privacy Policy and T&Cs.
@@ -446,7 +521,7 @@ export function OtpSpinAuth({ onSuccess, onClose, initialMobile = "", initialSte
               </div>
 
               <button
-                className="btn-primary"
+                className="text-white h-[45px] w-full font-normal text-base cursor-pointer transition-opacity uppercase tracking-[0.3px] border-none mt-3 bg-[#b55670] rounded-lg disabled:opacity-50"
                 onClick={handleSpinAndRegister}
                 disabled={isSpinning || loading}
               >
@@ -457,18 +532,20 @@ export function OtpSpinAuth({ onSuccess, onClose, initialMobile = "", initialSte
         )}
 
         {step === "success" && (
-          <div className="success-section" id="successSection">
+          <div className="text-center">
             <div className="text-4xl mb-4 text-center">🎉</div>
-            <p className="heading">Account Created Successfully!</p>
-            <p className="subtext">Your reward is ready. Apply this at checkout.</p>
-            <div className="coupon-box">
-              <span id="couponCode">{COUPON_MAP[wonPrize?.value] || "LUCIRA10"}</span>
-              <button className="copy-btn" onClick={copyCoupon}>
+            <p className="mb-2 text-center text-base leading-tight font-medium text-black uppercase mx-auto mt-4 max-w-[245px]">Your Account has been created Successfully</p>
+            <p className="text-xs font-medium text-[#5B5B5B] text-center mb-3 tracking-wider leading-relaxed capitalize max-w-[280px] mx-auto mt-3">
+              Your reward is ready, Apply this on checkout
+            </p>
+            <div className="flex items-center justify-between gap-2 mx-auto my-3 p-2 pl-5 rounded-lg border border-dashed border-green-600 bg-green-50 max-w-[205px] font-semibold text-black">
+              <span className="text-base">{COUPON_MAP[wonPrize?.value] || "LUCIRA10"}</span>
+              <button className="border-none bg-transparent cursor-pointer text-lg p-1" onClick={copyCoupon}>
                 📋
               </button>
             </div>
             <button 
-              className="btn-primary mt-4" 
+              className="text-white h-[45px] w-full font-normal text-base cursor-pointer transition-opacity uppercase tracking-[0.3px] border-none mt-4 bg-[#b55670] rounded-lg" 
               onClick={() => {
                 if (onSuccess) onSuccess();
                 else router.push("/");
@@ -481,20 +558,17 @@ export function OtpSpinAuth({ onSuccess, onClose, initialMobile = "", initialSte
         )}
 
         {step === "register" && (
-          <p className="register-link" style={{ marginBottom: "5px" }}>
+          <p className="text-center text-base mt-2.5 text-[#5B5B5B] mb-1">
             Already have an account?{" "}
             <span
-              className="cursor-pointer font-bold underline"
-              onClick={() => onStepChange ? onStepChange("login") : setStep("login")}
+              className="cursor-pointer font-bold underline text-[#5a413f]"
+              onClick={() => onStepChange ? onStepChange("register") : setStep("login")}
             >
               Login
             </span>
           </p>
         )}
 
-        <div className="safe-secure-text">
-          <span>100% Secured & Spam Free</span>
-        </div>
       </div>
     </div>
   );

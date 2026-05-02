@@ -6,6 +6,7 @@ import QueryProvider from "@/providers/QueryProvider";
 import BackToTop from "@/components/common/BackToTop";
 import ToastProvider from "@/components/common/ToastProvider";
 import PointsResetHandler from "@/components/common/PointsResetHandler";
+import { GlobalAuthModal } from "@/components/auth/GlobalAuthModal";
 import Script from "next/script";
 import GtmPageView from "@/components/common/GtmPageView";
 
@@ -54,6 +55,11 @@ const abeezee = ABeeZee({
 export const metadata = {
   title: "India's Best Lab Grown Diamond Jewellery Brand - Lucira Jewelry",
   description: "Shop premium diamond jewellery online in India at Lucira Jewelry. Discover elegant lab grown diamond designs, certified quality, modern craftsmanship, and timeless styles crafted for every occasion. Shop now.",
+  icons: {
+    icon: "/Favicon.png",
+    apple: "/Favicon.png",
+  },
+  manifest: "/manifest.json",
 };
 
 export default function RootLayout({ children }) {
@@ -92,6 +98,7 @@ export default function RootLayout({ children }) {
             )}
             <PointsResetHandler />
             {children}
+            <GlobalAuthModal />
             <BackToTop />
           </QueryProvider>
         </ReduxProvider>

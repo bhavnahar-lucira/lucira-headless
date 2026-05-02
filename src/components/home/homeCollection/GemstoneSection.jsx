@@ -85,6 +85,7 @@ export default function GemstoneSection() {
       tabs={tabs}
       page="home"
       colCat="shop all gemstone"
+      colLink="/collections/gemstone-jewellery"
       onTabChange={(tab) => setActiveTab(tab)}
       loading={loading || tabsLoading}
     >

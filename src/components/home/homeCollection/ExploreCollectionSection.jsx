@@ -44,6 +44,7 @@ export default function ExploreCollectionSection() {
       tabs={Object.keys(COLLECTION_HANDLE_MAP)}
       page="home"
       colCat="shop all collections"
+      colLink="/collections/all"
       onTabChange={(tab) => setActiveTab(tab)}
       loading={loading}
     >        

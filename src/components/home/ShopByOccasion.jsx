@@ -31,13 +31,15 @@ export default function ShopByOccasion() {
               <LazyImage 
                 src={occ.image} 
                 alt={occ.name} 
-                fill 
-                className="object-cover transition-transform duration-700 group-hover:scale-105"
+                fill
+                sizes="(max-width: 768px) 50vw, 25vw"
+                className="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+                priority={index < 2}
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+              <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent transition-opacity duration-300 group-hover:opacity-90" />
               <div className="absolute bottom-4 left-4 right-4 md:bottom-6 md:left-6 md:right-6 flex justify-between items-center text-white">
-                <span className="text-[14px] md:text-2xl font-semibold">{occ.name}</span>
-                <div className="w-6 h-6 md:w-10 md:h-10 rounded-full border border-white/40 flex items-center justify-center transition-all group-hover:bg-white group-hover:text-black">
+                <span className="text-base md:text-2xl font-semibold">{occ.name}</span>
+                <div className="shrink-0 w-6 h-6 md:w-10 md:h-10 rounded-full border border-white/40 flex items-center justify-center transition-all group-hover:bg-white group-hover:text-black">
                   <ArrowRight size={16} className="md:w-5 md:h-5" />
                 </div>
               </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo, use, useRef } from "react";
+import { useState, useEffect, useCallback, useMemo, use, useRef, Fragment } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -347,7 +347,7 @@ export default function CollectionPage({ params: paramsPromise }) {
 
     if (isFetchingNextPage) {
       items.push(
-        <>
+        <Fragment key="next-page-skeletons">
           <ProductCardSkeleton key="next-1" />
           <div className="hidden sm:block">
             <ProductCardSkeleton key="next-2" />
@@ -358,7 +358,7 @@ export default function CollectionPage({ params: paramsPromise }) {
           <div className="hidden 2xl:block">
             <ProductCardSkeleton key="next-4" />
           </div>
-        </>
+        </Fragment>
       );
     }
 
@@ -414,7 +414,7 @@ export default function CollectionPage({ params: paramsPromise }) {
         <div className="bg-[#FFF5F1] overflow-hidden">
           <div className="container-main flex flex-col md:flex-row items-center">
             {/* Left Content */}
-            <div className="flex-1 px-6 py-8 md:py-12 md:pr-12">
+            <div className="flex-1">
               <h1 className="text-3xl md:text-4xl font-serif font-bold mb-4 capitalize">
                 {displayTitle}
               </h1>
@@ -425,15 +425,15 @@ export default function CollectionPage({ params: paramsPromise }) {
               {/* Features */}
               <div className="flex flex-wrap gap-6 text-xs md:text-sm font-medium">
                 <div className="flex items-center gap-2">
-                  <Image src="/images/product/shipping.svg" alt="Shipping" width={20} height={20} className="md:w-6 md:h-6" />
+                  <Image src="https://cdn.shopify.com/s/files/1/0739/8516/3482/files/Group_f573cba5-716e-47c9-baeb-8303cf3ba2e8.png" alt="Shipping" width={20} height={20} className="md:w-6" />
                   <span>Free & secure shipping</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Image src="/images/product/certified.svg" alt="Certified" width={20} height={20} className="md:w-6 md:h-6" />
+                  <Image src="https://cdn.shopify.com/s/files/1/0739/8516/3482/files/streamline_star-badge_1.png" alt="Certified" width={20} height={20} className="md:w-6" />
                   <span>100% value guarantee</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Image src="/images/product/return.svg" alt="Return" width={20} height={20} className="md:w-6 md:h-6" />
+                  <Image src="https://cdn.shopify.com/s/files/1/0739/8516/3482/files/hugeicons_delivery-return-01.png" alt="Return" width={20} height={20} className="md:w-6" />
                   <span>15-day free returns</span>
                 </div>
               </div>
@@ -590,20 +590,21 @@ export default function CollectionPage({ params: paramsPromise }) {
           {/* Applied Filters Badges */}
           {!isMobile && (
             <div className="flex flex-wrap items-center gap-2 mb-4">
-              {Object.entries(availableFilters).map(([groupKey, options]) => 
-                options.filter(opt => searchParams.getAll(opt.urlKey).includes(opt.value)).map((opt) => (
-
-                  <Badge
-                    key={`${groupKey}-${opt.value}`}
-                    variant="secondary"
-                    className="bg-[#FFF5F1] text-black hover:bg-[#FFE4D9] border-none px-3 py-1 rounded-full flex items-center gap-2 cursor-pointer"
-                    onClick={() => toggleFilter(opt.urlKey, opt.value)}
-                  >
-                    <span className="text-xs font-medium">{opt.label.split(" (")[0]}</span>
-                    <XIcon className="size-3" />
-                  </Badge>
-                ))
-              )}
+              {Object.entries(availableFilters).map(([groupKey, options]) => (
+                <Fragment key={groupKey}>
+                  {options.filter(opt => searchParams.getAll(opt.urlKey).includes(opt.value)).map((opt) => (
+                    <Badge
+                      key={`${groupKey}-${opt.value}`}
+                      variant="secondary"
+                      className="bg-[#FFF5F1] text-black hover:bg-[#FFE4D9] border-none px-3 py-1 rounded-full flex items-center gap-2 cursor-pointer"
+                      onClick={() => toggleFilter(opt.urlKey, opt.value)}
+                    >
+                      <span className="text-xs font-medium">{opt.label.split(" (")[0]}</span>
+                      <XIcon className="size-3" />
+                    </Badge>
+                  ))}
+                </Fragment>
+              ))}
               {Object.entries(availableFilters).some(([groupKey, options]) => 
                 options.some(opt => searchParams.getAll(opt.urlKey).includes(opt.value))
               ) && (

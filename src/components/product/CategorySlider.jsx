@@ -29,7 +29,7 @@ export default function CategorySlider() {
     <section className="w-full py-16 bg-linear-to-b from-[#FEF5F1] to-white overflow-hidden mt-15">
       <div className="max-w-480 mx-auto px-5 md:px-17 min-[1440px]:px-17">
         <div className="text-center mb-10">
-          <h2 className="main-title font-extrabold font-abhaya mb-2">Explore Our Categories</h2>
+          <h2 className="text-3xl md:text-4xl font-extrabold font-abhaya mb-2">Explore Our Categories</h2>
           <p className="text-black text-base italic">Jewelry for life&apos;s most cherished moments.</p>
         </div>
 
