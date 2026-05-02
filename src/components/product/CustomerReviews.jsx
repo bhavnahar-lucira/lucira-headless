@@ -52,6 +52,7 @@ export default function CustomerReviews({
   const [usedFallback, setUsedFallback] = useState(false);
   const [isWriteReviewOpen, setIsWriteReviewOpen] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [visibleCount, setVisibleCount] = useState(12);
 
   useEffect(() => {
     async function initReviews() {
@@ -490,7 +491,7 @@ export default function CustomerReviews({
 
         {/* Reviews Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 lg:gap-10">
-          {filteredAndSortedReviews?.map((review, idx) => (
+          {filteredAndSortedReviews?.slice(0, visibleCount).map((review, idx) => (
             <ReviewCard
               key={review.id || `review-${idx}`}
               review={review}
@@ -498,6 +499,8 @@ export default function CustomerReviews({
             />
           ))}
         </div>
+
+      
 
         {/* Empty State */}
         {!loading && filteredAndSortedReviews.length === 0 && (
