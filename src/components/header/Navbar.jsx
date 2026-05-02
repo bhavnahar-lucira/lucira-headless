@@ -194,7 +194,7 @@ export default function Navbar({ hideTop }) {
                             <p className="text-lg font-semibold">
                               {item.title}
                             </p>
-                            <p className="text-xs mt-1 opacity-90">
+                            <p className="text-xs mt-1 opacity-90 w-[90%]">
                               {item.subtitle || item.description}
                             </p>
                           </div>
