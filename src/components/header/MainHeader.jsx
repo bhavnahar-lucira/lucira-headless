@@ -267,7 +267,7 @@ export default function MainHeader() {
               <input
                 type="text"
                 placeholder=""
-                className="w-full h-[40px] pl-[45px] pr-[10px] py-[8px] rounded-sm bg-[#F9F9F9] text-[16px] font-medium outline-none focus:bg-white focus:ring-1 focus:ring-gray-200 transition-all relative z-20"
+                className="w-full h-[40px] pl-[45px] pr-[10px] py-[8px] rounded-sm bg-[#F9F9F9] text-base font-medium outline-none focus:bg-white focus:ring-1 focus:ring-gray-200 transition-all relative z-20"
                 onFocus={() => setIsFocused(true)}
                 onBlur={() => {
                   setTimeout(() => setIsFocused(false), 200);
@@ -281,7 +281,7 @@ export default function MainHeader() {
               {/* Animated Placeholder Ticker */}
               {!isFocused && !searchQuery && (
                 <div className="absolute inset-0 flex items-center pointer-events-none z-30 overflow-hidden pl-[45px]">
-                  <span className="text-[16px] text-gray-500 font-medium whitespace-nowrap">Search for&nbsp;</span>
+                  <span className="text-base text-gray-500 font-medium whitespace-nowrap">Search for&nbsp;</span>
                   <div className="relative h-full flex items-center overflow-hidden">
                     <AnimatePresence mode="wait">
                       <motion.span
@@ -290,7 +290,7 @@ export default function MainHeader() {
                         animate={{ y: 0, opacity: 1 }}
                         exit={{ y: -20, opacity: 0 }}
                         transition={{ duration: 0.5, ease: "easeInOut" }}
-                        className="text-[16px] text-gray-500 font-medium whitespace-nowrap"
+                        className="text-base text-gray-500 font-medium whitespace-nowrap"
                       >
                         {SEARCH_PLACEHOLDERS[placeholderIndex]}...
                       </motion.span>
@@ -316,7 +316,7 @@ export default function MainHeader() {
         {/* Right Icons */}
         <div className="flex items-center justify-end lg:gap-3 xl:gap-6 text-sm">
 
-           <Link href="/pages/store-locator" className="hidden lg:flex items-center justify-center gap-[6px] cursor-pointer transition-colors hover:text-primary text-[14px] leading-[130%] tracking-normal font-normal text-black">
+           <Link href="/pages/store-locator" className="hidden lg:flex items-center justify-center gap-[6px] cursor-pointer transition-colors hover:text-primary text-sm leading-[130%] tracking-normal font-normal text-black">
             <StoreIcon />
             <span>Find a Store</span>
           </Link>
