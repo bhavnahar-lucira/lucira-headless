@@ -56,44 +56,41 @@ export default function HomeFAQSection() {
   const [openIndex, setOpenIndex] = useState(0);
 
   return (
-    <section className="py-12 md:py-20 bg-[#FAF3EC]/30">
-      <div className="container-main max-w-6xl mx-auto">
+    <section className="py-12 md:py-20 bg-[#FEF5F1]">
+      <div className="container-main max-w-7xl mx-auto">
 
         {/* Header */}
-        <div className="text-center mb-16 space-y-4">
-          <h2 className="text-[18px] md:text-[28px] font-medium text-zinc-900 uppercase tracking-tight font-abhaya">
-            FAQ&apos;S
+        <div className="text-center mb-12 lg:mb-16">
+          <h2 className="text-3xl lg:text-4xl font-extrabold font-abhaya text-zinc-900 mb-3 tracking-tight">
+            Frequently Asked Questions
           </h2>
-          <div className="h-1 w-12 bg-primary mx-auto rounded-full" />
-          <p className="text-[14px] md:text-[18px] text-zinc-500 font-figtree max-w-xl mx-auto">
+          <p className="text-[15px] lg:text-[16px] text-zinc-500 font-figtree max-w-xl mx-auto">
             Everything You Need to Know About Lab Grown Diamonds
           </p>
         </div>
 
         {/* FAQ Items */}
-        <div className="space-y-6">
+        <div className="space-y-4 lg:space-y-6">
           {FAQ_ITEMS.map((item, index) => (
             <div
               key={item.id}
-              className="bg-white rounded-3xl overflow-hidden border border-zinc-100 shadow-sm"
+              className="bg-white rounded-2xl lg:rounded-3xl overflow-hidden border border-zinc-100 shadow-sm"
             >
               <button
                 onClick={() => setOpenIndex(openIndex === index ? null : index)}
-                className="w-full p-2 md:p-4 text-left flex justify-between items-center group"
+                className="w-full p-4 lg:p-6 text-left flex justify-between items-center group transition-all duration-300"
               >
                 <span
-                  className={`text-[14px] md:text-[18px] capitalize tracking-tight font-figtree transition-colors duration-300 ${
-                    openIndex === index ? "text-primary" : "text-zinc-800"
-                  }`}
+                  className={`text-[15px] lg:text-[17px] font-bold font-figtree transition-colors duration-300 pr-8 ${openIndex === index ? "text-primary" : "text-zinc-800"
+                    }`}
                 >
                   {item.question}
                 </span>
                 <div
-                  className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-colors duration-300 ${
-                    openIndex === index
-                      ? "bg-primary text-white"
+                  className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 ${openIndex === index
+                      ? "bg-primary text-white rotate-0"
                       : "bg-zinc-50 text-zinc-400"
-                  }`}
+                    }`}
                 >
                   {openIndex === index ? (
                     <Minus size={16} />
@@ -104,14 +101,13 @@ export default function HomeFAQSection() {
               </button>
 
               <div
-                className={`overflow-hidden transition-all duration-300 ${
-                  openIndex === index
-                    ? "max-h-[800px] opacity-100"
+                className={`overflow-hidden transition-all duration-500 ease-in-out ${openIndex === index
+                    ? "max-h-[1000px] opacity-100"
                     : "max-h-0 opacity-0"
-                }`}
+                  }`}
               >
                 <div
-                  className="p-2 md:p-4 pt-0 text-zinc-500 leading-relaxed text-[14px] md:text-[18px] font-figtree border-t border-zinc-50 pt-8"
+                  className="px-4 lg:px-6 pb-6 pt-0 text-zinc-600 leading-relaxed text-[13px] lg:text-[15px] font-figtree border-t border-zinc-50 pt-6"
                   dangerouslySetInnerHTML={{ __html: item.answer }}
                 />
               </div>

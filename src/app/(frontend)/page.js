@@ -88,14 +88,14 @@ export default function Home() {
       </Suspense>
 
 
+      <Suspense fallback={<div className="h-20 bg-gray-50 animate-pulse"></div>}>
+        <HomeFAQSection />
+      </Suspense>
 
       <Suspense fallback={<div className="h-20 bg-gray-100 animate-pulse"></div>}>
         <JoinLuciraCommunity />
       </Suspense>
 
-      <Suspense fallback={<div className="h-20 bg-gray-50 animate-pulse"></div>}>
-        <HomeFAQSection />
-      </Suspense>
 
     </div>
   );

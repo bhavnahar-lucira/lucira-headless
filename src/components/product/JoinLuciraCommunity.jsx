@@ -16,7 +16,7 @@ export function JoinLuciraCommunity() {
 
   const handleSubscribe = async (e) => {
     if (e) e.preventDefault();
-    
+
     if (!email) {
       toast.error("Please enter your email address");
       return;
@@ -43,7 +43,7 @@ export function JoinLuciraCommunity() {
       if (response.ok && data.success) {
         // GTM tracking
         pushNewsletterSubscription(email);
-        
+
         toast.success(data.message || "Successfully subscribed to our newsletter!");
         setEmail("");
       } else {
@@ -58,9 +58,9 @@ export function JoinLuciraCommunity() {
   };
 
   return (
-    <section className="w-full bg-[#FEF5F1] overflow-hidden mt-12 md:mt-20">
+    <section className="w-full bg-[#FEF5F1] overflow-hidden mt-12 md:mt-0">
       <div className="max-w-480 mx-auto grid lg:grid-cols-2 items-stretch">
-        
+
         {/* Mobile: Top Content | Desktop: Left Side (Images) */}
         {!isMobile && (
           <div className="flex h-full min-h-[400px]">
@@ -90,18 +90,18 @@ export function JoinLuciraCommunity() {
               <h2 className="text-3xl md:text-4xl font-extrabold font-abhaya mb-2 text-black">Join the Lucira Community Today</h2>
               <p className="text-black text-base font-normal">Get early access to jewelry drops, care tips, and exclusive offers, straight to your inbox.</p>
             </div>
-            
+
             <div className="space-y-4">
               <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-3">
-                <Input 
+                <Input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter your email" 
+                  placeholder="Enter your email"
                   className="h-14 bg-white/50 border-primary rounded-lg px-6 text-base placeholder:text-zinc-400 focus-visible:ring-1 focus-visible:ring-zinc-900"
                   disabled={loading}
                 />
-                <Button 
+                <Button
                   type="submit"
                   disabled={loading}
                   className="h-14 w-full md:w-fit px-12 bg-primary hover:accent text-white font-bold text-base uppercase rounded-lg transition-all flex items-center justify-center gap-2"
