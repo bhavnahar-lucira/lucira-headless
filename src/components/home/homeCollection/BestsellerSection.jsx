@@ -38,7 +38,6 @@ export default function BestsellerSection() {
         "Necklaces",
         "Pendants",
         "Mangalsutra",
-        "Men's Stud",
       ]}
       page="home"
       colCat="Shop All Bestsellers"
