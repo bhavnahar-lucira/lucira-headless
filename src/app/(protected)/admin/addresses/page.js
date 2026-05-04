@@ -8,7 +8,6 @@ import {
   Trash2,
   Loader2,
   CheckCircle2,
-  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -21,6 +20,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { toast } from "react-toastify";
+import { cn } from "@/lib/utils";
 import {
   fetchCustomerAddresses,
   deleteCustomerAddress,
@@ -61,6 +61,7 @@ export default function SavedAddressesPage() {
   const [addressForm, setAddressForm] = useState(emptyAddressForm);
   const [makeDefault, setMakeDefault] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [showErrors, setShowErrors] = useState(false);
 
   const loadAddresses = useCallback(async () => {
     try {
@@ -83,6 +84,7 @@ export default function SavedAddressesPage() {
     setEditingAddressId("");
     setAddressForm(emptyAddressForm);
     setMakeDefault(addresses.length === 0);
+    setShowErrors(false);
     setDialogOpen(true);
   };
 
@@ -91,11 +93,13 @@ export default function SavedAddressesPage() {
     setEditingAddressId(address.id);
     setAddressForm(normalizeAddressForm(address));
     setMakeDefault(Boolean(address.isDefault));
+    setShowErrors(false);
     setDialogOpen(true);
   };
 
   const handleSaveAddress = async () => {
-    if (!addressForm.firstName || !addressForm.address1 || !addressForm.city || !addressForm.province || !addressForm.zip || !addressForm.phone) {
+    if (!addressForm.firstName || !addressForm.lastName || !addressForm.address1 || !addressForm.city || !addressForm.province || !addressForm.zip || !addressForm.phone) {
+      setShowErrors(true);
       toast.error("Please fill in all required fields");
       return;
     }
@@ -103,6 +107,7 @@ export default function SavedAddressesPage() {
     // Phone validation: exactly 10 digits
     const phoneRegex = /^[0-9]{10}$/;
     if (!phoneRegex.test(addressForm.phone)) {
+      setShowErrors(true);
       toast.error("Please enter a valid 10-digit phone number");
       return;
     }
@@ -110,6 +115,7 @@ export default function SavedAddressesPage() {
     // ZIP/PIN validation: exactly 6 digits (India)
     const zipRegex = /^[0-9]{6}$/;
     if (!zipRegex.test(addressForm.zip)) {
+      setShowErrors(true);
       toast.error("Please enter a valid 6-digit PIN code");
       return;
     }
@@ -164,7 +170,7 @@ export default function SavedAddressesPage() {
   };
 
   return (
-    <div className="font-figtree space-y-6 md:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="font-figtree space-y-6 md:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 outline-none">
 
       {/* ── Header ── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -318,42 +324,60 @@ export default function SavedAddressesPage() {
                     placeholder="First name *"
                     value={addressForm.firstName}
                     onChange={(e) => setAddressForm({ ...addressForm, firstName: e.target.value })}
-                    className="font-figtree h-12 md:h-14 rounded-2xl border-zinc-100 bg-zinc-50/50 focus:bg-white transition-all font-medium text-sm placeholder:text-zinc-400"
+                    className={cn(
+                      "font-figtree h-12 md:h-14 rounded-2xl border-zinc-100 bg-zinc-50/50 focus:bg-white transition-all font-medium text-sm placeholder:text-zinc-400",
+                      showErrors && !addressForm.firstName && "border-rose-500 bg-rose-50/30"
+                    )}
                   />
-                  {!addressForm.firstName && <p className="text-[10px] text-rose-500 font-bold uppercase tracking-widest ml-4">Required</p>}
+                  {showErrors && !addressForm.firstName && <p className="text-[10px] text-rose-500 font-bold uppercase tracking-widest ml-4 animate-in fade-in slide-in-from-top-1">Required</p>}
                 </div>
-                <Input
-                  placeholder="Last name"
-                  value={addressForm.lastName}
-                  onChange={(e) => setAddressForm({ ...addressForm, lastName: e.target.value })}
-                  className="font-figtree h-12 md:h-14 rounded-2xl border-zinc-100 bg-zinc-50/50 focus:bg-white transition-all font-medium text-sm placeholder:text-zinc-400"
-                />
+                <div className="space-y-1">
+                  <Input
+                    placeholder="Last name *"
+                    value={addressForm.lastName}
+                    onChange={(e) => setAddressForm({ ...addressForm, lastName: e.target.value })}
+                    className={cn(
+                      "font-figtree h-12 md:h-14 rounded-2xl border-zinc-100 bg-zinc-50/50 focus:bg-white transition-all font-medium text-sm placeholder:text-zinc-400",
+                      showErrors && !addressForm.lastName && "border-rose-500 bg-rose-50/30"
+                    )}
+                  />
+                  {showErrors && !addressForm.lastName && <p className="text-[10px] text-rose-500 font-bold uppercase tracking-widest ml-4 animate-in fade-in slide-in-from-top-1">Required</p>}
+                </div>
                 <div className="md:col-span-2 space-y-1">
                   <Input
                     placeholder="Address *"
                     value={addressForm.address1}
                     onChange={(e) => setAddressForm({ ...addressForm, address1: e.target.value })}
-                    className="font-figtree h-12 md:h-14 rounded-2xl border-zinc-100 bg-zinc-50/50 focus:bg-white transition-all font-medium text-sm placeholder:text-zinc-400"
+                    className={cn(
+                      "font-figtree h-12 md:h-14 rounded-2xl border-zinc-100 bg-zinc-50/50 focus:bg-white transition-all font-medium text-sm placeholder:text-zinc-400",
+                      showErrors && !addressForm.address1 && "border-rose-500 bg-rose-50/30"
+                    )}
                   />
-                  {!addressForm.address1 && <p className="text-[10px] text-rose-500 font-bold uppercase tracking-widest ml-4">Required</p>}
+                  {showErrors && !addressForm.address1 && <p className="text-[10px] text-rose-500 font-bold uppercase tracking-widest ml-4 animate-in fade-in slide-in-from-top-1">Required</p>}
                 </div>
                 <div className="space-y-1">
                   <Input
                     placeholder="City *"
                     value={addressForm.city}
                     onChange={(e) => setAddressForm({ ...addressForm, city: e.target.value })}
-                    className="font-figtree h-12 md:h-14 rounded-2xl border-zinc-100 bg-zinc-50/50 focus:bg-white transition-all font-medium text-sm placeholder:text-zinc-400"
+                    className={cn(
+                      "font-figtree h-12 md:h-14 rounded-2xl border-zinc-100 bg-zinc-50/50 focus:bg-white transition-all font-medium text-sm placeholder:text-zinc-400",
+                      showErrors && !addressForm.city && "border-rose-500 bg-rose-50/30"
+                    )}
                   />
-                  {!addressForm.city && <p className="text-[10px] text-rose-500 font-bold uppercase tracking-widest ml-4">Required</p>}
+                  {showErrors && !addressForm.city && <p className="text-[10px] text-rose-500 font-bold uppercase tracking-widest ml-4 animate-in fade-in slide-in-from-top-1">Required</p>}
                 </div>
                 <div className="space-y-1">
                   <Input
                     placeholder="State *"
                     value={addressForm.province}
                     onChange={(e) => setAddressForm({ ...addressForm, province: e.target.value })}
-                    className="font-figtree h-12 md:h-14 rounded-2xl border-zinc-100 bg-zinc-50/50 focus:bg-white transition-all font-medium text-sm placeholder:text-zinc-400"
+                    className={cn(
+                      "font-figtree h-12 md:h-14 rounded-2xl border-zinc-100 bg-zinc-50/50 focus:bg-white transition-all font-medium text-sm placeholder:text-zinc-400",
+                      showErrors && !addressForm.province && "border-rose-500 bg-rose-50/30"
+                    )}
                   />
-                  {!addressForm.province && <p className="text-[10px] text-rose-500 font-bold uppercase tracking-widest ml-4">Required</p>}
+                  {showErrors && !addressForm.province && <p className="text-[10px] text-rose-500 font-bold uppercase tracking-widest ml-4 animate-in fade-in slide-in-from-top-1">Required</p>}
                 </div>
                 <div className="space-y-1">
                   <Input
@@ -363,9 +387,12 @@ export default function SavedAddressesPage() {
                       const val = e.target.value.replace(/\D/g, "").slice(0, 6);
                       setAddressForm({ ...addressForm, zip: val });
                     }}
-                    className="font-figtree h-12 md:h-14 rounded-2xl border-zinc-100 bg-zinc-50/50 focus:bg-white transition-all font-medium text-sm placeholder:text-zinc-400"
+                    className={cn(
+                      "font-figtree h-12 md:h-14 rounded-2xl border-zinc-100 bg-zinc-50/50 focus:bg-white transition-all font-medium text-sm placeholder:text-zinc-400",
+                      showErrors && !addressForm.zip && "border-rose-500 bg-rose-50/30"
+                    )}
                   />
-                  {!addressForm.zip && <p className="text-[10px] text-rose-500 font-bold uppercase tracking-widest ml-4">Required</p>}
+                  {showErrors && !addressForm.zip && <p className="text-[10px] text-rose-500 font-bold uppercase tracking-widest ml-4 animate-in fade-in slide-in-from-top-1">Required</p>}
                 </div>
                 <div className="space-y-1">
                   <Input
@@ -376,9 +403,12 @@ export default function SavedAddressesPage() {
                       const val = e.target.value.replace(/\D/g, "").slice(0, 10);
                       setAddressForm({ ...addressForm, phone: val });
                     }}
-                    className="font-figtree h-12 md:h-14 rounded-2xl border-zinc-100 bg-zinc-50/50 focus:bg-white transition-all font-medium text-sm placeholder:text-zinc-400"
+                    className={cn(
+                      "font-figtree h-12 md:h-14 rounded-2xl border-zinc-100 bg-zinc-50/50 focus:bg-white transition-all font-medium text-sm placeholder:text-zinc-400",
+                      showErrors && !addressForm.phone && "border-rose-500 bg-rose-50/30"
+                    )}
                   />
-                  {!addressForm.phone && <p className="text-[10px] text-rose-500 font-bold uppercase tracking-widest ml-4">Required</p>}
+                  {showErrors && !addressForm.phone && <p className="text-[10px] text-rose-500 font-bold uppercase tracking-widest ml-4 animate-in fade-in slide-in-from-top-1">Required</p>}
                 </div>
               </div>
 
