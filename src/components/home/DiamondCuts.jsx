@@ -33,7 +33,7 @@ export default function DiamondShapes() {
               href={`/collections/${shape.slug}`}
               className="group flex flex-col items-center"
             >
-              <div className="relative w-full aspect-square max-w-30 mb-4">
+              <div className="relative w-full aspect-square max-w-24 mb-4">
                 <Image
                   src={`/images/diamondCuts/${shape.imgId}.png`}
                   alt={`${shape.name} cut diamond shape`}
