@@ -1,7 +1,7 @@
 "use client";
 
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { Navigation, Pagination, FreeMode, Autoplay } from 'swiper/modules';
+import { Navigation, Pagination } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
@@ -48,22 +48,9 @@ export default function CollectionSlider ({ products = [], loading = false }) {
     <>
       <div className="relative">
         <Swiper
-          modules={[Navigation, Pagination, FreeMode, Autoplay]}
+          modules={[Navigation, Pagination]}
           spaceBetween={12}
           slidesPerView={2}
-          grabCursor={true}
-          speed={500}
-          touchRatio={1.5}
-          resistanceRatio={0.7}
-          freeMode={{
-            enabled: true,
-            sticky: true,
-          }}
-          autoplay={{
-            delay: 6000,
-            disableOnInteraction: false,
-            pauseOnMouseEnter: true,
-          }}
           onSlideChange={(swiper) => {
             const progress = (swiper.activeIndex / (swiper.slides.length - swiper.params.slidesPerView)) * 100;
             const bar = document.getElementById(`progress-bar-${id}`);
@@ -76,7 +63,7 @@ export default function CollectionSlider ({ products = [], loading = false }) {
           breakpoints={{
             640: { slidesPerView: 2, spaceBetween: 20 },
             1024: { slidesPerView: 3, spaceBetween: 24 },
-            1280: { slidesPerView: 4, spaceBetween: 30, freeMode: false },
+            1280: { slidesPerView: 4, spaceBetween: 30 },
           }}
           className="w-full overflow-visible!"
         >

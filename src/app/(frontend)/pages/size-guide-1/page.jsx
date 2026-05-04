@@ -108,7 +108,7 @@ export default function SizeGuidePage() {
 
                         <p className="text-[clamp(14px,3vw,16px)] leading-[1.6] font-light text-[#333]">
                         Finding the perfect fit for your jewelry ensures both comfort and
-                        style.&nbsp;
+                        style.
                         <Link
                             href="https://www.lucirajewelry.com/"
                             target="_blank"

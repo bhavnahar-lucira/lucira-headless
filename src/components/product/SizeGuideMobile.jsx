@@ -3,16 +3,8 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { X, Play } from "lucide-react";
+import { X } from "lucide-react";
 import { Sheet } from "react-modal-sheet";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogPortal,
-  DialogOverlay,
-} from "@/components/ui/dialog";
 
 const sizeData = [
   { ind: 5, us: "3", diaIn: 0.56, cirIn: 1.74 },
@@ -33,8 +25,6 @@ const sizeData = [
 export function SizeGuideMobile({ children, nearestStore, availableStores = [], availableStoreCount = 0, deliveryInfo, getStoreDisplayName  }) {
   const [isOpen, setIsOpen] = useState(false);
   const [unit, setUnit] = useState("inch"); // 'inch' or 'cm'
-  const [isVideoOpen, setIsVideoOpen] = useState(false);
-  
 
   const convert = (val) => {
     if (unit === "cm") {
@@ -49,29 +39,6 @@ export function SizeGuideMobile({ children, nearestStore, availableStores = [], 
       <div onClick={() => setIsOpen(true)} className="contents">
         {children}
       </div>
-
-      <Dialog open={isVideoOpen} onOpenChange={setIsVideoOpen}>
-        <DialogPortal>
-          <DialogOverlay className="z-[9999] bg-black/60 backdrop-blur-sm" />
-          <DialogContent 
-            className="z-[10000] sm:max-w-[800px] p-0 overflow-hidden border-none bg-black shadow-2xl"
-          >
-            <DialogHeader className="sr-only">
-              <DialogTitle>Ring Measurement Tutorial</DialogTitle>
-            </DialogHeader>
-            <div className="relative w-full aspect-video bg-black">
-              <video
-                src="https://cdn.shopify.com/videos/c/o/v/b6bd45e165384f7bb50a9598b5986822.mp4"
-                className="w-full h-full"
-                autoPlay
-                muted
-                playsInline
-                controls
-              />
-            </div>
-          </DialogContent>
-        </DialogPortal>
-      </Dialog>
 
       <Sheet 
         isOpen={isOpen} 
@@ -89,44 +56,48 @@ export function SizeGuideMobile({ children, nearestStore, availableStores = [], 
                 </button>
               </div>
 
+              <Link href="https://wa.me/919004435760?text=Hi,%20I%20want%20to%20visit%20the%20store" target="_blank">
+                {availableStoreCount > 0 && nearestStore && (
+                  <div className="space-y-4 pt-2">
+                    <h3 className="text-lg font-bold text-gray-900">Nearest Store</h3>
+
+                    <div className="border border-gray-100 rounded-2xl p-4 bg-gray-50/50 space-y-3">
+                      <div className="flex justify-between items-start">
+                        <div className="space-y-0.5">
+                          <h4 className="font-bold text-base">
+                            {getStoreDisplayName ? getStoreDisplayName(nearestStore.name) : nearestStore.name}
+                          </h4>
+                          {nearestStore.distance !== null && (
+                            <p className="text-sm text-primary font-semibold">
+                              {Math.round(nearestStore.distance)} Km away
+                            </p>
+                          )}
+                        </div>
+                        {nearestStore.isInStock ? (
+                          <div className="bg-[#E3F5E0] text-black px-3 py-1 rounded-full flex items-center gap-1.5">
+                            <div className="w-2 h-2 bg-[#76D168] rounded-full" />
+                            <span className="text-xs font-bold uppercase">In Stock</span>
+                          </div>
+                        ) : (
+                          <div className="bg-amber-50 text-amber-700 px-3 py-1 rounded-full flex items-center gap-1.5 border border-amber-100">
+                            <div className="w-2 h-2 bg-amber-400 rounded-full" />
+                            <span className="text-xs font-bold uppercase">Ships to Store</span>
+                          </div>
+                        )}
+                      </div>
+
+                      <p className="text-sm text-gray-600 font-medium">
+                        {nearestStore.address1 || nearestStore.address}, {nearestStore.city}
+                      </p>
+                      <p className="text-sm text-gray-600 font-medium">
+                        {nearestStore.phone || "+91 91724 99912"}
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </Link>
+
               <div className="flex-1 overflow-y-auto mt-6 space-y-8 custom-scrollbar pr-1">
-                <div 
-                  onClick={() => setIsVideoOpen(true)}
-                  className="bg-[#F8F9FA] rounded-sm flex items-center mb-4 gap-4 px-4 py-2.5 border border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors"
-                >
-                  <div className="relative w-20 h-16 bg-white rounded-lg shadow-sm overflow-hidden flex items-center justify-center shrink-0">
-                    <Image 
-                      src="/images/Sizing_A_ring_thumb.jpg" 
-                      alt="Video Icon" 
-                      fill 
-                      className="object-cover"
-                    />
-                    <Play size={20} fill="white" className="text-white relative z-10" />
-                  </div>
-                  <span className="text-sm text-black font-medium">
-                    Watch this quick video to measure your ring right.
-                  </span>
-                </div>
-                
-                <Link
-                  href="https://wa.me/919004435760?text=Hi,%20I%20want%20to%20book%20an%20appointment"
-                  target="_blank"
-                  className="bg-white rounded-sm mb-4 flex items-center gap-4 p-3 border border-gray-100 shadow-sm"
-                >
-                  <div className="relative w-20 h-20 rounded-lg overflow-hidden shrink-0">
-                    <Image src="/images/store.jpg" alt="Lucira store" fill className="object-cover" />
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="font-bold text-sm text-gray-900">Visit Nearest Lucira Store</h4>
-                    <p className="text-xs text-gray-500 mt-1 leading-relaxed">
-                      Visit Lucira store to get professionally sized.
-                    </p>
-                    <button className="text-[11px] font-bold uppercase tracking-widest text-gray-900 mt-2 border-b border-gray-900 pb-0.5">
-                      BOOK APPOINTMENT
-                    </button>
-                  </div>
-                </Link>
-                
                 {/* Ring Sizer Promo */}
                 <div className="bg-white rounded-2xl flex items-center gap-4 p-4 border border-gray-100 shadow-sm hidden">
                   <div className="relative w-16 h-16 rounded-xl overflow-hidden shrink-0">

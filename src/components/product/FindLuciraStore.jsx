@@ -43,10 +43,10 @@ export function FindLuciraStore({
   const storesToDisplay = availableStores.length > 0 ? availableStores : [];
 
   return (
-    <section className="w-full py-10 bg-gray-50 mt-10">
+    <section className="w-full py-8 bg-gray-50 mt-15">
       <div className="max-w-[1440px] mx-auto px-4 sm:px-6 md:px-17">
         <div className="w-full text-center mb-8 md:mb-12">
-          <h2 className="text-3xl lg:text-4xl font-extrabold font-abhaya mb-2 text-black">
+          <h2 className="text-xl sm:text-2xl md:text-[28px] font-bold mb-4">
             Find in Lucira Store Near You
           </h2>
 
