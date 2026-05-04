@@ -83,6 +83,7 @@ import {
   SheetClose,
 } from "@/components/ui/sheet";
 import StyledByLucira from "../home/StyledByLucira";
+import PdpInfoSheet from "@/components/product/PdpInfoSheet";
 
 import { Sheet as MobileSheet } from "react-modal-sheet";
 
@@ -247,6 +248,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
   const [similarProducts, setSimilarProducts] = useState([]);
   const [loadingSimilar, setLoadingSimilar] = useState(false);
 
+  const [activeInfoSheet, setActiveInfoSheet] = useState(null);
   const [allStores, setAllStores] = useState([]);
   const [availableStores, setAvailableStores] = useState([]);
   const [nearestStore, setNearestStore] = useState(null);
@@ -1795,7 +1797,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                 <div className="bg-[#F9F9F9] rounded-2xl p-5 space-y-4">
                   <div className="flex items-center gap-2 font-bold text-sm uppercase text-gray-700">
                     <Image src="/images/icons/metal.svg" alt="Metal" width={18} height={18} />
-                    Metal <Info size={14} className="text-gray-400 cursor-pointer ml-auto" />
+                    Metal <Info size={14} className="text-gray-400 cursor-pointer ml-auto" onClick={() => setActiveInfoSheet("metal")} />
                   </div>
                   <div className="space-y-2">
                     {activeVariant?.metafields?.metal_purity && (
@@ -1823,7 +1825,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                 <div className="bg-[#F9F9F9] rounded-2xl p-5 space-y-4">
                   <div className="flex items-center gap-2 font-bold text-sm uppercase text-gray-700">
                     <Image src="/images/icons/dimension.svg" alt="Dimensions" width={18} height={18} />
-                    Dimension <Info size={14} className="text-gray-400 cursor-pointer ml-auto" />
+                    Dimension <Info size={14} className="text-gray-400 cursor-pointer ml-auto" onClick={() => setActiveInfoSheet("dimension")} />
                   </div>
                   <div className="space-y-2">
                     {activeVariant?.metafields?.top_height && (
@@ -1852,7 +1854,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                   <div className="bg-[#F9F9F9] rounded-2xl p-5 space-y-4">
                     <div className="flex items-center gap-2 font-bold text-sm uppercase text-gray-700">
                       <Image src="/images/icons/diamond.svg" alt="Diamond" width={18} height={18} />
-                      Diamond <Info size={14} className="text-gray-400 cursor-pointer ml-auto" />
+                      Diamond <Info size={14} className="text-gray-400 cursor-pointer ml-auto" onClick={() => setActiveInfoSheet("diamond")} />
                     </div>
                     <div className="space-y-2.5">
                       {activeVariant.metafields.diamonds[0].quality && (
@@ -1884,7 +1886,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                   <div className="bg-[#F9F9F9] rounded-2xl p-5 space-y-4">
                     <div className="flex items-center gap-2 font-bold text-sm uppercase text-gray-700">
                       <Image src="/images/icons/diamond.svg" alt="Gemstone" width={18} height={18} className="grayscale opacity-70" />
-                      Gemstone <Info size={14} className="text-gray-400 cursor-pointer ml-auto" />
+                      Gemstone <Info size={14} className="text-gray-400 cursor-pointer ml-auto" onClick={() => setActiveInfoSheet("gemstone")} />
                     </div>
                     <div className="space-y-2.5">
                       {activeVariant.metafields.gemstones[0].color && (
@@ -1917,7 +1919,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                 <div className="bg-[#F9F9F9] rounded-2xl p-5 space-y-5">
                   <div className="flex items-center gap-2 font-bold text-sm uppercase text-gray-700">
                     <Image src="/images/icons/diamond.svg" alt="Diamond" width={18} height={18} />
-                    Diamond <Info size={14} className="text-gray-400 cursor-pointer ml-auto" />
+                    Diamond <Info size={14} className="text-gray-400 cursor-pointer ml-auto" onClick={() => setActiveInfoSheet("diamond")} />
                   </div>
                   
                   <div className="flex gap-4 md:gap-6 overflow-x-auto pb-2 scrollbar-hide">
@@ -2228,6 +2230,12 @@ export default function ProductPageClient({ product, complementaryProducts = [],
             </SheetContent>
           </Sheet>
         )}
+
+        <PdpInfoSheet 
+          type={activeInfoSheet} 
+          isOpen={!!activeInfoSheet} 
+          onOpenChange={(open) => !open && setActiveInfoSheet(null)} 
+        />
     </div>
   );
 }
