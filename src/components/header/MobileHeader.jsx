@@ -14,6 +14,7 @@ import { MEGA_MENU as STATIC_MENU } from "@/data/megaMenu";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { pushLogout, pushViewCart } from "@/lib/gtm";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import LuciraLogo from "./LuciraLogo";
 import { AnimatePresence, motion } from "framer-motion";
 import { Sheet as MobileSheet } from "react-modal-sheet";
@@ -121,6 +122,14 @@ const UserIconCustom = () => (
     <path d="M17.3474 16.2092C15.9328 13.7635 13.6651 12.0936 11.0379 11.4916C15.1859 9.79213 15.9387 4.23958 12.3929 1.49701C8.84712 -1.24556 3.66208 0.878761 3.05984 5.3208C2.7035 7.94905 4.16824 10.486 6.62255 11.4916C3.9987 12.091 1.72767 13.7635 0.312981 16.2092C0.190761 16.4429 0.367305 16.7212 0.630763 16.7102C0.742782 16.7055 0.845425 16.6464 0.905569 16.5517C2.57888 13.6564 5.54355 11.9275 8.83021 11.9275C12.1169 11.9275 15.0815 13.6564 16.7548 16.5517C16.816 16.6576 16.9289 16.7229 17.0511 16.723C17.1113 16.7232 17.1705 16.7072 17.2224 16.6768C17.3859 16.5821 17.4418 16.3729 17.3474 16.2092ZM3.69212 6.1043C3.69212 2.149 7.97386 -0.323059 11.3993 1.65459C14.8246 3.63224 14.8246 8.57637 11.3993 10.554C10.6182 11.005 9.73213 11.2424 8.83021 11.2424C5.9939 11.2391 3.69543 8.94062 3.69212 6.1043Z" fill="black" stroke="black" strokeWidth="0.5459"></path>
   </svg>
 );
+
+const getInitials = (name = "") =>
+  name
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .substring(0, 2)
+    .toUpperCase();
 
 export default function MobileHeader() {
   const router = useRouter();
@@ -606,7 +615,7 @@ export default function MobileHeader() {
           </div>
 
           <div className="px-4 space-y-1">
-            <a href="https://wa.me/yournumber" className="flex items-center justify-between p-4 border border-gray-100 rounded-lg group active:bg-gray-50 bg-[#FBF7F2]">
+            <a href="https://api.whatsapp.com/send/?phone=%2B919004435760&text=I+want+to+know+more+about+Lucira+Jewelry" className="flex items-center justify-between p-4 border border-gray-100 rounded-lg group active:bg-gray-50 bg-[#FBF7F2]">
               <div className="flex items-center gap-4">
                 <div className="flex items-center justify-center">
                   <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -747,9 +756,18 @@ export default function MobileHeader() {
                     )}
                   </div>
                   <div className="flex items-center gap-4">
-                    <button onClick={() => { setIsMenuOpen(false); handleAuthTrigger(); }} className="p-1">
-                      <UserIconCustom />
-                    </button>
+                    {user ? (
+                      <Link href="/admin" onClick={() => setIsMenuOpen(false)} className="p-1">
+                        <Avatar className="h-7 w-7 cursor-pointer border border-gray-100 shadow-sm">
+                          {user.avatar && <AvatarImage src={user.avatar} alt={user.name} />}
+                          <AvatarFallback className="bg-[#5a413f] text-white font-bold text-[10px]">{getInitials(user?.name)}</AvatarFallback>
+                        </Avatar>
+                      </Link>
+                    ) : (
+                      <button onClick={() => { setIsMenuOpen(false); handleAuthTrigger(); }} className="p-1">
+                        <UserIconCustom />
+                      </button>
+                    )}
                     <Link href="/checkout/cart" onClick={() => setIsMenuOpen(false)} className="relative p-1">
                       <CartIcon />
                       {totalQuantity > 0 && (
@@ -811,9 +829,18 @@ export default function MobileHeader() {
             </button>
           )}
 
-          <button onClick={handleAuthTrigger} className="p-1">
-            <UserIconCustom />
-          </button>
+          {user ? (
+            <Link href="/admin" className="p-1">
+              <Avatar className="h-7 w-7 cursor-pointer border border-gray-100 shadow-sm">
+                {user.avatar && <AvatarImage src={user.avatar} alt={user.name} />}
+                <AvatarFallback className="bg-[#5a413f] text-white font-bold text-[10px]">{getInitials(user?.name)}</AvatarFallback>
+              </Avatar>
+            </Link>
+          ) : (
+            <button onClick={handleAuthTrigger} className="p-1">
+              <UserIconCustom />
+            </button>
+          )}
           <Link href={user ? "/admin/wishlist" : "#"} onClick={!user ? handleAuthTrigger : undefined} className="relative">
             <HeartIcon />
             {wishlistItems.length > 0 && (

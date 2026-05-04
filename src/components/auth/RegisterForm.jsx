@@ -118,8 +118,17 @@ export function RegisterForm() {
       }
     } catch (err) {}
 
-    await dispatch(mergeCart({ userId })).unwrap();
-    await dispatch(mergeGuestWishlist()).unwrap();
+    try {
+      await dispatch(mergeCart({ userId })).unwrap();
+    } catch (err) {
+      console.error("Cart merge failed:", err);
+    }
+    
+    try {
+      await dispatch(mergeGuestWishlist()).unwrap();
+    } catch (err) {
+      console.error("Wishlist merge failed:", err);
+    }
 
     toast.success("Registration Successful");
   };
