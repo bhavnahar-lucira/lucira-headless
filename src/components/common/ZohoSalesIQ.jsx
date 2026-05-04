@@ -14,7 +14,7 @@ export default function ZohoSalesIQ() {
       if (window.$zoho.salesiq.floatbutton) {
         window.$zoho.salesiq.floatbutton.visible('hide');
       }
-
+      
       if (window.$zoho.salesiq.privacy) {
         window.$zoho.salesiq.privacy.updateCookieConsent([
           'necessary',
