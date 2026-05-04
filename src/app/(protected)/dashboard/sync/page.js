@@ -14,16 +14,25 @@ export default function SyncPage() {
     setError(null);
 
     try {
+      // 1. Sync Pages & Blogs
       const response = await fetch("/api/sync/shopify", {
         method: "POST",
       });
-
       const data = await response.json();
 
-      if (data.success) {
-        setResult(data);
+      // 2. Sync Collections
+      const colResponse = await fetch("/api/sync-collections", {
+        method: "POST",
+      });
+      const colData = await colResponse.json();
+
+      if (data.success && colData.success) {
+        setResult({
+          ...data,
+          collectionsCount: colData.count
+        });
       } else {
-        setError(data.error || "Failed to sync");
+        setError(data.error || colData.error || "Failed to sync");
       }
     } catch (err) {
       setError("An unexpected error occurred");
@@ -38,7 +47,7 @@ export default function SyncPage() {
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">Sync Shopify Data</h1>
         <p className="text-zinc-500">
-          Sync your Shopify pages and blogs to the local database for use in the storefront.
+          Sync your Shopify pages, blogs, and collections to the local database for use in the storefront.
         </p>
       </div>
 
@@ -51,9 +60,9 @@ export default function SyncPage() {
             />
           </div>
 
-          <h2 className="text-xl font-semibold mb-4">Pages & Blogs Sync</h2>
+          <h2 className="text-xl font-semibold mb-4">Storefront Data Sync</h2>
           <p className="text-zinc-500 mb-8 max-w-md">
-            This will fetch all pages, blogs, and articles from your Shopify store
+            This will fetch all pages, blogs, articles, and collections from your Shopify store
             and update the local MongoDB database.
           </p>
 
@@ -66,7 +75,7 @@ export default function SyncPage() {
                 : "bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200"
             }`}
           >
-            {loading ? "Syncing..." : error ? "Retry Sync" : "Start Sync"}
+            {loading ? "Syncing..." : error ? "Retry Sync" : "Start Full Sync"}
           </button>
 
           {result && (
@@ -78,6 +87,7 @@ export default function SyncPage() {
               <ul className="text-left text-sm text-green-600 dark:text-green-500 space-y-1 ml-8">
                 <li>• Synced {result.pagesCount} Pages</li>
                 <li>• Synced {result.blogsCount} Blogs (with articles)</li>
+                <li>• Synced {result.collectionsCount} Collections</li>
               </ul>
             </div>
           )}
