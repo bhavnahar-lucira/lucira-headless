@@ -225,6 +225,14 @@ const serviceSlider = [
 export default function ProductPageClient({ product, complementaryProducts = [], matchingProducts = [] }) {
   const router = useRouter();
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    window.__LUCIRA_PRODUCT__ = product;
+    return () => {
+      delete window.__LUCIRA_PRODUCT__;
+    };
+  }, [product]);
+
   const user = useSelector(selectUser);
   const isMobile = useMediaQuery("(max-width: 1023px)");
   const wishlistItems = useSelector((state) => state.wishlist.items);

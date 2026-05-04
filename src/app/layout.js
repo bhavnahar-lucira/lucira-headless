@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import ReduxProvider from "@/redux/provider";
 import QueryProvider from "@/providers/QueryProvider";
 import BackToTop from "@/components/common/BackToTop";
+import ZohoSalesIQ from "@/components/common/ZohoSalesIQ";
 import ToastProvider from "@/components/common/ToastProvider";
 import PointsResetHandler from "@/components/common/PointsResetHandler";
 import { GlobalAuthModal } from "@/components/auth/GlobalAuthModal";
@@ -35,8 +36,7 @@ export const metadata = {
 };
 
 export default function RootLayout({ children }) {
-  //const isProd = process.env.NODE_ENV === "production";
-    const isProd = true;
+  const isProd = process.env.NODE_ENV === "production";
   return (
     <html lang="en">
       <head>
@@ -69,6 +69,7 @@ export default function RootLayout({ children }) {
               </Suspense>
             )}
             <PointsResetHandler />
+            <ZohoSalesIQ />
             {children}
             <GlobalAuthModal />
             <BackToTop />
