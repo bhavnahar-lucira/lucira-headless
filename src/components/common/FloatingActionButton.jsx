@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
 import "./FloatingActionButton.css";
+import Link from "next/link";
 
 export default function FloatingActionButton() {
   const pathname = usePathname();
@@ -195,10 +196,10 @@ export default function FloatingActionButton() {
   return (
     <div className={`fab-container ${pathname.startsWith('/products') ? 'product-template-page' : ''}`}>
       <div className={`fab-actions ${isFabOpen ? 'is-open' : ''}`} ref={fabActionsRef}>
-        <a href="#" className="fab-btn fab-btn-chat" onClick={handleChatClick} title="Live Chat">
+        <Link href="#" className="fab-btn fab-btn-chat" onClick={handleChatClick} title="Live Chat">
           <img src="https://cdn.shopify.com/s/files/1/0739/8516/3482/files/chat_1.png?v=1772104883" width="20" height="20" alt="Chat" loading="lazy" />
           {unreadCount > 0 && <span className="fab-badge" style={{ display: 'flex' }}>{unreadCount}</span>}
-        </a>
+        </Link>
         <a href="tel:+918976773659" className="fab-btn fab-btn-phone" onClick={handlePhoneClick} title="Call" target="_blank" rel="noopener noreferrer">
           <img src="https://cdn.shopify.com/s/files/1/0739/8516/3482/files/phone-call_1.png?v=1772105479" width={20} height={20} alt="Call" loading="lazy" />
         </a>
