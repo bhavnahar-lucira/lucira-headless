@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, Suspense, useCallback } from "react";
+import { useState, useEffect, useLayoutEffect, useRef, Suspense, useCallback } from "react";
 import Image from "next/image";
 import {
   Breadcrumb,
@@ -762,13 +762,17 @@ export default function ProductPageClient({ product, complementaryProducts = [],
     }
   };
 
-  // Smooth scroll to top on mount/refresh
+  // Scroll to top on mount/refresh
   useEffect(() => {
-    // Small timeout to ensure browser's default scroll restoration is bypassed
-    const timer = setTimeout(() => {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }, 100);
-    return () => clearTimeout(timer);
+    if ('scrollRestoration' in window.history) {
+      window.history.scrollRestoration = 'manual';
+    }
+    window.scrollTo(0, 0);
+    return () => {
+      if ('scrollRestoration' in window.history) {
+        window.history.scrollRestoration = 'auto';
+      }
+    };
   }, []);
 
   // Update active variant when selection changes
@@ -915,9 +919,9 @@ export default function ProductPageClient({ product, complementaryProducts = [],
   // Get current display price from active variant or product
   const currentPrice = activeVariant ? activeVariant.price : product.price;
   const currentComparePrice = activeVariant ? activeVariant.compare_price : product.compare_price;
-  const mounted = useMounted();
+  // const mounted = useMounted();
   const isMobileView = useMediaQuery("(max-width: 1023px)");
-  if (!mounted) return null;
+  // if (!mounted) return null;
 
   const renderEngravingContent = () => (
     <div className="flex-1 overflow-y-auto">

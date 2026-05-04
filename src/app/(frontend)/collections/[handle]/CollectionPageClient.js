@@ -268,7 +268,7 @@ export default function CollectionPage({ params: paramsPromise }) {
   const totalCount = data?.pages?.[0]?.pagination?.total || 0;
 
   const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.scrollTo(0, 0);
   };
 
   const toggleFilter = (urlKey, value) => {

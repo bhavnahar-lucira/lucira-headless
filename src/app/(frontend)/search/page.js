@@ -240,7 +240,7 @@ export default function SearchPage() {
   const reachedEnd = totalCount > 0 && products.length >= totalCount;
 
   const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.scrollTo(0, 0);
   };
 
   const toggleFilter = (urlKey, value) => {
