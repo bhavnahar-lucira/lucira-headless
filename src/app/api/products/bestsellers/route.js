@@ -18,16 +18,16 @@ export async function GET(request) {
     let query = { status: "ACTIVE", isPublished: true };
     
     if (tab === "All") {
-      query.tags = { $regex: /best seller/i };
+      // Primary source: products belonging to the 'bestsellers' collection handle
+      query.collectionHandles = "bestsellers";
     } else {
-      // 1. Specific bestseller collection handle
+      // Specific bestseller sub-collection handle (e.g., bestseller-rings)
       const handle = `bestseller-${tab.toLowerCase()
         .replace(/'/g, "")
         .replace(/[^a-z0-9]+/g, "-")
         .replace(/-$/, "")
         .replace(/^-/, "")}`;
       
-      // 2. Fallback search (Tag: 'best seller' AND category name in tags/type)
       const categoryTerm = tab.toLowerCase().replace(/s$/, ""); // e.g. "Rings" -> "ring"
       
       const categoryFilter = {
@@ -35,7 +35,7 @@ export async function GET(request) {
           { collectionHandles: handle },
           {
             $and: [
-              { tags: { $regex: /best seller/i } },
+              { collectionHandles: "bestsellers" },
               {
                 $or: [
                   { type: { $regex: new RegExp(categoryTerm, "i") } },
@@ -54,6 +54,14 @@ export async function GET(request) {
       .find(query)
       .limit(20)
       .toArray();
+
+    // Fallback: If "All" tab still empty (perhaps handle naming issue), check for tags
+    if (tab === "All" && products.length === 0) {
+      products = await productsCollection
+        .find({ status: "ACTIVE", isPublished: true, tags: { $regex: /best seller/i } })
+        .limit(20)
+        .toArray();
+    }
 
     if (products.length > 0) {
       return NextResponse.json({ 
