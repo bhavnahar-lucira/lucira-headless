@@ -232,7 +232,10 @@ export default function StoreLocatorSection() {
             <div className="relative overflow-hidden rounded-2xl shadow-xl">
               <div className="relative aspect-[4/3.5] w-full">
                 <LazyImage src={activeStore.image} alt={activeStore.name} fill className="object-cover" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/30" />
+                <div 
+                  className="absolute inset-0 pointer-events-none" 
+                  style={{ background: "linear-gradient(180deg, #000000 -25.71%, rgba(0, 0, 0, 0.751968) 3.02%, rgba(0, 0, 0, 0) 18.55%)" }} 
+                />
               </div>
 
               <div className="absolute left-5 right-5 top-5 flex items-start justify-between">
@@ -336,6 +339,10 @@ export default function StoreLocatorSection() {
           <div className="relative overflow-hidden rounded-sm">
             <div className="relative aspect-[4/4.3] w-full h-full">
               <LazyImage src={activeStore.image} alt={activeStore.name} fill className="object-cover" />
+              <div 
+                className="absolute inset-0 pointer-events-none" 
+                style={{ background: "linear-gradient(180deg, #000000 -25.71%, rgba(0, 0, 0, 0.751968) 3.02%, rgba(0, 0, 0, 0) 18.55%)" }} 
+              />
             </div>
 
             <div className="absolute left-4 right-4 top-4 flex items-start justify-between gap-4">

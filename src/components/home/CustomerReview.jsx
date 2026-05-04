@@ -37,8 +37,8 @@ function ReviewCard({ item, onClick, isMobile }) {
             </h3>
 
             {item.verified && (
-              <div className="flex items-center gap-1 text-[10px] text-[#A68966] font-bold uppercase">
-                <BadgeCheck size={14} className="fill-[#A68966] text-white" />
+              <div className="flex items-center gap-1 text-[10px] text-[#B77767] font-bold uppercase">
+                <BadgeCheck size={14} className="fill-[#B77767] text-white" />
                 <span>Verified</span>
               </div>
             )}
@@ -302,8 +302,8 @@ function ReviewBottomSheet({ isOpen, onClose, review }) {
                <div className="flex items-center justify-between gap-3 mb-2">
                   <h3 className="text-lg font-black text-zinc-900">{review.personName}</h3>
                   {review.verified && (
-                    <div className="flex items-center gap-1.5 text-xs text-[#A68966] font-bold uppercase">
-                      <BadgeCheck size={16} className="fill-[#A68966] text-white" />
+                    <div className="flex items-center gap-1.5 text-xs text-[#B77767] font-bold uppercase">
+                      <BadgeCheck size={16} className="fill-[#B77767] text-white" />
                       <span>Verified</span>
                     </div>
                   )}

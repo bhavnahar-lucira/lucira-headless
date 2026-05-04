@@ -34,7 +34,7 @@ export default function NoteFromFounder() {
             {/* Signature Image */}
             <div className="absolute bottom-2 right-6 xl:bottom-12 xl:right-16 opacity-90">
                <LazyImage 
-                src="/images/signature.png" 
+                src="https://cdn.shopify.com/s/files/1/0739/8516/3482/files/image_3146.png" 
                 alt="Rupesh Jain Signature" 
                 width={70} 
                 height={90} 
