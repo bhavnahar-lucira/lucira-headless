@@ -1,0 +1,153 @@
+.fab-container {
+  position: fixed;
+  bottom: 25px;
+  right: 25px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.fab-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 15px;
+  opacity: 0;
+  transform: translateY(20px);
+  pointer-events: none;
+  transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.fab-actions.is-open {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.fab-btn {
+  width: 45px;
+  height: 45px;
+  background: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+  transition: transform 0.2s;
+  position: relative;
+  text-decoration: none;
+}
+
+.fab-btn:hover {
+  transform: scale(1.1);
+}
+
+.fab-btn-chat {
+  background: #2196F3;
+}
+
+.fab-btn-phone {
+  background: #FFC0CB;
+}
+
+.fab-btn-whatsapp {
+  background: #25D366;
+}
+
+.fab-main {
+  width: 56px;
+  height: 56px;
+  background: #5A413F; /* Primary color from globals.css */
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+  cursor: pointer;
+  transition: background 0.3s, transform 0.3s;
+  position: relative;
+  padding: 0;
+  line-height: 0;
+}
+
+.fab-main.is-open {
+  background: #B77767; /* Accent color from globals.css */
+}
+
+.fab-icon-default {
+  display: block;
+  flex-shrink: 0;
+}
+
+.fab-icon-close {
+  display: none;
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+}
+
+.fab-main.is-open .fab-icon-default {
+  display: none;
+}
+
+.fab-main.is-open .fab-icon-close {
+  display: block;
+}
+
+.fab-badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: #F83E50; /* Destructive color from globals.css */
+  color: #fff;
+  font-size: 10px;
+  font-weight: bold;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: none; /* Shown via JS */
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #fff;
+}
+
+.fab-tooltip {
+  position: absolute;
+  right: 70px;
+  bottom: 10px;
+  background: #333;
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+}
+
+.fab-tooltip::after {
+  content: "";
+  position: absolute;
+  right: -6px;
+  top: 50%;
+  transform: translateY(-50%);
+  border-width: 6px 0 6px 6px;
+  border-style: solid;
+  border-color: transparent transparent transparent #333;
+}
+
+.fab-tooltip.show {
+  opacity: 1;
+}
+
+@media only screen and (max-width: 767px) {
+  .fab-container {
+    bottom: 25px;
+  }
+  /* If there's a mobile sticky bar, offset it */
+  .product-template-page .fab-container {
+    bottom: 80px;
+  }
+}
