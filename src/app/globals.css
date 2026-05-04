@@ -284,6 +284,22 @@
   }
 }
 
+/* Hide Native Zoho SalesIQ Float */
+#zsiq_float, #zsiq_float_container {
+  display: none !important;
+}
+
+@keyframes fabTooltipFade {
+  0%   { opacity: 0; transform: translateY(10px); }
+  15%  { opacity: 1; transform: translateY(0); }
+  75%  { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(10px); }
+}
+
+.animate-fab-tooltip {
+  animation: fabTooltipFade 5s ease forwards;
+}
+
 .safe-bottom {
   padding-bottom: env(safe-area-inset-bottom, 0);
 }

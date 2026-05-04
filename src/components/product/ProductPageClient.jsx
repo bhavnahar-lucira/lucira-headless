@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, Suspense, useCallback } from "react";
+import { useState, useEffect, useLayoutEffect, useRef, Suspense, useCallback } from "react";
 import Image from "next/image";
 import {
   Breadcrumb,
@@ -88,6 +88,7 @@ import PdpInfoSheet from "@/components/product/PdpInfoSheet";
 import { Sheet as MobileSheet } from "react-modal-sheet";
 
 import { Lobster, Yellowtail, Satisfy, ABeeZee } from "next/font/google";
+import ExploreRange from "../home/ExploreRange";
 
 const lobster = Lobster({
   subsets: ["latin"],
@@ -225,6 +226,14 @@ const serviceSlider = [
 export default function ProductPageClient({ product, complementaryProducts = [], matchingProducts = [] }) {
   const router = useRouter();
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    window.__LUCIRA_PRODUCT__ = product;
+    return () => {
+      delete window.__LUCIRA_PRODUCT__;
+    };
+  }, [product]);
+
   const user = useSelector(selectUser);
   const isMobile = useMediaQuery("(max-width: 1023px)");
   const wishlistItems = useSelector((state) => state.wishlist.items);
@@ -764,13 +773,17 @@ export default function ProductPageClient({ product, complementaryProducts = [],
     }
   };
 
-  // Smooth scroll to top on mount/refresh
+  // Scroll to top on mount/refresh
   useEffect(() => {
-    // Small timeout to ensure browser's default scroll restoration is bypassed
-    const timer = setTimeout(() => {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }, 100);
-    return () => clearTimeout(timer);
+    if ('scrollRestoration' in window.history) {
+      window.history.scrollRestoration = 'manual';
+    }
+    window.scrollTo(0, 0);
+    return () => {
+      if ('scrollRestoration' in window.history) {
+        window.history.scrollRestoration = 'auto';
+      }
+    };
   }, []);
 
   // Update active variant when selection changes
@@ -917,9 +930,9 @@ export default function ProductPageClient({ product, complementaryProducts = [],
   // Get current display price from active variant or product
   const currentPrice = activeVariant ? activeVariant.price : product.price;
   const currentComparePrice = activeVariant ? activeVariant.compare_price : product.compare_price;
-  const mounted = useMounted();
+  // const mounted = useMounted();
   const isMobileView = useMediaQuery("(max-width: 1023px)");
-  if (!mounted) return null;
+  // if (!mounted) return null;
 
   const renderEngravingContent = () => (
     <div className="flex-1 overflow-y-auto">
@@ -1030,7 +1043,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
       <div className="w-[91%] lg:w-full lg:max-w-480 mx-auto lg:px-17">
         {/* Breadcrumb */}
         <Breadcrumb className="py-5">
-          <BreadcrumbList>
+          <BreadcrumbList className="flex-nowrap">
             <BreadcrumbItem>
               <BreadcrumbLink href="/collections" className="text-sm font-medium text-black">Collections</BreadcrumbLink>
             </BreadcrumbItem>
@@ -1039,7 +1052,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
               <BreadcrumbLink href={`/collections/${slugify(product.type)}`} className="text-sm font-medium text-black">{product.type}</BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator><ChevronRight size={14}/></BreadcrumbSeparator>
-            <BreadcrumbItem className="text-sm font-medium text-gray-400 truncate">
+            <BreadcrumbItem className="text-sm font-medium text-gray-400 truncate line-clamp-1">
               {product.title}
             </BreadcrumbItem>
           </BreadcrumbList>
@@ -1325,36 +1338,38 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                       )}
                     </div>
 
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <div className="bg-[#F8F9FA] rounded-lg flex items-center gap-4 px-4 py-2.5 border border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors">
-                          <div className="bg-white rounded-lg shadow-sm">
-                            <Image src="/images/Sizing_A_ring_thumb.jpg" alt="Video Icon" aspect-ratio="3/4" width={60} height={25} />
-                            {/* <Video size={16} fill="black" /> */}
+                    {String(product.type || "").toLowerCase().includes("ring") && (
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <div className="bg-[#F8F9FA] rounded-lg flex items-center gap-4 px-4 py-2.5 border border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors">
+                            <div className="bg-white rounded-lg shadow-sm">
+                              <Image src="/images/Sizing_A_ring_thumb.jpg" alt="Video Icon" aspect-ratio="3/4" width={60} height={25} />
+                              {/* <Video size={16} fill="black" /> */}
+                            </div>
+                            <span className="text-base text-black">
+                              Watch this quick video to measure your ring right.
+                            </span>
                           </div>
-                          <span className="text-base text-black">
-                            Watch this quick video to measure your ring right.
-                          </span>
-                        </div>
-                      </DialogTrigger>
+                        </DialogTrigger>
 
-                      <DialogContent className="sm:max-w-[800px] p-0 overflow-hidden border-none bg-transparent shadow-none">
-                        <DialogHeader className="sr-only">
-                          <DialogTitle>Ring Measurement Tutorial</DialogTitle>
-                        </DialogHeader>
-                        
-                        <div className="relative w-full aspect-video bg-black rounded-lg overflow-hidden">
-                          <video 
-                            src="https://cdn.shopify.com/videos/c/o/v/b6bd45e165384f7bb50a9598b5986822.mp4"
-                            className="w-full h-full"
-                            autoPlay
-                            muted
-                            playsInline
-                            controls
-                          />
-                        </div>
-                      </DialogContent>
-                    </Dialog>
+                        <DialogContent className="sm:max-w-[800px] p-0 overflow-hidden border-none bg-transparent shadow-none">
+                          <DialogHeader className="sr-only">
+                            <DialogTitle>Ring Measurement Tutorial</DialogTitle>
+                          </DialogHeader>
+                          
+                          <div className="relative w-full aspect-video bg-black rounded-lg overflow-hidden">
+                            <video 
+                              src="https://cdn.shopify.com/videos/c/o/v/b6bd45e165384f7bb50a9598b5986822.mp4"
+                              className="w-full h-full"
+                              autoPlay
+                              muted
+                              playsInline
+                              controls
+                            />
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+                    )}
 
                     <div className="grid grid-cols-7 gap-4">
                       {availableSizes.map(sizeStr => {
@@ -1719,8 +1734,8 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                   {serviceSlider.map((item, i) => (
                     <SwiperSlide key={`promo-${i}`}>
                       <div className="bg-[#F9F9F9] border border-gray-100 rounded-xl p-5 flex items-center gap-5 h-full">
-                        <div className="relative w-18 h-18 rounded-lg overflow-hidden shadow-sm shrink-0">
-                          <Image src={item.img} alt="Complimentary gold coin" fill className="object-cover" />
+                        <div className="relative w-18 h-18 rounded-lg overflow-hidden shrink-0">
+                          <Image src={item.img} alt={item.title} fill className="object-cover" />
                         </div>
                         <div className="space-y-2">
                           <p className="text-lg font-semibold italic leading-tight">{item.title}</p>
@@ -2054,8 +2069,8 @@ export default function ProductPageClient({ product, complementaryProducts = [],
         preservePriceOnColorChange={true}
       />
       {!isGoldCoin && <DiamondComparison/>}      
-      <ExploreOtherRings />
-      <CategorySlider />      
+      {/* <ExploreOtherRings /> */}
+      {isMobile ? (<ExploreRange />) : (<CategorySlider /> )}
       <FindLuciraStore 
         pincode={pincode}
         setPincode={setPincode}

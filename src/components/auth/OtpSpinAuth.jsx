@@ -182,8 +182,17 @@ export function OtpSpinAuth({
       }
     } catch (err) {}
 
-    await dispatch(mergeCart({ userId })).unwrap();
-    await dispatch(mergeGuestWishlist()).unwrap();
+    try {
+      await dispatch(mergeCart({ userId })).unwrap();
+    } catch (err) {
+      console.error("Cart merge failed:", err);
+    }
+    
+    try {
+      await dispatch(mergeGuestWishlist()).unwrap();
+    } catch (err) {
+      console.error("Wishlist merge failed:", err);
+    }
 
     if (!skipRedirect) {
       toast.success("Login Successful");
@@ -433,16 +442,16 @@ export function OtpSpinAuth({
 
         {step === "login" && (
           <>
-            <p className="mb-2 text-center text-xl leading-tight font-medium text-black uppercase mx-auto mt-0">{overrideHeading || "WELCOME TO LUCIRA"}</p>
-            <p className="text-base font-medium text-[#5B5B5B] text-center mb-3 tracking-wider leading-relaxed capitalize max-w-[100%] mx-auto">{overrideSubtext || "Welcome To The Jewelry World Of Lucira!"}</p>
+            <p className="mb-2 text-center text-lg md:text-xl leading-tight font-medium text-black uppercase mx-auto mt-0">{overrideHeading || "WELCOME TO LUCIRA"}</p>
+            <p className="text-sm md:text-base font-medium text-[#5B5B5B] text-center mb-3 tracking-wider leading-relaxed capitalize max-w-[100%] mx-auto">{overrideSubtext || "Welcome To The Jewelry World Of Lucira!"}</p>
             <div className="flex items-center border border-[#e2e2e2] h-[45px] px-4 rounded-sm bg-white">
-              <span className="text-base font-normal mr-2.5 pr-3 border-r border-[#d0d0d0]">+91</span>
+              <span className="text-sm md:text-base font-normal mr-2.5 pr-3 border-r border-[#d0d0d0]">+91</span>
               <input
                 ref={mobileRef}
                 type="tel"
                 placeholder="Enter Phone Number"
                 maxLength="10"
-                className="w-full h-full text-base border-none outline-none font-normal bg-transparent tracking-[0.3px]"
+                className="w-full h-full text-sm md:text-base border-none outline-none font-normal bg-transparent tracking-[0.3px]"
                 value={mobile}
                 onChange={(e) => setMobile(e.target.value.replace(/\D/g, ""))}
               />
@@ -461,20 +470,20 @@ export function OtpSpinAuth({
               </label>
             </div>
             <button 
-              className="text-white h-[45px] w-full font-normal text-base cursor-pointer transition-opacity uppercase tracking-[0.3px] border-none mt-3 bg-[#b55670] rounded-lg disabled:opacity-50" 
+              className="text-white h-[45px] w-full font-normal text-sm md:text-base cursor-pointer transition-opacity uppercase tracking-[0.3px] border-none mt-3 bg-[#b55670] rounded-lg disabled:opacity-50" 
               onClick={handleSendOtp} 
               disabled={loading}
             >
               {loading ? "SENDING..." : "REQUEST OTP"}
             </button>
-            <div className="flex items-center justify-center gap-2 text-base text-black mt-3">
+            <div className="flex items-center justify-center gap-2 text-sm md:text-base text-black mt-3">
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" className="shrink-0">
                 <path d="M16.6668 10.8333C16.6668 15 13.7502 17.0833 10.2835 18.2916C10.102 18.3531 9.90478 18.3502 9.72516 18.2833C6.25016 17.0833 3.3335 15 3.3335 10.8333V4.99997C3.3335 4.77895 3.42129 4.56699 3.57757 4.41071C3.73385 4.25443 3.94582 4.16663 4.16683 4.16663C5.8335 4.16663 7.91683 3.16663 9.36683 1.89997C9.54337 1.74913 9.76796 1.66626 10.0002 1.66626C10.2324 1.66626 10.4569 1.74913 10.6335 1.89997C12.0918 3.17497 14.1668 4.16663 15.8335 4.16663C16.0545 4.16663 16.2665 4.25443 16.4228 4.41071C16.579 4.56699 16.6668 4.77895 16.6668 4.99997V10.8333Z" stroke="#008000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"></path>
                 <path d="M7.5 9.99992L9.16667 11.6666L12.5 8.33325" stroke="#008000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"></path>
               </svg>
               <span>100% Secured & Spam Free</span>
             </div>
-            <p className="text-center text-base mt-2.5 text-[#5B5B5B]">
+            <p className="text-center text-sm md:text-base mt-2.5 text-[#5B5B5B]">
               New user? <span className="cursor-pointer font-bold underline text-[#5a413f]" onClick={() => handleStepChange("register")}>Register</span>
             </p>
           </>
@@ -482,8 +491,8 @@ export function OtpSpinAuth({
 
         {step === "otp" && (
           <>
-            <p className="mb-2 text-center text-xl leading-tight font-medium text-black uppercase mx-auto mt-0">{overrideHeading || "VERIFY OTP"}</p>
-            <p className="text-base font-medium text-[#5B5B5B] text-center mb-5 tracking-wider leading-relaxed capitalize max-w-[100%] mx-auto">{overrideSubtext || `Sent to +91 ${mobile}`}</p>
+            <p className="mb-2 text-center text-lg md:text-xl leading-tight font-medium text-black uppercase mx-auto mt-0">{overrideHeading || "VERIFY OTP"}</p>
+            <p className="text-sm md:text-base font-medium text-[#5B5B5B] text-center mb-5 tracking-wider leading-relaxed capitalize max-w-[100%] mx-auto">{overrideSubtext || `Sent to +91 ${mobile}`}</p>
             <div className="flex justify-center gap-2 mt-2 mb-2">
               {otp.map((digit, i) => (
                 <input
@@ -493,7 +502,7 @@ export function OtpSpinAuth({
                   inputMode="numeric"
                   autoComplete={i === 0 ? "one-time-code" : "off"}
                   maxLength="1"
-                  className="w-[20%] h-[50px] text-center text-lg border rounded-md border-[#ddd] focus:border-black outline-none font-extrabold"
+                  className="w-[20%] h-[50px] text-center text-base md:text-lg border rounded-md border-[#ddd] focus:border-black outline-none font-extrabold"
                   value={digit}
                   onChange={(e) => handleOtpChange(i, e.target.value)}
                   onKeyDown={(e) => handleKeyDown(i, e)}
@@ -501,13 +510,13 @@ export function OtpSpinAuth({
               ))}
             </div>
             <button 
-              className="text-white h-[45px] w-full font-normal text-base cursor-pointer transition-opacity uppercase tracking-[0.3px] border-none mt-3 bg-[#b55670] rounded-lg disabled:opacity-50" 
+              className="text-white h-[45px] w-full font-normal text-sm md:text-base cursor-pointer transition-opacity uppercase tracking-[0.3px] border-none mt-3 bg-[#b55670] rounded-lg disabled:opacity-50" 
               onClick={() => handleVerifyOtp()} 
               disabled={loading}
             >
               {loading ? "VERIFYING..." : "VERIFY OTP"}
             </button>
-            <p className="text-center mt-2.5 text-base text-[#5B5B5B]">
+            <p className="text-center mt-2.5 text-sm md:text-base text-[#5B5B5B]">
               {timer > 0 ? (
                 `Resend OTP in 00:${timer < 10 ? `0${timer}` : timer}`
               ) : (
@@ -521,49 +530,49 @@ export function OtpSpinAuth({
 
         {step === "register" && (
           <div className="overflow-hidden">
-            <p className="mb-2 text-center text-xl leading-tight font-medium text-black uppercase mx-auto mt-0">Register to Win a Reward</p>
-            <p className="text-base font-medium text-[#5B5B5B] text-center mb-3 tracking-wider leading-relaxed capitalize max-w-[100%] mx-auto">Try Your Luck! Win a Diamond Pendant</p>
+            <p className="mb-2 text-center text-lg md:text-xl leading-tight font-medium text-black uppercase mx-auto mt-0">Register to Win a Reward</p>
+            <p className="text-sm md:text-base font-medium text-[#5B5B5B] text-center mb-3 tracking-wider leading-relaxed capitalize max-w-[100%] mx-auto">Try Your Luck! Win a Diamond Pendant</p>
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-3.5 mb-2">
                 <div className="flex flex-col">
-                  <label className="text-base flex mb-1.5 font-normal text-[#666]">First Name <span className="text-red-500 ml-1">*</span></label>
+                  <label className="text-sm md:text-base flex mb-1.5 font-normal text-[#666]">First Name <span className="text-red-500 ml-1">*</span></label>
                   <input
                     ref={firstNameRef}
                     type="text"
-                    className="w-full h-10 px-4 text-base border border-[#e2e2e2] rounded-sm outline-none bg-white"
+                    className="w-full h-10 px-4 text-sm md:text-base border border-[#e2e2e2] rounded-sm outline-none bg-white"
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
                   />
                 </div>
                 <div className="flex flex-col">
-                  <label className="text-base flex mb-1.5 font-normal text-[#666]">Last Name <span className="text-red-500 ml-1">*</span></label>
+                  <label className="text-sm md:text-base flex mb-1.5 font-normal text-[#666]">Last Name <span className="text-red-500 ml-1">*</span></label>
                   <input
                     type="text"
-                    className="w-full h-10 px-4 text-base border border-[#e2e2e2] rounded-sm outline-none bg-white"
+                    className="w-full h-10 px-4 text-sm md:text-base border border-[#e2e2e2] rounded-sm outline-none bg-white"
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
                   />
                 </div>
               </div>
               <div className="flex flex-col mb-2">
-                <label className="text-base flex mb-1.5 font-normal text-[#666]">Email Address <span className="text-red-500 ml-1">*</span></label>
+                <label className="text-sm md:text-base flex mb-1.5 font-normal text-[#666]">Email Address <span className="text-red-500 ml-1">*</span></label>
                 <input
                   type="email"
-                  className="w-full h-10 px-4 text-base border border-[#e2e2e2] rounded-lg outline-none bg-white rounded-sm"
+                  className="w-full h-10 px-4 text-sm md:text-base border border-[#e2e2e2] rounded-lg outline-none bg-white rounded-sm"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                 />
               </div>
 
               <div className="flex flex-col">
-                <label className="text-base flex mb-1.5 font-normal text-[#666]">Phone Number</label>
+                <label className="text-sm md:text-base flex mb-1.5 font-normal text-[#666]">Phone Number</label>
                 <div className="flex items-center border border-[#e2e2e2] h-[45px] px-4 rounded-sm bg-white">
-                  <span className="text-base font-normal mr-2.5 pr-3 border-r border-[#d0d0d0]">+91</span>
+                  <span className="text-sm md:text-base font-normal mr-2.5 pr-3 border-r border-[#d0d0d0]">+91</span>
                   <input
                     type="tel"
                     placeholder="Enter Phone Number"
                     maxLength="10"
-                    className="w-full h-full text-base border-none outline-none font-normal bg-transparent tracking-[0.3px]"
+                    className="w-full h-full text-sm md:text-base border-none outline-none font-normal bg-transparent tracking-[0.3px]"
                     value={mobile}
                     onChange={(e) => setMobile(e.target.value.replace(/\D/g, ""))}
                   />
@@ -585,7 +594,7 @@ export function OtpSpinAuth({
               </div>
 
               <button
-                className="text-white h-[45px] w-full font-normal text-base cursor-pointer transition-opacity uppercase tracking-[0.3px] border-none mt-0 bg-[#b55670] rounded-lg disabled:opacity-50"
+                className="text-white h-[45px] w-full font-normal text-sm md:text-base cursor-pointer transition-opacity uppercase tracking-[0.3px] border-none mt-0 bg-[#b55670] rounded-lg disabled:opacity-50"
                 onClick={handleSpinAndRegister}
                 disabled={isSpinning || loading}
               >
@@ -598,18 +607,18 @@ export function OtpSpinAuth({
         {step === "success" && (
           <div className="text-center">
             <div className="text-4xl mb-4 text-center">🎉</div>
-            <p className="mb-2 text-center text-xl leading-tight font-medium text-black uppercase mx-auto mt-0 max-w-[245px]">Your Account has been created Successfully</p>
+            <p className="mb-2 text-center text-lg md:text-xl leading-tight font-medium text-black uppercase mx-auto mt-0 max-w-[245px]">Your Account has been created Successfully</p>
             <p className="text-xs font-medium text-[#5B5B5B] text-center mb-3 tracking-wider leading-relaxed capitalize max-w-[280px] mx-auto mt-3">
               Your reward is ready, Apply this on checkout
             </p>
             <div className="flex items-center justify-between gap-2 mx-auto my-3 p-2 pl-5 rounded-lg border border-dashed border-green-600 bg-green-50 max-w-[205px] font-semibold text-black">
-              <span className="text-base">{COUPON_MAP[wonPrize?.value] || "LUCIRA10"}</span>
+              <span className="text-sm md:text-base">{COUPON_MAP[wonPrize?.value] || "LUCIRA10"}</span>
               <button className="border-none bg-transparent cursor-pointer text-lg p-1" onClick={copyCoupon}>
                 📋
               </button>
             </div>
             <button 
-              className="text-white h-[45px] w-full font-normal text-base cursor-pointer transition-opacity uppercase tracking-[0.3px] border-none mt-4 bg-[#b55670] rounded-lg" 
+              className="text-white h-[45px] w-full font-normal text-sm md:text-base cursor-pointer transition-opacity uppercase tracking-[0.3px] border-none mt-4 bg-[#b55670] rounded-lg" 
               onClick={() => {
                 const target = redirectTargetRef.current || localStorage.getItem("auth_redirect_path") || pathname || "/";
                 localStorage.removeItem("auth_redirect_path");
@@ -624,7 +633,7 @@ export function OtpSpinAuth({
         )}
 
         {step === "register" && (
-          <p className="text-center text-base mt-2.5 text-[#5B5B5B] mb-1">
+          <p className="text-center text-sm md:text-base mt-2.5 text-[#5B5B5B] mb-1">
             Already have an account?{" "}
             <span
               className="cursor-pointer font-bold underline text-[#5a413f]"

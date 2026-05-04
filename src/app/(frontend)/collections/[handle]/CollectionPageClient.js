@@ -21,6 +21,12 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { pushProductImpression, formatGtmPrice } from "@/lib/gtm";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
@@ -128,7 +134,7 @@ export default function CollectionPage({ params: paramsPromise }) {
     return count;
   }, [availableFilters, searchParams]);
 
-  // 1. Fetch Collection Metadata
+  // 1. Fetch Collection Metadata from Shopify (Existing)
   const { data: collection } = useQuery({
     queryKey: ["collection-metadata", handle],
     queryFn: async () => {
@@ -140,6 +146,17 @@ export default function CollectionPage({ params: paramsPromise }) {
       };
     },
     initialData: { title: "", description: "" }
+  });
+
+  // 2. Fetch Synced Collection Data from MongoDB (SEO & FAQ)
+  const { data: dbCollection } = useQuery({
+    queryKey: ["db-collection", handle],
+    queryFn: async () => {
+      const res = await fetch(`/api/collection/metadata?handle=${handle}`);
+      const data = await res.json();
+      return data.success ? data.collection : null;
+    },
+    enabled: !!handle
   });
 
   // 3. Infinite Query for Products
@@ -194,7 +211,6 @@ export default function CollectionPage({ params: paramsPromise }) {
 
   const products = useMemo(() => {
     const allProducts = data?.pages.flatMap((page) => page?.products || []) || [];
-    // Deduplicate by shopifyId or id to prevent "duplicate key" errors
     const uniqueMap = new Map();
     allProducts.forEach(p => {
       if (!p) return;
@@ -220,7 +236,6 @@ export default function CollectionPage({ params: paramsPromise }) {
       });
 
       if (newProducts.length > 0) {
-        // Helper to extract numeric ID from Shopify GID
         const getNumericId = (gid) => {
           if (!gid) return 0;
           if (typeof gid === 'number') return gid;
@@ -251,10 +266,9 @@ export default function CollectionPage({ params: paramsPromise }) {
   }, [products, handle]);
 
   const totalCount = data?.pages?.[0]?.pagination?.total || 0;
-  const reachedEnd = products.length >= totalCount && totalCount > 0;
 
   const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.scrollTo(0, 0);
   };
 
   const toggleFilter = (urlKey, value) => {
@@ -340,13 +354,6 @@ export default function CollectionPage({ params: paramsPromise }) {
       });
     });
 
-    // Add skeletons at the end if we are fetching the next page
-    // if (isFetchingNextPage) {
-    //   for (let i = 0; i < 4; i++) {
-    //     items.push(<ProductCardSkeleton key={`skeleton-next-${i}`} />);
-    //   }
-    // }
-
     if (isFetchingNextPage) {
       items.push(
         <Fragment key="next-page-skeletons">
@@ -367,12 +374,62 @@ export default function CollectionPage({ params: paramsPromise }) {
     return items;
   };
 
+  // Helper to render Shopify Rich Text JSON
+  const renderShopifyRichText = (jsonString) => {
+    if (!jsonString) return null;
+    try {
+      const data = typeof jsonString === "string" ? JSON.parse(jsonString) : jsonString;
+      if (!data.children) return jsonString;
+
+      return data.children.map((node, i) => {
+        const renderChildren = (children) => 
+          children?.map((child, j) => {
+            if (child.type === "text") {
+              return <span key={j} className={child.bold ? "font-bold" : ""}>{child.value}</span>;
+            }
+            if (child.type === "link") {
+              return <a key={j} href={child.url} className="underline text-blue-600" target="_blank" rel="noopener noreferrer">{renderChildren(child.children)}</a>;
+            }
+            return null;
+          });
+
+        switch (node.type) {
+          case "heading":
+            const HeadingTag = `h${node.level || 2}`;
+            return (
+              <HeadingTag key={i} className="text-xl md:text-2xl font-bold mt-8 mb-4 text-gray-900 uppercase tracking-wider">
+                {renderChildren(node.children)}
+              </HeadingTag>
+            );
+          case "paragraph":
+            return (
+              <p key={i} className="mb-2 text-gray-600 leading-relaxed text-left">
+                {renderChildren(node.children)}
+              </p>
+            );
+          case "list":
+            const ListTag = node.listType === "ordered" ? "ol" : "ul";
+            return (
+              <ListTag key={i} className={`mb-2 text-left space-y-2 ${node.listType === "ordered" ? "list-decimal pl-6" : "list-disc pl-6 text-gray-600"}`}>
+                {node.children.map((item, k) => (
+                  <li key={k}>{renderChildren(item.children)}</li>
+                ))}
+              </ListTag>
+            );
+          default:
+            return null;
+        }
+      });
+    } catch (e) {
+      console.warn("Failed to parse rich text:", e);
+      return jsonString;
+    }
+  };
+
   const displayTitle = isMobile 
     ? (handle === "all" ? "All Products" : handle.split("-").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" "))
     : (collection.title || (handle === "all" ? "All Products" : handle.replace(/-/g, " ")));
 
-  // Show full skeleton ONLY on the very first load of the page
-  // After that, we keep the existing data visible while re-fetching
   const isInitialLoading = productsLoading && products.length === 0;
   const showInitialSkeleton = isInitialLoading || (initialPage > 1 && products.length < (initialPage - 1) * limit);
 
@@ -381,7 +438,6 @@ export default function CollectionPage({ params: paramsPromise }) {
       {/* Hero Section */}
       {isMobile ? (
         <div className="w-full">
-          {/* Mobile Breadcrumb */}
           <div className="container-main mx-auto pt-2 px-4 py-3">
             <Breadcrumb>
               <BreadcrumbList className="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400">
@@ -401,8 +457,7 @@ export default function CollectionPage({ params: paramsPromise }) {
               </BreadcrumbList>
             </Breadcrumb>
           </div>
-          {/* Mobile Banner */}
-          <div className="w-full relative h-[160px]">
+          <div className="w-full relative h-40">
             <Image 
               src="/images/collection/category-banner.jpg" 
               alt={displayTitle}
@@ -415,7 +470,6 @@ export default function CollectionPage({ params: paramsPromise }) {
       ) : (
         <div className="bg-[#FFF5F1] overflow-hidden">
           <div className="container-main flex flex-col md:flex-row items-center">
-            {/* Left Content */}
             <div className="flex-1">
               <h1 className="text-3xl md:text-4xl font-serif font-bold mb-4 capitalize">
                 {displayTitle}
@@ -423,8 +477,6 @@ export default function CollectionPage({ params: paramsPromise }) {
               <p className="text-gray-700 text-sm md:text-base mb-8 max-w-xl">
                 {collection.description || "Find the perfect piece for your special moment."}
               </p>
-              
-              {/* Features */}
               <div className="flex flex-wrap gap-6 text-xs md:text-sm font-medium">
                 <div className="flex items-center gap-2">
                   <Image src="https://cdn.shopify.com/s/files/1/0739/8516/3482/files/Group_f573cba5-716e-47c9-baeb-8303cf3ba2e8.png" alt="Shipping" width={20} height={20} className="md:w-6" />
@@ -440,8 +492,6 @@ export default function CollectionPage({ params: paramsPromise }) {
                 </div>
               </div>
             </div>
-
-            {/* Right Image */}
             <div className="flex-1 relative w-full h-57.5">
               <Image 
                 src="/images/category-banner.jpg" 
@@ -449,25 +499,6 @@ export default function CollectionPage({ params: paramsPromise }) {
                 fill
                 className="object-cover"
               />
-              {/* Badges Overlay */}
-              <div className="absolute top-1/2 -translate-y-1/2 right-6 flex-col gap-6 hidden">
-                <div className="bg-white p-2 pt-5 rounded-xl shadow-md text-center relative">
-                  <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                    <Image src="/images/icons/diamond.svg" alt="Diamond" width={28} height={28} className="brightness-0" />
-                  </div>
-                  <div className="text-xs font-semibold">Flat</div>
-                  <div className="font-bold text-base">20% OFF</div>
-                  <div className="text-[10px] font-semibold whitespace-nowrap">On Diamond Prices</div>
-                </div>
-                <div className="bg-white p-2 pt-5 rounded-xl shadow-md text-center relative">
-                  <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                    <Hammer size={28} className="text-black" strokeWidth={1.5} />
-                  </div>
-                  <div className="text-xs font-semibold">Up To</div>
-                  <div className="font-bold text-base">100% OFF</div>
-                  <div className="text-[10px] font-semibold whitespace-nowrap">On Making Charges</div>
-                </div>
-              </div>
             </div>
           </div>
         </div>
@@ -549,7 +580,6 @@ export default function CollectionPage({ params: paramsPromise }) {
 
         {/* ================= PRODUCTS SECTION ================= */}
         <div className="flex-1">
-          {/* Toolbar */}
           <div className={`flex gap-4 items-center justify-between sticky top-0 bg-white z-20 ${isMobile ? "py-5 border-b border-gray-50 px-4" : "py-4"}`}>
             <div className={isMobile ? "flex items-baseline gap-2.5" : "flex gap-3 items-center"}>
               {isMobile ? (
@@ -570,7 +600,6 @@ export default function CollectionPage({ params: paramsPromise }) {
 
             {!isMobile && (
               <div className="flex items-center gap-4">
-                {/* Sort Dropdown */}
                 <div className="flex items-center gap-2">
                   <span className="text-sm text-gray-600">Sort:</span>
                   <select 
@@ -589,7 +618,6 @@ export default function CollectionPage({ params: paramsPromise }) {
             )}
           </div>
 
-          {/* Applied Filters Badges */}
           {!isMobile && (
             <div className="flex flex-wrap items-center gap-2 mb-4">
               {Object.entries(availableFilters).map(([groupKey, options]) => (
@@ -610,7 +638,6 @@ export default function CollectionPage({ params: paramsPromise }) {
               {Object.entries(availableFilters).some(([groupKey, options]) => 
                 options.some(opt => searchParams.getAll(opt.urlKey).includes(opt.value))
               ) && (
-
                 <button 
                   onClick={clearAllFilters}
                   className="text-sm text-gray-400 hover:text-black font-medium ml-2"
@@ -621,9 +648,8 @@ export default function CollectionPage({ params: paramsPromise }) {
             </div>
           )}
 
-          {/* Products Grid */}
           {showInitialSkeleton ? (
-            <div className={`grid gap-6 mt-4 ${isMobile ? "grid-cols-2 gap-4 px-2" : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"}`}>
+            <div className={`grid gap-6 mt-4 ${isMobile ? "grid-cols-2 gap-4 px-2" : "grid-cols-1 sm:grid-cols-2 2xl:grid-cols-4 lg:grid-cols-3"}`}>
               {Array.from({ length: initialPage > 1 ? initialPage * limit : 6 }).map((_, i) => (
                 <ProductCardSkeleton key={i} />
               ))}
@@ -633,17 +659,8 @@ export default function CollectionPage({ params: paramsPromise }) {
               <div className={`grid mt-4 ${isMobile ? "grid-cols-2 gap-4 px-2" : "grid-cols-1 sm:grid-cols-2 2xl:grid-cols-4 lg:grid-cols-3 gap-6"}`}>
                 {renderGridItems()}
               </div>
-
-              {/* Load More Trigger */}
-              <div 
-                ref={loadMoreRef} 
-                className="w-full flex justify-center items-center py-10"
-              >
-                {isFetchingNextPage ? (
-                  null // Skeletons are already rendered in grid via renderGridItems
-                ) : hasNextPage ? (
-                  <div className="h-10" /> 
-                ) : (
+              <div ref={loadMoreRef} className="w-full flex justify-center items-center py-10">
+                {!hasNextPage && totalCount > 0 && (
                   <p className="text-gray-400 text-xs font-bold uppercase tracking-widest">
                     You've reached the end
                   </p>
@@ -658,20 +675,97 @@ export default function CollectionPage({ params: paramsPromise }) {
         </div>
       </div>
 
-      {/* Sticky Mobile Filter Bar */}
+      {/* SEO & FAQ Content from MongoDB */}
+      {(dbCollection?.metafields?.["custom.seocontent"] || 
+        dbCollection?.metafields?.["custom.seo_content"] || 
+        dbCollection?.metafields?.["custom.faqquestion"] || 
+        dbCollection?.metafields?.["custom.faq_section"]) && (
+        <div className="seo-content container-main py-12 md:py-20 border-t border-gray-100">
+          <div className="w-full px-2 lg:px-6">
+            
+            {/* FAQ Section (Show First) */}
+            {(dbCollection.metafields["custom.faqquestion"] || dbCollection.metafields["custom.faq_section"]) && (
+              <div className="mb-16">
+                <h2 className="text-lg lg:text-2xl font-bold mb-5 text-left text-gray-900 uppercase tracking-widest">
+                  FAQ
+                </h2>
+                <div className="w-full">
+                  {(() => {
+                    let questions = [];
+                    let answers = [];
+
+                    try {
+                      const rawQ = dbCollection.metafields["custom.faqquestion"];
+                      const rawA = dbCollection.metafields["custom.faqanswers"];
+
+                      if (rawQ?.startsWith("[")) {
+                        questions = JSON.parse(rawQ);
+                      } else {
+                        questions = (rawQ || "").split("•").filter(Boolean);
+                      }
+
+                      if (rawA?.startsWith("[")) {
+                        answers = JSON.parse(rawA);
+                      } else {
+                        answers = (rawA || "").split("•").filter(Boolean);
+                      }
+                    } catch (e) {
+                      console.error("FAQ parse error:", e);
+                    }
+                    
+                    if (questions.length > 0) {
+                      return (
+                        <Accordion type="single" collapsible className="w-full">
+                          {questions.map((q, idx) => (
+                            <AccordionItem key={idx} value={`item-${idx}`} className="border-b border-gray-200">
+                              <AccordionTrigger className="text-base lg:text-lg font-medium text-gray-900 hover:no-underline py-4">
+                                {q.trim()}
+                              </AccordionTrigger>
+                              {answers[idx] && (
+                                <AccordionContent className="text-gray-600 leading-relaxed pb-6">
+                                  {answers[idx].trim()}
+                                </AccordionContent>
+                              )}
+                            </AccordionItem>
+                          ))}
+                        </Accordion>
+                      );
+                    }
+                    
+                    if (dbCollection.metafields["custom.faq_section"]) {
+                      return (
+                        <div className="bg-gray-50 p-6 rounded-xl border border-gray-200">
+                          <div className="text-gray-600 text-sm leading-relaxed">
+                            {dbCollection.metafields["custom.faq_section"]}
+                          </div>
+                        </div>
+                      );
+                    }
+                    return null;
+                  })()}
+                </div>
+              </div>
+            )}
+
+            {/* SEO Section (Show Second) */}
+            {(dbCollection.metafields["custom.seocontent"] || dbCollection.metafields["custom.seo_content"]) && (
+              <div className="prose prose-sm md:prose-base max-w-none">
+                <div className="text-gray-600 leading-loose">
+                  {renderShopifyRichText(dbCollection.metafields["custom.seocontent"] || dbCollection.metafields["custom.seo_content"])}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Sticky Mobile Filter Bar & Sheets */}
       {isMobile && (
         <div className="fixed bottom-0 left-0 right-0 z-10 bg-primary text-white flex justify-around items-center py-4 border-t border-white/10 px-4 gap-2">          
-          <button 
-            onClick={() => setIsSortSheetOpen(true)}
-            className="flex-1 flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-wider border-r border-white/20"
-          >
+          <button onClick={() => setIsSortSheetOpen(true)} className="flex-1 flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-wider border-r border-white/20">
             <ArrowUpDown size={16} /> Sort
           </button>
-
-          <button 
-            onClick={() => setIsFilterSheetOpen(true)}
-            className="flex-1 flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-wider"
-          >
+          <button onClick={() => setIsFilterSheetOpen(true)} className="flex-1 flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-wider">
             <SlidersHorizontal size={16} /> Filter 
             {activeFilterCount > 0 && (
               <span className="bg-[#FF69B4] text-white text-[10px] min-w-4 h-4 rounded-full flex items-center justify-center px-1">
@@ -683,34 +777,19 @@ export default function CollectionPage({ params: paramsPromise }) {
       )}
 
       {/* Sort Sheet */}
-      <Sheet 
-        isOpen={isSortSheetOpen} 
-        onClose={() => setIsSortSheetOpen(false)}
-        snapPoints={[0, 1]}
-        initialSnap={1}
-      >
+      <Sheet isOpen={isSortSheetOpen} onClose={() => setIsSortSheetOpen(false)} snapPoints={[0, 1]} initialSnap={1}>
         <Sheet.Container className="!rounded-t-[24px] !h-auto max-h-[60vh] bottom-0">
           <Sheet.Header className="hidden" />
           <Sheet.Content className="bg-white">
             <div className="flex flex-col">
               <div className="flex items-center gap-4 p-4 border-b border-gray-100">
-                <button onClick={() => setIsSortSheetOpen(false)} className="p-1">
-                  <X size={20} className="text-black" />
-                </button>
+                <button onClick={() => setIsSortSheetOpen(false)} className="p-1"><X size={20} className="text-black" /></button>
                 <h3 className="text-sm font-bold uppercase tracking-widest">Sort By</h3>
               </div>
               <div className="p-4 space-y-2 overflow-y-auto pb-10">
                 {SORT_OPTIONS.map((opt) => (
-                  <button
-                    key={opt.value}
-                    onClick={() => {
-                      handleSort(opt.value);
-                      setIsSortSheetOpen(false);
-                    }}
-                    className={`w-full text-left py-4 px-4 rounded-lg transition-colors flex justify-between items-center ${
-                      activeSort === opt.value ? "bg-[#FFF5F1] text-black font-bold" : "hover:bg-gray-50 text-gray-700"
-                    }`}
-                  >
+                  <button key={opt.value} onClick={() => { handleSort(opt.value); setIsSortSheetOpen(false); }}
+                    className={`w-full text-left py-4 px-4 rounded-lg transition-colors flex justify-between items-center ${activeSort === opt.value ? "bg-[#FFF5F1] text-black font-bold" : "hover:bg-gray-50 text-gray-700"}`}>
                     {opt.label}
                     {activeSort === opt.value && <div className="w-2 h-2 rounded-full bg-[#35255F]" />}
                   </button>
@@ -723,75 +802,38 @@ export default function CollectionPage({ params: paramsPromise }) {
       </Sheet>
 
       {/* Filter Sheet */}
-      <Sheet 
-        isOpen={isFilterSheetOpen} 
-        onClose={() => setIsFilterSheetOpen(false)}
-        snapPoints={[0, 1]}
-        initialSnap={1}
-      >
+      <Sheet isOpen={isFilterSheetOpen} onClose={() => setIsFilterSheetOpen(false)} snapPoints={[0, 1]} initialSnap={1}>
         <Sheet.Container className="!rounded-t-none">
           <Sheet.Header className="hidden" />
           <Sheet.Content className="bg-white">
             <div className="flex flex-col h-full">
               <div className="flex items-center gap-4 p-4 border-b border-gray-100">
-                <button onClick={() => setIsFilterSheetOpen(false)} className="p-1">
-                  <X size={20} className="text-black" />
-                </button>
+                <button onClick={() => setIsFilterSheetOpen(false)} className="p-1"><X size={20} className="text-black" /></button>
                 <h3 className="text-sm font-bold uppercase tracking-widest">Filters</h3>
               </div>
-              
               <div className="flex-1 flex overflow-hidden">
-                {/* Left Column: Groups */}
                 <div className="w-[45%] bg-[#F8F7FF] border-r border-gray-100 overflow-y-auto">
                   {Object.entries(availableFilters).map(([groupKey]) => {
-                    const count = availableFilters[groupKey].filter(opt => 
-                      searchParams.getAll(opt.urlKey).includes(opt.value)
-                    ).length;
-                    
+                    const count = availableFilters[groupKey].filter(opt => searchParams.getAll(opt.urlKey).includes(opt.value)).length;
                     return (
-                      <button
-                        key={groupKey}
-                        onClick={() => setActiveMobileGroup(groupKey)}
-                        className={`w-full text-left px-4 py-5 text-[11px] font-figtree font-bold uppercase tracking-tight border-b border-gray-100 relative leading-tight ${
-                          activeMobileGroup === groupKey ? "bg-white text-primary" : "text-gray-500"
-                        }`}
-                      >
+                      <button key={groupKey} onClick={() => setActiveMobileGroup(groupKey)}
+                        className={`w-full text-left px-4 py-5 text-[11px] font-figtree font-bold uppercase tracking-tight border-b border-gray-100 relative leading-tight ${activeMobileGroup === groupKey ? "bg-white text-primary" : "text-gray-500"}`}>
                         {groupKey}
-                        {count > 0 && (
-                          <span className="absolute right-2 top-1/2 -translate-y-1/2 bg-[#35255F] text-white text-[9px] w-5 h-5 rounded-md flex items-center justify-center font-bold">
-                            {count}
-                          </span>
-                        )}
+                        {count > 0 && <span className="absolute right-2 top-1/2 -translate-y-1/2 bg-[#35255F] text-white text-[9px] w-5 h-5 rounded-md flex items-center justify-center font-bold">{count}</span>}
                       </button>
                     );
                   })}
                 </div>
-
-                {/* Right Column: Options */}
                 <div className="w-[55%] bg-white overflow-y-auto p-4">
                   {activeMobileGroup && availableFilters[activeMobileGroup] && (
                     <div className="space-y-6 pb-20">
                       {availableFilters[activeMobileGroup].map((option) => {
                         const isSelected = searchParams.getAll(option.urlKey).includes(option.value);
                         return (
-                          <div 
-                            key={option.value} 
-                            className="flex items-center justify-between py-1 cursor-pointer group"
-                            onClick={() => toggleFilter(option.urlKey, option.value)}
-                          >
+                          <div key={option.value} className="flex items-center justify-between py-1 cursor-pointer group" onClick={() => toggleFilter(option.urlKey, option.value)}>
                             <div className="flex items-center gap-3">
-                              {isSelected ? (
-                                <div className="w-4 h-4 bg-[#8A70FF] rounded flex items-center justify-center">
-                                  <svg width="10" height="8" viewBox="0 0 10 8" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M1 4L4 7L9 1" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                  </svg>
-                                </div>
-                              ) : (
-                                <div className="w-4 h-4 border border-gray-300 rounded group-hover:border-[#8A70FF]" />
-                              )}
-                              <span className={`text-[13px] ${isSelected ? "text-black font-semibold" : "text-gray-600"}`}>
-                                {option.label}
-                              </span>
+                              {isSelected ? <div className="w-4 h-4 bg-[#8A70FF] rounded flex items-center justify-center"><svg width="10" height="8" viewBox="0 0 10 8" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 4L4 7L9 1" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg></div> : <div className="w-4 h-4 border border-gray-300 rounded group-hover:border-[#8A70FF]" />}
+                              <span className={`text-[13px] ${isSelected ? "text-black font-semibold" : "text-gray-600"}`}>{option.label}</span>
                             </div>
                             <span className="text-[11px] text-gray-400">({option.count})</span>
                           </div>
@@ -801,20 +843,9 @@ export default function CollectionPage({ params: paramsPromise }) {
                   )}
                 </div>
               </div>
-
               <div className="grid grid-cols-2 border-t border-gray-300 bg-white shadow-[0_-4px_10px_rgba(0,0,0,0.05)]">
-                <button 
-                  onClick={clearAllFilters}
-                  className="py-4 px-2 text-[11px] font-black bg-accent text-white font-figtree uppercase tracking-[0.1em]"
-                >
-                  Clear All
-                </button>
-                <button 
-                  onClick={() => setIsFilterSheetOpen(false)}
-                  className="py-4 px-2 text-[11px] font-black bg-primary text-white font-figtree uppercase tracking-[0.1em]"
-                >
-                  APPLY FILTERS
-                </button>
+                <button onClick={clearAllFilters} className="py-4 px-2 text-[11px] font-black bg-accent text-white font-figtree uppercase tracking-[0.1em]">Clear All</button>
+                <button onClick={() => setIsFilterSheetOpen(false)} className="py-4 px-2 text-[11px] font-black bg-primary text-white font-figtree uppercase tracking-[0.1em]">APPLY FILTERS</button>
               </div>
             </div>
           </Sheet.Content>
