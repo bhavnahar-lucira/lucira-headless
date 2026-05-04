@@ -120,7 +120,7 @@ export default function PopularSearches() {
   return (
     <div className="w-full bg-white py-12 lg:py-16">
       <div className="container-main">
-        <h2 className="font-abhaya text-[18px] lg:text-[28px] font-bold text-primary mb-8 lg:mb-12">
+        <h2 className="font-abhaya text-[18px] lg:text-[28px] font-bold text-primary mb-8 lg:mb-8">
           Popular Searches
         </h2>
 
@@ -128,7 +128,7 @@ export default function PopularSearches() {
           <Accordion type="single" collapsible defaultValue="item-0" className="w-full">
             {SEARCH_DATA.map((section, idx) => (
               <AccordionItem key={idx} value={`item-${idx}`} className="border-b border-gray-200">
-                <AccordionTrigger className="font-abhaya text-lg font-bold py-4 hover:no-underline text-primary">
+                <AccordionTrigger className="font-abhaya text-[14px] font-bold py-4 hover:no-underline text-primary">
                   {section.title}
                 </AccordionTrigger>
                 <AccordionContent>
@@ -152,10 +152,10 @@ export default function PopularSearches() {
             ))}
           </Accordion>
         ) : (
-          <div className="flex flex-col gap-8 lg:gap-10">
+          <div className="flex flex-col gap-6 lg:gap-8">
             {SEARCH_DATA.map((section, idx) => (
               <div key={idx} className="search-section">
-                <h3 className="font-abhaya text-[18px] lg:text-[22px] font-bold text-primary mb-3">
+                <h3 className="font-abhaya text-[16px] font-bold text-primary mb-2">
                   {section.title}
                 </h3>
                 <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
@@ -163,12 +163,12 @@ export default function PopularSearches() {
                     <React.Fragment key={lIdx}>
                       <Link
                         href={link.href}
-                        className="font-figtree text-[16px] lg:text-[18px] text-gray-600 hover:text-primary transition-colors leading-normal"
+                        className="font-figtree text-[14px] text-gray-600 hover:text-primary transition-colors leading-normal"
                       >
                         {link.label}
                       </Link>
                       {lIdx < section.links.length - 1 && (
-                        <span className="text-gray-300">|</span>
+                        <span className="text-gray-300 text-[12px]">|</span>
                       )}
                     </React.Fragment>
                   ))}
