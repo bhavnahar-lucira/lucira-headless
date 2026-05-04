@@ -126,7 +126,7 @@ export default function CustomerDashboard() {
                 </div>
                 <div className="text-right">
                   <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">{stat.title}</p>
-                  <h3 className="text-2xl font-bold text-primary">{stat.value}</h3>
+                  <h3 className="text-xl md:text-2xl font-bold text-primary">{stat.value}</h3>
                 </div>
               </div>
               <p className="text-base font-bold text-primary flex items-center gap-1 cursor-pointer hover:underline">
@@ -169,7 +169,7 @@ export default function CustomerDashboard() {
                     />
                   </div>
                   <div className="flex-1 space-y-1 text-center md:text-left">
-                    <div className="flex flex-col md:flex-row md:items-center gap-2 mb-1">
+                    <div className="flex flex-col md:flex-row items-center md:items-start gap-2 mb-1">
                       <span className="text-xs font-bold text-primary uppercase tracking-widest px-2 py-0.5 bg-primary/5 rounded-full">
                         #{order.orderNumber}
                       </span>

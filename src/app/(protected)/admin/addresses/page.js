@@ -148,10 +148,10 @@ export default function SavedAddressesPage() {
       {/* ── Header ── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="font-figtree text-2xl md:text-3xl font-bold text-zinc-900 tracking-tight mb-1">
+          <h2 className="font-figtree text-xl md:text-2xl font-bold text-zinc-900 tracking-tight mb-1">
             Saved Addresses
           </h2>
-          <p className="font-figtree text-sm md:text-base text-zinc-500 font-normal leading-relaxed">
+          <p className="font-figtree text-sm md:text-base text-zinc-500 font-medium leading-relaxed">
             Manage your shipping and billing locations for faster checkout.
           </p>
         </div>

@@ -641,8 +641,8 @@ export default function EarnRewardsPage() {
       {/* Page header */}
       <div className="flex flex-wrap items-start justify-between gap-4 mb-6">
         <div>
-          <h2 className="font-figtree text-2xl md:text-3xl font-bold text-zinc-900 tracking-tight mb-1">Earn Rewards</h2>
-          <p className="text-[#666] text-sm mt-1">Complete your profile to earn Lucira Coins and unlock exclusive benefits.</p>
+          <h2 className="font-figtree text-xl md:text-2xl font-bold text-zinc-900 tracking-tight mb-1">Earn Rewards</h2>
+          <p className="text-[#666] text-sm md:text-base font-medium mt-1">Complete your profile to earn Lucira Coins and unlock exclusive benefits.</p>
         </div>
 
         {/* Lucira Coins badge */}
