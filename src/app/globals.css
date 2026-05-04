@@ -284,11 +284,6 @@
   }
 }
 
-/* Hide Native Zoho SalesIQ Float */
-#zsiq_float, #zsiq_float_container {
-  display: none !important;
-}
-
 @keyframes fabTooltipFade {
   0%   { opacity: 0; transform: translateY(10px); }
   15%  { opacity: 1; transform: translateY(0); }
@@ -543,6 +538,11 @@
 }
 
 .franchise-hero-enhanced__image img { @apply rounded;}
+
+img.marquee-img {max-width: 110px;
+    height: 50px;
+    object-fit: contain;
+    transition: filter 0.3s ease;}
 
 @keyframes scaleIn {
   from { transform: scale(0); }

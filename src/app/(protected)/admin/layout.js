@@ -135,7 +135,7 @@ export default function CustomerDashboardLayout({ children }) {
 
         {/* Mobile menu bar */}
         <div className="lg:hidden bg-white border-b border-zinc-200 px-6 py-4 flex items-center justify-between sticky top-[50px] z-20">
-          <span className="font-bold text-zinc-900">Account Menu</span>
+          <span className="text-sm font-bold text-zinc-900">Account Menu</span>
           <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
             <SheetTrigger asChild>
               <button className="p-2 -mr-2 text-zinc-500 hover:bg-zinc-50 rounded-xl outline-none focus:outline-none focus-visible:outline-none">

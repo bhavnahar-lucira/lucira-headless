@@ -219,8 +219,8 @@ export default function WishlistPage() {
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="font-figtree text-2xl md:text-3xl font-bold text-zinc-900 tracking-tight mb-1">My Wishlist</h2>
-          <p className="text-zinc-500 font-medium">Save your favorite pieces and return to them later.</p>
+          <h2 className="font-figtree text-xl md:text-2xl font-bold text-zinc-900 tracking-tight mb-1">My Wishlist</h2>
+          <p className="font-figtree text-sm md:text-base text-zinc-500 font-medium leading-relaxed">Save your favorite pieces and return to them later.</p>
         </div>
         <button
           onClick={loadWishlist}
@@ -294,7 +294,7 @@ export default function WishlistPage() {
                 {/* Product Info */}
                 <div className="flex flex-col gap-3 px-1">
                   <Link href={`/products/${item.productHandle || item.productId}`}>
-                    <h3 className="text-xl font-bold hover:underline underline-offset-4 decoration-1 leading-snug hover:text-gray-700 transition-colors line-clamp-2 min-h-7">
+                    <h3 className="text-base md:text-xl font-bold hover:underline underline-offset-4 decoration-1 leading-snug hover:text-gray-700 transition-colors line-clamp-2 min-h-7">
                       {item.title}
                     </h3>
                   </Link>

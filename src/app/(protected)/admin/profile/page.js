@@ -106,6 +106,18 @@ export default function MyProfilePage() {
   };
 
   const handleSaveChanges = async () => {
+    if (!formData.firstName || !formData.phone) {
+      toast.error("First name and phone are required");
+      return;
+    }
+
+    // Phone validation: exactly 10 digits
+    const phoneRegex = /^[0-9]{10}$/;
+    if (!phoneRegex.test(formData.phone)) {
+      toast.error("Please enter a valid 10-digit phone number");
+      return;
+    }
+
     try {
       setIsSaving(true);
       const res = await fetch("/api/customer/profile", {
@@ -143,7 +155,9 @@ export default function MyProfilePage() {
       });
       if (res.ok) {
         const result = await res.json();
-        setProfileImage(result.url);
+        // Add cache buster to URL
+        const imageUrl = result.url + (result.url.includes("?") ? "&" : "?") + "t=" + Date.now();
+        setProfileImage(imageUrl);
         toast.success("Profile image updated");
         // Notify layout/header to refresh avatar
         window.dispatchEvent(new Event("profile-updated"));
@@ -160,7 +174,7 @@ export default function MyProfilePage() {
 
   if (loading) {
     return (
-      <div className="font-figtree flex flex-col items-center justify-center min-h-[60vh] space-y-4 bg-white rounded-[2rem] md:rounded-[3rem] border border-zinc-100">
+      <div className="font-figtree flex flex-col items-center justify-center min-h-[60vh] space-y-4 bg-white rounded-[2rem] border border-zinc-100">
         <Loader2 className="size-8 md:size-10 animate-spin text-primary" />
         <p className="font-figtree text-zinc-400 font-semibold uppercase tracking-[0.13em] text-xs">
           Loading your profile...
@@ -170,15 +184,15 @@ export default function MyProfilePage() {
   }
 
   return (
-    <div className="font-figtree space-y-6 md:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 [&_*]:outline-none [&_*]:focus:outline-none [&_*]:focus-visible:outline-none">
+    <div className="font-figtree space-y-6 md:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
 
       {/* ── Header ── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="font-figtree text-2xl md:text-3xl font-bold text-zinc-900 tracking-tight mb-1">
+          <h2 className="font-figtree text-xl md:text-2xl font-bold text-zinc-900 tracking-tight mb-1">
             My Profile
           </h2>
-          <p className="font-figtree text-sm md:text-base text-zinc-500 font-normal leading-relaxed">
+          <p className="font-figtree text-sm md:text-base text-zinc-500 font-medium leading-relaxed">
             Update your personal details and account preferences.
           </p>
         </div>
@@ -196,11 +210,11 @@ export default function MyProfilePage() {
         </button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8 items-start">
 
         {/* ── Left: Personal Info ── */}
         <div className="lg:col-span-2 space-y-6 md:space-y-8">
-          <div className="bg-white rounded-[2rem] md:rounded-[4px] border border-zinc-100 p-6 md:p-8 lg:p-10 space-y-6 md:space-y-8 shadow-sm">
+          <div className="bg-white rounded-[2rem] border border-zinc-100 p-6 md:p-8 lg:p-10 space-y-6 md:space-y-8 shadow-sm">
 
             {/* Section header */}
             <div className="flex items-center gap-3 md:gap-4 border-b border-zinc-100 pb-5 md:pb-6">
@@ -223,7 +237,7 @@ export default function MyProfilePage() {
               {/* First Name */}
               <div className="space-y-2">
                 <label className="font-figtree text-xs font-bold text-zinc-400 uppercase tracking-widest ml-1">
-                  First Name
+                  First Name *
                 </label>
                 <Input
                   value={formData.firstName}
@@ -262,22 +276,24 @@ export default function MyProfilePage() {
                 </div>
               </div>
 
-              {/* Phone */}
+              {/* Phone — disabled */}
               <div className="space-y-2">
                 <label className="font-figtree text-xs font-bold text-zinc-400 uppercase tracking-widest ml-1">
                   Phone Number
                 </label>
                 <div className="relative">
                   <Input
+                    type="tel"
                     value={formData.phone}
-                    onChange={(e) => handleInputChange("phone", e.target.value)}
-                    className="font-figtree h-12 md:h-14 rounded-2xl border-zinc-100 bg-zinc-50/50 focus:bg-white transition-all font-bold text-zinc-900 pl-11 md:pl-12 text-base"
+                    disabled
+                    className="font-figtree h-12 md:h-14 rounded-2xl border-zinc-100 bg-zinc-50/50 font-bold text-zinc-400 pl-11 md:pl-12 cursor-not-allowed text-base"
                   />
                   <Phone
                     className="absolute left-3.5 md:left-4 top-1/2 -translate-y-1/2 text-zinc-300"
                     size={17}
                   />
                 </div>
+                <p className="text-[10px] text-zinc-400 font-medium ml-1">To change your phone number, please contact support.</p>
               </div>
 
             </div>
@@ -286,19 +302,19 @@ export default function MyProfilePage() {
 
         {/* ── Right: Avatar Card ── */}
         <div className="space-y-6 md:space-y-8">
-          <div className="bg-white rounded-[2rem] md:rounded-[4px] border border-zinc-100 p-6 md:p-8 text-center space-y-5 md:space-y-6 shadow-sm">
+          <div className="bg-white rounded-[2rem] border border-zinc-100 p-6 md:p-8 text-center space-y-5 md:space-y-6 shadow-sm">
 
             {/* Avatar */}
             <div className="relative size-28 md:size-32 mx-auto">
               <div
-                className={`size-28 md:size-32 rounded-[2rem] md:rounded-[4px] flex items-center justify-center overflow-hidden relative shadow-md transition-all ${
+                className={`size-28 md:size-32 rounded-[2rem] flex items-center justify-center overflow-hidden relative shadow-md transition-all ${
                   profileImage
                     ? "bg-zinc-50 border-2 border-dashed border-zinc-200"
                     : getAvatarColor(formData.firstName)
                 }`}
               >
                 {profileImage ? (
-                  <Image src={profileImage} alt="Profile" fill className="object-cover" />
+                  <Image src={profileImage} alt="Profile" fill className="object-cover" unoptimized />
                 ) : (
                   <span className="font-figtree text-[3rem] md:text-[3.5rem] font-bold text-white/95 uppercase drop-shadow-sm">
                     {formData.firstName?.[0] || ""}
@@ -333,11 +349,11 @@ export default function MyProfilePage() {
             </div>
 
             {/* Name */}
-            <div>
-              <h4 className="font-figtree text-lg md:text-xl font-semibold text-zinc-900">
+            <div className="overflow-hidden">
+              <h4 className="font-figtree text-lg md:text-xl font-semibold text-zinc-900 truncate px-2">
                 {formData.firstName} {formData.lastName}
               </h4>
-              <p className="font-figtree text-xs text-zinc-400 font-normal mt-0.5">
+              <p className="font-figtree text-xs text-zinc-400 font-normal mt-0.5 truncate px-2">
                 {formData.email}
               </p>
             </div>

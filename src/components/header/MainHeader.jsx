@@ -352,7 +352,7 @@ export default function MainHeader() {
             >
               <HeartIcon />
               {wishlistItems.length > 0 && (
-                <span className="absolute -top-1 -right-1 bg-rose-500 text-white text-[10px] font-bold w-4.5 h-4.5 rounded-full flex items-center justify-center border-2 border-white shadow-sm">
+                <span className="absolute -top-1 -right-1 bg-[#5a413f] text-white text-[10px] font-bold w-4.5 h-4.5 rounded-full flex items-center justify-center">
                   {wishlistItems.length}
                 </span>
               )}
@@ -365,7 +365,7 @@ export default function MainHeader() {
             >
             <CartIcon />
             {totalQuantity > 0 && (
-              <span className="absolute -top-1 -right-1 bg-primary text-white text-[10px] font-bold w-4.5 h-4.5 rounded-full flex items-center justify-center border-2 border-white shadow-sm">
+              <span className="absolute -top-1 -right-1 bg-[#5a413f] text-white text-[10px] font-bold w-4.5 h-4.5 rounded-full flex items-center justify-center">
                 {totalQuantity}
               </span>
             )}

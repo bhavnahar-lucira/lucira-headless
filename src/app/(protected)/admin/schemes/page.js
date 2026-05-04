@@ -87,7 +87,7 @@ function SchemeDetail({ scheme, onBack, enrollUrl }) {
           <ArrowLeft size={18} />
         </button>
         <div>
-          <h3 className="text-xl font-black text-zinc-900">{displayName}</h3>
+          <h3 className="text-lg md:text-xl font-bold text-zinc-900 tracking-tight">{displayName}</h3>
           <p className="text-xs text-zinc-400 font-medium mt-0.5">Monthly payment history</p>
         </div>
       </div>
@@ -254,7 +254,7 @@ function EmptySchemes({ enrollUrl }) {
         <TicketPercent size={40} className="text-primary/40" />
       </div>
       <div className="space-y-2">
-        <h3 className="text-2xl font-black text-zinc-900">No Enrolled Schemes</h3>
+        <h3 className="text-xl md:text-2xl font-bold text-zinc-900 tracking-tight">No Enrolled Schemes</h3>
         <p className="text-zinc-500 font-medium max-w-sm mx-auto">
           You haven't enrolled in any savings scheme yet. Start your jewelry savings journey today!
         </p>
@@ -346,8 +346,8 @@ export default function SchemesPage() {
     return (
       <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
         <div>
-          <h2 className="text-3xl font-black text-zinc-900 tracking-tight mb-1">My Schemes</h2>
-          <p className="text-zinc-500 font-medium">View and manage your jewelry savings schemes.</p>
+          <h2 className="text-xl md:text-2xl font-bold text-zinc-900 tracking-tight mb-1">My Schemes</h2>
+          <p className="text-sm md:text-base text-zinc-500 font-medium">View and manage your jewelry savings schemes.</p>
         </div>
         <div className="bg-white rounded-[3rem] border border-zinc-100 p-10 text-center space-y-4 shadow-sm">
           <div className="size-16 bg-red-50 rounded-3xl flex items-center justify-center mx-auto">
@@ -373,8 +373,8 @@ export default function SchemesPage() {
       {!selectedScheme && (
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h2 className="text-3xl font-black text-zinc-900 tracking-tight mb-1">My Schemes</h2>
-            <p className="text-zinc-500 font-medium">View and manage your jewelry savings schemes.</p>
+            <h2 className="text-xl md:text-2xl font-bold text-zinc-900 tracking-tight mb-1">My Schemes</h2>
+            <p className="text-sm md:text-base text-zinc-500 font-medium">View and manage your jewelry savings schemes.</p>
           </div>
           {schemes.length > 0 && (
             <div className="flex items-center gap-2">
@@ -413,7 +413,7 @@ export default function SchemesPage() {
                 <TicketPercent size={28} className="text-primary" />
               </div>
               <div>
-                <h3 className="text-2xl font-black text-zinc-900">What are Lucira Schemes?</h3>
+                <h3 className="text-xl md:text-2xl font-bold text-zinc-900 tracking-tight">What are Lucira Schemes?</h3>
                 <p className="text-zinc-500 font-medium max-w-md mt-2">
                   Our jewelry savings schemes let you save monthly and redeem on your dream jewelry purchase.
                   Enroll now and get exclusive member benefits.
