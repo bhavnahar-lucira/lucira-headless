@@ -137,22 +137,33 @@ export default function MainHeader() {
     }
 
     // Fetch avatar if user is logged in but avatar is not in state
-    if (user?.id && !user.avatar) {
-      const fetchUserAvatar = async () => {
-        try {
-          const res = await fetch("/api/customer/profile/avatar");
-          if (res.ok) {
-            const data = await res.json();
-            if (data.avatar) {
-              dispatch(setAvatar(data.avatar));
-            }
+    const fetchUserAvatar = async () => {
+      try {
+        const res = await fetch("/api/customer/profile/avatar");
+        if (res.ok) {
+          const data = await res.json();
+          if (data.avatar) {
+            dispatch(setAvatar(data.avatar));
           }
-        } catch (err) {
-          console.error("Header avatar fetch error:", err);
         }
-      };
+      } catch (err) {
+        console.error("Header avatar fetch error:", err);
+      }
+    };
+
+    if (user?.id && !user.avatar) {
       fetchUserAvatar();
     }
+
+    // Listen for profile updates to refresh avatar
+    const handleProfileUpdate = () => {
+      if (user?.id) {
+        fetchUserAvatar();
+      }
+    };
+
+    window.addEventListener("profile-updated", handleProfileUpdate);
+    return () => window.removeEventListener("profile-updated", handleProfileUpdate);
   }, [dispatch, user?.id, user?.avatar, wishlistItems.length, guestWishlistItems.length]);
 
   const handleSearchChange = async (e) => {
@@ -290,7 +301,7 @@ export default function MainHeader() {
             <div className="relative group flex items-center">
               <Link href="/admin">
                 <Avatar className="h-9 w-9 cursor-pointer border border-gray-100 shadow-sm">
-                  {user.avatar && <AvatarImage src={user.avatar} alt={user.name} />}
+                  {user.avatar && <AvatarImage className="object-cover" src={user.avatar} alt={user.name} />}
                   <AvatarFallback className="bg-[#5a413f] text-white font-bold text-xs">{getInitials(user?.name)}</AvatarFallback>
                 </Avatar>
               </Link>

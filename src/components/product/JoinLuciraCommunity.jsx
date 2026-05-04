@@ -104,7 +104,7 @@ export function JoinLuciraCommunity() {
                 <Button
                   type="submit"
                   disabled={loading}
-                  className="h-14 w-full md:w-fit px-12 bg-primary hover:accent text-white font-bold text-base uppercase rounded-lg transition-all flex items-center justify-center gap-2"
+                  className="h-14 w-full md:w-fit px-12 bg-primary hover:accent text-white font-bold text-base uppercase rounded-[4px] transition-all flex items-center justify-center gap-2"
                 >
                   {loading ? (
                     <>
