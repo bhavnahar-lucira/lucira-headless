@@ -13,14 +13,14 @@ import GtmPageView from "@/components/common/GtmPageView";
 
 const figtree = Figtree({
   subsets: ["latin"],
-  weight: ["300","400","500","600","700","800","900"],
+  weight: ["300", "400", "500", "600", "700", "800", "900"],
   variable: "--font-figtree",
   display: "swap",
 });
 
 const abhaya = Abhaya_Libre({
   subsets: ["latin"],
-  weight: ["400","500","600","700","800"],
+  weight: ["400", "500", "600", "700", "800"],
   variable: "--font-abhaya",
   display: "swap",
 });
@@ -36,7 +36,8 @@ export const metadata = {
 };
 
 export default function RootLayout({ children }) {
-  const isProd = process.env.NODE_ENV === "production";
+  // const isProd = process.env.NODE_ENV === "production";
+  const isProd = true;
   return (
     <html lang="en">
       <head>
@@ -53,16 +54,16 @@ export default function RootLayout({ children }) {
       <body className={`${figtree.variable} ${abhaya.variable} font-figtree antialiased`}>
         {isProd && (
           <noscript>
-            <iframe 
+            <iframe
               src="https://www.googletagmanager.com/ns.html?id=GTM-MKZBJB8M"
-              height="0" 
-              width="0" 
+              height="0"
+              width="0"
               style={{ display: 'none', visibility: 'hidden' }}
             />
           </noscript>
         )}
         <ReduxProvider>
-          <QueryProvider> 
+          <QueryProvider>
             {isProd && (
               <Suspense fallback={null}>
                 <GtmPageView />

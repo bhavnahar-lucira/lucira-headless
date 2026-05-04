@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Play, X, ChevronRight } from "lucide-react";
 import { Sheet } from "react-modal-sheet";
 import { SizeGuideMobile } from "./SizeGuideMobile";
+import { pushPromoClick } from "@/lib/gtm";
 
 export function ProductCustomizerMobile({
   activeColor,
@@ -21,6 +22,7 @@ export function ProductCustomizerMobile({
   availableStoreCount,
   deliveryInfo,
   getStoreDisplayName,
+  activeVariant,
 }) {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -55,7 +57,16 @@ export function ProductCustomizerMobile({
           SIZE & CUSTOMIZATION
         </h3>
         <SizeGuideMobile nearestStore={nearestStore} availableStores={availableStores} availableStoreCount={availableStoreCount} deliveryInfo={deliveryInfo} getStoreDisplayName={getStoreDisplayName}>
-          <button className="text-sm font-medium text-[#A67C7C] hover:cursor-pointer">
+          <button 
+            onClick={() => {
+              pushPromoClick({
+                promo_id: activeVariant?.sku || "",
+                promo_name: product.title || "",
+                creative_name: 'Size Guide Clicked'
+              });
+            }}
+            className="text-sm font-medium text-[#A67C7C] hover:cursor-pointer"
+          >
             Size Guide
           </button>
         </SizeGuideMobile>
