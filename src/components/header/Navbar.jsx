@@ -19,14 +19,24 @@ export default function Navbar({ hideTop }) {
   const MEGA_MENU = menuData || STATIC_MENU;
 
   const handleEnter = (index) => {
-    clearTimeout(timeoutRef.current);
-    setActiveMenu(index);
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    
+    // If a menu is already open, switch immediately for better UX
+    if (activeMenu !== null) {
+      setActiveMenu(index);
+    } else {
+      // If no menu is open, wait 150ms to ensure the hover is intentional
+      timeoutRef.current = setTimeout(() => {
+        setActiveMenu(index);
+      }, 150);
+    }
   };
 
   const handleLeave = () => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
     timeoutRef.current = setTimeout(() => {
       setActiveMenu(null);
-    }, 120);
+    }, 150);
   };
 
   const closeMenu = () => {
