@@ -70,7 +70,7 @@ export default function WaysToExplore() {
   );
 
   return (
-    <section className={`w-full ${isMobile ? "mt-12 bg-[#FEF5F1] py-12" : "mt-16 bg-[#FEF5F1] py-16"} overflow-hidden`}>
+    <section className={`w-full ${isMobile ? "mt-12 bg-[#FEF5F1] py-12" : "mt-0 bg-[#FEF5F1] py-16"} overflow-hidden`}>
       <div className="container-main mx-auto">
         {isMobile ? (
           <>

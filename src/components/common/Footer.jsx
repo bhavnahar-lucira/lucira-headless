@@ -193,7 +193,9 @@ export default function Footer() {
   }
 
   return (
-    <footer className="w-full bg-primary text-white mt-0">
+
+    <footer className="w-full bg-primary text-white">
+
       <div className="container-main py-12">
         <div className="grid grid-cols-1 xl:gap-10 lg:gap-8 xl:grid-cols-[220px_1fr] lg:grid-cols-[160px_1fr]">
 

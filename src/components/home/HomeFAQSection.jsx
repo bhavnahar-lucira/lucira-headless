@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Minus } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
 
 const FAQ_ITEMS = [
   {
@@ -52,74 +53,94 @@ const FAQ_ITEMS = [
 ];
 
 export default function HomeFAQSection() {
-  // First item open by default
   const [openIndex, setOpenIndex] = useState(0);
 
   return (
-    <section className="py-12 md:py-20 bg-[#FEF5F1]">
-      <div className="container-main max-w-7xl mx-auto">
 
-        {/* Header */}
-        <div className="text-center mb-12 lg:mb-16">
-          <h2 className="text-3xl lg:text-4xl font-extrabold font-abhaya text-zinc-900 mb-3 tracking-tight">
-            Frequently Asked Questions
+    <section className="w-full py-12 bg-gray-50"> 
+
+      <div className="max-w-480 mx-auto px-5 md:px-17 min-[1440px]:px-17 grid lg:grid-cols-[1fr_480px] gap-16">
+
+        {/* LEFT FAQ */}
+
+        <div>
+
+          <h2 className="text-28px font-bold mb-6 text-black">
+            Your Questions Answered
           </h2>
-          <p className="text-[15px] lg:text-[16px] text-zinc-500 font-figtree max-w-xl mx-auto">
-            Everything You Need to Know About Lab Grown Diamonds
-          </p>
-        </div>
 
-        {/* FAQ Items */}
-        <div className="space-y-4 lg:space-y-6">
-          {FAQ_ITEMS.map((item, index) => (
-            <div
-              key={item.id}
-              className="bg-white rounded-2xl lg:rounded-3xl overflow-hidden border border-zinc-100 shadow-sm"
-            >
-              <button
-                onClick={() => setOpenIndex(openIndex === index ? null : index)}
-                className="w-full p-4 lg:p-6 text-left flex justify-between items-center group transition-all duration-300"
-              >
-                <span
-                  className={`text-[15px] lg:text-[17px] font-bold font-figtree transition-colors duration-300 pr-8 ${openIndex === index ? "text-primary" : "text-zinc-800"
-                    }`}
-                >
-                  {item.question}
-                </span>
-                <div
-                  className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 ${openIndex === index
-                      ? "bg-primary text-white rotate-0"
-                      : "bg-zinc-50 text-zinc-400"
-                    }`}
-                >
-                  {openIndex === index ? (
-                    <Minus size={16} />
-                  ) : (
-                    <Plus size={16} />
-                  )}
+          <div className="w-full">
+
+            {FAQ_ITEMS.map((faq, index) => {
+              const isOpen = openIndex === index;
+
+              return (
+                <div key={faq.id} className="border-b py-6">
+
+                  <button
+                    onClick={() =>
+                      setOpenIndex(isOpen ? -1 : index)
+                    }
+                    className="flex items-center justify-between w-full text-left"
+                  >
+                    <span className="font-semibold text-base">
+                      {faq.question}
+                    </span>
+
+                    <span className="text-xl">
+                      {isOpen ? "-" : "+"}
+                    </span>
+                  </button>
+
+                  <AnimatePresence>
+
+                    {isOpen && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{
+                          height: "auto",
+                          opacity: 1,
+                        }}
+                        exit={{
+                          height: 0,
+                          opacity: 0,
+                        }}
+                        transition={{ duration: 0.25 }}
+                        className="overflow-hidden"
+                      >
+                        <div 
+                          className="text-sm leading-relaxed mt-4 max-w-130 [&>p]:mb-2 last:[&>p]:mb-0"
+                          dangerouslySetInnerHTML={{ __html: faq.answer }}
+                        />
+                      </motion.div>
+                    )}
+
+                  </AnimatePresence>
+
                 </div>
-              </button>
+              );
+            })}
 
-              <div
-                className={`overflow-hidden transition-all duration-500 ease-in-out ${openIndex === index
-                    ? "max-h-[1000px] opacity-100"
-                    : "max-h-0 opacity-0"
-                  }`}
-              >
-                <div
-                  className="px-4 lg:px-6 pb-6 pt-0 text-zinc-600 leading-relaxed text-[13px] lg:text-[15px] font-figtree border-t border-zinc-50 pt-6"
-                  dangerouslySetInnerHTML={{ __html: item.answer }}
-                />
-              </div>
-            </div>
-          ))}
+          </div>
+
         </div>
+
+        {/* RIGHT IMAGE */}
+
+        <div className="relative w-full min-h-132 rounded-lg overflow-hidden bg-gray-200">
+
+          <Image
+            src="https://cdn.shopify.com/s/files/1/0739/8516/3482/files/FAQ_side_img_1.png"
+            alt="FAQ"
+            fill
+            className="object-cover"
+          />
+
+
+        </div>
+
       </div>
 
-      <style jsx>{`
-        .font-abhaya { font-family: var(--font-abhaya), serif; }
-        .font-figtree { font-family: var(--font-figtree), sans-serif; }
-      `}</style>
     </section>
   );
 }

@@ -186,9 +186,13 @@ export default function FloatingActionButton() {
   };
 
   const isProductPage = pathname.startsWith('/products');
+  const isCollectionPage = pathname.startsWith('/collections');
 
   return (
-    <div className="fixed bottom-10 right-[30px] z-[9999] flex flex-col items-center">
+    <div className={`fixed 
+      ${isProductPage ? 'bottom-22 md:bottom-10' : isCollectionPage ? 'bottom-16 md:bottom-10' : 'bottom-10'} 
+      ${isCollectionPage ? 'right-[20px] md:right-[30px]' : 'right-[30px]'} 
+      z-[9999] flex flex-col items-center`}>
       {/* Tooltip */}
       {!isFabOpen && !isZohoActive && tooltipShown && (
         <div className="absolute right-5 bottom-16 bg-white text-black text-xs py-1.5 px-3 rounded-md whitespace-nowrap shadow-md border border-[#b76f79] animate-fab-tooltip pointer-events-none z-[1]
@@ -198,7 +202,21 @@ export default function FloatingActionButton() {
       )}
 
       {/* Actions Menu */}
-      <div className={`flex flex-col items-center absolute bottom-[45px] right-0 transition-all duration-300 ${isFabOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
+      <div className={`flex flex-col items-center absolute bottom-[50px] right-0 transition-all duration-300 ${isFabOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
+        {/* WhatsApp (Inside menu for mobile product pages) */}
+        {isProductPage && (
+          <a 
+            href={getWhatsAppUrl()} 
+            onClick={handleWhatsAppClick}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`md:hidden w-[50px] h-[50px] rounded-full mb-2.5 flex items-center justify-center bg-[#32d950] text-white shadow-lg transition-all duration-350 hover:scale-110 ${isFabOpen ? 'translate-y-0 opacity-100 delay-[100ms]' : 'translate-y-[180px] opacity-0'}`}
+            title="WhatsApp"
+          >
+            <img src="https://cdn.shopify.com/s/files/1/0739/8516/3482/files/whatsapp_3_1.png?v=1772105856" width={20} height={20} alt="WhatsApp" />
+          </a>
+        )}
+
         {/* Chat */}
         <Link 
           href="#" 
@@ -224,34 +242,19 @@ export default function FloatingActionButton() {
           <img src="https://cdn.shopify.com/s/files/1/0739/8516/3482/files/phone-call_1.png?v=1772105479" width="20" height="20" alt="Call" />
         </a>
 
-        {/* WhatsApp (Inside menu for mobile product pages) */}
-        {isProductPage && (
-          <a 
-            href={getWhatsAppUrl()} 
-            onClick={handleWhatsAppClick}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={`md:hidden w-[50px] h-[50px] rounded-full mb-2.5 flex items-center justify-center bg-[#32d950] text-white shadow-lg transition-all duration-350 hover:scale-110 ${isFabOpen ? 'translate-y-0 opacity-100 delay-[100ms]' : 'translate-y-[20px] opacity-0'}`}
-            title="WhatsApp"
-          >
-            <img src="https://cdn.shopify.com/s/files/1/0739/8516/3482/files/whatsapp_3_1.png?v=1772105856" width={20} height={20} alt="WhatsApp" />
-          </a>
-        )}
       </div>
 
       {/* WhatsApp (Outside menu - persistent unless mobile product page) */}
-      {(!isProductPage || !isFabOpen) && (
-        <a 
-          href={getWhatsAppUrl()} 
-          onClick={handleWhatsAppClick}
-          target="_blank"
-          rel="noopener noreferrer"
-          className={`w-[50px] h-[50px] rounded-full mb-2.5 flex items-center justify-center bg-[#29a319] text-white shadow-lg transition-all duration-350 hover:scale-110 z-[3] ${isProductPage ? 'hidden md:flex' : 'flex'} ${isFabOpen ? '-translate-y-[120px]' : 'translate-y-0'}`}
-          title="WhatsApp"
-        >
-          <img src="https://cdn.shopify.com/s/files/1/0739/8516/3482/files/whatsapp_3_1.png?v=1772105856" width={20} height={20} alt="WhatsApp" />
-        </a>
-      )}
+      <a 
+        href={getWhatsAppUrl()} 
+        onClick={handleWhatsAppClick}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={`w-[50px] h-[50px] rounded-full mb-2.5 flex items-center justify-center bg-[#29a319] text-white shadow-lg transition-all duration-350 hover:scale-110 z-[3] ${isProductPage ? 'hidden md:flex' : 'flex'} ${isFabOpen ? '-translate-y-[120px]' : 'translate-y-0'}`}
+        title="WhatsApp"
+      >
+        <img src="https://cdn.shopify.com/s/files/1/0739/8516/3482/files/whatsapp_3_1.png?v=1772105856" width={20} height={20} alt="WhatsApp" />
+      </a>
 
       {/* Main FAB Toggle */}
       <div 

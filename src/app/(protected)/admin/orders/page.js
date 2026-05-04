@@ -64,7 +64,7 @@ export default function MyOrdersPage() {
   const uniqueStatuses = [...new Set(orders.map((o) => o.status))];
 
   return (
-    <div className="font-figtree space-y-6 md:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="font-figtree space-y-6 md:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 outline-none">
 
       {/* ── Header ── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -77,39 +77,43 @@ export default function MyOrdersPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <div className="font-figtree px-4 py-2 bg-white border border-zinc-100 rounded-xl text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
-            {orders.length} Total Orders
-          </div>
+          {orders.length > 0 && (
+            <div className="font-figtree px-4 py-2 bg-white border border-zinc-100 rounded-xl text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
+              {orders.length} Total Orders
+            </div>
+          )}
         </div>
       </div>
 
       {/* ── Filters ── */}
-      <div className="flex flex-col md:flex-row gap-3 md:gap-4">
-        <div className="flex-1 relative">
-          <input
-            type="text"
-            placeholder="Search by order # or product..."
-            className="font-figtree w-full pl-11 md:pl-12 pr-4 py-3.5 md:py-4 bg-white border border-zinc-100 rounded-2xl text-sm font-normal text-zinc-700 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-          <div className="absolute left-3.5 md:left-4 top-1/2 -translate-y-1/2 text-zinc-300">
-            <ShoppingBag size={18} />
+      {orders.length > 0 ? (
+        <div className="flex flex-col md:flex-row gap-3 md:gap-4">
+          <div className="flex-1 relative">
+            <input
+              type="text"
+              placeholder="Search by order # or product..."
+              className="font-figtree w-full pl-11 md:pl-12 pr-4 py-3.5 md:py-4 bg-white border border-zinc-100 rounded-2xl text-sm font-normal text-zinc-700 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all shadow-none"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            <div className="absolute left-3.5 md:left-4 top-1/2 -translate-y-1/2 text-zinc-300">
+              <ShoppingBag size={18} />
+            </div>
+          </div>
+          <div className="w-full md:w-56">
+            <select
+              className="font-figtree w-full px-4 py-3.5 md:py-4 bg-white border border-zinc-100 rounded-2xl text-sm font-normal text-zinc-700 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all appearance-none shadow-none"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+            >
+              <option value="">All Statuses</option>
+              {uniqueStatuses.map((status) => (
+                <option key={status} value={status}>{status}</option>
+              ))}
+            </select>
           </div>
         </div>
-        <div className="w-full md:w-56">
-          <select
-            className="font-figtree w-full px-4 py-3.5 md:py-4 bg-white border border-zinc-100 rounded-2xl text-sm font-normal text-zinc-700 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all appearance-none"
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-          >
-            <option value="">All Statuses</option>
-            {uniqueStatuses.map((status) => (
-              <option key={status} value={status}>{status}</option>
-            ))}
-          </select>
-        </div>
-      </div>
+      ) : null}
 
       {/* ── Order Cards ── */}
       <div className="space-y-4 md:space-y-6">

@@ -139,11 +139,11 @@ export default function EducationPage() {
               <div className="size-9 md:size-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
                 <GraduationCap size={20} />
               </div>
-              <h2 className="font-figtree text-lg md:text-2xl font-bold text-primary tracking-[0.03em] uppercase">
+              <h2 className="font-figtree text-xl md:text-2xl font-bold text-primary tracking-tight mb-1">
                 Education
               </h2>
             </div>
-            <p className="font-figtree text-sm md:text-base text-zinc-500 font-normal leading-relaxed max-w-2xl">
+            <p className="font-figtree text-sm md:text-base text-zinc-500 font-medium leading-relaxed max-w-2xl">
               Learn everything you need to know about jewelry, from gold purity to diamond quality and styling tips.
             </p>
           </div>
@@ -190,7 +190,7 @@ export default function EducationPage() {
               className={`${guide.bgClass} rounded-[1.75rem] md:rounded-[4px] p-7 md:p-12 flex flex-col justify-between group hover:shadow-2xl transition-all duration-500 border border-zinc-100 w-full`}
             >
               <div>
-                <h3 className="font-figtree text-lg md:text-2xl font-bold text-primary mb-3 md:mb-4 uppercase tracking-[0.03em]">
+                <h3 className="font-figtree text-lg md:text-xl font-bold text-primary mb-3 md:mb-4 tracking-tight">
                   {guide.title}
                 </h3>
                 <p className="font-figtree text-sm md:text-base text-zinc-600 font-normal leading-relaxed max-w-sm">
@@ -206,7 +206,7 @@ export default function EducationPage() {
 
         {/* ── Size Guide ── */}
         <div className="bg-white rounded-[1.75rem] md:rounded-[4px] border border-zinc-100 p-7 md:p-14 text-center shadow-sm mx-1">
-          <h2 className="font-figtree text-lg md:text-2xl font-bold text-primary mb-3 md:mb-4 uppercase tracking-[0.03em]">
+          <h2 className="font-figtree text-lg md:text-xl font-bold text-primary mb-3 md:mb-4 tracking-tight">
             Size Guide
           </h2>
           <p className="font-figtree text-sm md:text-base text-zinc-500 font-normal leading-relaxed max-w-2xl mx-auto mb-8 md:mb-12">

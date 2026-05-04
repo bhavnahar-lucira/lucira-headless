@@ -8,7 +8,6 @@ import {
   Trash2,
   Loader2,
   CheckCircle2,
-  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -21,6 +20,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { toast } from "react-toastify";
+import { cn } from "@/lib/utils";
 import {
   fetchCustomerAddresses,
   deleteCustomerAddress,
@@ -61,6 +61,7 @@ export default function SavedAddressesPage() {
   const [addressForm, setAddressForm] = useState(emptyAddressForm);
   const [makeDefault, setMakeDefault] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [showErrors, setShowErrors] = useState(false);
 
   const loadAddresses = useCallback(async () => {
     try {
@@ -83,6 +84,7 @@ export default function SavedAddressesPage() {
     setEditingAddressId("");
     setAddressForm(emptyAddressForm);
     setMakeDefault(addresses.length === 0);
+    setShowErrors(false);
     setDialogOpen(true);
   };
 
@@ -91,14 +93,33 @@ export default function SavedAddressesPage() {
     setEditingAddressId(address.id);
     setAddressForm(normalizeAddressForm(address));
     setMakeDefault(Boolean(address.isDefault));
+    setShowErrors(false);
     setDialogOpen(true);
   };
 
   const handleSaveAddress = async () => {
-    if (!addressForm.firstName || !addressForm.address1 || !addressForm.zip) {
-      toast.error("Please fill in the required fields");
+    if (!addressForm.firstName || !addressForm.lastName || !addressForm.address1 || !addressForm.city || !addressForm.province || !addressForm.zip || !addressForm.phone) {
+      setShowErrors(true);
+      toast.error("Please fill in all required fields");
       return;
     }
+
+    // Phone validation: exactly 10 digits
+    const phoneRegex = /^[0-9]{10}$/;
+    if (!phoneRegex.test(addressForm.phone)) {
+      setShowErrors(true);
+      toast.error("Please enter a valid 10-digit phone number");
+      return;
+    }
+
+    // ZIP/PIN validation: exactly 6 digits (India)
+    const zipRegex = /^[0-9]{6}$/;
+    if (!zipRegex.test(addressForm.zip)) {
+      setShowErrors(true);
+      toast.error("Please enter a valid 6-digit PIN code");
+      return;
+    }
+
     try {
       setSaving(true);
       if (dialogMode === "create") {
@@ -122,6 +143,12 @@ export default function SavedAddressesPage() {
   };
 
   const handleDelete = async (id) => {
+    const addressToDelete = addresses.find(a => a.id === id);
+    if (addressToDelete?.isDefault) {
+      toast.error("Default address cannot be deleted. Please set another address as default first.");
+      return;
+    }
+
     if (!confirm("Are you sure you want to remove this address?")) return;
     try {
       await deleteCustomerAddress(id);
@@ -143,15 +170,15 @@ export default function SavedAddressesPage() {
   };
 
   return (
-    <div className="font-figtree space-y-6 md:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="font-figtree space-y-6 md:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 outline-none">
 
       {/* ── Header ── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="font-figtree text-2xl md:text-3xl font-bold text-zinc-900 tracking-tight mb-1">
+          <h2 className="font-figtree text-xl md:text-2xl font-bold text-zinc-900 tracking-tight mb-1">
             Saved Addresses
           </h2>
-          <p className="font-figtree text-sm md:text-base text-zinc-500 font-normal leading-relaxed">
+          <p className="font-figtree text-sm md:text-base text-zinc-500 font-medium leading-relaxed">
             Manage your shipping and billing locations for faster checkout.
           </p>
         </div>
@@ -173,13 +200,13 @@ export default function SavedAddressesPage() {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 items-stretch">
 
           {/* ── Address Cards ── */}
           {addresses.map((address) => (
             <div
               key={address.id}
-              className={`bg-white rounded-[1.75rem] md:rounded-[2rem] border-2 p-5 md:p-6 transition-all duration-300 relative group ${
+              className={`bg-white rounded-[1.75rem] md:rounded-[2rem] border-2 p-5 md:p-6 transition-all duration-300 relative group flex flex-col justify-between ${
                 address.isDefault
                   ? "border-primary shadow-xl shadow-primary/5"
                   : "border-zinc-100 hover:border-zinc-200 shadow-sm"
@@ -206,14 +233,12 @@ export default function SavedAddressesPage() {
                     >
                       <Pencil size={13} />
                     </button>
-                    {!address.isDefault && (
-                      <button
-                        onClick={() => handleDelete(address.id)}
-                        className="size-8 rounded-lg bg-zinc-50 flex items-center justify-center text-rose-500 hover:bg-rose-500 hover:text-white transition-all"
-                      >
-                        <Trash2 size={13} />
-                      </button>
-                    )}
+                    <button
+                      onClick={() => handleDelete(address.id)}
+                      className="size-8 rounded-lg bg-zinc-50 flex items-center justify-center text-rose-500 hover:bg-rose-500 hover:text-white transition-all"
+                    >
+                      <Trash2 size={13} />
+                    </button>
                   </div>
                 </div>
 
@@ -289,61 +314,102 @@ export default function SavedAddressesPage() {
                   Provide your address details below for accurate delivery.
                 </DialogDescription>
               </div>
-              <button
-                onClick={() => setDialogOpen(false)}
-                className="size-9 md:size-10 bg-zinc-50 rounded-2xl flex items-center justify-center text-zinc-400 hover:text-zinc-900 transition-colors shrink-0"
-              >
-                <X size={18} />
-              </button>
             </div>
 
             {/* Form Fields */}
             <div className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
-                <Input
-                  placeholder="First name"
-                  value={addressForm.firstName}
-                  onChange={(e) => setAddressForm({ ...addressForm, firstName: e.target.value })}
-                  className="font-figtree h-12 md:h-14 rounded-2xl border-zinc-100 bg-zinc-50/50 focus:bg-white transition-all font-medium text-sm placeholder:text-zinc-400"
-                />
-                <Input
-                  placeholder="Last name"
-                  value={addressForm.lastName}
-                  onChange={(e) => setAddressForm({ ...addressForm, lastName: e.target.value })}
-                  className="font-figtree h-12 md:h-14 rounded-2xl border-zinc-100 bg-zinc-50/50 focus:bg-white transition-all font-medium text-sm placeholder:text-zinc-400"
-                />
-                <div className="md:col-span-2">
+                <div className="space-y-1">
                   <Input
-                    placeholder="Address"
+                    placeholder="First name *"
+                    value={addressForm.firstName}
+                    onChange={(e) => setAddressForm({ ...addressForm, firstName: e.target.value })}
+                    className={cn(
+                      "font-figtree h-12 md:h-14 rounded-2xl border-zinc-100 bg-zinc-50/50 focus:bg-white transition-all font-medium text-sm placeholder:text-zinc-400",
+                      showErrors && !addressForm.firstName && "border-rose-500 bg-rose-50/30"
+                    )}
+                  />
+                  {showErrors && !addressForm.firstName && <p className="text-[10px] text-rose-500 font-bold uppercase tracking-widest ml-4 animate-in fade-in slide-in-from-top-1">Required</p>}
+                </div>
+                <div className="space-y-1">
+                  <Input
+                    placeholder="Last name *"
+                    value={addressForm.lastName}
+                    onChange={(e) => setAddressForm({ ...addressForm, lastName: e.target.value })}
+                    className={cn(
+                      "font-figtree h-12 md:h-14 rounded-2xl border-zinc-100 bg-zinc-50/50 focus:bg-white transition-all font-medium text-sm placeholder:text-zinc-400",
+                      showErrors && !addressForm.lastName && "border-rose-500 bg-rose-50/30"
+                    )}
+                  />
+                  {showErrors && !addressForm.lastName && <p className="text-[10px] text-rose-500 font-bold uppercase tracking-widest ml-4 animate-in fade-in slide-in-from-top-1">Required</p>}
+                </div>
+                <div className="md:col-span-2 space-y-1">
+                  <Input
+                    placeholder="Address *"
                     value={addressForm.address1}
                     onChange={(e) => setAddressForm({ ...addressForm, address1: e.target.value })}
-                    className="font-figtree h-12 md:h-14 rounded-2xl border-zinc-100 bg-zinc-50/50 focus:bg-white transition-all font-medium text-sm placeholder:text-zinc-400"
+                    className={cn(
+                      "font-figtree h-12 md:h-14 rounded-2xl border-zinc-100 bg-zinc-50/50 focus:bg-white transition-all font-medium text-sm placeholder:text-zinc-400",
+                      showErrors && !addressForm.address1 && "border-rose-500 bg-rose-50/30"
+                    )}
                   />
+                  {showErrors && !addressForm.address1 && <p className="text-[10px] text-rose-500 font-bold uppercase tracking-widest ml-4 animate-in fade-in slide-in-from-top-1">Required</p>}
                 </div>
-                <Input
-                  placeholder="City"
-                  value={addressForm.city}
-                  onChange={(e) => setAddressForm({ ...addressForm, city: e.target.value })}
-                  className="font-figtree h-12 md:h-14 rounded-2xl border-zinc-100 bg-zinc-50/50 focus:bg-white transition-all font-medium text-sm placeholder:text-zinc-400"
-                />
-                <Input
-                  placeholder="State"
-                  value={addressForm.province}
-                  onChange={(e) => setAddressForm({ ...addressForm, province: e.target.value })}
-                  className="font-figtree h-12 md:h-14 rounded-2xl border-zinc-100 bg-zinc-50/50 focus:bg-white transition-all font-medium text-sm placeholder:text-zinc-400"
-                />
-                <Input
-                  placeholder="PIN code"
-                  value={addressForm.zip}
-                  onChange={(e) => setAddressForm({ ...addressForm, zip: e.target.value })}
-                  className="font-figtree h-12 md:h-14 rounded-2xl border-zinc-100 bg-zinc-50/50 focus:bg-white transition-all font-medium text-sm placeholder:text-zinc-400"
-                />
-                <Input
-                  placeholder="Phone"
-                  value={addressForm.phone}
-                  onChange={(e) => setAddressForm({ ...addressForm, phone: e.target.value })}
-                  className="font-figtree h-12 md:h-14 rounded-2xl border-zinc-100 bg-zinc-50/50 focus:bg-white transition-all font-medium text-sm placeholder:text-zinc-400"
-                />
+                <div className="space-y-1">
+                  <Input
+                    placeholder="City *"
+                    value={addressForm.city}
+                    onChange={(e) => setAddressForm({ ...addressForm, city: e.target.value })}
+                    className={cn(
+                      "font-figtree h-12 md:h-14 rounded-2xl border-zinc-100 bg-zinc-50/50 focus:bg-white transition-all font-medium text-sm placeholder:text-zinc-400",
+                      showErrors && !addressForm.city && "border-rose-500 bg-rose-50/30"
+                    )}
+                  />
+                  {showErrors && !addressForm.city && <p className="text-[10px] text-rose-500 font-bold uppercase tracking-widest ml-4 animate-in fade-in slide-in-from-top-1">Required</p>}
+                </div>
+                <div className="space-y-1">
+                  <Input
+                    placeholder="State *"
+                    value={addressForm.province}
+                    onChange={(e) => setAddressForm({ ...addressForm, province: e.target.value })}
+                    className={cn(
+                      "font-figtree h-12 md:h-14 rounded-2xl border-zinc-100 bg-zinc-50/50 focus:bg-white transition-all font-medium text-sm placeholder:text-zinc-400",
+                      showErrors && !addressForm.province && "border-rose-500 bg-rose-50/30"
+                    )}
+                  />
+                  {showErrors && !addressForm.province && <p className="text-[10px] text-rose-500 font-bold uppercase tracking-widest ml-4 animate-in fade-in slide-in-from-top-1">Required</p>}
+                </div>
+                <div className="space-y-1">
+                  <Input
+                    placeholder="PIN code *"
+                    value={addressForm.zip}
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/\D/g, "").slice(0, 6);
+                      setAddressForm({ ...addressForm, zip: val });
+                    }}
+                    className={cn(
+                      "font-figtree h-12 md:h-14 rounded-2xl border-zinc-100 bg-zinc-50/50 focus:bg-white transition-all font-medium text-sm placeholder:text-zinc-400",
+                      showErrors && !addressForm.zip && "border-rose-500 bg-rose-50/30"
+                    )}
+                  />
+                  {showErrors && !addressForm.zip && <p className="text-[10px] text-rose-500 font-bold uppercase tracking-widest ml-4 animate-in fade-in slide-in-from-top-1">Required</p>}
+                </div>
+                <div className="space-y-1">
+                  <Input
+                    type="tel"
+                    placeholder="Phone (10 digits) *"
+                    value={addressForm.phone}
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/\D/g, "").slice(0, 10);
+                      setAddressForm({ ...addressForm, phone: val });
+                    }}
+                    className={cn(
+                      "font-figtree h-12 md:h-14 rounded-2xl border-zinc-100 bg-zinc-50/50 focus:bg-white transition-all font-medium text-sm placeholder:text-zinc-400",
+                      showErrors && !addressForm.phone && "border-rose-500 bg-rose-50/30"
+                    )}
+                  />
+                  {showErrors && !addressForm.phone && <p className="text-[10px] text-rose-500 font-bold uppercase tracking-widest ml-4 animate-in fade-in slide-in-from-top-1">Required</p>}
+                </div>
               </div>
 
               {/* Make Default Checkbox */}
@@ -356,7 +422,7 @@ export default function SavedAddressesPage() {
                 />
                 <label
                   htmlFor="make-default"
-                  className="font-figtree text-xs font-semibold text-zinc-600 uppercase tracking-[0.13em] cursor-pointer leading-relaxed"
+                  className="font-figtree text-xs font-semibold text-zinc-600 uppercase tracking-[0.13em] cursor-pointer leading-relaxed flex-1"
                 >
                   Set as my default address
                 </label>

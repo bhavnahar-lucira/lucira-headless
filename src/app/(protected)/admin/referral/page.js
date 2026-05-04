@@ -156,10 +156,10 @@ export default function ReferralPage() {
       {/* ── Header ── */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-6">
         <div>
-          <h2 className="font-figtree text-2xl md:text-3xl font-bold text-zinc-900 tracking-tight mb-1">
+          <h2 className="font-figtree text-xl md:text-2xl font-bold text-zinc-900 tracking-tight mb-1">
             Refer & Earn
           </h2>
-          <p className="font-figtree text-sm md:text-base text-zinc-500 font-normal leading-relaxed">
+          <p className="font-figtree text-sm md:text-base text-zinc-500 font-medium leading-relaxed">
             Invite your friends and earn rewards for every successful referral.
           </p>
         </div>
