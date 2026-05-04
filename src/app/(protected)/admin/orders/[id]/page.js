@@ -241,21 +241,27 @@ export default function OrderDetailsPage() {
             </div>
 
             {/* Shipping Address */}
-            <div className="bg-white rounded-[2.5rem] border border-zinc-100 p-8 shadow-sm">
+            <div className="bg-white rounded-[2.5rem] border border-zinc-100 p-8 shadow-sm h-full">
               <div className="flex items-center gap-3 mb-6">
                 <div className="size-10 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center">
                   <MapPin size={20} />
                 </div>
                 <h3 className="text-lg font-bold text-primary uppercase tracking-tight">Delivery Address</h3>
               </div>
-              <div className="space-y-1 text-sm text-zinc-600 font-medium">
-                <p className="text-zinc-900 font-bold">{order.shippingAddress?.firstName} {order.shippingAddress?.lastName}</p>
-                <p>{order.shippingAddress?.address1}</p>
-                {order.shippingAddress?.address2 && <p>{order.shippingAddress?.address2}</p>}
-                <p>{order.shippingAddress?.city}, {order.shippingAddress?.province} {order.shippingAddress?.zip}</p>
-                <p>{order.shippingAddress?.country}</p>
-                <p className="mt-2 text-zinc-400">{order.shippingAddress?.phone}</p>
-              </div>
+              {order.shippingAddress && order.shippingAddress.address1 ? (
+                <div className="space-y-1 text-sm text-zinc-600 font-medium">
+                  <p className="text-zinc-900 font-bold">{order.shippingAddress.firstName} {order.shippingAddress.lastName}</p>
+                  <p>{order.shippingAddress.address1}</p>
+                  {order.shippingAddress.address2 && <p>{order.shippingAddress.address2}</p>}
+                  <p>{order.shippingAddress.city}, {order.shippingAddress.province} {order.shippingAddress.zip}</p>
+                  <p>{order.shippingAddress.country}</p>
+                  {order.shippingAddress.phone && <p className="mt-2 text-zinc-400">{order.shippingAddress.phone}</p>}
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center py-6 border-2 border-dashed border-zinc-100 rounded-2xl">
+                   <p className="text-sm text-zinc-400 font-medium italic text-center">No delivery address provided<br/>for this order.</p>
+                </div>
+              )}
             </div>
           </div>
         </div>

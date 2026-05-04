@@ -610,7 +610,15 @@ export default function EarnRewardsPage() {
         @keyframes fadeSlide { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
         @keyframes spin { to { transform: rotate(360deg); } }
         * { box-sizing: border-box; }
-        input[type=date]::-webkit-calendar-picker-indicator { opacity: .6; cursor: pointer; }
+        input[type=date]::-webkit-calendar-picker-indicator { 
+          opacity: 0; 
+          cursor: pointer; 
+          position: absolute;
+          left: 0;
+          top: 0;
+          width: 100%;
+          height: 100%;
+        }
         
         @media (max-width: 768px) {
           /* Grid adjustments */
