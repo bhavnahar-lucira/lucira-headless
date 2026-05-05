@@ -1,47 +1,35 @@
 import { NextResponse } from "next/server";
 
-const INSTA_DATA = [
-  { 
-    id: "1", 
-    image: "/images/blogs/1.jpg", 
-    isVideo: false,
-    caption: "The perfect stack doesn't exi... oh wait. ✨ Our signature marquise and round cut rings are made for each other. #LuciraJewelry"
-  },
-  { 
-    id: "2", 
-    image: "/images/blogs/2.jpg", 
-    isVideo: true,
-    videoUrl: "https://www.lucirajewelry.com/cdn/shop/videos/c/vp/6f8b91e03c4740e6b497e9fd12cfb809/6f8b91e03c4740e6b497e9fd12cfb809.HD-1080p-7.2Mbps-26162134.mp4",
-    caption: "POV: You just found your forever ring. 💍 Watch the sparkle in every light. #EngagementRing #DiamondRing"
-  },
-  { 
-    id: "3", 
-    image: "/images/blogs/3.jpg", 
-    isVideo: false,
-    caption: "Elegance in every detail. Handcrafted with love, for your most precious moments. 💖 #HandcraftedJewelry #Lucira"
-  },
-  { 
-    id: "4", 
-    image: "/images/blogs/4.jpg", 
-    isVideo: true,
-    videoUrl: "https://www.lucirajewelry.com/cdn/shop/videos/c/vp/6f8b91e03c4740e6b497e9fd12cfb809/6f8b91e03c4740e6b497e9fd12cfb809.HD-1080p-7.2Mbps-26162134.mp4",
-    caption: "Golden hour glow with our new collection. ✨ Which one is your favorite? #GoldJewelry #NewCollection"
-  },
-  { 
-    id: "5", 
-    image: "/images/love/1.jpg", 
-    isVideo: false,
-    caption: "A promise that lasts a lifetime. 💍 Explore our solitaire collection today. #DiamondSolitaire #LuciraLove"
-  },
-  { 
-    id: "6", 
-    image: "/images/love/2.jpg", 
-    isVideo: false,
-    caption: "Modern statements for the contemporary woman. 💎 #FineJewelry #ModernLuxury"
-  },
-];
+const INSTAGRAM_ACCESS_TOKEN = "IGAAVJNIZC9IvtBZAFpuQ05oZAEJNeUh2RU80MUxGbENadVZAObF93MEhmOENDNTQ3RXBwZA3pIQXZAhZAFN5UzZAQVklaOEYySm80Ym5WUFFPX2FwVndSSF9uTTRXZA3Itc1BQcDdua2xNYURma2I3TDZAhNnlnaWNfTDNFbGQxTVlYTGQ2cwZDZD";
 
 export async function GET() {
-  // In a real scenario, you would fetch from Instagram API here
-  return NextResponse.json(INSTA_DATA);
+  try {
+    const response = await fetch(
+      `https://graph.instagram.com/me/media?fields=id,caption,media_type,media_url,permalink,thumbnail_url,timestamp&access_token=${INSTAGRAM_ACCESS_TOKEN}&limit=30`,
+      { next: { revalidate: 3600 } } // Cache for 1 hour
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error("Instagram API error:", errorData);
+      return NextResponse.json({ error: "Failed to fetch Instagram data" }, { status: response.status });
+    }
+
+    const data = await response.json();
+    
+    const formattedData = data.data.map(item => ({
+      id: item.id,
+      image: item.media_type === "VIDEO" ? item.thumbnail_url : item.media_url,
+      mediaUrl: item.media_url,
+      isVideo: item.media_type === "VIDEO",
+      caption: item.caption || "",
+      permalink: item.permalink,
+      timestamp: item.timestamp
+    }));
+
+    return NextResponse.json(formattedData);
+  } catch (error) {
+    console.error("Error fetching Instagram feed:", error);
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+  }
 }

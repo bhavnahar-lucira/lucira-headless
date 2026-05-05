@@ -1,150 +1,158 @@
 "use client";
 
-import { X, ChevronLeft, ChevronRight, Instagram } from "lucide-react";
+import { X, ChevronUp, ChevronDown, Volume2, VolumeX } from "lucide-react";
 import LazyImage from "../common/LazyImage";
-import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState, useLayoutEffect } from "react";
 
-export default function InstaPopup({ isOpen, onClose, data, activeIndex, onIndexChange }) {
+export default function InstaPopup({ isOpen, onClose, data, activeIndex }) {
+  const scrollContainerRef = useRef(null);
+  const [currentIndex, setCurrentIndex] = useState(activeIndex);
+  const [isMuted, setIsMuted] = useState(false); // Unmuted by default as requested
+  const [isReady, setIsReady] = useState(false);
+
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
+      setCurrentIndex(activeIndex);
+      // Brief delay to ensure position is set before revealing
+      const timer = setTimeout(() => setIsReady(true), 50);
+      return () => clearTimeout(timer);
     } else {
       document.body.style.overflow = "unset";
+      setIsReady(false);
     }
-    return () => {
-      document.body.style.overflow = "unset";
-    };
-  }, [isOpen]);
+  }, [isOpen, activeIndex]);
+
+  // Use useLayoutEffect for instant scrolling before paint
+  useLayoutEffect(() => {
+    if (isOpen && scrollContainerRef.current) {
+      const height = scrollContainerRef.current.clientHeight;
+      if (height > 0) {
+        scrollContainerRef.current.scrollTop = activeIndex * height;
+      } else {
+        const element = scrollContainerRef.current.children[activeIndex];
+        if (element) {
+          element.scrollIntoView({ behavior: "instant", block: "start" });
+        }
+      }
+    }
+  }, [isOpen, activeIndex]);
 
   if (!isOpen || !data || data.length === 0) return null;
 
-  const item = data[activeIndex];
-  if (!item) return null;
+  const handleScroll = (e) => {
+    const container = e.target;
+    const scrollPos = container.scrollTop;
+    const height = container.clientHeight;
+    if (height === 0) return;
 
-  const handlePrev = () => {
-    const nextIndex = (activeIndex - 1 + data.length) % data.length;
-    onIndexChange(nextIndex);
+    const newIndex = Math.round(scrollPos / height);
+    if (newIndex !== currentIndex && newIndex >= 0 && newIndex < data.length) {
+      setCurrentIndex(newIndex);
+    }
   };
 
-  const handleNext = () => {
-    const nextIndex = (activeIndex + 1) % data.length;
-    onIndexChange(nextIndex);
+  const scrollToNext = () => {
+    if (currentIndex < data.length - 1 && scrollContainerRef.current) {
+      scrollContainerRef.current.children[currentIndex + 1].scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
+  const scrollToPrev = () => {
+    if (currentIndex > 0 && scrollContainerRef.current) {
+      scrollContainerRef.current.children[currentIndex - 1].scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
+  const toggleMute = () => {
+    setIsMuted(!isMuted);
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-md p-4 md:p-10 transition-all duration-300">
+    <div className={`fixed inset-0 z-[99999] flex items-center justify-center bg-black transition-opacity duration-300 ${isReady ? 'opacity-100' : 'opacity-0'}`}>
       
-      {/* Navigation */}
-      <button 
-        onClick={handlePrev}
-        className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 z-[110] text-white/50 hover:text-white transition-all cursor-pointer outline-none bg-white/5 hover:bg-white/10 rounded-full p-3 backdrop-blur-sm"
-      >
-        <ChevronLeft size={40} strokeWidth={1.5} />
-      </button>
-      <button 
-        onClick={handleNext}
-        className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 z-[110] text-white/50 hover:text-white transition-all cursor-pointer outline-none bg-white/5 hover:bg-white/10 rounded-full p-3 backdrop-blur-sm"
-      >
-        <ChevronRight size={40} strokeWidth={1.5} />
-      </button>
+      {/* Custom Controls Bar (Mute and Close) */}
+      <div className="absolute top-6 left-6 right-6 flex items-center justify-between z-[140]">
+        {/* Mute/Unmute Button (Top Left) */}
+        <button
+            onClick={toggleMute}
+            className="text-white hover:scale-110 transition-all cursor-pointer bg-black/40 hover:bg-black/60 rounded-full p-2.5 backdrop-blur-md border border-white/20"
+        >
+            {isMuted ? <VolumeX size={24} /> : <Volume2 size={24} />}
+        </button>
 
-      {/* Main Container */}
-      <div className="relative w-full max-w-6xl bg-white rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-500">
-        
-        {/* Close Button */}
+        {/* Close Button (Top Right) */}
         <button
             onClick={onClose}
-            className="absolute top-6 right-6 z-[120] text-white hover:scale-110 transition-all cursor-pointer bg-black/20 hover:bg-black/40 rounded-full p-2 backdrop-blur-md"
+            className="text-white hover:scale-110 transition-all cursor-pointer bg-black/40 hover:bg-black/60 rounded-full p-2.5 backdrop-blur-md border border-white/20"
         >
             <X size={24} />
         </button>
+      </div>
 
-        <div className="flex flex-col md:flex-row h-full min-h-[500px] md:h-[750px]">
-          
-          {/* Left Side: Media */}
-          <div className="w-full md:w-[65%] relative bg-black flex items-center justify-center overflow-hidden">
-            {item.isVideo ? (
-                <video 
-                    src={item.videoUrl || item.image} 
-                    className="w-full h-full object-contain"
-                    controls
-                    autoPlay
-                    loop
-                />
-            ) : (
-                <div className="relative w-full h-full">
-                    <LazyImage
-                        src={item.image}
-                        alt="Instagram Media"
-                        fill
-                        className="object-contain"
-                        priority
-                    />
-                </div>
-            )}
-          </div>
+      {/* Desktop Navigation Arrows */}
+      <div className="hidden md:flex absolute right-10 top-1/2 -translate-y-1/2 flex-col gap-4 z-[130]">
+        <button 
+          onClick={scrollToPrev}
+          disabled={currentIndex === 0}
+          className="text-white/50 hover:text-white transition-all bg-white/10 hover:bg-white/20 rounded-full p-3 backdrop-blur-md disabled:opacity-20"
+        >
+          <ChevronUp size={32} />
+        </button>
+        <button 
+          onClick={scrollToNext}
+          disabled={currentIndex === data.length - 1}
+          className="text-white/50 hover:text-white transition-all bg-white/10 hover:bg-white/20 rounded-full p-3 backdrop-blur-md disabled:opacity-20"
+        >
+          <ChevronDown size={32} />
+        </button>
+      </div>
 
-          {/* Right Side: Info */}
-          <div className="w-full md:w-[35%] p-8 md:p-12 flex flex-col bg-white border-l border-gray-100">
+      {/* Vertical Scroll Container */}
+      <div 
+        ref={scrollContainerRef}
+        onScroll={handleScroll}
+        className="w-full h-full overflow-y-scroll snap-y snap-mandatory hide-scrollbar"
+      >
+        {data.map((item, idx) => (
+          <div key={item.id} className="w-full h-full snap-start flex items-center justify-center relative bg-black">
             
-            {/* Header */}
-            <div className="flex items-center justify-between mb-10 pb-6 border-b border-gray-50">
-              <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-full bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-600 p-0.5 shadow-md">
-                    <div className="w-full h-full rounded-full border-2 border-white overflow-hidden relative">
-                        <LazyImage src="/images/icons/small-logo.svg" alt="Lucira" fill className="object-cover bg-black p-2" />
-                    </div>
-                </div>
-                <div>
-                    <h3 className="font-black text-gray-900 text-lg leading-tight">lucirajewelry</h3>
-                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Lucira Jewelry</p>
-                </div>
-              </div>
-              <Link 
-                href="https://www.instagram.com/lucirajewelry" 
-                target="_blank"
-                className="text-pink-600 hover:scale-110 transition-transform"
-              >
-                <Instagram size={24} />
-              </Link>
+            {/* Media Content */}
+            <div className="w-full h-full md:max-w-4xl md:h-[90vh] md:rounded-3xl overflow-hidden bg-black relative flex items-center justify-center">
+              {item.isVideo ? (
+                  <video 
+                      src={item.mediaUrl} 
+                      className="w-full h-full object-contain"
+                      autoPlay={idx === currentIndex}
+                      loop
+                      muted={idx !== currentIndex || isMuted}
+                      playsInline
+                      preload="auto"
+                      key={`video-${item.id}-${idx === currentIndex}-${isMuted}`}
+                  />
+              ) : (
+                  <div className="relative w-full h-full">
+                      <LazyImage
+                          src={item.image}
+                          alt="Instagram Media"
+                          fill
+                          className="object-contain"
+                          priority={idx === currentIndex}
+                      />
+                  </div>
+              )}
             </div>
-
-            {/* Caption */}
-            <div className="flex-grow overflow-y-auto pr-4 custom-scrollbar mb-10">
-              <p className="text-gray-600 leading-relaxed text-base font-medium italic">
-                {item.caption || "Sparkle every day with Lucira's handcrafted elegance. ✨ From timeless classics to modern statements, find the piece that speaks to you. \n\n#LuciraJewelry #HandcraftedLuxury #FineJewelry #DiamondRings"}
-              </p>
-              
-              <div className="mt-8 flex flex-wrap gap-2">
-                {["FineJewelry", "Luxury", "Elegance", "Lucira"].map(tag => (
-                    <span key={tag} className="text-blue-600 font-bold text-sm hover:underline cursor-pointer">#{tag}</span>
-                ))}
-              </div>
-            </div>
-
-            {/* CTA */}
-            <Link 
-                href="https://www.instagram.com/lucirajewelry" 
-                target="_blank"
-                className="mt-auto w-full py-5 bg-black text-white rounded-2xl font-black text-xs uppercase tracking-[0.3em] text-center hover:bg-gray-900 transition-all shadow-xl active:scale-[0.98]"
-            >
-                View on Instagram
-            </Link>
           </div>
-        </div>
+        ))}
       </div>
 
       <style jsx global>{`
-        .custom-scrollbar::-webkit-scrollbar {
-          width: 4px;
+        .hide-scrollbar::-webkit-scrollbar {
+          display: none;
         }
-        .custom-scrollbar::-webkit-scrollbar-track {
-          background: #f9f9f9;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: #ddd;
-          border-radius: 10px;
+        .hide-scrollbar {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
         }
       `}</style>
     </div>
