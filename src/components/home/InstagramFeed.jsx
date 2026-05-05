@@ -57,9 +57,14 @@ export default function InstagramFeed() {
       try {
         const response = await fetch("/api/instagram");
         const data = await response.json();
-        setFeedData(data);
+        if (Array.isArray(data)) {
+          setFeedData(data);
+        } else {
+          setFeedData([]);
+        }
       } catch (error) {
         console.error("Error fetching Instagram feed:", error);
+        setFeedData([]);
       } finally {
         setLoading(false);
       }
@@ -77,6 +82,10 @@ export default function InstagramFeed() {
         </div>
       </section>
     );
+  }
+
+  if (!feedData || feedData.length === 0) {
+    return null;
   }
 
   return (
