@@ -111,10 +111,10 @@ export default function MyProfilePage() {
       return;
     }
 
-    // Phone validation: exactly 10 digits
-    const phoneRegex = /^[0-9]{10}$/;
-    if (!phoneRegex.test(formData.phone)) {
-      toast.error("Please enter a valid 10-digit phone number");
+    // Phone validation: strip non-digits and ensure at least 10 digits
+    const cleanPhone = formData.phone.replace(/\D/g, "");
+    if (cleanPhone.length < 10) {
+      toast.error("Please enter a valid phone number");
       return;
     }
 

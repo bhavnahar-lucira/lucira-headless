@@ -16,12 +16,13 @@ export default function ExploreCollectionSection() {
   const [activeTab, setActiveTab] = useState("On The Move");
   const [loading, setLoading] = useState(true);
 
+  const activeHandle = COLLECTION_HANDLE_MAP[activeTab] || "sports-collection";
+
   useEffect(() => {
     async function fetchCollectionProducts() {
       setLoading(true);
       try {
-        const handle = COLLECTION_HANDLE_MAP[activeTab] || "sports-collection";
-        const res = await fetch(`/api/products/search?handle=${encodeURIComponent(handle)}&limit=10`);
+        const res = await fetch(`/api/products/search?handle=${encodeURIComponent(activeHandle)}&limit=10`);
         const data = await res.json();
         if (data.products) {
           setProducts(data.products);
@@ -36,7 +37,7 @@ export default function ExploreCollectionSection() {
       }
     }
     fetchCollectionProducts();
-  }, [activeTab]);
+  }, [activeHandle]);
 
   return (
     <CollectionSection 
@@ -51,6 +52,7 @@ export default function ExploreCollectionSection() {
       <CollectionSlider 
         products={products.length > 0 ? products : (loading ? [] : null)} 
         loading={loading}
+        collectionHandle={activeHandle}
       />
     </CollectionSection>
   );

@@ -294,12 +294,12 @@ export default function WishlistPage() {
                 {/* Product Info */}
                 <div className="flex flex-col gap-3 px-1">
                   <Link href={`/products/${item.productHandle || item.productId}`}>
-                    <h3 className="text-base md:text-xl font-bold hover:underline underline-offset-4 decoration-1 leading-snug hover:text-gray-700 transition-colors line-clamp-2 min-h-7">
+                    <h3 className="font-figtree text-base md:text-lg font-bold hover:underline underline-offset-4 decoration-1 leading-snug hover:text-primary transition-colors truncate">
                       {item.title}
                     </h3>
                   </Link>
 
-                  {/* Rating Section */}
+                  {/* Rating Section ... rest of code */}
                   {item.reviews?.count > 0 && (
                     <div className="flex items-center gap-1.5">
                       <div className="flex items-center gap-0.5 text-amber-400">
@@ -324,7 +324,7 @@ export default function WishlistPage() {
 
                   {/* Price Section */}
                   <div className="flex items-center gap-3">
-                    <p className="text-xl font-black text-black">₹ {formatPrice(priceNum)}</p>
+                    <p className="text-xl font-black text-primary">₹ {formatPrice(priceNum)}</p>
                     {comparePriceNum > priceNum && (
                       <p className="text-base text-zinc-400 line-through">₹ {formatPrice(comparePriceNum)}</p>
                     )}
@@ -340,7 +340,7 @@ export default function WishlistPage() {
                     <button
                       onClick={() => handleMoveToCart(item)}
                       disabled={movingToCartId === item.productId}
-                      className="flex-1 flex items-center justify-center gap-2 bg-black text-white text-[11px] font-bold uppercase tracking-wider py-3 rounded-xl hover:bg-zinc-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="flex-1 flex items-center justify-center gap-2 bg-primary text-white text-[11px] font-bold uppercase tracking-wider py-3 rounded-xl hover:opacity-90 transition-all shadow-md shadow-primary/10 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {movingToCartId === item.productId ? (
                         <>
@@ -372,10 +372,10 @@ export default function WishlistPage() {
               <Heart size={40} />
             </div>
             <div className="space-y-2">
-              <h3 className="text-2xl font-black text-zinc-900">Your wishlist is empty</h3>
-              <p className="text-zinc-500 font-medium max-w-sm mx-auto">Start adding items you love to your wishlist and they’ll appear here.</p>
+              <h3 className="font-figtree text-2xl font-black text-primary">Your wishlist is empty</h3>
+              <p className="font-figtree text-zinc-500 font-medium max-w-sm mx-auto">Start adding items you love to your wishlist and they’ll appear here.</p>
             </div>
-            <Link href="/collections/all" className="inline-block px-10 py-4 bg-primary text-white text-sm font-black uppercase tracking-[0.2em] rounded-2xl shadow-xl shadow-primary/30 hover:scale-105 transition-transform">
+            <Link href="/collections/all" className="font-figtree inline-block px-10 py-4 bg-primary text-white text-sm font-black uppercase tracking-[0.2em] rounded-2xl shadow-xl shadow-primary/30 hover:scale-105 transition-transform">
               Browse Collections
             </Link>
           </div>

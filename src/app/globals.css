@@ -462,6 +462,7 @@
 
 @layer components {
   .footer-pages {
+    margin: 20px 0 0;
     font-family: var(--font-figtree), sans-serif !important;
   }
   .footer-pages * {
@@ -478,6 +479,9 @@
   .footer-pages h6 {
     font-family: var(--font-abhaya), serif !important;
   }
+  .footer-pages h1 {
+    @apply text-4xl
+  }
   .footer-pages p {
     @apply text-base my-4
   }
@@ -489,6 +493,29 @@
   }
   .footer-pages .section .section-content table td {
     @apply py-3.5 px-3 border border-[#ddd]
+  }
+  .btn-peek-animation {
+    @apply flex items-center overflow-hidden whitespace-nowrap transition-all duration-500 cursor-pointer ease-in-out;
+    max-width: 44px; 
+    animation: peek-container 4s ease-in-out forwards;
+  }
+  .btn-peek-animation .btn-text {
+    @apply opacity-0 ml-2 transition-opacity duration-300;
+    animation: peek-text 4s ease-in-out forwards;
+  }
+  .btn-peek-animation:hover {
+    max-width: 200px !important
+  }
+  .btn-peek-animation:hover .btn-text {
+    @apply opacity-100!;
+  }
+  @keyframes peek-container {
+    0%, 10%, 50%, 60% { max-width: 200px; }
+    30%, 40%, 80%, 100% { max-width: 44px; }
+  }
+  @keyframes peek-text {
+    0%, 15%, 50%, 65% { opacity: 1; }
+    35%, 45%, 85%, 100% { opacity: 0; }
   }
 }
 

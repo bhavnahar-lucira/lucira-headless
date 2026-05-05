@@ -196,6 +196,7 @@ export default function MobileHeader() {
   };
 
   const handleResultClick = (href) => {
+    if (!href) return;
     setShowSearch(false);
     setSearchQuery("");
     setSearchResults([]);
@@ -321,7 +322,12 @@ export default function MobileHeader() {
       authLogout();
       dispatch(clearCart());
       dispatch(restoreGuestWishlist());
-      router.push("/");
+      const currentPath = window.location.pathname;
+      if (currentPath.startsWith("/admin") || currentPath.startsWith("/dashboard")) {
+        router.push("/login");
+      } else {
+        router.refresh();
+      }
     }
   };
 

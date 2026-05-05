@@ -72,7 +72,7 @@ import {
 import { addRecentlyViewed, selectRecentlyViewed } from "@/redux/features/recentlyViewed/recentlyViewedSlice";
 import AtcBar from "@/components/AtcBar";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
-import { pushProductView, pushAddToCart, pushAddToWishlist, pushRemoveFromWishlist, formatGtmPrice, getNumericId, getStandardWishlistPayload } from "@/lib/gtm";
+import { pushProductView, pushAddToCart, pushAddToWishlist, pushRemoveFromWishlist, pushPromoClick, formatGtmPrice, getNumericId, getStandardWishlistPayload, pushToDataLayer } from "@/lib/gtm";
 
 import {
   Sheet,
@@ -146,7 +146,7 @@ const formatPrice = (num) => {
   if (num === null || num === undefined) return "0";
   // Convert to absolute integer to avoid any .00 trailing
   const val = Math.round(Number(num));
-  return new Intl.NumberFormat("en-IN", { 
+  return new Intl.NumberFormat("en-IN", {
     maximumFractionDigits: 0,
     minimumFractionDigits: 0
   }).format(val);
@@ -226,6 +226,7 @@ const serviceSlider = [
 
 export default function ProductPageClient({ product, complementaryProducts = [], matchingProducts = [] }) {
   const router = useRouter();
+  const collectionContext = useSelector((state) => state.user.collectionContext);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -251,7 +252,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
   const [isEngravingDrawerOpen, setIsEngravingDrawerOpen] = useState(false);
   const [savedEngraving, setSavedEngraving] = useState({ text: "", font: "" });
   const engravingInputRef = useRef(null);
-  
+
   const [giftText, setGiftText] = useState("");
   const [activePromoSlide, setActivePromoSlide] = useState(1);
   const [showSimilar, setShowSimilar] = useState(false);
@@ -295,8 +296,24 @@ export default function ProductPageClient({ product, complementaryProducts = [],
     fetchReviewStats();
   }, [product.shopifyId]);
 
-  // Initialize with the first in-stock variant if available, otherwise first variant
-  const initialVariant = product.variants?.find(v => v.inStock) || (product.variants && product.variants.length > 0 ? product.variants[0] : null);
+
+  // Initialize with priority for 9KT only if it's exclusively/primarily in the 9KT collection
+  const initialVariant = (() => {
+    const handles = product.collectionHandles || [];
+    // Only apply 9KT priority if it's in 9kt-collection and NOT in other thematic collections
+    // AND the user context is specifically from the 9kt-collection
+    const isStrict9kt = collectionContext === "9kt-collection" &&
+      handles.includes("9kt-collection") &&
+      !handles.some(h => h !== "9kt-collection" && h !== "all" && h !== product.type?.toLowerCase() &&
+        ["sports-collection", "cotton-candy", "hexa-collection", "solitaire-collection"].includes(h));
+
+    if (isStrict9kt) {
+      const nineKT = product.variants?.find(v => String(v.color || v.title).includes("9KT"));
+      if (nineKT) return nineKT;
+    }
+    return product.variants?.find(v => v.inStock) || (product.variants && product.variants.length > 0 ? product.variants[0] : null);
+  })();
+
   const initialSelection = getVariantSelection(initialVariant);
   const initialColor = initialSelection.color;
   const initialKarat = initialSelection.karat;
@@ -308,7 +325,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
   const [activeVariant, setActiveVariant] = useState(initialVariant);
   const [priceBreakup, setPriceBreakup] = useState(null);
   const shouldToastVariantChange = useRef(false);
-  
+
   // Pincode & Dispatch Logic
   const globalPincode = useSelector((state) => state.user.pincode);
   const [pincode, setPincode] = useState(globalPincode || "");
@@ -335,10 +352,10 @@ export default function ProductPageClient({ product, complementaryProducts = [],
   const calculateDispatchDate = useCallback(() => {
     // 1. Check if product is in stock or made to order
     const isInStock = activeVariant?.inStock === true || activeVariant?.inStock === "true";
-    
+
     const today = new Date();
     const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-    
+
     if (isInStock) {
       // Estimated free dispatch by 48hrs
       const dispatchDate = new Date(today);
@@ -348,7 +365,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
       // Made to order - use lead_time from metafields (default to 7 if missing)
       const leadTimeValue = parseInt(product.productMetafields?.lead_time) || 12;
       const totalDays = leadTimeValue + 3; // Lead time + 3 days buffer
-      
+
       const dispatchDate = new Date(today);
       dispatchDate.setDate(today.getDate() + totalDays);
       return `Estimated free dispatch by ${months[dispatchDate.getMonth()]} ${dispatchDate.getDate()}, ${dispatchDate.getFullYear()}`;
@@ -359,7 +376,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
     // If val is a string (like from useEffect), use it. 
     // Otherwise (from button click/event), use the current 'pincode' state.
     const pincodeToCheck = (typeof val === 'string' ? val : pincode).trim();
-    
+
     if (pincodeToCheck.length !== 6) {
       if (pincodeToCheck) toast.error("Please enter a valid 6-digit pincode");
       return;
@@ -371,7 +388,9 @@ export default function ProductPageClient({ product, complementaryProducts = [],
     try {
       const res = await fetch(`/api/pincodes/check?pincode=${pincodeToCheck}`);
       const data = await res.json();
-      console.log(res);
+
+      // GTM tracking for pincode entry
+      handlePromoClick('pincodeEntered', pincodeToCheck, {}, true);
       if (data.success && data.deliverable) {
         const dispatchMsg = calculateDispatchDate();
         setDeliveryInfo({
@@ -450,7 +469,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
     };
 
     const inStoreTags = activeVariant.metafields?.in_store_available || [];
-    
+
     // 1. Identify which stores actually have stock
     const stockStoreIds = allStores.filter(store => {
       if (inStoreTags.includes(store.shopifyId)) return true;
@@ -459,7 +478,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
 
       const storeNameLower = store.name.toLowerCase();
       const storeCityLower = (store.city || "").toLowerCase();
-      
+
       return inStoreTags.some(tag => {
         const tagLower = String(tag).toLowerCase();
         if (tagLower.includes("gid://")) return false;
@@ -475,16 +494,16 @@ export default function ProductPageClient({ product, complementaryProducts = [],
       let distance = null;
       if (deliveryInfo.coords && (store.latitude || store.lat) && (store.longitude || store.lng)) {
         distance = calculateDistance(
-          deliveryInfo.coords.lat, 
-          deliveryInfo.coords.lng, 
-          store.latitude || store.lat, 
+          deliveryInfo.coords.lat,
+          deliveryInfo.coords.lng,
+          store.latitude || store.lat,
           store.longitude || store.lng
         );
       }
-      return { 
-        ...store, 
-        distance, 
-        isInStock: stockStoreIds.includes(store.shopifyId) 
+      return {
+        ...store,
+        distance,
+        isInStock: stockStoreIds.includes(store.shopifyId)
       };
     });
 
@@ -500,11 +519,11 @@ export default function ProductPageClient({ product, complementaryProducts = [],
           return 1;
         }
       }
-      
+
       // 2. Stock status priority
       if (a.isInStock && !b.isInStock) return -1;
       if (!a.isInStock && b.isInStock) return 1;
-      
+
       // 3. Alphabetical fallback
       return a.name.localeCompare(b.name);
     });
@@ -530,21 +549,22 @@ export default function ProductPageClient({ product, complementaryProducts = [],
   const handleSaveEngraving = () => {
     setSavedEngraving({ text: engraving, font: engravingFont });
     setIsEngravingDrawerOpen(false);
+    handlePromoClick('Add Engraving Clicked', null, { location_id: getNumericId(activeVariant?.id) }, true);
   };
 
   const insertSymbol = (symbol) => {
     if (!engravingInputRef.current) return;
-    
+
     const input = engravingInputRef.current;
     const start = input.selectionStart || 0;
     const end = input.selectionEnd || 0;
     const text = engraving;
-    
+
     if (text.length >= 8) return;
 
     const newText = text.substring(0, start) + symbol + text.substring(end);
     setEngraving(newText.substring(0, 8));
-    
+
     // Focus back and set cursor
     setTimeout(() => {
       input.focus();
@@ -570,7 +590,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
             if (entry.isIntersecting) {
               setShowTopAtc(false);
               setShowBottomAtc(false);
-            } else if(isPastPoint) {
+            } else if (isPastPoint) {
               setShowTopAtc(true);
               setShowBottomAtc(false);
             } else {
@@ -584,7 +604,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
       );
 
       observer.observe(mainAtcRef.current);
-      
+
       return () => observer.disconnect();
     }, 100);
 
@@ -692,7 +712,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
         engravingText: savedEngraving.text,
         engravingFont: savedEngraving.font,
         giftText: giftText,
-        shippingDate: "13/04/2026", 
+        shippingDate: "13/04/2026",
         goldPricePerGram: raw?.metal?.rate_per_gram || 0,
         goldWeight: raw?.metal?.weight || parseFloat(fallbackWeight),
         goldPrice: raw?.metal?.cost || 0,
@@ -804,6 +824,85 @@ export default function ProductPageClient({ product, complementaryProducts = [],
     }
   };
 
+  const handlePromoClick = useCallback((creativeName, promoPosition = 'Product Details Section', extraData = {}, isMinimal = false) => {
+    if (isMinimal) {
+      const promoData = {
+        promo_id: activeVariant?.sku || product?.sku || "",
+        promo_name: product.title,
+        creative_name: creativeName,
+        ...extraData
+      };
+
+      // If promoPosition is provided and it's not the default, add it to promoData
+      if (promoPosition && promoPosition !== 'Product Details Section') {
+        promoData.promo_position = promoPosition;
+      }
+
+      pushPromoClick(promoData);
+      return;
+    }
+
+    const raw = priceBreakup?.raw_breakup || {};
+
+    const promoData = {
+      // Promotion Info
+      creative_name: creativeName,
+      promo_id: activeVariant?.sku || product?.sku || "",
+      promo_name: product.title,
+      promo_position: promoPosition,
+      position: "-",
+
+      // Product Info
+      product_id: getNumericId(product.shopifyId || product.id),
+      product_name: product.title,
+      sku: activeVariant?.sku || "",
+      variant_id: getNumericId(activeVariant?.id),
+      location_id: getNumericId(activeVariant?.id),
+
+      // URL & Image
+      product_url: typeof window !== 'undefined' ? window.location.href : "",
+      product_image: getValidSrc(activeVariant?.image || product.featuredImage || (product.media && product.media[0]?.url)),
+
+      // Pricing
+      price: (activeVariant?.price || product.price),
+      offer_price: (activeVariant?.price || product.price),
+
+      // Price Breakup Values
+      metal_label: (activeVariant?.metafields?.metal_purity || activeKarat) + ' ' + (activeVariant?.metafields?.metal_color || activeColor),
+      gold_rate_per_g: (raw?.metal?.rate_per_gram || 0),
+      metal_price: (raw?.metal?.cost || 0),
+
+      diamond_price_original: (raw?.diamond?.original || 0),
+      diamond_price_final: (raw?.diamond?.final || 0),
+      diamond_discount_percent: raw?.diamond?.discount_percent || 0,
+      diamond_pcs: raw?.diamond?.pcs || 0,
+
+      making_charges_original: (raw?.making_charges?.original || 0),
+      making_charges_final: (raw?.making_charges?.final || 0),
+      making_charges_discount_pct: raw?.making_charges?.discount_percent || 0,
+
+      gst_percent: raw?.gst?.percent || 0,
+      gst_amount: (raw?.gst?.amount || 0),
+
+      gemstone_price_original: (raw?.gemstone?.original || 0),
+      gemstone_price_final: (raw?.gemstone?.final || 0),
+      gemstone_pcs: raw?.gemstone?.pcs || 0,
+
+      grand_total: (raw?.total || activeVariant?.price || product.price),
+
+      // Savings (only for savings tab)
+      savings_amount: (extraData.savings_amount || 0),
+
+      // Optional
+      email: '',
+      phone: '',
+
+      ...extraData
+    };
+
+    pushPromoClick(promoData);
+  }, [product, activeVariant, activeColor, activeKarat, priceBreakup]);
+
   // Scroll to top on mount/refresh
   useEffect(() => {
     if ('scrollRestoration' in window.history) {
@@ -819,50 +918,50 @@ export default function ProductPageClient({ product, complementaryProducts = [],
 
   // Update active variant when selection changes
   useEffect(() => {
-    const variant = product.variants?.find(v => 
+    const variant = product.variants?.find(v =>
       v.color === `${activeKarat} ${activeColor}` && v.size === selectedSize
     );
     if (variant) setActiveVariant(variant);
   }, [activeColor, activeKarat, selectedSize, product.variants]);
 
-    //gtm
-    // Product View GTM Trigger, runs when variant changes or page loads
-    useEffect(() => {
-      if (activeVariant || product) {
-        // Helper to extract numeric ID from Shopify GID
-        const getNumericId = (gid) => {
-          if (!gid) return 0;
-          if (typeof gid === 'number') return gid;
-          const match = String(gid).match(/\d+$/);
-          return match ? Number(match[0]) : 0;
-        };
+  //gtm
+  // Product View GTM Trigger, runs when variant changes or page loads
+  useEffect(() => {
+    if (activeVariant || product) {
+      // Helper to extract numeric ID from Shopify GID
+      const getNumericId = (gid) => {
+        if (!gid) return 0;
+        if (typeof gid === 'number') return gid;
+        const match = String(gid).match(/\d+$/);
+        return match ? Number(match[0]) : 0;
+      };
 
-        const productImageUrl = getValidSrc(activeVariant?.image || product.images?.[0]);
-        const currentUrl = typeof window !== 'undefined' ? window.location.origin + `/products/${product.handle}` : "";
+      const productImageUrl = getValidSrc(activeVariant?.image || product.images?.[0]);
+      const currentUrl = typeof window !== 'undefined' ? window.location.origin + `/products/${product.handle}` : "";
 
-        // Correctly identify the Selling Price and the Original/Regular Price
-        const sellingPrice = Number(activeVariant?.price || product.price || 0);
-        const originalPrice = Number(activeVariant?.compare_price || activeVariant?.compareAtPrice || product.compare_price || product.compareAtPrice || sellingPrice);
+      // Correctly identify the Selling Price and the Original/Regular Price
+      const sellingPrice = Number(activeVariant?.price || product.price || 0);
+      const originalPrice = Number(activeVariant?.compare_price || activeVariant?.compareAtPrice || product.compare_price || product.compareAtPrice || sellingPrice);
 
-        pushProductView({
-          productId: getNumericId(product.shopifyId || product.id),
-          sku: activeVariant?.sku || "",
-          variantId: getNumericId(activeVariant?.id || activeVariant?.shopifyId),
-          vendorCode: product.vendor || "Lucira Jewelry",
-          productName: product.title,
-          productType: product.type || "",
-          category: product.type || "",
-          //subCategory: "0",
-          productUrl: currentUrl,
-          productUrlw: `/products/${product.handle}`,
-          thumbnailImage: productImageUrl,
-          image: productImageUrl,
-          price: originalPrice,
-          offerPrice: sellingPrice,
-          //productPersona: null
-        });
-      }
-    }, [activeVariant, product]);
+      pushProductView({
+        productId: getNumericId(product.shopifyId || product.id),
+        sku: activeVariant?.sku || "",
+        variantId: getNumericId(activeVariant?.id || activeVariant?.shopifyId),
+        vendorCode: product.vendor || "Lucira Jewelry",
+        productName: product.title,
+        productType: product.type || "",
+        category: product.type || "",
+        //subCategory: "0",
+        productUrl: currentUrl,
+        productUrlw: `/products/${product.handle}`,
+        thumbnailImage: productImageUrl,
+        image: productImageUrl,
+        price: originalPrice,
+        offerPrice: sellingPrice,
+        //productPersona: null
+      });
+    }
+  }, [activeVariant, product]);
 
 
 
@@ -902,7 +1001,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
       setShowSimilar(true);
       return;
     }
-    
+
     setLoadingSimilar(true);
     setShowSimilar(true);
     try {
@@ -923,9 +1022,9 @@ export default function ProductPageClient({ product, complementaryProducts = [],
     shouldToastVariantChange.current = true;
     setActiveColor(metal);
     setActiveKarat(karat);
-    
+
     // Find matching variant for new metal/karat with current size
-    const variant = product.variants?.find(v => 
+    const variant = product.variants?.find(v =>
       v.color === `${karat} ${metal}` && v.size === selectedSize
     );
     if (variant) setActiveVariant(variant);
@@ -936,9 +1035,9 @@ export default function ProductPageClient({ product, complementaryProducts = [],
 
     shouldToastVariantChange.current = true;
     setSelectedSize(size);
-    
+
     // Find matching variant for current metal/karat with new size
-    const variant = product.variants?.find(v => 
+    const variant = product.variants?.find(v =>
       v.color === `${activeKarat} ${activeColor}` && v.size === size
     );
     if (variant) setActiveVariant(variant);
@@ -969,19 +1068,19 @@ export default function ProductPageClient({ product, complementaryProducts = [],
     <div className="flex-1 overflow-y-auto">
       {/* Ring Preview */}
       <div className="relative w-full aspect-[16/9] bg-[#F9F9F9] flex items-center justify-center overflow-hidden">
-        <Image 
-          src="/images/engraving_bg.jpg" 
-          alt="Ring band preview" 
-          fill 
+        <Image
+          src="/images/engraving_bg.jpg"
+          alt="Ring band preview"
+          fill
           className="object-cover"
         />
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           {engraving && (
-            <div 
-              style={{ 
+            <div
+              style={{
                 fontFamily: `var(--font-${engravingFont.toLowerCase()})`,
                 textShadow: "1px 1px 1.5px rgba(255,255,255,0.8), -0.5px -0.5px 1px rgba(0,0,0,0.15)"
-              }} 
+              }}
               className="text-gray-800 text-xl sm:text-2xl tracking-[0.15em] opacity-80 italic -translate-y-9 sm:-translate-y-9"
             >
               {engraving}
@@ -1004,11 +1103,10 @@ export default function ProductPageClient({ product, complementaryProducts = [],
               <button
                 key={font}
                 onClick={() => setEngravingFont(font)}
-                className={`px-4 py-3 rounded-xl border text-sm transition-all duration-300 ${
-                  engravingFont === font 
-                    ? "border-black bg-zinc-900 text-white shadow-md scale-[1.02]" 
-                    : "border-gray-200 text-gray-600 hover:border-gray-400 bg-white"
-                }`}
+                className={`px-4 py-3 rounded-xl border text-sm transition-all duration-300 ${engravingFont === font
+                  ? "border-black bg-zinc-900 text-white shadow-md scale-[1.02]"
+                  : "border-gray-200 text-gray-600 hover:border-gray-400 bg-white"
+                  }`}
               >
                 <span style={{ fontFamily: `var(--font-${font.toLowerCase()})` }} className="text-lg">Aa - {font}</span>
               </button>
@@ -1023,7 +1121,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
               {engraving.length}/8 Characters
             </div>
           </div>
-          
+
           <div className="flex gap-3 items-center">
             <div className="relative flex-1">
               <Input
@@ -1037,14 +1135,14 @@ export default function ProductPageClient({ product, complementaryProducts = [],
               />
             </div>
             <div className="flex gap-2 shrink-0">
-              <button 
+              <button
                 onClick={() => insertSymbol("♥")}
                 className="w-12 h-12 flex items-center justify-center border-2 border-zinc-100 rounded-xl hover:border-black hover:bg-zinc-50 transition-all active:scale-95"
                 title="Insert Heart"
               >
                 <span className="text-2xl text-black">♥</span>
               </button>
-              <button 
+              <button
                 onClick={() => insertSymbol("∞")}
                 className="w-12 h-12 flex items-center justify-center border-2 border-zinc-100 rounded-xl hover:border-black hover:bg-zinc-50 transition-all active:scale-95"
                 title="Insert Infinity"
@@ -1060,10 +1158,10 @@ export default function ProductPageClient({ product, complementaryProducts = [],
 
   return (
     <div className={`w-full ${lobster.variable} ${yellowtail.variable} ${satisfy.variable} ${abeezee.variable}`}>
-      <AtcBar 
+      <AtcBar
         isTopVisible={showTopAtc}
-        isBottomVisible={showBottomAtc} 
-        product={product} 
+        isBottomVisible={showBottomAtc}
+        product={product}
         activeVariant={activeVariant}
         onAddToCart={handleAddToCart}
         addingToCart={addingToCart}
@@ -1078,11 +1176,11 @@ export default function ProductPageClient({ product, complementaryProducts = [],
             <BreadcrumbItem>
               <BreadcrumbLink href="/collections" className="text-sm font-medium text-black">Collections</BreadcrumbLink>
             </BreadcrumbItem>
-            <BreadcrumbSeparator><ChevronRight size={14}/></BreadcrumbSeparator>
+            <BreadcrumbSeparator><ChevronRight size={14} /></BreadcrumbSeparator>
             <BreadcrumbItem>
               <BreadcrumbLink href={`/collections/${slugify(product.type)}`} className="text-sm font-medium text-black">{product.type}</BreadcrumbLink>
             </BreadcrumbItem>
-            <BreadcrumbSeparator><ChevronRight size={14}/></BreadcrumbSeparator>
+            <BreadcrumbSeparator><ChevronRight size={14} /></BreadcrumbSeparator>
             <BreadcrumbItem className="text-sm font-medium text-gray-400 truncate line-clamp-1">
               {product.title}
             </BreadcrumbItem>
@@ -1115,45 +1213,45 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                       const prodMeta = product.productMetafields;
                       const pricingDiamond = priceBreakup?.diamond_info;
                       const ornaverseComp = parseOrnaverseComponent(variantMeta?.components || prodMeta?.components);
-                      
+
                       // Find the first diamond component for summary display
-                      const firstDiamond = ornaverseComp?.components?.find(c => 
+                      const firstDiamond = ornaverseComp?.components?.find(c =>
                         (c.item_group_name === "Diamond" || (c.quality_code && c.quality_code !== "NA")) && (parseFloat(c.weight) > 0 || parseInt(c.pieces) > 0)
                       );
-                      
+
                       const variantDiamonds = variantMeta?.diamonds?.filter(d => parseFloat(d.weight) > 0 || parseInt(d.pieces) > 0) || [];
                       const isDiamondProduct = !!firstDiamond || variantDiamonds.length > 0 || (!!pricingDiamond && (parseFloat(pricingDiamond.weight) > 0 || parseInt(pricingDiamond.pcs) > 0));
-                      
+
                       const parts = [];
-                      
+
                       if (isDiamondProduct) {
                         // 1. Diamond Quality
                         const quality = (firstDiamond?.quality_code && firstDiamond?.stone_color_code && firstDiamond.quality_code !== "NA" && firstDiamond.stone_color_code !== "NA")
                           ? `${firstDiamond.quality_code}, ${firstDiamond.stone_color_code}`
                           : (firstDiamond?.purity || variantDiamonds[0]?.quality || pricingDiamond?.title || prodMeta?.quality);
-                        
+
                         // 2. Diamond Carat
-                        const carat = variantDiamonds[0]?.weight 
-                          ? `${variantDiamonds[0].weight}ct` 
+                        const carat = variantDiamonds[0]?.weight
+                          ? `${variantDiamonds[0].weight}ct`
                           : (firstDiamond?.weight ? `${firstDiamond.weight}ct` : prodMeta?.carat_range);
-                          
+
                         if (quality && quality !== "NA") parts.push(quality);
                         if (carat && carat !== "NA" && !carat.startsWith("0ct")) parts.push(carat);
-                      } 
-                      
+                      }
+
                       // If no diamond parts were added, or it's not a diamond product, show metal purity
                       if (parts.length === 0) {
                         const metalPurity = variantMeta?.metal_purity || activeKarat;
                         if (metalPurity) parts.push(metalPurity);
                       }
-                      
+
                       // 3. Metal Weight
                       const weightVal = variantMeta?.metal_weight || prodMeta?.weight;
                       const weight = weightVal ? `${weightVal}${String(weightVal).toLowerCase().includes('g') ? '' : 'g'}` : null;
                       if (weight) parts.push(weight);
 
                       if (parts.length === 0) return null;
-                      
+
                       return (
                         <p className="font-figtree text-[10px] lg:text-sm font-medium text-gray-800 uppercase tracking-tight">
                           {parts.join(" · ")}
@@ -1161,7 +1259,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                       );
                     })()}
                     {/* Rating */}
-                    {reviewStats.count > 0 && (
+                    {((product.reviews?.count || product.reviewStats?.count) > 0) && (
                       <div
                         className="flex items-center gap-1.5 cursor-pointer hover:opacity-80 transition-opacity"
                         onClick={() =>
@@ -1180,12 +1278,12 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                         </span>
                       </div>
                     )}
-                  </div>                  
+                  </div>
                 </div>
               </div>
 
               {/* Price */}
-              <div className="w-full">  
+              <div className="w-full">
                 <div className="flex flex-row flex-wrap items-center justify-between gap-3 pt-1">
                   <div className="flex flex-wrap items-center gap-2 md:gap-3">
                     <span className="text-lg sm:text-xl md:text-2xl font-bold">&#8377;{formatPrice(currentPrice)}</span>
@@ -1200,7 +1298,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                       </span>
                     )}
                   </div>
-                  <button 
+                  <button
                     onClick={() =>
                       productDetailsRef.current?.scrollIntoView({ behavior: "smooth" })
                     }
@@ -1213,7 +1311,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                   Inclusive of all taxes.
                 </p>
               </div>
-              
+
               {/* Savings Banners Slider */}
               {(() => {
                 const raw = priceBreakup?.raw_breakup;
@@ -1288,7 +1386,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                 );
               })()}
               <Separator />
-            </div> 
+            </div>
 
             <div className="space-y-6 mt-4">
               {/* Mobile Customizer */}
@@ -1329,14 +1427,29 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                           }
                         }
                       });
-                      
-                      // Sort combinations: 14KT first, then 18KT. Inside each, White, Yellow, Rose.
+
+
+                      // Sort combinations based on collection context
+                      const handles = product.collectionHandles || [];
+                      const isStrict9kt = collectionContext === "9kt-collection" &&
+                        handles.includes("9kt-collection") &&
+                        !handles.some(h => h !== "9kt-collection" && h !== "all" && h !== product.type?.toLowerCase() &&
+                          ["sports-collection", "cotton-candy", "hexa-collection", "solitaire-collection"].includes(h));
+
+                      const karatOrder = isStrict9kt ? ["9KT", "14KT", "18KT"] : ["14KT", "18KT", "9KT"];
+
                       const metalOrder = ["White Gold", "Yellow Gold", "Rose Gold"];
+
                       combinations.sort((a, b) => {
-                        if (a.karat !== b.karat) return a.karat.localeCompare(b.karat);
+                        const aKaratIdx = karatOrder.indexOf(a.karat.toUpperCase());
+                        const bKaratIdx = karatOrder.indexOf(b.karat.toUpperCase());
+
+                        const aKaratVal = aKaratIdx === -1 ? 99 : aKaratIdx;
+                        const bKaratVal = bKaratIdx === -1 ? 99 : bKaratIdx;
+
+                        if (aKaratVal !== bKaratVal) return aKaratVal - bKaratVal;
                         return metalOrder.indexOf(a.metal) - metalOrder.indexOf(b.metal);
                       });
-
                       const colorMap = {
                         yellow: "linear-gradient(147.45deg, #c59922 17.98%, #ead59e 48.14%, #c59922 83.84%)",
                         rose: "linear-gradient(154.36deg, #f2b5b5 10.36%, #f8dbdb 68.09%)",
@@ -1347,16 +1460,16 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                         let colorClass = colorMap.yellow;
                         if (metal.includes("White")) colorClass = colorMap.white;
                         if (metal.includes("Rose")) colorClass = colorMap.rose;
-                        
+
                         return (
-                          <GoldOption 
+                          <GoldOption
                             key={`${karat}-${metal}`}
-                            metal={metal} 
-                            karat={karat} 
-                            onClick={handleGoldSelection} 
-                            active={activeColor === metal && activeKarat === karat} 
-                            color={colorClass} 
-                            inStock={isColorInStock(metal, karat)} 
+                            metal={metal}
+                            karat={karat}
+                            onClick={handleGoldSelection}
+                            active={activeColor === metal && activeKarat === karat}
+                            color={colorClass}
+                            inStock={isColorInStock(metal, karat)}
                           />
                         );
                       });
@@ -1365,87 +1478,91 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                 </div>
 
                 {/* Ring Size */}
-                  <div className="space-y-4">
-                {availableSizes.length > 0 && availableSizes[0] !== null && availableSizes[0] !== undefined && (
-                  <>
-                    <div className="flex justify-between items-center text-sm">
-                      <span className="font-semibold text-base">Select Ring Size: <span className="font-medium ml-1">{selectedSize} IND</span></span>
+                <div className="space-y-4">
+                  {availableSizes.length > 0 && availableSizes[0] !== null && availableSizes[0] !== undefined && (
+                    <>
+                      <div className="flex justify-between items-center text-sm">
+                        <span className="font-semibold text-base">Select Ring Size: <span className="font-medium ml-1">{selectedSize} IND</span></span>
+                        {String(product.type || "").toLowerCase().includes("ring") && (
+                          <SizeGuideSheet>
+                            <button
+                              className="text-sm font-medium underline underline-offset-4 decoration-gray-300 hover:cursor-pointer"
+                              onClick={() => handlePromoClick('Size Guide Clicked', null, {}, true)}
+                            >
+                              Size Guide
+                            </button>
+                          </SizeGuideSheet>
+                        )}
+                      </div>
+
                       {String(product.type || "").toLowerCase().includes("ring") && (
-                        <SizeGuideSheet>
-                          <button className="text-sm font-medium underline underline-offset-4 decoration-gray-300 hover:cursor-pointer">Size Guide</button>
-                        </SizeGuideSheet>
-                      )}
-                    </div>
-
-                    {String(product.type || "").toLowerCase().includes("ring") && (
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <div className="bg-[#F8F9FA] rounded-lg flex items-center gap-4 px-4 py-2.5 border border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors">
-                            <div className="bg-white rounded-lg shadow-sm">
-                              <Image src="/images/Sizing_A_ring_thumb.jpg" alt="Video Icon" aspect-ratio="3/4" width={60} height={25} />
-                              {/* <Video size={16} fill="black" /> */}
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <div className="bg-[#F8F9FA] rounded-lg flex items-center gap-4 px-4 py-2.5 border border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors">
+                              <div className="bg-white rounded-lg shadow-sm">
+                                <Image src="/images/Sizing_A_ring_thumb.jpg" alt="Video Icon" aspect-ratio="3/4" width={60} height={25} />
+                                {/* <Video size={16} fill="black" /> */}
+                              </div>
+                              <span className="text-base text-black">
+                                Watch this quick video to measure your ring right.
+                              </span>
                             </div>
-                            <span className="text-base text-black">
-                              Watch this quick video to measure your ring right.
-                            </span>
-                          </div>
-                        </DialogTrigger>
+                          </DialogTrigger>
 
-                        <DialogContent className="sm:max-w-[800px] p-0 overflow-hidden border-none bg-transparent shadow-none">
-                          <DialogHeader className="sr-only">
-                            <DialogTitle>Ring Measurement Tutorial</DialogTitle>
-                          </DialogHeader>
-                          
-                          <div className="relative w-full aspect-video bg-black rounded-lg overflow-hidden">
-                            <video 
-                              src="https://cdn.shopify.com/videos/c/o/v/b6bd45e165384f7bb50a9598b5986822.mp4"
-                              className="w-full h-full"
-                              autoPlay
-                              muted
-                              playsInline
-                              controls
-                            />
-                          </div>
-                        </DialogContent>
-                      </Dialog>
-                    )}
+                          <DialogContent className="sm:max-w-[800px] p-0 overflow-hidden border-none bg-transparent shadow-none">
+                            <DialogHeader className="sr-only">
+                              <DialogTitle>Ring Measurement Tutorial</DialogTitle>
+                            </DialogHeader>
 
-                    <div className="grid grid-cols-7 gap-4">
-                      {availableSizes.map(sizeStr => {
-                        const inStock = isSizeInStock(sizeStr);
-                        return (
-                          <button
-                            key={`size-${sizeStr}`}
-                            onClick={() => handleSizeSelection(sizeStr)}
-                            className={`relative border rounded-md h-10 px-0.5 flex items-center justify-center text-sm transition-all ${
-                              sizeStr === selectedSize
+                            <div className="relative w-full aspect-video bg-black rounded-lg overflow-hidden">
+                              <video
+                                src="https://cdn.shopify.com/videos/c/o/v/b6bd45e165384f7bb50a9598b5986822.mp4"
+                                className="w-full h-full"
+                                autoPlay
+                                muted
+                                playsInline
+                                controls
+                              />
+                            </div>
+                          </DialogContent>
+                        </Dialog>
+                      )}
+
+                      <div className="grid grid-cols-7 gap-4">
+                        {availableSizes.map(sizeStr => {
+                          const inStock = isSizeInStock(sizeStr);
+                          return (
+                            <button
+                              key={`size-${sizeStr}`}
+                              onClick={() => handleSizeSelection(sizeStr)}
+                              className={`relative border rounded-md h-10 px-0.5 flex items-center justify-center text-sm transition-all ${sizeStr === selectedSize
                                 ? "border-primary bg-white ring-1 ring-primary font-bold"
                                 : "border-gray-200 hover:border-primary font-normal"
-                            }`}
-                          >
-                            {sizeStr}
-                            {inStock && <span className="absolute top-1 left-1 w-1.5 h-1.5 bg-[#2DB36F] rounded-full"></span>}
-                          </button>
-                        );
-                      })}
-                    </div>
-                    <p className="text-sm text-black font-medium">Didn&apos;t get the size right? We&apos;ll exchange it.</p>  
+                                }`}
+                            >
+                              {sizeStr}
+                              {inStock && <span className="absolute top-1 left-1 w-1.5 h-1.5 bg-[#2DB36F] rounded-full"></span>}
+                            </button>
+                          );
+                        })}
+                      </div>
+                      <p className="text-sm text-black font-medium">Didn&apos;t get the size right? We&apos;ll exchange it.</p>
                     </>
-                  )}              
-                    {activeVariant?.inStock ? (
-                      <div className="bg-[#ECF7F2] border border-[#B3E1CD] text-black rounded-lg px-4 py-3 flex items-center gap-1 xl:flex-nowrap lg:flex-wrap">
-                        <span className="w-2.5 h-2.5 bg-[#189351] rounded-full"></span>
-                        This combination is <span className="font-semibold xl:basis-auto lg:basis-full">in-stock & ready to ship in 24 hrs</span>
-                      </div>
-                    ) : (
-                      <div className="bg-amber-50 border border-amber-200 text-black rounded-lg px-4 py-3 flex items-center gap-1 xl:flex-nowrap lg:flex-wrap">
-                        <span className="w-2.5 h-2.5 bg-amber-500 rounded-full"></span>
-                        This combination will be <span className="font-semibold xl:basis-auto lg:basis-full">made to order (dispatched in 10-15 days)</span>
-                      </div>
-                    )}
-                  </div>
+                  )}
+                  {activeVariant?.inStock ? (
+                    <div className="bg-[#ECF7F2] border border-[#B3E1CD] text-black rounded-lg px-4 py-3 flex items-center gap-1 xl:flex-nowrap lg:flex-wrap">
+                      <span className="w-2.5 h-2.5 bg-[#189351] rounded-full"></span>
+                      This combination is <span className="font-semibold xl:basis-auto lg:basis-full">in-stock & ready to ship in 24 hrs</span>
+                    </div>
+                  ) : (
+                    <div className="bg-amber-50 border border-amber-200 text-black rounded-lg px-4 py-3 flex items-center gap-1 xl:flex-nowrap lg:flex-wrap">
+                      <span className="w-2.5 h-2.5 bg-amber-500 rounded-full"></span>
+                      This combination will be <span className="font-semibold xl:basis-auto lg:basis-full">made to order (dispatched in 10-15 days)</span>
+                    </div>
+                  )}
+                </div>
               </div>
-              
+
               <Separator />
             </div>
 
@@ -1460,7 +1577,10 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                   </p>
                 </div>
 
-                <div className="flex gap-4 items-center mt-4 group cursor-pointer" onClick={() => setIsEngravingDrawerOpen(true)}>
+                <div className="flex gap-4 items-center mt-4 group cursor-pointer" onClick={() => {
+                  setIsEngravingDrawerOpen(true);
+                  handlePromoClick('Add Engraving Clicked', null, {}, true);
+                }}>
                   <div className="relative flex-1">
                     <div className="h-12 bg-white border border-gray-300 rounded-md px-4 flex items-center text-gray-400 text-sm group-hover:border-primary transition-colors">
                       {savedEngraving.text ? (
@@ -1474,7 +1594,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                     <Button variant="ghost" className="absolute right-2 top-1/2 -translate-y-1/2 text-sm font-bold text-gray-400 group-hover:text-primary">
                       ENGRAVE
                     </Button>
-                  </div>                
+                  </div>
                 </div>
 
                 {isMobile ? (
@@ -1495,7 +1615,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                           </div>
                           {renderEngravingContent()}
                           <div className="p-3 border-t border-gray-100">
-                            <Button 
+                            <Button
                               onClick={handleSaveEngraving}
                               className="w-full h-12 font-bold rounded-full uppercase tracking-wider disabled:opacity-50"
                               disabled={!engraving}
@@ -1519,11 +1639,11 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                           </button>
                         </SheetClose>
                       </SheetHeader>
-                      
+
                       {renderEngravingContent()}
 
                       <div className="p-6 border-t border-gray-100">
-                        <Button 
+                        <Button
                           onClick={handleSaveEngraving}
                           className="w-full h-12 font-bold rounded-full uppercase tracking-wider disabled:opacity-50"
                           disabled={!engraving}
@@ -1538,11 +1658,11 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                 {savedEngraving.text && (
                   <div className="mt-3 flex items-center gap-2 text-primary font-semibold text-sm bg-primary/5 w-fit px-3 py-1.5 rounded-full border border-primary/10">
                     <Check size={14} />
-                    Engraving Saved: 
+                    Engraving Saved:
                     <span style={{ fontFamily: `var(--font-${savedEngraving.font.toLowerCase()})` }} className="ml-1 text-base underline decoration-dotted">
                       {savedEngraving.text}
                     </span>
-                    <button 
+                    <button
                       onClick={() => {
                         setSavedEngraving({ text: "", font: "" });
                         setEngraving("");
@@ -1554,77 +1674,77 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                   </div>
                 )}
               </div>
-            )}  
+            )}
             <div className="space-y-2 mb-4">
-                <Drawer open={showSimilar} onOpenChange={setShowSimilar}>                  
-                  <DrawerContent className="max-h-[90vh] h-[90vh] bg-white rounded-t-[20px] flex flex-col">
-                    <div className="mx-auto w-full flex flex-col h-full overflow-hidden">
-                      <DrawerHeader className="px-10 py-6 flex flex-row items-center justify-between border-b border-zinc-100 !text-left !flex-row shrink-0">
-                        <DrawerTitle className="text-xl font-medium text-black uppercase">VIEW SIMILAR</DrawerTitle>
-                        <DrawerClose asChild>
-                          <button className="text-zinc-400 hover:text-black transition-colors hover:cursor-pointer p-1">
-                            <X size={22} strokeWidth={1.5} />
-                          </button>
-                        </DrawerClose>
-                      </DrawerHeader>
-                      
-                      <div className="sm:px-10 sm:py-10 px-5 py-5 overflow-y-auto flex-1">
-                        {loadingSimilar ? (
-                          <div className="flex flex-col items-center justify-center py-20 gap-4 w-full">
-                            <Loader2 className="animate-spin text-zinc-400" size={40} />
-                            <p className="text-sm font-bold uppercase tracking-widest text-zinc-400">Searching matching designs...</p>
-                          </div>
-                        ) : similarProducts.length > 0 ? (
-                          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 sm:gap-x-8 gap-x-4 sm:gap-y-12 gap-y-6 pb-10">
-                            {similarProducts.slice(0, 10).map((item) => (
-                              <div key={item.shopifyId || item._id || item.id} className="space-y-4">
-                                <Link href={`/products/${item.handle}`} onClick={() => setShowSimilar(false)} className="block space-y-4 group">
-                                  <div className="aspect-square relative rounded-md bg-[#F9F9F9] overflow-hidden transition-all duration-300 group-hover:bg-[#f3f3f3]">
-                                    <Image
-                                      src={getValidSrc(item.image)}
-                                      alt={item.title || "Similar product"}
-                                      fill
-                                      className="w-full h-full object-contain p-4 mix-blend-multiply transition-transform duration-500 group-hover:scale-105"
-                                    />
-                                  </div>
-                                  <div className="space-y-2 px-0">
-                                    <h4 className="text-[13px] font-normal text-zinc-900 line-clamp-1 leading-relaxed tracking-tight">{item.title}</h4>
-                                    <div className="space-y-2">
-                                      <div className="flex items-center gap-2">
-                                        <p className="text-[14px] font-bold text-black tracking-tight">₹{formatPrice(item.price)}</p>
-                                        {(item.compare_price || item.compareAtPrice) > item.price && (
-                                          <p className="text-[12px] text-zinc-400 line-through font-medium">₹{formatPrice(item.compare_price || item.compareAtPrice)}</p>
-                                        )}
-                                      </div>
-                                      <div className="flex items-center gap-1 group/link">
-                                        <span className="text-[10px] font-bold text-zinc-900 uppercase tracking-widest border-b border-zinc-200 pb-0.5 group-hover/link:border-black transition-colors">
-                                          VIEW DETAILS
-                                        </span>
-                                        <ChevronRight size={10} className="text-zinc-900" />
-                                      </div>
+              <Drawer open={showSimilar} onOpenChange={setShowSimilar}>
+                <DrawerContent className="max-h-[90vh] h-[90vh] bg-white rounded-t-[20px] flex flex-col">
+                  <div className="mx-auto w-full flex flex-col h-full overflow-hidden">
+                    <DrawerHeader className="px-10 py-6 flex flex-row items-center justify-between border-b border-zinc-100 !text-left !flex-row shrink-0">
+                      <DrawerTitle className="text-xl font-medium text-black uppercase">VIEW SIMILAR</DrawerTitle>
+                      <DrawerClose asChild>
+                        <button className="text-zinc-400 hover:text-black transition-colors hover:cursor-pointer p-1">
+                          <X size={22} strokeWidth={1.5} />
+                        </button>
+                      </DrawerClose>
+                    </DrawerHeader>
+
+                    <div className="sm:px-10 sm:py-10 px-5 py-5 overflow-y-auto flex-1">
+                      {loadingSimilar ? (
+                        <div className="flex flex-col items-center justify-center py-20 gap-4 w-full">
+                          <Loader2 className="animate-spin text-zinc-400" size={40} />
+                          <p className="text-sm font-bold uppercase tracking-widest text-zinc-400">Searching matching designs...</p>
+                        </div>
+                      ) : similarProducts.length > 0 ? (
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 sm:gap-x-8 gap-x-4 sm:gap-y-12 gap-y-6 pb-10">
+                          {similarProducts.slice(0, 10).map((item) => (
+                            <div key={item.shopifyId || item._id || item.id} className="space-y-4">
+                              <Link href={`/products/${item.handle}`} onClick={() => setShowSimilar(false)} className="block space-y-4 group">
+                                <div className="aspect-square relative rounded-md bg-[#F9F9F9] overflow-hidden transition-all duration-300 group-hover:bg-[#f3f3f3]">
+                                  <Image
+                                    src={getValidSrc(item.image)}
+                                    alt={item.title || "Similar product"}
+                                    fill
+                                    className="w-full h-full object-contain p-4 mix-blend-multiply transition-transform duration-500 group-hover:scale-105"
+                                  />
+                                </div>
+                                <div className="space-y-2 px-0">
+                                  <h4 className="text-[13px] font-normal text-zinc-900 line-clamp-1 leading-relaxed tracking-tight">{item.title}</h4>
+                                  <div className="space-y-2">
+                                    <div className="flex items-center gap-2">
+                                      <p className="text-[14px] font-bold text-black tracking-tight">₹{formatPrice(item.price)}</p>
+                                      {(item.compare_price || item.compareAtPrice) > item.price && (
+                                        <p className="text-[12px] text-zinc-400 line-through font-medium">₹{formatPrice(item.compare_price || item.compareAtPrice)}</p>
+                                      )}
+                                    </div>
+                                    <div className="flex items-center gap-1 group/link">
+                                      <span className="text-[10px] font-bold text-zinc-900 uppercase tracking-widest border-b border-zinc-200 pb-0.5 group-hover/link:border-black transition-colors">
+                                        VIEW DETAILS
+                                      </span>
+                                      <ChevronRight size={10} className="text-zinc-900" />
                                     </div>
                                   </div>
-                                </Link>
-                              </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <div className="flex flex-col items-center justify-center py-20 text-center gap-4 w-full">
-                            <div className="w-16 h-16 bg-zinc-50 rounded-full flex items-center justify-center">
-                              <Copy className="text-zinc-300" size={30} />
+                                </div>
+                              </Link>
                             </div>
-                            <p className="font-bold text-zinc-500 uppercase tracking-widest text-sm">No similar items found for this design.</p>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="flex flex-col items-center justify-center py-20 text-center gap-4 w-full">
+                          <div className="w-16 h-16 bg-zinc-50 rounded-full flex items-center justify-center">
+                            <Copy className="text-zinc-300" size={30} />
                           </div>
-                        )}
-                      </div>
+                          <p className="font-bold text-zinc-500 uppercase tracking-widest text-sm">No similar items found for this design.</p>
+                        </div>
+                      )}
                     </div>
-                  </DrawerContent>
-                </Drawer>              
+                  </div>
+                </DrawerContent>
+              </Drawer>
             </div>
 
             <div ref={mainAtcRef} className="space-y-2 mb-4">
               <div className="flex gap-2">
-                <Button 
+                <Button
                   onClick={handleAddToCart}
                   disabled={addingToCart}
                   className="flex-1 h-12 text-lg font-bold rounded-md hover:cursor-pointer"
@@ -1661,7 +1781,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                 </Button>
               </div>
             </div>
-           
+
             {/* Features */}
             <div className="space-y-4">
               <div className="grid grid-cols-2 md:grid-cols-2 gap-y-4 gap-x-6 lg:gap-x-6 text-xs sm:text-sm font-medium text-black`">
@@ -1671,7 +1791,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                 <Feature icon={<Image src="/images/product/certified.svg" alt="Return icon" width={28} height={28} />} text="IGI and Hallmark certified" />
               </div>
 
-              <Separator/>
+              <Separator />
 
               {/* Lucira Coins */}
               <div className="flex gap-4 items-center bg-gray-50 border border-gray-100 rounded-xl p-4">
@@ -1688,7 +1808,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                 </div>
               </div>
 
-              <Separator/>
+              <Separator />
             </div>
 
             <div className="space-y-4 mt-4">
@@ -1702,7 +1822,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                     onKeyDown={(e) => e.key === 'Enter' && handlePincodeCheck()}
                     className="h-14 bg-white border-gray-200 rounded-md text-sm font-medium pr-40"
                   />
-                  <Button 
+                  <Button
                     onClick={handlePincodeCheck}
                     disabled={checkingPincode}
                     className="h-12 px-10 font-bold rounded-md absolute right-1 top-1/2 transform -translate-y-1/2 hover:cursor-pointer"
@@ -1739,10 +1859,10 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                       </span>
                     </div>
                     <div className="flex items-center gap-2 bg-[#E3F5E0] text-black px-3 py-1.5 rounded-full w-fit">
-                          <div className="w-3.5 h-3.5 bg-[#76D168] rounded-full flex items-center justify-center">
-                            <Check size={9} className="text-white" strokeWidth={4} />
-                          </div>
-                          <span className="text-12px font-semibold tracking-tight">Design Available</span>
+                      <div className="w-3.5 h-3.5 bg-[#76D168] rounded-full flex items-center justify-center">
+                        <Check size={9} className="text-white" strokeWidth={4} />
+                      </div>
+                      <span className="text-12px font-semibold tracking-tight">Design Available</span>
                     </div>
                   </>
                 )}
@@ -1751,14 +1871,14 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                     Also available in <button onClick={() => setIsStoreDrawerOpen(true)} className="underline underline-offset-2 font-bold">{availableStoreCount - 1} other stores</button>
                   </p>
                 )}
-                <Button 
+                <Button
                   onClick={() => setIsStoreDrawerOpen(true)}
                   className="w-full h-12 font-bold rounded-md mt-1 text-sm uppercase tracking-widest"
                 >
                   {availableStoreCount > 0 ? "FIND IN STORE" : "FIND STORE"}
                 </Button>
               </div>
-              <Separator/>
+              <Separator />
             </div>
 
             {/* Promo Cards Slider */}
@@ -1789,7 +1909,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                 {/* Slider Indicator */}
                 <div className="flex items-center gap-5 mt-4">
                   <div className="flex-1 h-0.75 bg-gray-100 rounded-full overflow-hidden">
-                    <div 
+                    <div
                       className="h-full bg-black rounded-full transition-all duration-300"
                       style={{ width: `${(activePromoSlide / 3) * 100}%` }}
                     ></div>
@@ -1797,7 +1917,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                   <span className="text-[12px] font-bold tracking-tight text-black">{activePromoSlide}/3</span>
                 </div>
               </div>
-              <Separator/>            
+              <Separator />
             </div>
             {/* Explore Section */}
             <div className="space-y-4 mt-4">
@@ -1809,6 +1929,14 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                 action="BOOK APPOINTMENT"
                 img="/images/store.jpg"
                 url="https://wa.me/919004435760?text=Hi,%20I%20want%20to%20book%20an%20appointment"
+                onClick={() => pushToDataLayer({
+                  event: 'promoClick',
+                  promoClick: {
+                    promo_id: getNumericId(product.shopifyId || product.id),
+                    creative_name: 'Visit Store Button clicked',
+                    location_id: 'Pdp',
+                  }
+                })}
               />
               <ExploreCard
                 key="try-at-home"
@@ -1817,8 +1945,17 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                 action="BOOK HOME TRIAL"
                 img="/images/subscribe-2.jpg"
                 url="https://wa.me/919004435760?text=Hi,%20I%20want%20to%20try%20this%20at%20home"
+                onClick={() => pushToDataLayer({
+                  event: 'promoClick',
+                  promoClick: {
+                    promo_id: 'Try at Home',
+                    promo_name: 'Try at Home Button',
+                    creative_name: 'Try at Home Section',
+                    location_id: 'TryAtHomeOverlay',
+                  }
+                })}
               />
-              <Separator/>
+              <Separator />
             </div>
 
             {/* Product Details Section */}
@@ -1826,17 +1963,18 @@ export default function ProductPageClient({ product, complementaryProducts = [],
               <div className="flex justify-between items-center">
                 <h2 className="text-base font-bold tracking-tight uppercase">Product Details</h2>
                 {activeVariant?.sku && (
-                  <div 
+                  <div
                     className="flex items-center gap-1.5 cursor-pointer group"
                     title="Click to copy SKU"
                     onClick={() => {
                       navigator.clipboard.writeText(activeVariant.sku);
-                      toast.success("SKU Copied!", { 
+                      toast.success("SKU Copied!", {
                         position: "bottom-center",
                         autoClose: 1500,
                         hideProgressBar: true,
                         theme: "light"
-                      });                    }}
+                      });
+                    }}
                   >
                     <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest group-hover:text-gray-600 transition-colors">
                       SKU: {activeVariant.sku}
@@ -1975,7 +2113,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                     <Image src="/images/icons/diamond.svg" alt="Diamond" width={18} height={18} />
                     Diamond <Info size={14} className="text-gray-400 cursor-pointer ml-auto" onClick={() => setActiveInfoSheet("diamond")} />
                   </div>
-                  
+
                   <div className="flex gap-4 md:gap-6 overflow-x-auto pb-2 scrollbar-hide">
                     {/* Labels Column */}
                     <div className="space-y-1 shrink-0">
@@ -1984,7 +2122,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                       <div className="text-sm text-gray-500 font-medium h-5 flex items-center">Quantity :</div>
                       <div className="text-sm text-gray-500 font-medium h-5 flex items-center">Carat :</div>
                     </div>
-                    
+
                     {/* Values Columns */}
                     {activeVariant.metafields.diamonds.map((d, i) => (
                       <div key={`dia-col-${i}`} className="space-y-1 shrink-0">
@@ -2005,7 +2143,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                     <Image src="/images/icons/diamond.svg" alt="Gemstone" width={18} height={18} className="grayscale opacity-70" />
                     Gemstone <Info size={14} className="text-gray-400 cursor-pointer ml-auto" />
                   </div>
-                  
+
                   <div className="flex gap-10 md:gap-16 overflow-x-auto pb-2 scrollbar-hide">
                     {/* Labels Column */}
                     <div className="space-y-3 shrink-0">
@@ -2014,7 +2152,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                       <div className="text-sm text-gray-500 font-medium h-5 flex items-center">Quantity :</div>
                       <div className="text-sm text-gray-500 font-medium h-5 flex items-center">Carat :</div>
                     </div>
-                    
+
                     {/* Values Columns */}
                     {activeVariant.metafields.gemstones.map((g, i) => (
                       <div key={`gem-col-${i}`} className="space-y-3 shrink-0">
@@ -2034,7 +2172,18 @@ export default function ProductPageClient({ product, complementaryProducts = [],
             </div>
 
             <div ref={productDetailsRef}>
-              <PriceSavingsDetails priceBreakup={priceBreakup?.price_breakup}/>
+              <PriceSavingsDetails
+                priceBreakup={priceBreakup?.price_breakup}
+                onTabChange={(tab) => {
+                  if (tab === 'price') {
+                    handlePromoClick('priceBreakup', 'Product Details Section');
+                  } else if (tab === 'comparison') {
+                    const savingsStr = priceBreakup?.price_breakup?.comparison?.savings || '₹0';
+                    const savingsAmount = parseFloat(savingsStr.replace(/[^\d.]/g, '')) || 0;
+                    handlePromoClick('yourSavings', savingsStr, { savings_amount: savingsAmount });
+                  }
+                }}
+              />
             </div>
 
             {priceBreakup?.price_breakup?.total_savings && priceBreakup?.price_breakup?.total_savings !== "₹0" && (
@@ -2049,12 +2198,12 @@ export default function ProductPageClient({ product, complementaryProducts = [],
               <div className="pt-6">
                 <div className="bg-gray-50 border border-gray-100 rounded-xl ps-4 pe-16 py-4">
                   <div className="flex items-center gap-2 text-base font-semibold text-black mb-4">
-                     Certified Quality Guaranteed.
+                    Certified Quality Guaranteed.
                   </div>
                   <div className="flex items-start justify-between gap-4 xl:flex-nowrap flex-wrap">
                     <Button variant="link" className="text-sm font-semibold underline underline-offset-[6px] decoration-black mt-1 whitespace-nowrap p-0 h-auto" asChild>
                       <a href="/images/certificate/SampleCertificate.jpg" alt="Sample Certificate" download>
-                      See Sample Certificate
+                        See Sample Certificate
                       </a>
                     </Button>
                     <div className="flex items-center gap-7">
@@ -2072,45 +2221,45 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                 </div>
               </div>
             )}
-            
-            <ProductAccordion/>
+
+            <ProductAccordion />
             {/* Wear This With Slider */}
             {complementaryProducts.length > 0 && <WearThisWith products={complementaryProducts} />}
           </div>
         </div>
       </div>
-      <LuxuryMarquee prop={["bg-primary", "text-white", "mt-10", "text-md", "font-semibold"]}/>
-      <ProductStory description={product.description}/>  
+      <LuxuryMarquee prop={["bg-primary", "text-white", "mt-10", "text-md", "font-semibold"]} />
+      <ProductStory description={product.description} />
       <Suspense fallback={<div className="h-20 bg-gray-100 animate-pulse"></div>}>
-        <StyledByLucira/>
+        <StyledByLucira />
       </Suspense>
-      <OurProcess/>
+      <OurProcess />
       <div ref={reviewsRef}>
-        <CustomerReviews 
-          reviews={product.reviews} 
-          productId={product.shopifyId} 
+        <CustomerReviews
+          reviews={product.reviews}
+          productId={product.shopifyId}
           productTitle={product.title}
           productImage={getValidSrc(product.image)}
           productHandle={product.handle}
         />
       </div>
       {matchingProducts.length > 0 && (
-        <ProductSlider 
-          title="From the Same Collection" 
+        <ProductSlider
+          title="From the Same Collection"
           subtitle="Discover matching pieces that perfectly complement one another"
           products={matchingProducts}
         />
       )}
-      <FAQSection/>
+      <FAQSection />
       <ProductSlider
         title={recentlyViewedState?.title || "Recently Viewed"}
         products={Array.isArray(recentlyViewedState?.products) && recentlyViewedState.products.length > 0 ? recentlyViewedState.products.slice(0, 12) : undefined}
         preservePriceOnColorChange={true}
       />
-      {!isGoldCoin && <DiamondComparison/>}      
+      {!isGoldCoin && <DiamondComparison />}
       {/* <ExploreOtherRings /> */}
-      {isMobile ? (<ExploreRange />) : (<CategorySlider /> )}
-      <FindLuciraStore 
+      {isMobile ? (<ExploreRange />) : (<CategorySlider />)}
+      <FindLuciraStore
         pincode={pincode}
         setPincode={setPincode}
         handlePincodeCheck={handlePincodeCheck}
@@ -2120,7 +2269,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
         product={product}
         activeVariant={activeVariant}
       />
-      <JoinLuciraCommunity/>
+      <JoinLuciraCommunity />
 
       {isMobileView ? (
         <MobileSheet
@@ -2130,93 +2279,16 @@ export default function ProductPageClient({ product, complementaryProducts = [],
         >
           <MobileSheet.Container className="z-[9999]">
             <MobileSheet.Header />
-                <MobileSheet.Content>
-                  <div className="h-[100dvh]">
-                    <div className="flex items-center justify-between px-4 pb-6 border-b border-gray-100">
-                      <h2 className="text-lg font-bold">Store Availability</h2>
-                      <button onClick={() => setIsStoreDrawerOpen(false)} className="p-2">
-                        <X size={20} className="text-gray-400" />
-                      </button>
-                    </div>
-
-                    <div className="space-y-6  overflow-y-auto h-full">
-                    {availableStores.length > 0 ? (
-                      availableStores.map((store) => (
-                        <div key={store.id || store.shopifyId} className="border border-gray-100 rounded-xl p-5 space-y-4 bg-gray-50/50">
-                          <div className="flex justify-between items-start">
-                            <div className="space-y-1">
-                              <h3 className="font-bold text-lg">{getStoreDisplayName(store.name)}</h3>
-                              {store.distance !== null && (
-                                <div className="flex items-center gap-1.5 text-primary font-semibold text-sm">
-                                  <MapPin size={14} />
-                                  {Math.round(store.distance)} Km away
-                                </div>
-                              )}
-                            </div>
-                            {store.isInStock ? (
-                              <div className="bg-[#E3F5E0] text-black px-3 py-1 rounded-full flex items-center gap-1.5">
-                                <div className="w-2 h-2 bg-[#76D168] rounded-full"></div>
-                                <span className="text-xs font-bold uppercase">In Stock</span>
-                              </div>
-                            ) : (
-                              <div className="bg-amber-50 text-amber-700 px-3 py-1 rounded-full flex items-center gap-1.5 border border-amber-100">
-                                <div className="w-2 h-2 bg-amber-400 rounded-full"></div>
-                                <span className="text-xs font-bold uppercase">Ships to Store</span>
-                              </div>
-                            )}
-                          </div>
-
-                          <div className="space-y-3 pt-2">
-                            <div className="flex items-start gap-3 text-sm text-gray-600">
-                              <MapPin size={18} className="shrink-0 text-gray-400 mt-0.5" />
-                              <p className="leading-relaxed font-medium">{store.address1 || store.address}, {store.city}</p>
-                            </div>
-                            <div className="flex items-center gap-3 text-sm text-gray-600">
-                              <Phone size={18} className="shrink-0 text-gray-400" />
-                              <p className="font-medium">{store.phone || "+91 91724 99912"}</p>
-                            </div>
-                            <div className="flex items-center gap-3 text-sm text-gray-600">
-                              <Package size={18} className="shrink-0 text-gray-400" />
-                              <p className="font-medium">Ready for pickup in 2-4 hours</p>
-                            </div>
-                          </div>
-
-                          <div className="grid grid-cols-2 gap-3 pt-2">
-                            <Button variant="outline" className="font-bold h-11 rounded-lg border-gray-200" asChild>
-                              <a href={`tel:${store.phone || "+919172499912"}`}>CALL STORE</a>
-                            </Button>
-                            <Button className="font-bold h-11 rounded-lg">
-                              DIRECTIONS
-                            </Button>
-                          </div>
-                        </div>
-                      ))
-                    ) : (
-                    <div className="flex flex-col items-center justify-center py-20 text-center gap-4">
-                      <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center">
-                        <Store className="text-gray-300" size={32} />
-                      </div>
-                      <div className="space-y-1">
-                        <p className="font-bold text-gray-900">No Stores with Stock</p>
-                        <p className="text-sm text-gray-500">This design is currently not available in any nearby stores.</p>
-                      </div>
-                    </div>
-                  )}
+            <MobileSheet.Content>
+              <div className="h-[100dvh]">
+                <div className="flex items-center justify-between px-4 pb-6 border-b border-gray-100">
+                  <h2 className="text-lg font-bold">Store Availability</h2>
+                  <button onClick={() => setIsStoreDrawerOpen(false)} className="p-2">
+                    <X size={20} className="text-gray-400" />
+                  </button>
                 </div>
-              </div>
-            </MobileSheet.Content>
-          </MobileSheet.Container>
-          <MobileSheet.Backdrop />
-        </MobileSheet>
-          ) : (
-            <Sheet open={isStoreDrawerOpen} onOpenChange={setIsStoreDrawerOpen}>
-            <SheetContent side="right" className="w-full sm:max-w-[450px] p-0 flex flex-col">
-              <SheetHeader className="p-6 border-b border-gray-100 flex flex-row items-center justify-between">
-                <SheetTitle className="text-lg font-bold">Store Availability</SheetTitle>
-              </SheetHeader>
-              
-              <div className="flex-1 overflow-y-auto p-6">
-                <div className="space-y-6">
+
+                <div className="space-y-6  overflow-y-auto h-full">
                   {availableStores.length > 0 ? (
                     availableStores.map((store) => (
                       <div key={store.id || store.shopifyId} className="border border-gray-100 rounded-xl p-5 space-y-4 bg-gray-50/50">
@@ -2281,15 +2353,92 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                   )}
                 </div>
               </div>
-            </SheetContent>
-          </Sheet>
-        )}
+            </MobileSheet.Content>
+          </MobileSheet.Container>
+          <MobileSheet.Backdrop />
+        </MobileSheet>
+      ) : (
+        <Sheet open={isStoreDrawerOpen} onOpenChange={setIsStoreDrawerOpen}>
+          <SheetContent side="right" className="w-full sm:max-w-[450px] p-0 flex flex-col">
+            <SheetHeader className="p-6 border-b border-gray-100 flex flex-row items-center justify-between">
+              <SheetTitle className="text-lg font-bold">Store Availability</SheetTitle>
+            </SheetHeader>
 
-        <PdpInfoSheet 
-          type={activeInfoSheet} 
-          isOpen={!!activeInfoSheet} 
-          onOpenChange={(open) => !open && setActiveInfoSheet(null)} 
-        />
+            <div className="flex-1 overflow-y-auto p-6">
+              <div className="space-y-6">
+                {availableStores.length > 0 ? (
+                  availableStores.map((store) => (
+                    <div key={store.id || store.shopifyId} className="border border-gray-100 rounded-xl p-5 space-y-4 bg-gray-50/50">
+                      <div className="flex justify-between items-start">
+                        <div className="space-y-1">
+                          <h3 className="font-bold text-lg">{getStoreDisplayName(store.name)}</h3>
+                          {store.distance !== null && (
+                            <div className="flex items-center gap-1.5 text-primary font-semibold text-sm">
+                              <MapPin size={14} />
+                              {Math.round(store.distance)} Km away
+                            </div>
+                          )}
+                        </div>
+                        {store.isInStock ? (
+                          <div className="bg-[#E3F5E0] text-black px-3 py-1 rounded-full flex items-center gap-1.5">
+                            <div className="w-2 h-2 bg-[#76D168] rounded-full"></div>
+                            <span className="text-xs font-bold uppercase">In Stock</span>
+                          </div>
+                        ) : (
+                          <div className="bg-amber-50 text-amber-700 px-3 py-1 rounded-full flex items-center gap-1.5 border border-amber-100">
+                            <div className="w-2 h-2 bg-amber-400 rounded-full"></div>
+                            <span className="text-xs font-bold uppercase">Ships to Store</span>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="space-y-3 pt-2">
+                        <div className="flex items-start gap-3 text-sm text-gray-600">
+                          <MapPin size={18} className="shrink-0 text-gray-400 mt-0.5" />
+                          <p className="leading-relaxed font-medium">{store.address1 || store.address}, {store.city}</p>
+                        </div>
+                        <div className="flex items-center gap-3 text-sm text-gray-600">
+                          <Phone size={18} className="shrink-0 text-gray-400" />
+                          <p className="font-medium">{store.phone || "+91 91724 99912"}</p>
+                        </div>
+                        <div className="flex items-center gap-3 text-sm text-gray-600">
+                          <Package size={18} className="shrink-0 text-gray-400" />
+                          <p className="font-medium">Ready for pickup in 2-4 hours</p>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-3 pt-2">
+                        <Button variant="outline" className="font-bold h-11 rounded-lg border-gray-200" asChild>
+                          <a href={`tel:${store.phone || "+919172499912"}`}>CALL STORE</a>
+                        </Button>
+                        <Button className="font-bold h-11 rounded-lg">
+                          DIRECTIONS
+                        </Button>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-20 text-center gap-4">
+                    <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center">
+                      <Store className="text-gray-300" size={32} />
+                    </div>
+                    <div className="space-y-1">
+                      <p className="font-bold text-gray-900">No Stores with Stock</p>
+                      <p className="text-sm text-gray-500">This design is currently not available in any nearby stores.</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </SheetContent>
+        </Sheet>
+      )}
+
+      <PdpInfoSheet
+        type={activeInfoSheet}
+        isOpen={!!activeInfoSheet}
+        onOpenChange={(open) => !open && setActiveInfoSheet(null)}
+      />
     </div>
   );
 }
@@ -2312,17 +2461,17 @@ function DiamondDetail({ img, shape, pcs, carat, quality }) {
   );
 }
 
-function ExploreCard({ title, description, action, img, url }) {
+function ExploreCard({ title, description, action, img, url, onClick }) {
   return (
     <div className="bg-[#F9F9F9] border border-gray-100 rounded-lg p-3 md:p-4 flex items-start gap-3 md:gap-4">
       <div className="w-20 h-20 sm:w-24 sm:h-24 md:w-24 md:h-16 shrink-0 rounded-md bg-gray-200 relative overflow-hidden shadow-sm">
-        {img && ( <Image src={getValidSrc(img)} alt={title} fill className="object-cover" /> )}
+        {img && (<Image src={getValidSrc(img)} alt={title} fill className="object-cover" />)}
       </div>
       <div className="flex-1 min-w-0 flex flex-col gap-2">
         <p className="text-sm md:text-base font-semibold leading-tight"> {title} </p>
         <p className="text-xs md:text-sm font-medium leading-[1.5] text-gray-700"> {description} </p>
         <Button variant="link" className=" p-0 m-0 h-auto w-fit text-sm font-bold underline underline-offset-4 justify-start" asChild>
-          <a href={url} target="_blank" rel="noopener noreferrer"> 
+          <a href={url} target="_blank" rel="noopener noreferrer" onClick={onClick}>
             {action}
           </a>
         </Button>
@@ -2342,7 +2491,7 @@ function Feature({ icon, text }) {
 
 function GoldOption({ metal, karat, color, active, onClick, inStock }) {
   return (
-    <div 
+    <div
       onClick={() => onClick(metal, karat)}
       className={`border rounded-lg py-2 px-4 cursor-pointer relative flex flex-col items-center gap-3 transition-all ${active ? "border-primary bg-white ring-1 ring-primary shadow-sm" : "border-gray-200 bg-[#F9F9F9] hover:border-gray-300"}`}
     >

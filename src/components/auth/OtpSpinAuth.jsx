@@ -93,6 +93,7 @@ export function OtpSpinAuth({
   const [isSpinning, setIsSpinning] = useState(false);
   const [consent, setConsent] = useState(true);
   const [pendingRegister, setPendingRegister] = useState(false);
+  const [isMobileVerified, setIsMobileVerified] = useState(false);
 
   const otpRefs = [useRef(), useRef(), useRef(), useRef()];
   const mobileRef = useRef();
@@ -105,6 +106,11 @@ export function OtpSpinAuth({
     }
     return () => clearTimeout(timerRef.current);
   }, [timer]);
+
+  // Reset verification if mobile changes
+  useEffect(() => {
+    setIsMobileVerified(false);
+  }, [mobile]);
 
   // WebOTP API listener
   useEffect(() => {
@@ -240,6 +246,7 @@ export function OtpSpinAuth({
             setPendingRegister(false);
           }
         } else {
+          setIsMobileVerified(true);
           handleStepChange("register");
         }
       } else if (data.status === "LOGIN" || data.type === "success") {
@@ -338,18 +345,42 @@ export function OtpSpinAuth({
 
     // After spin animation
     setTimeout(async () => {
-      try {
-        setLoading(true);
-        await sendOtpApi(mobile);
-        toast.success("OTP Sent for verification");
-        setPendingRegister(true);
-        handleStepChange("otp");
-        setTimer(30);
-      } catch (err) {
-        toast.error(err.message || "Failed to send OTP");
-        setIsSpinning(false);
-      } finally {
-        setLoading(false);
+      if (isMobileVerified) {
+        try {
+          setLoading(true);
+          const regData = await registerCustomer({
+            firstName,
+            lastName,
+            email,
+            mobile,
+            wonPrize: prize?.value,
+            prizeLabel: prize?.label,
+          });
+          if (regData.status === "REGISTER_SUCCESS" || regData.type === "success") {
+            loginSuccess(regData, true);
+            handleStepChange("success");
+            setPendingRegister(false);
+          }
+        } catch (err) {
+          toast.error(err.message || "Registration failed");
+          setIsSpinning(false);
+        } finally {
+          setLoading(false);
+        }
+      } else {
+        try {
+          setLoading(true);
+          await sendOtpApi(mobile);
+          toast.success("OTP Sent for verification");
+          setPendingRegister(true);
+          handleStepChange("otp");
+          setTimer(30);
+        } catch (err) {
+          toast.error(err.message || "Failed to send OTP");
+          setIsSpinning(false);
+        } finally {
+          setLoading(false);
+        }
       }
     }, 500);
   };
@@ -572,9 +603,10 @@ export function OtpSpinAuth({
                     type="tel"
                     placeholder="Enter Phone Number"
                     maxLength="10"
-                    className="w-full h-full text-sm md:text-base border-none outline-none font-normal bg-transparent tracking-[0.3px]"
+                    className="w-full h-full text-sm md:text-base border-none outline-none font-normal bg-transparent tracking-[0.3px] disabled:opacity-50"
                     value={mobile}
                     onChange={(e) => setMobile(e.target.value.replace(/\D/g, ""))}
+                    disabled={isMobileVerified && mobile.length === 10}
                   />
                 </div>
               </div>

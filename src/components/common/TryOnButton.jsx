@@ -110,19 +110,15 @@ export default function TryOnButton({ sku, productTitle, isAvailable, className 
       id={id} // 👈 IMPORTANT (must match config)
       onClick={pushDataLayer} // 👈 tracking only (Camweara handles actual click)
       className={className || `
-        flex items-center gap-2
         bg-[#EDEDED]
         text-black
-        px-4 py-2
-        rounded-full
-        text-[14px]
-        font-medium
         hover:bg-[#E0E0E0]
-        transition
         cursor-pointer
+        btn-peek-animation
       `}
     >
       {/* Eye Icon */}
+      <span className="w-6 h-6 shrink-0 flex items-center justify-center">
       <svg
         xmlns="http://www.w3.org/2000/svg"
         className="w-4 h-4"
@@ -138,8 +134,8 @@ export default function TryOnButton({ sku, productTitle, isAvailable, className 
         />
         <circle cx="12" cy="12" r="3" />
       </svg>
-
-      <span>Virtual try on</span>
+</span>
+      <span className="btn-text text-xs font-bold uppercase tracking-wider">Virtual try on</span>
     </button>
   );
 }

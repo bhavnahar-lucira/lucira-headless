@@ -41,16 +41,14 @@ export default function BackToTop() {
 
   if (!shouldShowOnPage) return null;
 
+  const isCollectionPage = pathname.startsWith('/collections');
+
   return (
     <button
       onClick={scrollToTop}
       className={cn(
-        "fixed right-4 z-[100] p-3 rounded-full bg-black text-white shadow-xl transition-all duration-300 hover:scale-110 active:scale-95 group",
-        "bottom-[calc(10%+env(safe-area-inset-bottom))]", "md:top-1/2 md:bottom-auto md:right-5 md:-translate-y-1/2",
-        
-        isVisible 
-          ? "translate-x-0 opacity-100" 
-          : "translate-x-12 opacity-0 pointer-events-none"
+        "fixed top-1/2 right-[30px] -translate-y-1/2 z-[100] p-3 rounded-full bg-black text-white shadow-xl transition-all duration-300 w-[50px] h-[50px] hover:scale-110 active:scale-95 group",
+        isVisible ? "translate-x-0 opacity-100" : "translate-x-10 opacity-0 pointer-events-none"
       )}
       aria-label="Back to top"
     >

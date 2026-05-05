@@ -4,7 +4,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { motion } from "framer-motion";
 import Image from "next/image";
 
-export default function PriceSavingsDetails({ priceBreakup }) {
+export default function PriceSavingsDetails({ priceBreakup, onTabChange }) {
   if (!priceBreakup) return null;
 
   return (
@@ -12,7 +12,11 @@ export default function PriceSavingsDetails({ priceBreakup }) {
       <h2 className="text-base font-semibold tracking-tight mb-4 uppercase tracking-wider">Price & Savings Details:</h2>
 
       <div className="bg-gray-50 border border-gray-100 rounded-xl p-5">
-        <Tabs defaultValue="price" className="w-full">
+        <Tabs 
+          defaultValue="price" 
+          className="w-full"
+          onValueChange={(value) => onTabChange?.(value)}
+        >
           <TabsList className={`grid ${priceBreakup.comparison ? 'grid-cols-2' : 'grid-cols-1'} bg-gray-100 p-1 rounded-lg mb-6 w-full h-12!`}>
             <TabsTrigger 
               value="price" 
