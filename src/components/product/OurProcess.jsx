@@ -11,28 +11,38 @@ export default function OurProcess() {
   const steps = [
     {
       title: "Ideation & Sketching",
-      desc: "Every ring begins as a refined concept inspired by timeless design. Ideas are translated into intentional sketches.",
-      img: "/images/process/1.jpg",
+      desc: "We shape the initial design concept.",
+      img: "/images/process/IdeationSketching.jpg",
     },
     {
       title: "3D Designing",
-      desc: "Sketches evolve into detailed 3D models. Every curve and setting is perfected before production.",
-      img: "/images/process/2.jpg",
+      desc: "Digital model is created in 3D.",
+      img: "/images/process/3DDesigning.jpg",
     },
     {
       title: "Modeling & Casting",
-      desc: "Designs are cast with precision for strength and accuracy. The foundation of a ring made to last.",
-      img: "/images/process/3.jpg",
+      desc: "Metal is cast into the base form.",
+      img: "/images/process/ModelingCasting.jpg",
     },
     {
       title: "Filing & Polishing",
-      desc: "Artisans hand-file the metal to refine every edge and surface. Polishing is done in stages for a flawless finish.",
-      img: "/images/process/4.jpg",
+      desc: "Piece is refined and polished smooth.",
+      img: "/images/process/FilingPolishing.jpg",
     },
     {
       title: "Diamond Setting",
-      desc: "Ethically sourced diamonds are carefully placed to ensure brilliance and durability.",
-      img: "/images/process/5.jpg",
+      desc: "Stones are carefully set by hand.",
+      img: "/images/process/DiamondSetting.jpg",
+    },
+    {
+      title: "Quality Check",
+      desc: "Each piece is thoroughly inspected.",
+      img: "/images/process/QualityCheck.jpg",
+    },
+    {
+      title: "Packaging",
+      desc: "Packed securely for a premium unboxing.",
+      img: "/images/process/Packaging.jpg",
     },
   ];
 

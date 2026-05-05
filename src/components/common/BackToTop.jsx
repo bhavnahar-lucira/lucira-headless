@@ -47,18 +47,8 @@ export default function BackToTop() {
     <button
       onClick={scrollToTop}
       className={cn(
-                // POSITIONING: Bottom 10px to stay below FAB. 
-        // Right logic matches your FAB exactly for a perfect line.
-        "fixed bottom-23 md:bottom-25 lg:bottom-23 z-100",
-        isCollectionPage ? "right-[20px] md:right-[30px]" : "right-[30px]",
-        
-        // YOUR ORIGINAL STYLING
-        "w-[50px] h-[50px] flex items-center justify-center text-center rounded-full bg-black text-white shadow-xl transition-all duration-300 group",
-
-        
-        isVisible 
-          ? "translate-x-0 opacity-100" 
-          : "translate-x-12 opacity-0 pointer-events-none"
+        "fixed top-1/2 right-[30px] -translate-y-1/2 z-[100] p-3 rounded-full bg-black text-white shadow-xl transition-all duration-300 w-[50px] h-[50px] hover:scale-110 active:scale-95 group",
+        isVisible ? "translate-x-0 opacity-100" : "translate-x-10 opacity-0 pointer-events-none"
       )}
       aria-label="Back to top"
     >
