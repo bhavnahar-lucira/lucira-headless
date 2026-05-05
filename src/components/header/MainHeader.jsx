@@ -211,8 +211,12 @@ export default function MainHeader() {
       authLogout();
       dispatch(clearCart());
       dispatch(restoreGuestWishlist());
-      router.push("/");
-      router.refresh();
+      const currentPath = window.location.pathname;
+      if (currentPath.startsWith("/admin") || currentPath.startsWith("/dashboard")) {
+        router.push("/login");
+      } else {
+        router.refresh();
+      }
     }
   };
 
@@ -301,7 +305,7 @@ export default function MainHeader() {
             <div className="relative group flex items-center">
               <Link href="/admin">
                 <Avatar className="h-9 w-9 cursor-pointer border border-gray-100 shadow-sm">
-                  {user.avatar && <AvatarImage className="object-cover" src={user.avatar} alt={user.name} />}
+                  {user.avatar && <AvatarImage src={user.avatar} alt={user.name} />}
                   <AvatarFallback className="bg-[#5a413f] text-white font-bold text-xs">{getInitials(user?.name)}</AvatarFallback>
                 </Avatar>
               </Link>

@@ -172,3 +172,99 @@ export const CUSTOMER_METAFIELD_UPDATE_MUTATION = `
     }
   }
 `;
+
+/**
+ * Server-side utility to upload a file to Shopify Content/Files
+ * @param {Buffer} buffer The file content
+ * @param {string} filename The filename
+ * @param {string} mimeType The mime type
+ * @returns {Promise<string>} The uploaded file URL
+ */
+export async function uploadFileToShopify(buffer, filename, mimeType) {
+  try {
+    // 1. Create staged upload
+    const stagedData = await shopifyAdminFetch(STAGED_UPLOADS_CREATE_MUTATION, {
+      input: [
+        {
+          filename,
+          mimeType,
+          resource: mimeType.startsWith("image/") ? "IMAGE" : "FILE",
+          httpMethod: "POST",
+        },
+      ],
+    });
+
+    const stagedTarget = stagedData.stagedUploadsCreate.stagedTargets[0];
+    if (stagedData.stagedUploadsCreate.userErrors?.length > 0) {
+      throw new Error(stagedData.stagedUploadsCreate.userErrors[0].message);
+    }
+
+    // 2. Upload to Shopify's URL (Google Cloud Storage typically)
+    const formData = new FormData();
+    stagedTarget.parameters.forEach((param) => {
+      formData.append(param.name, param.value);
+    });
+    
+    // Convert Buffer to Blob for Fetch API
+    const blob = new Blob([buffer], { type: mimeType });
+    formData.append("file", blob, filename);
+
+    const uploadRes = await fetch(stagedTarget.url, {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!uploadRes.ok) {
+      const errorText = await uploadRes.text();
+      console.error("Shopify Storage Upload Error:", errorText);
+      throw new Error("Failed to upload file to Shopify storage");
+    }
+
+    // 3. Register file in Shopify
+    const registerData = await shopifyAdminFetch(FILE_CREATE_MUTATION, {
+      files: [
+        {
+          alt: filename.startsWith("headless_") ? filename : `headless_${filename}`,
+          contentType: mimeType.startsWith("image/") ? "IMAGE" : "FILE",
+          originalSource: stagedTarget.resourceUrl,
+        },
+      ],
+    });
+
+    if (registerData.fileCreate.userErrors?.length > 0) {
+      throw new Error(registerData.fileCreate.userErrors[0].message);
+    }
+
+    const fileId = registerData.fileCreate.files[0].id;
+
+    // 4. Poll for file readiness
+    return await pollFileStatus(fileId);
+  } catch (error) {
+    console.error("uploadFileToShopify error:", error);
+    throw error;
+  }
+}
+
+async function pollFileStatus(fileId) {
+  let attempts = 0;
+  const maxAttempts = 15;
+  const delay = 1000;
+
+  while (attempts < maxAttempts) {
+    const data = await shopifyAdminFetch(FILE_QUERY, { id: fileId });
+    const file = data.node;
+
+    if (file && (file.fileStatus === "READY" || (file.image && file.image.url) || file.url)) {
+      return file.image?.url || file.url;
+    }
+
+    if (file && file.fileStatus === "FAILED") {
+      throw new Error("File upload processing failed in Shopify");
+    }
+
+    await new Promise(resolve => setTimeout(resolve, delay));
+    attempts++;
+  }
+  
+  throw new Error("Timeout waiting for file to be ready in Shopify");
+}

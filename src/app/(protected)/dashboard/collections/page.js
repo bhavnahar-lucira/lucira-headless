@@ -123,6 +123,19 @@ export default function CollectionsDashboardPage() {
         );
       },
     }),
+    columnHelper.accessor("bestsellerProducts", {
+      header: "Bestsellers",
+      cell: (info) => {
+        const products = info.getValue();
+        return products && products.length > 0 ? (
+          <span className="px-2 py-0.5 bg-purple-100 text-purple-700 text-[10px] font-bold uppercase rounded">
+            {products.length} Items
+          </span>
+        ) : (
+          <span className="px-2 py-0.5 bg-zinc-100 text-zinc-500 text-[10px] font-bold uppercase rounded">No</span>
+        );
+      },
+    }),
     columnHelper.accessor("updatedAt", {
       header: "Last Updated",
       cell: (info) => (
