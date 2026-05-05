@@ -3,96 +3,26 @@
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { motion } from "framer-motion";
 import Image from "next/image";
-import { pushPromoClick, getNumericId } from "@/lib/gtm";
 
-export default function PriceSavingsDetails({ priceData, product, activeVariant }) {
-  const priceBreakup = priceData?.price_breakup;
+export default function PriceSavingsDetails({ priceBreakup }) {
   if (!priceBreakup) return null;
-
-  const handleTabChange = (value) => {
-    if (!product || !activeVariant) return;
-
-    const currentOrigin = typeof window !== 'undefined' ? window.location.origin : "";
-    const productImageUrl = activeVariant?.image || product.images?.[0]?.url || "";
-    
-    // Calculate values safely from raw_breakup
-    const rawBreakup = priceData.raw_breakup || {};
-    
-    const savingsAmount = value === 'comparison' ? (parseFloat(String(priceBreakup.comparison?.savings || "0").replace(/[^\d.]/g, '')) || 0) : 0;
-    
-    const promoData = {
-      // Promotion Info
-      creative_name: value === 'price' ? 'priceBreakup' : 'yourSavings',
-      promo_id: activeVariant.sku || "",
-      promo_name: product.title || "",
-      promo_position: value === 'comparison' && savingsAmount ? `₹${savingsAmount}` : 'Product Details Section',
-      position: '-',
-
-      // Product Info
-      product_id: String(getNumericId(product.shopifyId || product.id)),
-      product_name: product.title || "",
-      sku: activeVariant.sku || "",
-      variant_id: String(getNumericId(activeVariant.id || activeVariant.shopifyId)),
-      location_id: String(getNumericId(activeVariant.id || activeVariant.shopifyId)),
-
-      // URL & Image
-      product_url: `${currentOrigin}/products/${product.handle}`,
-      product_image: productImageUrl.startsWith('//') ? 'https:' + productImageUrl : productImageUrl,
-
-      // Pricing
-      price: Number(activeVariant.price || 0),
-      offer_price: Number(activeVariant.price || 0),
-
-      // Price Breakup Values (Technical Data)
-      metal_label: `${activeVariant.metafields?.metal_purity || ""} ${activeVariant.metafields?.metal_color || ""} Gold`,
-      gold_rate_per_g: rawBreakup.metal?.rate_per_gram || 0,
-      metal_price: rawBreakup.metal?.cost || 0,
-
-      diamond_price_original: rawBreakup.diamond?.original || 0,
-      diamond_price_final: rawBreakup.diamond?.final || 0,
-      diamond_discount_percent: rawBreakup.diamond?.discount_percent || 0,
-      diamond_pcs: rawBreakup.diamond?.pcs || 0,
-
-      making_charges_original: rawBreakup.making_charges?.original || 0,
-      making_charges_final: rawBreakup.making_charges?.final || 0,
-      making_charges_discount_pct: rawBreakup.making_charges?.discount_percent || 0,
-
-      gst_percent: rawBreakup.gst?.percent || 0,
-      gst_amount: rawBreakup.gst?.amount || 0,
-
-      gemstone_price_original: rawBreakup.gemstone?.original || 0,
-      gemstone_price_final: rawBreakup.gemstone?.final || 0,
-      gemstone_pcs: rawBreakup.gemstone?.pcs || 0,
-
-      grand_total: rawBreakup.total || Number(activeVariant.price || 0),
-
-      // Savings
-      savings_amount: savingsAmount,
-
-      // Optional
-      email: '',
-      phone: ''
-    };
-
-    pushPromoClick(promoData);
-  };
 
   return (
     <div className="mt-6">
-      <h2 className="text-base font-semibold tracking-tight mb-4 uppercase tracking-wider">Price & Savings Details:</h2>
+      <h2 className="text-base font-semibold tracking-tight mb-4 uppercase tracking-wider" id="see-savings-breakup">Price & Savings Details:</h2>
 
       <div className="bg-gray-50 border border-gray-100 rounded-xl p-5">
-        <Tabs defaultValue="price" className="w-full" onValueChange={handleTabChange}>
+        <Tabs defaultValue="price" className="w-full">
           <TabsList className={`grid ${priceBreakup.comparison ? 'grid-cols-2' : 'grid-cols-1'} bg-gray-100 p-1 rounded-lg mb-6 w-full h-12!`}>
-            <TabsTrigger 
-              value="price" 
+            <TabsTrigger
+              value="price"
               className="flex items-center justify-center gap-2 text-[13px] font-bold data-[state=active]:bg-primary data-[state=active]:text-white rounded-md transition-all h-full hover:cursor-pointer uppercase tracking-tight"
             >
               Price Breakup
             </TabsTrigger>
             {priceBreakup.comparison && (
-              <TabsTrigger 
-                value="comparison" 
+              <TabsTrigger
+                value="comparison"
                 className="flex items-center justify-center gap-2 text-[13px] font-bold data-[state=active]:bg-primary data-[state=active]:text-white rounded-md transition-all h-full hover:cursor-pointer uppercase tracking-tight"
               >
                 Comparison
@@ -107,15 +37,15 @@ export default function PriceSavingsDetails({ priceData, product, activeVariant 
               className="space-y-4"
             >
               {priceBreakup.price?.map((item, index) => (
-                <PriceRow 
-                  key={index} 
-                  label={item.label} 
-                  value={item.value} 
-                  oldValue={item.oldValue} 
+                <PriceRow
+                  key={index}
+                  label={item.label}
+                  value={item.value}
+                  oldValue={item.oldValue}
                   discount={item.discount}
                 />
               ))}
-              
+
               <div className="flex justify-between items-center pt-2 border-t border-gray-200">
                 <span className="text-base font-bold text-gray-900 uppercase">Grand Total</span>
                 <span className="text-lg font-bold text-gray-900">{priceBreakup.grand_total}</span>
@@ -132,8 +62,8 @@ export default function PriceSavingsDetails({ priceData, product, activeVariant 
               >
                 <div className="grid grid-cols-3 gap-4 border-b border-gray-200 pb-4">
                   <div className="text-xs font-bold text-gray-400 uppercase tracking-widest pt-1">Attributes</div>
-                  <div className="text-xs font-bold text-gray-900 uppercase tracking-widest text-center leading-tight">Lucira<br/>Grown</div>
-                  <div className="text-xs font-bold text-gray-900 uppercase tracking-widest text-center leading-tight">Mined<br/>Diamond</div>
+                  <div className="text-xs font-bold text-gray-900 uppercase tracking-widest text-center leading-tight">Lucira<br />Grown</div>
+                  <div className="text-xs font-bold text-gray-900 uppercase tracking-widest text-center leading-tight">Mined<br />Diamond</div>
                 </div>
 
                 <ComparisonRow label="Price" lucira={priceBreakup.comparison?.price?.lucira} mined={priceBreakup.comparison?.price?.mined} isPrice />
