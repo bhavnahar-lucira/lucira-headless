@@ -1,30 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 export default function TryOnButton({ sku, productTitle, isAvailable, className = "", id = "tryonbutton2" }) {
-  const [showText, setShowText] = useState(false);
-  const [hasHovered, setHasHovered] = useState(false);
-  const [playCount, setPlayCount] = useState(0);
-
   const formattedSku = sku?.replace("/", "");
   const productName = productTitle;
-
-  useEffect(() => {
-    if (playCount >= 2) return;
-
-    const timer = setTimeout(() => {
-      setShowText(true);
-
-      setTimeout(() => {
-        setShowText(false);
-        setPlayCount((prev) => prev + 1);
-      }, 2000); // visible duration
-    }, 1200 * playCount); // delay between loops
-
-    return () => clearTimeout(timer);
-  }, [playCount]);
-
 
   // ✅ Load Camweara External Button Script
   useEffect(() => {
@@ -130,24 +110,15 @@ export default function TryOnButton({ sku, productTitle, isAvailable, className 
       id={id} // 👈 IMPORTANT (must match config)
       onClick={pushDataLayer} // 👈 tracking only (Camweara handles actual click)
       className={className || `
-        flex items-center
-        rounded-full
-        cursor-pointer 
-        ${showText ? "py-2 px-3 pr-5" : "px-3 py-2"}
+        bg-[#EDEDED]
+        text-black
+        hover:bg-[#E0E0E0]
+        cursor-pointer
+        btn-peek-animation
       `}
-      onMouseEnter={() => {
-        setHasHovered(true);
-        setShowText(true);
-      }}
-      onMouseLeave={() => {
-        setHasHovered(false);
-        setShowText(false);
-      }}
-
     >
       {/* Eye Icon */}
       <span className="w-6 h-6 shrink-0 flex items-center justify-center">
-
       <svg
         xmlns="http://www.w3.org/2000/svg"
         className="w-4 h-4"
@@ -163,14 +134,8 @@ export default function TryOnButton({ sku, productTitle, isAvailable, className 
         />
         <circle cx="12" cy="12" r="3" />
       </svg>
-      </span>
-       <span
-        className={`whitespace-nowrap overflow-hidden transition-all duration-500 ease-in-out text-[12px] font-bold uppercase tracking-wider
-        ${showText ? "max-w-50 opacity-100 ml-2" : "max-w-0 opacity-0 ml-0"}
-      `}
-      >
-        Virtual try on
-      </span>
+</span>
+      <span className="btn-text text-xs font-bold uppercase tracking-wider">Virtual try on</span>
     </button>
   );
 }
