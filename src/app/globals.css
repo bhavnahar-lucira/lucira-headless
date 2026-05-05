@@ -682,7 +682,7 @@ img.marquee-img {
   flex-direction: column !important;
   align-items: center !important;
   width: auto !important;
-  max-width: 420px !important;
+  max-width: 360px !important;
   margin: 0 !important;
   padding: 0 !important;
   z-index: 9999 !important;
@@ -691,9 +691,9 @@ img.marquee-img {
 
 /* Base card */
 .Toastify__toast {
-  @apply !w-[400px] !max-w-[calc(100vw-40px)] !pointer-events-auto !rounded-xl !py-4 !pr-5 !pl-4 !mb-2.5 !flex !items-center !cursor-default !gap-4 !font-semibold !text-black !text-sm;
+  @apply !w-[360px] !max-w-[calc(100vw-32px)] !pointer-events-auto !rounded-xl !py-3.5 !pr-5 !pl-4 !mb-2.5 !flex !items-center !cursor-default !gap-4 !font-semibold !text-black !text-sm;
   min-height: unset !important;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.09), 0 1px 4px rgba(0, 0, 0, 0.06) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.05) !important;
   font-family: 'Figtree', var(--font-figtree), sans-serif !important;
 }
 
