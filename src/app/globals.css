@@ -803,6 +803,10 @@ img.marquee-img {
 /* Mobile */
 @media (max-width: 480px) {
   .Toastify__toast-container--bottom-center {
-    @apply !bottom-4 !left-4 !right-4 !translate-x-0 !w-auto;
+    bottom: 16px !important;
+    left: 16px !important;
+    right: 16px !important;
+    transform: none !important;
+    width: auto !important;
   }
 }
