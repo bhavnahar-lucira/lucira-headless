@@ -85,6 +85,46 @@ export default function CollectionPage({ params: paramsPromise }) {
   const [isFilterSheetOpen, setIsFilterSheetOpen] = useState(false);
   const [isSortSheetOpen, setIsSortSheetOpen] = useState(false);
 
+  // Price Filter State (Local for inputs)
+  const [localPriceRange, setLocalPriceRange] = useState({
+    min: searchParams.get("filter.v.price.gte") || "",
+    max: searchParams.get("filter.v.price.lte") || ""
+  });
+
+  // Sync local state with URL (e.g. for Clear All or External Changes)
+  useEffect(() => {
+    setLocalPriceRange({
+      min: searchParams.get("filter.v.price.gte") || "",
+      max: searchParams.get("filter.v.price.lte") || ""
+    });
+  }, [searchParams]);
+
+  const applyPriceFilter = useCallback(() => {
+    const params = new URLSearchParams(searchParams.toString());
+    
+    if (localPriceRange.min) params.set("filter.v.price.gte", localPriceRange.min);
+    else params.delete("filter.v.price.gte");
+    
+    if (localPriceRange.max) params.set("filter.v.price.lte", localPriceRange.max);
+    else params.delete("filter.v.price.lte");
+
+    params.delete("page");
+    const query = params.toString();
+    router.push(query ? `${pathname}?${query}` : pathname, { scroll: false });
+    scrollToTop();
+  }, [localPriceRange, searchParams, pathname, router]);
+
+  const resetPriceFilter = useCallback(() => {
+    setLocalPriceRange({ min: "", max: "" });
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("filter.v.price.gte");
+    params.delete("filter.v.price.lte");
+    params.delete("page");
+    const query = params.toString();
+    router.push(query ? `${pathname}?${query}` : pathname, { scroll: false });
+    scrollToTop();
+  }, [searchParams, pathname, router]);
+
   // Create a memoized version of searchParams without the 'page' for the queryKey
   const filterParamsString = useMemo(() => {
     const p = new URLSearchParams(searchParams.toString());
@@ -101,14 +141,18 @@ export default function CollectionPage({ params: paramsPromise }) {
       
       const sortedData = {};
       Object.entries(data || {}).forEach(([groupKey, options]) => {
-        sortedData[groupKey] = [...options].sort((a, b) => {
-          const aLabel = a.label?.toString() || "";
-          const bLabel = b.label?.toString() || "";
-          const aNum = parseFloat(aLabel);
-          const bNum = parseFloat(bLabel);
-          if (!isNaN(aNum) && !isNaN(bNum)) return aNum - bNum;
-          return aLabel.localeCompare(bLabel, undefined, { numeric: true, sensitivity: 'base' });
-        });
+        if (groupKey === "Price") {
+          sortedData[groupKey] = options;
+        } else if (Array.isArray(options)) {
+          sortedData[groupKey] = [...options].sort((a, b) => {
+            const aLabel = a.label?.toString() || "";
+            const bLabel = b.label?.toString() || "";
+            const aNum = parseFloat(aLabel);
+            const bNum = parseFloat(bLabel);
+            if (!isNaN(aNum) && !isNaN(bNum)) return aNum - bNum;
+            return aLabel.localeCompare(bLabel, undefined, { numeric: true, sensitivity: 'base' });
+          });
+        }
       });
       return sortedData;
     },
@@ -124,12 +168,18 @@ export default function CollectionPage({ params: paramsPromise }) {
 
   const activeFilterCount = useMemo(() => {
     let count = 0;
-    Object.values(availableFilters).forEach((options) => {
-      options.forEach((opt) => {
-        if (searchParams.getAll(opt.urlKey).includes(opt.value)) {
+    Object.entries(availableFilters).forEach(([groupKey, options]) => {
+      if (groupKey === "Price") {
+        if (searchParams.get("filter.v.price.gte") || searchParams.get("filter.v.price.lte")) {
           count++;
         }
-      });
+      } else if (Array.isArray(options)) {
+        options.forEach((opt) => {
+          if (searchParams.getAll(opt.urlKey).includes(opt.value)) {
+            count++;
+          }
+        });
+      }
     });
     return count;
   }, [availableFilters, searchParams]);
@@ -525,6 +575,69 @@ export default function CollectionPage({ params: paramsPromise }) {
 
                   {Object.entries(availableFilters || {}).map(([groupKey, options]) => {
                     const isExpanded = expandedFilters[groupKey] ?? false;
+                    
+                    if (groupKey === "Price") {
+                      return (
+                        <div key={groupKey} className="border-b mb-0 border-gray-200">
+                          <button
+                            onClick={() => toggleFilterExpand(groupKey)}
+                            className="w-full flex items-center justify-between py-5 hover:opacity-70 transition-opacity"
+                          >
+                            <h4 className="font-medium text-sm capitalize">{groupKey}</h4>
+                            <ChevronUp
+                              size={18}
+                              className={`transition-transform duration-300 ${
+                                isExpanded ? "rotate-0" : "rotate-180"
+                              }`}
+                            />
+                          </button>
+                          {isExpanded && (
+                            <div className="space-y-4 my-2 pb-5">
+                              <p className="text-xs text-gray-500">
+                                The highest price is ₹{new Intl.NumberFormat("en-IN").format(options.max || 0)}
+                              </p>
+                              <div className="flex items-center gap-2">
+                                <div className="relative flex-1">
+                                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">₹</span>
+                                  <Input
+                                    type="number"
+                                    placeholder="From"
+                                    value={localPriceRange.min}
+                                    onChange={(e) => setLocalPriceRange(prev => ({ ...prev, min: e.target.value }))}
+                                    className="pl-7 h-10 text-sm focus-visible:ring-black"
+                                  />
+                                </div>
+                                <div className="relative flex-1">
+                                  <Input
+                                    type="number"
+                                    placeholder="To"
+                                    value={localPriceRange.max}
+                                    onChange={(e) => setLocalPriceRange(prev => ({ ...prev, max: e.target.value }))}
+                                    className="h-10 text-sm focus-visible:ring-black"
+                                  />
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2 pt-2">
+                                <Button 
+                                  onClick={applyPriceFilter}
+                                  className="flex-1 h-9 text-xs bg-primary hover:bg-primary/90 text-white rounded-md uppercase font-bold tracking-wider"
+                                >
+                                  Apply
+                                </Button>
+                                <Button 
+                                  variant="outline"
+                                  onClick={resetPriceFilter}
+                                  className="h-9 text-xs border-gray-200 hover:bg-gray-50 rounded-md uppercase font-bold tracking-wider px-3"
+                                >
+                                  Reset
+                                </Button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    }
+
                     return (
                       <div key={groupKey} className="border-b mb-0 border-gray-200">                     
                           <button
@@ -622,22 +735,35 @@ export default function CollectionPage({ params: paramsPromise }) {
             <div className="flex flex-wrap items-center gap-2 mb-4">
               {Object.entries(availableFilters).map(([groupKey, options]) => (
                 <Fragment key={groupKey}>
-                  {options.filter(opt => searchParams.getAll(opt.urlKey).includes(opt.value)).map((opt) => (
-                    <Badge
-                      key={`${groupKey}-${opt.value}`}
-                      variant="secondary"
-                      className="bg-[#FFF5F1] text-black hover:bg-[#FFE4D9] border-none px-3 py-1 rounded-full flex items-center gap-2 cursor-pointer"
-                      onClick={() => toggleFilter(opt.urlKey, opt.value)}
-                    >
-                      <span className="text-xs font-medium">{opt.label.split(" (")[0]}</span>
-                      <XIcon className="size-3" />
-                    </Badge>
-                  ))}
+                  {groupKey === "Price" ? (
+                    (searchParams.get("filter.v.price.gte") || searchParams.get("filter.v.price.lte")) && (
+                      <Badge
+                        variant="secondary"
+                        className="bg-[#FFF5F1] text-black hover:bg-[#FFE4D9] border-none px-3 py-1 rounded-full flex items-center gap-2 cursor-pointer"
+                        onClick={resetPriceFilter}
+                      >
+                        <span className="text-xs font-medium">
+                          Price: {searchParams.get("filter.v.price.gte") ? `₹${searchParams.get("filter.v.price.gte")}` : "0"} - {searchParams.get("filter.v.price.lte") ? `₹${searchParams.get("filter.v.price.lte")}` : "Max"}
+                        </span>
+                        <XIcon className="size-3" />
+                      </Badge>
+                    )
+                  ) : (
+                    Array.isArray(options) && options.filter(opt => searchParams.getAll(opt.urlKey).includes(opt.value)).map((opt) => (
+                      <Badge
+                        key={`${groupKey}-${opt.value}`}
+                        variant="secondary"
+                        className="bg-[#FFF5F1] text-black hover:bg-[#FFE4D9] border-none px-3 py-1 rounded-full flex items-center gap-2 cursor-pointer"
+                        onClick={() => toggleFilter(opt.urlKey, opt.value)}
+                      >
+                        <span className="text-xs font-medium">{opt.label.split(" (")[0]}</span>
+                        <XIcon className="size-3" />
+                      </Badge>
+                    ))
+                  )}
                 </Fragment>
               ))}
-              {Object.entries(availableFilters).some(([groupKey, options]) => 
-                options.some(opt => searchParams.getAll(opt.urlKey).includes(opt.value))
-              ) && (
+              {(activeFilterCount > 0) && (
                 <button 
                   onClick={clearAllFilters}
                   className="text-sm text-gray-400 hover:text-black font-medium ml-2"
@@ -859,7 +985,12 @@ export default function CollectionPage({ params: paramsPromise }) {
               <div className="flex-1 flex overflow-hidden">
                 <div className="w-[45%] bg-[#F8F7FF] border-r border-gray-100 overflow-y-auto">
                   {Object.entries(availableFilters).map(([groupKey]) => {
-                    const count = availableFilters[groupKey].filter(opt => searchParams.getAll(opt.urlKey).includes(opt.value)).length;
+                    let count = 0;
+                    if (groupKey === "Price") {
+                      if (localPriceRange.min || localPriceRange.max) count = 1;
+                    } else {
+                      count = availableFilters[groupKey].filter(opt => searchParams.getAll(opt.urlKey).includes(opt.value)).length;
+                    }
                     return (
                       <button key={groupKey} onClick={() => setActiveMobileGroup(groupKey)}
                         className={`w-full text-left px-4 py-5 text-[11px] font-figtree font-bold uppercase tracking-tight border-b border-gray-100 relative leading-tight ${activeMobileGroup === groupKey ? "bg-white text-primary" : "text-gray-500"}`}>
@@ -872,18 +1003,49 @@ export default function CollectionPage({ params: paramsPromise }) {
                 <div className="w-[55%] bg-white overflow-y-auto p-4">
                   {activeMobileGroup && availableFilters[activeMobileGroup] && (
                     <div className="space-y-6 pb-20">
-                      {availableFilters[activeMobileGroup].map((option) => {
-                        const isSelected = searchParams.getAll(option.urlKey).includes(option.value);
-                        return (
-                          <div key={option.value} className="flex items-center justify-between py-1 cursor-pointer group" onClick={() => toggleFilter(option.urlKey, option.value)}>
-                            <div className="flex items-center gap-3">
-                              {isSelected ? <div className="w-4 h-4 bg-[#8A70FF] rounded flex items-center justify-center"><svg width="10" height="8" viewBox="0 0 10 8" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 4L4 7L9 1" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg></div> : <div className="w-4 h-4 border border-gray-300 rounded group-hover:border-[#8A70FF]" />}
-                              <span className={`text-[13px] ${isSelected ? "text-black font-semibold" : "text-gray-600"}`}>{option.label}</span>
+                      {activeMobileGroup === "Price" ? (
+                        <div className="space-y-4">
+                          <p className="text-xs text-gray-500">
+                            The highest price is ₹{new Intl.NumberFormat("en-IN").format(availableFilters["Price"]?.max || 0)}
+                          </p>
+                          <div className="space-y-4">
+                            <div className="relative">
+                              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">₹</span>
+                              <Input
+                                type="number"
+                                placeholder="From"
+                                value={localPriceRange.min}
+                                onChange={(e) => setLocalPriceRange(prev => ({ ...prev, min: e.target.value }))}
+                                onBlur={applyPriceFilter}
+                                className="pl-7 h-12 text-sm focus-visible:ring-black"
+                              />
                             </div>
-                            <span className="text-[11px] text-gray-400">({option.count})</span>
+                            <div className="relative">
+                              <Input
+                                type="number"
+                                placeholder="To"
+                                value={localPriceRange.max}
+                                onChange={(e) => setLocalPriceRange(prev => ({ ...prev, max: e.target.value }))}
+                                onBlur={applyPriceFilter}
+                                className="h-12 text-sm focus-visible:ring-black"
+                              />
+                            </div>
                           </div>
-                        );
-                      })}
+                        </div>
+                      ) : (
+                        availableFilters[activeMobileGroup].map((option) => {
+                          const isSelected = searchParams.getAll(option.urlKey).includes(option.value);
+                          return (
+                            <div key={option.value} className="flex items-center justify-between py-1 cursor-pointer group" onClick={() => toggleFilter(option.urlKey, option.value)}>
+                              <div className="flex items-center gap-3">
+                                {isSelected ? <div className="w-4 h-4 bg-[#8A70FF] rounded flex items-center justify-center"><svg width="10" height="8" viewBox="0 0 10 8" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 4L4 7L9 1" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg></div> : <div className="w-4 h-4 border border-gray-300 rounded group-hover:border-[#8A70FF]" />}
+                                <span className={`text-[13px] ${isSelected ? "text-black font-semibold" : "text-gray-600"}`}>{option.label}</span>
+                              </div>
+                              <span className="text-[11px] text-gray-400">({option.count})</span>
+                            </div>
+                          );
+                        })
+                      )}
                     </div>
                   )}
                 </div>
