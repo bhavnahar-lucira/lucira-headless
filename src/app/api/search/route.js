@@ -51,6 +51,7 @@ export async function GET(req) {
         handle: p.handle,
         image: firstImage,
         price: p.price ? `₹${p.price.toLocaleString()}` : "Price on request",
+        url: `/products/${p.handle}`,
       };
     });
 

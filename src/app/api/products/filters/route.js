@@ -96,6 +96,7 @@ export async function GET(req) {
     // 4. Current Active Filters from URL
     const activeProductFilters = {};
     const activeVariantFilters = {};
+    const activePriceFilter = {};
 
     const rawParams = {};
     searchParams.forEach((val, key) => {
@@ -105,6 +106,15 @@ export async function GET(req) {
     });
 
     Object.entries(rawParams).forEach(([key, values]) => {
+      if (key === "filter.v.price.gte") {
+        activePriceFilter.$gte = parseFloat(values[0]);
+        return;
+      }
+      if (key === "filter.v.price.lte") {
+        activePriceFilter.$lte = parseFloat(values[0]);
+        return;
+      }
+
       let mongoKey = KEY_MAP[key] || null;
       if (!mongoKey) {
         if (key.startsWith("filter.v.m.")) {
@@ -143,9 +153,16 @@ export async function GET(req) {
 
     const getFacetedCounts = async (field, isMetafieldArray = false) => {
       const isVariantField = field.startsWith("variants.");
-      const pipeline = [{ $match: { ...baseMatch } }]; // Clone baseMatch
+      
+      // Start with baseMatch (Collection/Handle)
+      const pipeline = [{ $match: { ...baseMatch } }];
 
-      // Add product-level filters
+      // Apply Price Filter (if any) to all facet counts
+      if (Object.keys(activePriceFilter).length > 0) {
+        pipeline[0].$match.price = activePriceFilter;
+      }
+
+      // Add product-level filters (exclude current field if it matches)
       Object.entries(activeProductFilters).forEach(([activeField, val]) => {
         if (activeField !== field) {
           pipeline[0].$match[activeField] = val;
@@ -153,17 +170,19 @@ export async function GET(req) {
       });
 
       if (isVariantField) {
-        // For variant-level facets: unwind first, then apply OTHER variant filters
+        // For variant-level facets (e.g. In Store, Metal Purity): 
+        // We unwind first to count specific variants, then apply OTHER variant filters.
         pipeline.push({ $unwind: "$variants" });
         
         Object.entries(activeVariantFilters).forEach(([activeField, val]) => {
           if (activeField !== field) {
-            // After unwind, field path is still "variants.metafields..."
             pipeline.push({ $match: { [activeField]: val } });
           }
         });
       } else {
-        // For product-level facets: use $elemMatch for all active variant filters
+        // For product-level facets (e.g. Shop For, Material Type):
+        // Use $elemMatch for active variant filters to ensure we only count products 
+        // that have AT LEAST ONE variant matching ALL active variant filters.
         const variantElemMatch = {};
         Object.entries(activeVariantFilters).forEach(([activeField, val]) => {
           const vKey = activeField.replace("variants.", "");
@@ -179,6 +198,7 @@ export async function GET(req) {
       if (isMetafieldArray) {
         if (field.includes("diamonds") || field.includes("gemstones")) {
           const arrayPath = field.split(".").slice(0, -1).join(".");
+          // If it's a variant field, variants is already unwound
           pipeline.push({ $unwind: { path: `$${arrayPath}`, preserveNullAndEmptyArrays: false } });
         } else {
           pipeline.push({
@@ -242,20 +262,21 @@ export async function GET(req) {
     const REVERSE_KEY_MAP = {};
     Object.entries(KEY_MAP).forEach(([shortKey, mongoKey]) => { REVERSE_KEY_MAP[mongoKey] = shortKey; });
 
-    for (const cat of categories) {
-      if (cat.hideIfCategory && isCategoryHandle) continue;
-      const counts = await getFacetedCounts(cat.field, cat.isM);
-      if (counts.length > 0) {
-        // Group and merge counts by friendly label to prevent duplicates (e.g. ID and Name both mapping to "Borivali")
+    const filterPromises = categories.map(async (cat) => {
+      if (cat.hideIfCategory && isCategoryHandle) return null;
+      
+      try {
+        const counts = await getFacetedCounts(cat.field, cat.isM);
+        if (counts.length === 0) return null;
+
         const mergedResults = {};
-        
         counts.forEach(c => {
           let label = c.label;
           let value = c.value;
           
           if (cat.name === "In Store Available" && storeMap[value]) {
             label = storeMap[value];
-            value = storeMap[value]; // Use store name as the value too
+            value = storeMap[value]; 
           }
 
           if (!mergedResults[label]) {
@@ -269,8 +290,59 @@ export async function GET(req) {
           mergedResults[label].count += c.count;
         });
 
-        results[cat.name] = Object.values(mergedResults);
+        return { name: cat.name, data: Object.values(mergedResults) };
+      } catch (err) {
+        console.error(`Error fetching counts for ${cat.name}:`, err);
+        return null;
       }
+    });
+
+    const filterResults = await Promise.all(filterPromises);
+    
+    // 6. Calculate Price Range
+    let priceData = null;
+    try {
+      // For price range, we want the range of products matching ALL active filters EXCEPT price itself
+      const priceMatch = { ...baseMatch, ...activeProductFilters };
+      const pricePipeline = [{ $match: priceMatch }];
+      
+      const variantElemMatch = {};
+      Object.entries(activeVariantFilters).forEach(([activeField, val]) => {
+        const vKey = activeField.replace("variants.", "");
+        variantElemMatch[vKey] = val;
+      });
+
+      if (Object.keys(variantElemMatch).length > 0) {
+        pricePipeline[0].$match.variants = { $elemMatch: variantElemMatch };
+      }
+
+      pricePipeline.push({ $group: { _id: null, minPrice: { $min: "$price" }, maxPrice: { $max: "$price" } } });
+      
+      const priceRangeResult = await productsCollection.aggregate(pricePipeline).toArray();
+      if (priceRangeResult.length > 0) {
+        priceData = {
+          min: priceRangeResult[0].minPrice,
+          max: priceRangeResult[0].maxPrice
+        };
+      }
+    } catch (err) {
+      console.error("Error calculating price range:", err);
+    }
+
+    // 7. Assemble Results in Specific Order
+    filterResults.forEach((res, index) => {
+      if (res) {
+        results[res.name] = res.data;
+      }
+      // Insert Price at 4th position (after 3rd category: Shop For)
+      if (index === 2 && priceData) {
+        results["Price"] = priceData;
+      }
+    });
+
+    // If Price hasn't been added (e.g. fewer than 3 categories), add it at the end
+    if (!results["Price"] && priceData) {
+      results["Price"] = priceData;
     }
 
     return NextResponse.json(results);
