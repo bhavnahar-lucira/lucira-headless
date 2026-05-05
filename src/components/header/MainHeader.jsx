@@ -200,8 +200,13 @@ export default function MainHeader() {
       authLogout();
       dispatch(clearCart());
       dispatch(restoreGuestWishlist());
-      router.push("/");
-      router.refresh();
+      
+      const currentPath = window.location.pathname;
+      if (currentPath.startsWith("/admin") || currentPath.startsWith("/dashboard")) {
+        router.push("/login");
+      } else {
+        router.refresh();
+      }
     }
   };
 

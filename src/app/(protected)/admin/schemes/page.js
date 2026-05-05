@@ -56,15 +56,13 @@ function PaymentBadge({ made }) {
 function EnrollBar({ url, label = "Enroll New Scheme" }) {
   return (
     <div className="flex justify-center mt-8">
-      <a
-        href={url}
-        target="_blank"
-        rel="noopener noreferrer"
+      <Link
+        href={url}        
         className="flex items-center gap-2 px-10 py-4 bg-primary text-white text-xs font-black uppercase tracking-[0.2em] rounded-2xl shadow-xl shadow-primary/20 hover:opacity-90 transition-all"
       >
         <ExternalLink size={14} />
         {label}
-      </a>
+      </Link>
     </div>
   );
 }
@@ -259,15 +257,13 @@ function EmptySchemes({ enrollUrl }) {
           You haven't enrolled in any savings scheme yet. Start your jewelry savings journey today!
         </p>
       </div>
-      <a
+      <Link
         href={enrollUrl}
-        target="_blank"
-        rel="noopener noreferrer"
         className="inline-flex items-center gap-2 px-10 py-4 bg-primary text-white text-sm font-black uppercase tracking-[0.2em] rounded-2xl shadow-xl shadow-primary/30 hover:scale-105 transition-transform"
       >
         <ExternalLink size={16} />
         Enroll Now
-      </a>
+      </Link>
     </div>
   );
 }
@@ -282,9 +278,8 @@ export default function SchemesPage() {
   const [error, setError] = useState(null);
   const [phone, setPhone] = useState("");
 
-  // Build enroll URL (phone + timestamp + HMAC are generated server-side in prod;
-  // here we just deep-link to the public enrollment page)
-  const enrollUrl = `https://schemes.lucirajewelry.com`;
+  // Build enroll URL
+  const enrollUrl = `/scheme/enroll`;
 
   useEffect(() => {
     async function load() {
@@ -420,15 +415,13 @@ export default function SchemesPage() {
                 </p>
               </div>
             </div>
-            <a
+            <Link
               href={enrollUrl}
-              target="_blank"
-              rel="noopener noreferrer"
               className="px-10 py-5 bg-primary text-white text-sm font-black uppercase tracking-[0.2em] rounded-[1.5rem] hover:scale-105 transition-transform shadow-2xl shadow-primary/20 whitespace-nowrap flex items-center gap-2"
             >
               <ExternalLink size={16} />
               Learn More
-            </a>
+            </Link>
           </div>
         </div>
       )}
