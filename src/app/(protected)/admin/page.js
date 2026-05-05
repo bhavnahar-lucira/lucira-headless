@@ -111,14 +111,14 @@ export default function CustomerDashboard() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-2 xl:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 sm:grid-cols-2 xl:grid-cols-4 gap-3">
         {customerStats.map((stat, index) => {
           const Icon = stat.icon;
           return (
             <Link
               key={index}
               href={stat.link}
-              className="bg-white rounded-3xl p-6 border border-zinc-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group"
+              className="bg-white rounded-3xl p-4 border border-zinc-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group"
             >
               <div className="flex justify-between items-start mb-6">
                 <div className={`size-12 rounded-2xl bg-gradient-to-br ${stat.color} ${stat.shadow} flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform`}>
