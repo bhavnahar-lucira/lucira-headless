@@ -6,6 +6,7 @@ const initialState = {
   isAuthModalOpen: false,
   authRedirectPath: null,
   pincode: "",
+  collectionContext: null, // Track current browsing context (e.g., '9kt-collection')
   referralLink: "",
   referralLoading: false,
   referralError: null,
@@ -22,6 +23,9 @@ const userSlice = createSlice({
     },
     setPincode: (state, action) => {
       state.pincode = action.payload;
+    },
+    setCollectionContext: (state, action) => {
+      state.collectionContext = action.payload;
     },
     logout: (state) => {
       state.user = null;
@@ -60,6 +64,7 @@ const userSlice = createSlice({
 export const { 
   login, 
   setPincode, 
+  setCollectionContext,
   logout, 
   setAvatar, 
   openAuthModal, 

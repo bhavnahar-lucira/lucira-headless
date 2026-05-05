@@ -18,6 +18,7 @@ import {
   addGuestWishlistItem,
   removeGuestWishlistItem,
 } from "@/redux/features/wishlist/wishlistSlice";
+import { setCollectionContext } from "@/redux/features/user/userSlice";
 import {
   Drawer,
   DrawerClose,
@@ -141,17 +142,24 @@ function getPrioritizedVariant(product, collectionHandle) {
     (v.inventoryQuantity !== undefined && v.inventoryQuantity > 0)
   );
 
-  // 1. Exception Logic (Promote 9KT) - Only for 9kt-collection
+  // 1. Exception Logic (Promote 9KT) - Only for 9kt-collection AND Strictly 9KT products
   if (collectionHandle === "9kt-collection") {
-    const nineKT = variants.filter(v => String(v.color || v.title).includes("9KT"));
-    if (nineKT.length > 0) {
-      const inStock9KT = nineKT.find(v => 
-        v.inStock === true || 
-        v.inStock === "true" || 
-        (v.inventory_quantity !== undefined && v.inventory_quantity > 0)
-      );
-      if (inStock9KT) return inStock9KT;
-      return nineKT[0];
+    const handles = product.collectionHandles || [];
+    const isStrict9kt = handles.includes("9kt-collection") && 
+                       !handles.some(h => h !== "9kt-collection" && h !== "all" && h !== product.type?.toLowerCase() && 
+                       ["sports-collection", "cotton-candy", "hexa-collection", "solitaire-collection"].includes(h));
+
+    if (isStrict9kt) {
+      const nineKT = variants.filter(v => String(v.color || v.title).includes("9KT"));
+      if (nineKT.length > 0) {
+        const inStock9KT = nineKT.find(v => 
+          v.inStock === true || 
+          v.inStock === "true" || 
+          (v.inventory_quantity !== undefined && v.inventory_quantity > 0)
+        );
+        if (inStock9KT) return inStock9KT;
+        return nineKT[0];
+      }
     }
   }
 
@@ -333,6 +341,11 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle,
       return match ? Number(match[0]) : 0;
     };
     const currentOrigin = typeof window !== 'undefined' ? window.location.origin : "";
+
+    // Set browsing context for PDP prioritization
+    if (collectionHandle) {
+      dispatch(setCollectionContext(collectionHandle));
+    }
 
     const clickData = {
       productId: String(getNumericId(product.shopifyId || product.id)),
