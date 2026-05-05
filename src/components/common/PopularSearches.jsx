@@ -120,7 +120,7 @@ export default function PopularSearches() {
   return (
     <div className="w-full bg-white py-12 lg:py-16">
       <div className="container-main">
-        <h2 className="font-abhaya text-[18px] lg:text-[28px] font-bold text-primary mb-8 lg:mb-12">
+        <h2 className="text-lg lg:text-2xl font-bold font-abhaya text-zinc-900 mb-6 lg:mb-8 pb-4 border-b border-zinc-100 tracking-tight uppercase">
           Popular Searches
         </h2>
 
@@ -128,7 +128,7 @@ export default function PopularSearches() {
           <Accordion type="single" collapsible defaultValue="item-0" className="w-full">
             {SEARCH_DATA.map((section, idx) => (
               <AccordionItem key={idx} value={`item-${idx}`} className="border-b border-gray-200">
-                <AccordionTrigger className="font-abhaya text-lg font-bold py-4 hover:no-underline text-primary">
+                <AccordionTrigger className="font-abhaya text-sm font-bold py-4 hover:no-underline text-primary">
                   {section.title}
                 </AccordionTrigger>
                 <AccordionContent>
@@ -137,7 +137,7 @@ export default function PopularSearches() {
                       <React.Fragment key={lIdx}>
                         <Link
                           href={link.href}
-                          className="font-figtree text-[12px] text-gray-600 hover:text-primary transition-colors"
+                          className="font-figtree text-xs text-gray-600 hover:text-primary transition-colors"
                         >
                           {link.label}
                         </Link>
@@ -155,7 +155,7 @@ export default function PopularSearches() {
           <div className="flex flex-col gap-8 lg:gap-10">
             {SEARCH_DATA.map((section, idx) => (
               <div key={idx} className="search-section">
-                <h3 className="font-abhaya text-[18px] lg:text-[22px] font-bold text-primary mb-3">
+                <h3 className="font-abhaya text-lg lg:text-xl font-bold text-primary mb-3">
                   {section.title}
                 </h3>
                 <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
@@ -163,7 +163,7 @@ export default function PopularSearches() {
                     <React.Fragment key={lIdx}>
                       <Link
                         href={link.href}
-                        className="font-figtree text-[16px] lg:text-[18px] text-gray-600 hover:text-primary transition-colors leading-normal"
+                        className="font-figtree text-base lg:text-lg text-gray-600 hover:text-primary transition-colors leading-normal"
                       >
                         {link.label}
                       </Link>

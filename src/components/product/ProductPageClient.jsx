@@ -72,7 +72,7 @@ import {
 import { addRecentlyViewed, selectRecentlyViewed } from "@/redux/features/recentlyViewed/recentlyViewedSlice";
 import AtcBar from "@/components/AtcBar";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
-import { pushProductView, pushAddToCart, pushAddToWishlist, pushRemoveFromWishlist, formatGtmPrice, getNumericId, getStandardWishlistPayload } from "@/lib/gtm";
+import { pushProductView, pushAddToCart, pushAddToWishlist, pushRemoveFromWishlist, formatGtmPrice, getNumericId, getStandardWishlistPayload, pushPromoClick } from "@/lib/gtm";
 
 import {
   Sheet,
@@ -325,6 +325,14 @@ export default function ProductPageClient({ product, complementaryProducts = [],
       return;
     }
 
+    // GTM promoClick for pincode entered
+    pushPromoClick({
+      promo_id: activeVariant?.sku || "",
+      promo_name: product.title || "",
+      creative_name: "pincodeEntered",
+      promo_position: pincodeToCheck,
+    });
+
     setCheckingPincode(true);
     setDeliveryInfo({ status: "loading", message: "Checking..." });
 
@@ -490,6 +498,14 @@ export default function ProductPageClient({ product, complementaryProducts = [],
   const handleSaveEngraving = () => {
     setSavedEngraving({ text: engraving, font: engravingFont });
     setIsEngravingDrawerOpen(false);
+
+    // GTM promoClick for engraving added
+    pushPromoClick({
+      promo_id: activeVariant?.sku || "",
+      promo_name: product.title || "",
+      creative_name: 'Engraving Added',
+      location_id: String(getNumericId(activeVariant?.id || activeVariant?.shopifyId)),
+    });
   };
 
   const insertSymbol = (symbol) => {
@@ -1148,9 +1164,14 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                     )}
                   </div>
                   <button
-                    onClick={() =>
-                      productDetailsRef.current?.scrollIntoView({ behavior: "smooth" })
-                    }
+                    onClick={() => {
+                      productDetailsRef.current?.scrollIntoView({ behavior: "smooth" });
+                      pushPromoClick({
+                        promo_id: activeVariant?.sku || "",
+                        promo_name: product.title || "",
+                        creative_name: 'See Savings Breakup'
+                      });
+                    }}
                     className="text-xs sm:text-sm font-semibold underline underline-offset-4 decoration-gray-300 hover:cursor-pointer sm:ml-auto whitespace-nowrap">
                     See Savings Breakup
                   </button>
@@ -1254,6 +1275,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                 availableStoreCount={availableStoreCount}
                 deliveryInfo={deliveryInfo}
                 getStoreDisplayName={getStoreDisplayName}
+                activeVariant={activeVariant}
               />
 
               {/* Desktop Selection Blocks */}
@@ -1319,7 +1341,18 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                         <span className="font-semibold text-base">Select Ring Size: <span className="font-medium ml-1">{selectedSize} IND</span></span>
                         {String(product.type || "").toLowerCase().includes("ring") && (
                           <SizeGuideSheet>
-                            <button className="text-sm font-medium underline underline-offset-4 decoration-gray-300 hover:cursor-pointer">Size Guide</button>
+                            <button 
+                              onClick={() => {
+                                pushPromoClick({
+                                  promo_id: activeVariant?.sku || "",
+                                  promo_name: product.title || "",
+                                  creative_name: 'Size Guide Clicked'
+                                });
+                              }}
+                              className="text-sm font-medium underline underline-offset-4 decoration-gray-300 hover:cursor-pointer"
+                            >
+                              Size Guide
+                            </button>
                           </SizeGuideSheet>
                         )}
                       </div>
@@ -1404,7 +1437,19 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                   </p>
                 </div>
 
-                <div className="flex gap-4 items-center mt-4 group cursor-pointer" onClick={() => setIsEngravingDrawerOpen(true)}>
+                <div 
+                  className="flex gap-4 items-center mt-4 group cursor-pointer" 
+                  onClick={() => {
+                    setIsEngravingDrawerOpen(true);
+                    // GTM promoClick for opening engraving
+                    pushPromoClick({
+                      promo_id: activeVariant?.sku || "",
+                      promo_name: product.title || "",
+                      creative_name: 'Add Engraving Clicked',
+                      location_id: String(getNumericId(activeVariant?.id || activeVariant?.shopifyId)),
+                    });
+                  }}
+                >
                   <div className="relative flex-1">
                     <div className="h-12 bg-white border border-gray-300 rounded-md px-4 flex items-center text-gray-400 text-sm group-hover:border-primary transition-colors">
                       {savedEngraving.text ? (
@@ -1979,7 +2024,12 @@ export default function ProductPageClient({ product, complementaryProducts = [],
             </div>
 
             <div ref={productDetailsRef}>
-              <PriceSavingsDetails priceBreakup={priceBreakup?.price_breakup} />
+              <PriceSavingsDetails 
+                priceData={priceBreakup}
+                product={product}
+                activeVariant={activeVariant}
+                priceBreakup={priceBreakup?.price_breakup}
+              />
             </div>
 
             {priceBreakup?.price_breakup?.total_savings && priceBreakup?.price_breakup?.total_savings !== "₹0" && (

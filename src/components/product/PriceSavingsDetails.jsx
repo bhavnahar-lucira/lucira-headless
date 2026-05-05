@@ -4,15 +4,62 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { motion } from "framer-motion";
 import Image from "next/image";
 
-export default function PriceSavingsDetails({ priceBreakup }) {
+import { pushPromoClick } from "@/lib/gtm";
+import { toast } from "react-toastify";
+
+export default function PriceSavingsDetails({ priceBreakup, priceData, product, activeVariant }) {
   if (!priceBreakup) return null;
+
+  const handleTabChange = (value) => {
+    if (!activeVariant || !product) return;
+
+    const rawBreakup = priceData?.raw_breakup || {};
+    const savingsAmount = priceData?.price_breakup?.total_savings
+      ? Number(priceData.price_breakup.total_savings.replace(/[^0-9.-]+/g, ""))
+      : 0;
+
+    const promoData = {
+      promo_id: activeVariant.sku || "",
+      promo_name: product.title || "",
+      creative_name: value === 'price' ? 'Price Breakup Clicked' : 'Your Savings Clicked',
+      
+      // Additional metadata for analytics
+      metal_price_original: rawBreakup.gold?.original || 0,
+      metal_price_final: rawBreakup.gold?.final || 0,
+      metal_weight: rawBreakup.gold?.weight || 0,
+
+      diamond_price_original: rawBreakup.diamond?.original || 0,
+      diamond_price_final: rawBreakup.diamond?.final || 0,
+      diamond_pcs: rawBreakup.diamond?.pcs || 0,
+
+      making_charges_original: rawBreakup.making_charges?.original || 0,
+      making_charges_final: rawBreakup.making_charges?.final || 0,
+
+      gst: rawBreakup.gst || 0,
+
+      gemstone_price_original: rawBreakup.gemstone?.original || 0,
+      gemstone_price_final: rawBreakup.gemstone?.final || 0,
+      gemstone_pcs: rawBreakup.gemstone?.pcs || 0,
+
+      grand_total: rawBreakup.total || Number(activeVariant.price || 0),
+
+      // Savings
+      savings_amount: savingsAmount,
+
+      // Optional
+      email: '',
+      phone: ''
+    };
+
+    pushPromoClick(promoData);
+  };
 
   return (
     <div className="mt-6">
       <h2 className="text-base font-semibold tracking-tight mb-4 uppercase tracking-wider" id="see-savings-breakup">Price & Savings Details:</h2>
 
       <div className="bg-gray-50 border border-gray-100 rounded-xl p-5">
-        <Tabs defaultValue="price" className="w-full">
+        <Tabs defaultValue="price" className="w-full" onValueChange={handleTabChange}>
           <TabsList className={`grid ${priceBreakup.comparison ? 'grid-cols-2' : 'grid-cols-1'} bg-gray-100 p-1 rounded-lg mb-6 w-full h-12!`}>
             <TabsTrigger
               value="price"
