@@ -24,6 +24,9 @@ export default function ProductGallery({ media = [], title = "", activeColor = "
   const [currentIndex, setCurrentIndex] = useState(0);
   const [zoomLevel, setZoomLevel] = useState(1);
   const [thumbsSwiper, setThumbsSwiper] = useState(null);
+  const [showText, setShowText] = useState(false);
+  const [hasHovered, setHasHovered] = useState(false);
+  const [playCount, setPlayCount] = useState(0);
 
   const displayLabels = useMemo(() => {
     const labels = [];
@@ -44,6 +47,22 @@ export default function ProductGallery({ media = [], title = "", activeColor = "
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  useEffect(() => {
+    if (playCount >= 2) return;
+
+    const timer = setTimeout(() => {
+      setShowText(true);
+
+      setTimeout(() => {
+        setShowText(false);
+        setPlayCount((prev) => prev + 1);
+      }, 2000); // visible duration
+    }, 1200 * playCount); // delay between loops
+
+    return () => clearTimeout(timer);
+  }, [playCount]);
+
 
   const sortedMedia = useMemo(() => {
     if (!media || media.length === 0) return [];
@@ -262,7 +281,7 @@ export default function ProductGallery({ media = [], title = "", activeColor = "
                 <>
                   <div className="absolute top-4 left-4 flex flex-col gap-2 z-10">
                     {displayLabels.map((label, index) => (
-                      <span key={index} className="bg-[#E2C07E] px-3 py-1.5 text-[10px] font-semibold uppercase w-fit">{label}</span>
+                      <span key={index} className="bg-[#F1E4D1] px-3 py-1.5 text-[10px] font-semibold uppercase w-fit">{label}</span>
                     ))}
                   </div>
                   <div onClick={(e) => e.stopPropagation()}>
@@ -272,7 +291,7 @@ export default function ProductGallery({ media = [], title = "", activeColor = "
                         productTitle={product?.title}
                         isAvailable={activeVariant ? activeVariant.inStock : product?.available}
                         id="tryonbutton-desktop"
-                        className="absolute bottom-4 left-4 bg-white/95 backdrop-blur-sm px-4 py-2.5 rounded-full text-[12px] font-bold flex items-center gap-2 shadow-sm border border-gray-100 uppercase tracking-wider hover:bg-gray-50 transition-colors cursor-pointer z-30"
+                        className="group absolute bottom-4 left-4 flex items-center py-2 px-3 rounded-full border border-gray-100 bg-white/95 backdrop-blur-sm shadow-sm overflow-hidden transition-all duration-500 ease-in-out z-30"
                       />
                     )}
                   </div>
@@ -291,9 +310,32 @@ export default function ProductGallery({ media = [], title = "", activeColor = "
                     e.stopPropagation();
                     onViewSimilar();
                   }}
-                  className="absolute bottom-4 right-4 bg-white/95 backdrop-blur-sm p-2.5 rounded-full shadow-md border border-gray-100 hover:bg-gray-50 transition-colors hover:cursor-pointer z-10 group/sim"
-                >
-                  <BookCopy size={20} className="text-zinc-700 group-hover/sim:scale-110 transition-transform" />
+                  onMouseEnter={() => {
+                    setHasHovered(true);
+                    setShowText(true);
+                  }}
+                  onMouseLeave={() => {
+                    setHasHovered(false);
+                    setShowText(false);
+                  }}
+                  className={`group absolute bottom-4 right-4 flex items-center rounded-full border border-gray-100 bg-white/95 backdrop-blur-sm shadow-sm overflow-hidden transition-all duration-500 ease-in-out z-30
+                    ${showText ? "py-2 px-3 pr-5" : "px-3 py-2"}
+                  `}
+                  >
+                    <span className="w-6 h-6 shrink-0 flex items-center justify-center">
+                      <svg width="34" height="34" viewBox="0 0 34 34" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+                        <path d="M11.4322 10.4118C11.4293 10.2235 11.5012 10.0417 11.6321 9.90627C11.763 9.77087 11.9422 9.69288 12.1305 9.6894L21.4657 9.52505C21.6544 9.5214 21.8368 9.59284 21.9728 9.72366C22.1088 9.85448 22.1872 10.034 22.1909 10.2226L22.4232 23.5881C22.4262 23.7767 22.3542 23.9588 22.223 24.0943C22.0917 24.2299 21.9121 24.3078 21.7234 24.3109L12.3883 24.4752C12.1998 24.4785 12.0177 24.4068 11.882 24.2759C11.7463 24.1451 11.668 23.9657 11.6645 23.7772L11.4322 10.4118Z" stroke="currentColor" strokeWidth="1.17241" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M11.5349 11.5293L6.05123 12.9986C5.89057 13.0417 5.75356 13.1468 5.67029 13.2908C5.58702 13.4348 5.56428 13.606 5.60707 13.7667L8.65801 25.1594C8.70135 25.3201 8.80674 25.457 8.95101 25.5401C9.09527 25.6231 9.26661 25.6455 9.42735 25.6022L13.8263 24.4235" stroke="currentColor" strokeWidth="1.17241" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M22.4632 11.5293L27.9468 12.9986C28.1075 13.0417 28.2445 13.1468 28.3278 13.2908C28.411 13.4348 28.4338 13.606 28.391 13.7667L25.34 25.1594C25.2967 25.3201 25.1913 25.457 25.047 25.5401C24.9028 25.6231 24.7314 25.6455 24.5707 25.6022L19.8192 24.3291" stroke="currentColor" strokeWidth="1.17241" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>                    
+                    </span>
+                  <span
+                    className={`whitespace-nowrap overflow-hidden transition-all duration-500 ease-in-out text-[12px] font-bold uppercase tracking-wider
+                      ${showText ? "max-w-55 opacity-100 ml-2" : "max-w-0 opacity-0 ml-0"}
+                    `}
+                    >
+                    Similar Items
+                  </span>
                 </button>
               )}
             </div>
@@ -352,7 +394,7 @@ export default function ProductGallery({ media = [], title = "", activeColor = "
           {/* Badges Overlay */}
           <div className="absolute top-4 left-2 flex flex-col gap-2 z-10 pointer-events-none">
             {displayLabels.map((label, index) => (
-              <span key={index} className="bg-[#E2C07E] text-black px-3 py-1.5 text-[10px] font-semibold uppercase w-fit">{label}</span>
+              <span key={index} className="bg-[#F1E4D1] text-black px-3 py-1.5 text-[10px] font-semibold uppercase w-fit">{label}</span>
             ))}
           </div>
 
@@ -365,7 +407,7 @@ export default function ProductGallery({ media = [], title = "", activeColor = "
                    productTitle={product?.title}
                    isAvailable={activeVariant ? activeVariant.inStock : product?.available}
                    id="tryonbutton-mobile"
-                   className="bg-white/95 backdrop-blur-sm px-4 py-2.5 rounded-full text-[12px] font-bold flex items-center gap-2 shadow-sm border border-gray-100 uppercase tracking-wider cursor-pointer"
+                   className="bg-white/95 backdrop-blur-sm py-2 px-3 rounded-full text-[12px] font-bold flex items-center shadow-sm border border-gray-100 uppercase tracking-wider cursor-pointer"
                  />
                )}
              </div>
@@ -374,9 +416,32 @@ export default function ProductGallery({ media = [], title = "", activeColor = "
                  e.stopPropagation();
                  onViewSimilar();
                }}
-               className="bg-white/95 backdrop-blur-sm px-4 py-2.5 rounded-full text-[12px] font-bold flex items-center gap-2 shadow-sm border border-gray-100 uppercase tracking-wider"
+               onMouseEnter={() => {
+                setHasHovered(true);
+                setShowText(true);
+              }}
+              onMouseLeave={() => {
+                setHasHovered(false);
+                setShowText(false);
+              }}
+               className={`flex items-center rounded-full border border-gray-100 bg-white/95 backdrop-blur-sm shadow-sm overflow-hidden transition-all duration-500 ease-in-out z-30
+                    ${showText ? "py-2 px-3 pr-5" : "px-3 py-2"}
+                  `}
              >
-               <Copy size={16} /> Similar items
+               <span className="w-6 h-6 shrink-0 flex items-center justify-center">
+                  <svg width="34" height="34" viewBox="0 0 34 34" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+                    <path d="M11.4322 10.4118C11.4293 10.2235 11.5012 10.0417 11.6321 9.90627C11.763 9.77087 11.9422 9.69288 12.1305 9.6894L21.4657 9.52505C21.6544 9.5214 21.8368 9.59284 21.9728 9.72366C22.1088 9.85448 22.1872 10.034 22.1909 10.2226L22.4232 23.5881C22.4262 23.7767 22.3542 23.9588 22.223 24.0943C22.0917 24.2299 21.9121 24.3078 21.7234 24.3109L12.3883 24.4752C12.1998 24.4785 12.0177 24.4068 11.882 24.2759C11.7463 24.1451 11.668 23.9657 11.6645 23.7772L11.4322 10.4118Z" stroke="currentColor" strokeWidth="1.17241" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M11.5349 11.5293L6.05123 12.9986C5.89057 13.0417 5.75356 13.1468 5.67029 13.2908C5.58702 13.4348 5.56428 13.606 5.60707 13.7667L8.65801 25.1594C8.70135 25.3201 8.80674 25.457 8.95101 25.5401C9.09527 25.6231 9.26661 25.6455 9.42735 25.6022L13.8263 24.4235" stroke="currentColor" strokeWidth="1.17241" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M22.4632 11.5293L27.9468 12.9986C28.1075 13.0417 28.2445 13.1468 28.3278 13.2908C28.411 13.4348 28.4338 13.606 28.391 13.7667L25.34 25.1594C25.2967 25.3201 25.1913 25.457 25.047 25.5401C24.9028 25.6231 24.7314 25.6455 24.5707 25.6022L19.8192 24.3291" stroke="currentColor" strokeWidth="1.17241" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+              </span>
+              <span
+                className={`whitespace-nowrap overflow-hidden transition-all duration-500 ease-in-out text-[12px] font-bold uppercase tracking-wider
+                ${showText ? "max-w-50 opacity-100 ml-2" : "max-w-0 opacity-0 ml-0"}
+              `}
+              >
+                Similar items
+              </span>
              </button>
           </div>
         </div>
