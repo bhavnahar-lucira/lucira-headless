@@ -13,7 +13,7 @@ const CONFIG = {
   pointsPerStep: 100,
 };
 
-const STEP_NAMES = { 1: "About You", 2: "Gifting Behaviour", 3: "Your Wishlist", 4: "Your Style" };
+const STEP_NAMES = { 1: "About Us", 2: "Gifting Behaviour", 3: "Your Wishlist", 4: "Your Style" };
 
 /* theme colours (mirrors the Shopify liquid CSS vars) */
 const T = {
@@ -67,14 +67,17 @@ function Chip({ label, selected, onToggle }) {
 
 function RadioOpt({ value, checked, label, onChange }) {
   return (
-    <label style={{ display:"flex", alignItems:"center", gap:"8px", cursor:"pointer", fontSize:"13px", color:"#1a1a1a" }}>
+    <label 
+      onClick={() => onChange(value)}
+      style={{ display:"flex", alignItems:"center", gap:"8px", cursor:"pointer", fontSize:"13px", color:"#1a1a1a" }}
+    >
       <div
-        onClick={() => onChange(value)}
         style={{
           width:"16px", height:"16px", borderRadius:"50%",
           border:`1.5px solid ${checked ? T.blush : T.border}`,
           display:"flex", alignItems:"center", justifyContent:"center",
-          flexShrink:0, cursor:"pointer",
+          flexShrink:0,
+          pointerEvents: "none",
         }}
       >
         {checked && <div style={{ width:"8px", height:"8px", borderRadius:"50%", background: T.blush }} />}
@@ -86,15 +89,18 @@ function RadioOpt({ value, checked, label, onChange }) {
 
 function CheckOpt({ label, checked, onChange }) {
   return (
-    <label style={{ display:"flex", alignItems:"center", gap:"10px", cursor:"pointer", fontSize:"13px", color:"#1a1a1a" }}>
+    <label 
+      onClick={onChange}
+      style={{ display:"flex", alignItems:"center", gap:"10px", cursor:"pointer", fontSize:"13px", color:"#1a1a1a" }}
+    >
       <div
-        onClick={onChange}
         style={{
           width:"16px", height:"16px", borderRadius:"3px",
           border:`1.5px solid ${checked ? T.blush : T.border}`,
           background: checked ? T.blush : "#fff",
           display:"flex", alignItems:"center", justifyContent:"center",
-          flexShrink:0, cursor:"pointer",
+          flexShrink:0,
+          pointerEvents: "none",
         }}
       >
         {checked && <Check size={9} stroke="#fff" strokeWidth={3} />}
@@ -104,16 +110,15 @@ function CheckOpt({ label, checked, onChange }) {
   );
 }
 
-function Toggle({ checked, onChange }) {
+function Toggle({ checked }) {
   return (
-    <button
-      type="button"
-      onClick={() => onChange(!checked)}
+    <div
       style={{
         width:"40px", height:"22px", borderRadius:"22px",
         background: checked ? T.blush : T.border,
-        border:"none", cursor:"pointer", position:"relative", transition:"background .3s",
+        position:"relative", transition:"background .3s",
         flexShrink:0,
+        pointerEvents: "none",
       }}
     >
       <span style={{
@@ -121,7 +126,7 @@ function Toggle({ checked, onChange }) {
         width:"16px", height:"16px", borderRadius:"50%", background:"#fff",
         boxShadow:"0 1px 4px rgba(0,0,0,.2)", transition:"left .3s",
       }} />
-    </button>
+    </div>
   );
 }
 
@@ -146,6 +151,7 @@ function DateInput({ value, onChange }) {
         width:"100%", border:`1px solid ${T.ivory}`, borderRadius:"8px",
         padding:"12px", fontSize:"13px", color:"#1a1a1a", background: T.ivory,
         outline:"none", boxSizing:"border-box", fontFamily:"inherit",
+        position: "relative",
       }}
       onFocus={e => { e.target.style.borderColor = T.blush; e.target.style.background = "#fff"; }}
       onBlur={e => { e.target.style.borderColor = T.ivory; e.target.style.background = T.ivory; }}
@@ -289,7 +295,10 @@ function Step1({ data, onChange }) {
       <FieldLabel>Date of Birth</FieldLabel>
       <DateInput value={data.date_of_birth} onChange={v => onChange("date_of_birth", v)} />
 
-      <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:"12px 0", borderTop:`1px solid ${T.ivory}`, borderBottom:`1px solid ${T.ivory}`, margin:"14px 0" }}>
+      <div 
+        onClick={() => onChange("is_married", !data.is_married)}
+        style={{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:"12px 0", borderTop:`1px solid ${T.ivory}`, borderBottom:`1px solid ${T.ivory}`, margin:"14px 0", cursor: "pointer" }}
+      >
         <span style={{ fontSize:"13px", color:"#1c1410", fontWeight:500 }}>Are you Married?</span>
         <Toggle checked={!!data.is_married} onChange={v => onChange("is_married", v)} />
       </div>
@@ -481,12 +490,36 @@ export default function EarnRewardsPage() {
 
       const rewardedSteps  = (d.rewarded_steps  || []).map(Number);
       const completedSteps = (d.completed_steps || []).map(Number);
-      const profileComplete = !!d.profile_complete;
+      // Only treat as complete if the server says so AND step 4 (final reward) is already granted.
+      // This prevents the completion screen from showing prematurely if auto-save marks the profile as complete
+      // before the user explicitly clicks the final button.
+      const profileComplete = !!d.profile_complete && rewardedSteps.includes(4);
+
       let formData = { ...blank };
       if (d.form_data && typeof d.form_data === "object") {
         Object.entries(d.form_data).forEach(([k,v]) => { if (v && typeof v === "object") formData[k] = v; });
       }
-      setState(prev => { const ns = { ...prev, rewardedSteps, completedSteps, profileComplete, formData }; saveLocal(ns); return ns; });
+      setState(prev => {
+        let firstIncomplete = 1;
+        for (let i = 1; i <= CONFIG.totalSteps; i++) {
+          if (!completedSteps.includes(i)) {
+            firstIncomplete = i;
+            break;
+          }
+        }
+        if (profileComplete) firstIncomplete = 1; // Doesn't matter much if complete
+
+        const ns = { 
+          ...prev, 
+          rewardedSteps, 
+          completedSteps, 
+          profileComplete, 
+          formData,
+          currentStep: profileComplete ? prev.currentStep : firstIncomplete
+        }; 
+        saveLocal(ns); 
+        return ns; 
+      });
     } catch (e) { console.warn("Server progress:", e); }
   }
 
@@ -522,6 +555,10 @@ export default function EarnRewardsPage() {
   /* ── Debounced auto-save ── */
   const debouncedSave = useCallback(
     debounce((step, stepData) => {
+      // Prevent premature completion on backend by skipping auto-save for the last step.
+      // The final step data is still preserved in localStorage via saveLocal in handleChange.
+      if (step === 4) return;
+
       setSaveStatus("saving");
       apiSave(step, stepData, true)
         .then(() => { setSaveStatus("saved"); setTimeout(() => setSaveStatus(""), 2000); })
@@ -543,43 +580,68 @@ export default function EarnRewardsPage() {
 
   /* ── Navigation ── */
   function goStep(next) {
-    if (next < state.currentStep) { setErrors([]); setState(p => ({ ...p, currentStep:next })); return; }
-    const key  = `step_${state.currentStep}`;
-    const data = state.formData[key] || {};
-    const errs = validate(state.currentStep, data);
-    if (errs.length) { setErrors(errs); return; }
+    if (next < state.currentStep) { 
+      setErrors([]); 
+      setState(p => ({ ...p, currentStep:next })); 
+      return; 
+    }
+
+    // Validate ALL steps up to currentStep before proceeding forward
+    for (let s = 1; s <= state.currentStep; s++) {
+      const key  = `step_${s}`;
+      const data = state.formData[key] || {};
+      const errs = validate(s, data);
+      if (errs.length) {
+        if (s !== state.currentStep) {
+          // If a previous step is now invalid, jump back to it
+          setState(p => ({ ...p, currentStep: s }));
+        }
+        setErrors(errs);
+        return;
+      }
+    }
     setErrors([]);
 
     setState(prev => {
       const n   = prev.currentStep;
-      const isN = !prev.rewardedSteps.includes(n);
+      const alreadyRewarded = prev.rewardedSteps.includes(n);
+      const isN = !alreadyRewarded;
       const ns  = {
         ...prev, currentStep:next,
         rewardedSteps : isN ? [...prev.rewardedSteps, n]  : prev.rewardedSteps,
         completedSteps: prev.completedSteps.includes(n) ? prev.completedSteps : [...prev.completedSteps, n],
       };
       saveLocal(ns);
-      if (isN) apiSave(n, data, false);
+      if (isN) apiSave(n, prev.formData[`step_${n}`], false);
       return ns;
     });
   }
 
   function completeProfile() {
-    const data = state.formData.step_4 || {};
-    const errs = validate(4, data);
-    if (errs.length) { setErrors(errs); return; }
+    // Validate ALL steps 1-4
+    for (let s = 1; s <= 4; s++) {
+      const key  = `step_${s}`;
+      const data = state.formData[key] || {};
+      const errs = validate(s, data);
+      if (errs.length) {
+        setState(p => ({ ...p, currentStep: s }));
+        setErrors(errs);
+        return;
+      }
+    }
     setErrors([]);
     setCompleting(true);
 
     setState(prev => {
-      const isN = !prev.rewardedSteps.includes(4);
+      const alreadyRewarded = prev.rewardedSteps.includes(4);
+      const isN = !alreadyRewarded;
       const ns  = {
         ...prev, profileComplete:true,
         rewardedSteps : isN ? [...prev.rewardedSteps, 4]  : prev.rewardedSteps,
         completedSteps: prev.completedSteps.includes(4) ? prev.completedSteps : [...prev.completedSteps, 4],
       };
       saveLocal(ns);
-      if (isN) apiSave(4, data, false).finally(() => setCompleting(false));
+      if (isN) apiSave(4, prev.formData.step_4, false).finally(() => setCompleting(false));
       else setCompleting(false);
       return ns;
     });
