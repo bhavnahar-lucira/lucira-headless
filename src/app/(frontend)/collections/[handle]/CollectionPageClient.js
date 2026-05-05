@@ -442,15 +442,15 @@ export default function CollectionPage({ params: paramsPromise }) {
             <Breadcrumb>
               <BreadcrumbList className="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400">
                 <BreadcrumbItem>
-                  <BreadcrumbLink href="/" className="hover:text-[#35255F] transition-colors">Home</BreadcrumbLink>
+                  <BreadcrumbLink href="/" className="hover:text-[#5a413f] transition-colors">Home</BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator className="scale-75" />
                 <BreadcrumbItem>
-                  <BreadcrumbLink href="/collections/all" className="hover:text-[#35255F] transition-colors">Collections</BreadcrumbLink>
+                  <BreadcrumbLink href="/collections/all" className="hover:text-[#5a413f] transition-colors">Collections</BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator className="scale-75" />
                 <BreadcrumbItem>
-                  <BreadcrumbPage className="text-[#35255F]">
+                  <BreadcrumbPage className="text-[#5a413f]">
                     {displayTitle}
                   </BreadcrumbPage>
                 </BreadcrumbItem>
@@ -791,7 +791,7 @@ export default function CollectionPage({ params: paramsPromise }) {
                   <button key={opt.value} onClick={() => { handleSort(opt.value); setIsSortSheetOpen(false); }}
                     className={`w-full text-left py-4 px-4 rounded-lg transition-colors flex justify-between items-center ${activeSort === opt.value ? "bg-[#FFF5F1] text-black font-bold" : "hover:bg-gray-50 text-gray-700"}`}>
                     {opt.label}
-                    {activeSort === opt.value && <div className="w-2 h-2 rounded-full bg-[#35255F]" />}
+                    {activeSort === opt.value && <div className="w-2 h-2 rounded-full bg-[#5a413f]" />}
                   </button>
                 ))}
               </div>
@@ -812,14 +812,14 @@ export default function CollectionPage({ params: paramsPromise }) {
                 <h3 className="text-sm font-bold uppercase tracking-widest">Filters</h3>
               </div>
               <div className="flex-1 flex overflow-hidden">
-                <div className="w-[45%] bg-[#F8F7FF] border-r border-gray-100 overflow-y-auto">
+                <div className="w-[45%] bg-[#FEF5F1] border-r border-gray-100 overflow-y-auto">
                   {Object.entries(availableFilters).map(([groupKey]) => {
                     const count = availableFilters[groupKey].filter(opt => searchParams.getAll(opt.urlKey).includes(opt.value)).length;
                     return (
                       <button key={groupKey} onClick={() => setActiveMobileGroup(groupKey)}
                         className={`w-full text-left px-4 py-5 text-[11px] font-figtree font-bold uppercase tracking-tight border-b border-gray-100 relative leading-tight ${activeMobileGroup === groupKey ? "bg-white text-primary" : "text-gray-500"}`}>
                         {groupKey}
-                        {count > 0 && <span className="absolute right-2 top-1/2 -translate-y-1/2 bg-[#35255F] text-white text-[9px] w-5 h-5 rounded-md flex items-center justify-center font-bold">{count}</span>}
+                        {count > 0 && <span className="absolute right-2 top-1/2 -translate-y-1/2 bg-[#5a413f] text-white text-[9px] w-5 h-5 rounded-md flex items-center justify-center font-bold">{count}</span>}
                       </button>
                     );
                   })}
@@ -832,7 +832,7 @@ export default function CollectionPage({ params: paramsPromise }) {
                         return (
                           <div key={option.value} className="flex items-center justify-between py-1 cursor-pointer group" onClick={() => toggleFilter(option.urlKey, option.value)}>
                             <div className="flex items-center gap-3">
-                              {isSelected ? <div className="w-4 h-4 bg-[#8A70FF] rounded flex items-center justify-center"><svg width="10" height="8" viewBox="0 0 10 8" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 4L4 7L9 1" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg></div> : <div className="w-4 h-4 border border-gray-300 rounded group-hover:border-[#8A70FF]" />}
+                              {isSelected ? <div className="w-4 h-4 bg-[#5a413f] rounded flex items-center justify-center"><svg width="10" height="8" viewBox="0 0 10 8" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 4L4 7L9 1" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg></div> : <div className="w-4 h-4 border border-gray-300 rounded group-hover:border-[#5a413f]" />}
                               <span className={`text-[13px] ${isSelected ? "text-black font-semibold" : "text-gray-600"}`}>{option.label}</span>
                             </div>
                             <span className="text-[11px] text-gray-400">({option.count})</span>
