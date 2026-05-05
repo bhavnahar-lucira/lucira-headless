@@ -21,7 +21,7 @@ const SkeletonCard = () => (
   </div>
 );
 
-export default function CollectionSlider ({ products = [], loading = false }) {
+export default function CollectionSlider ({ products = [], loading = false, collectionHandle }) {
   const displayProducts = products;  const id = useId().replace(/:/g, "");
   const isDesktop = useMediaQuery("(min-width: 1025px)");
   const isTablet = useMediaQuery("(min-width: 768px)");
@@ -82,7 +82,11 @@ export default function CollectionSlider ({ products = [], loading = false }) {
         >
           {displayProducts.map((product, idx) => (
             <SwiperSlide key={product.id}>
-              <ProductCard product={product} index={idx + 1} />
+              <ProductCard 
+                product={product} 
+                index={idx + 1} 
+                collectionHandle={collectionHandle}
+              />
             </SwiperSlide>
           ))}
         </Swiper>
@@ -90,7 +94,7 @@ export default function CollectionSlider ({ products = [], loading = false }) {
         {/* Navigation & Progress Controls (Updated for design) */}
         <div className="flex justify-between items-center mt-8 md:mt-6 px-1">
           {/* Progress Bar (Global) */}
-          <div className="flex-1 max-w-[120px] md:max-w-[200px] h-[2px] bg-zinc-100 relative overflow-hidden">
+          <div className="flex-1 max-w-30 md:max-w-50 h-0.5 bg-zinc-100 relative overflow-hidden">
             <div 
               id={`progress-bar-${id}`}
               className="absolute top-0 left-0 h-full bg-[#5B4740] transition-all duration-300"
@@ -99,10 +103,10 @@ export default function CollectionSlider ({ products = [], loading = false }) {
           </div>
           
           <div className="flex items-center gap-3">
-            <button className={`${prevElClass} w-10 h-10 md:w-12 md:h-12 rounded-full border border-zinc-200 flex items-center justify-center hover:bg-black hover:text-white transition-all text-zinc-400 hover:border-black hover:text-white`}>
+            <button className={`${prevElClass} w-10 h-10 md:w-12 md:h-12 rounded-full border border-zinc-200 flex items-center justify-center hover:bg-black transition-all text-zinc-400 hover:border-black hover:text-white`}>
               <ChevronLeft size={20} className="md:w-6 md:h-6" />
             </button>
-            <button className={`${nextElClass} w-10 h-10 md:w-12 md:h-12 rounded-full border border-zinc-200 flex items-center justify-center hover:bg-black hover:text-white transition-all text-zinc-400 hover:border-black hover:text-white`}>
+            <button className={`${nextElClass} w-10 h-10 md:w-12 md:h-12 rounded-full border border-zinc-200 flex items-center justify-center hover:bg-black transition-all text-zinc-400 hover:border-black hover:text-white`}>
               <ChevronRight size={20} className="md:w-6 md:h-6" />
             </button>
           </div>
