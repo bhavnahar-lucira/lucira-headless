@@ -47,13 +47,13 @@ import {
 
 // ... (keep SPIN_PRIZES, WHEEL_SEGMENTS, COUPON_MAP)
 
-export function RegisterForm() {
+export function RegisterForm({ initialMobile = "" }) {
   const router = useRouter();
   const dispatch = useDispatch();
   const controls = useAnimation();
   const isMobile = useMediaQuery("(max-width: 1023px)");
 
-  const [mobile, setMobile] = useState("");
+  const [mobile, setMobile] = useState(initialMobile);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -64,6 +64,14 @@ export function RegisterForm() {
   const [step, setStep] = useState("register"); // register, success
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [countdown, setCountdown] = useState(5);
+
+  const [isMobilePreFilled] = useState(!!initialMobile);
+
+  useEffect(() => {
+    if (initialMobile) {
+      setMobile(initialMobile);
+    }
+  }, [initialMobile]);
 
   useEffect(() => {
     let timer;
@@ -273,7 +281,14 @@ export function RegisterForm() {
               <label className="text-xs font-medium text-gray-600">Phone Number <span className="text-red-500">*</span></label>
               <div className="flex items-center border border-gray-200 rounded h-10 px-3 bg-white focus-within:border-black transition-all">
                 <span className="text-sm text-gray-500 mr-2 border-r border-gray-200 pr-2">+91</span>
-                <input type="tel" maxLength="10" className="w-full h-full text-sm outline-none bg-transparent" value={mobile} onChange={(e) => setMobile(e.target.value.replace(/\D/g, ""))} />
+                <input
+                  type="tel"
+                  maxLength="10"
+                  className="w-full h-full text-sm outline-none bg-transparent disabled:opacity-50"
+                  value={mobile}
+                  onChange={(e) => setMobile(e.target.value.replace(/\D/g, ""))}
+                  disabled={isMobilePreFilled && mobile.length === 10}
+                />
               </div>
             </div>
 
