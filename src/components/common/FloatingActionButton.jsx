@@ -190,7 +190,7 @@ export default function FloatingActionButton() {
 
   return (
     <div className={`fixed 
-      ${isProductPage ? 'bottom-22 md:bottom-10' : isCollectionPage ? 'bottom-16 md:bottom-10' : 'bottom-10'} 
+      ${isProductPage ? 'bottom-38 md:bottom-42' : isCollectionPage ? 'bottom-38 md:bottom-42' : 'bottom-38'} 
       ${isCollectionPage ? 'right-[20px] md:right-[30px]' : 'right-[30px]'} 
       z-[9999] flex flex-col items-center`}>
       {/* Tooltip */}
