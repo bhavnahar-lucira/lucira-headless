@@ -29,9 +29,31 @@ export async function POST() {
                 metafields(first: 50) {
                   edges {
                     node {
+                      id
                       namespace
                       key
                       value
+                      reference {
+                        ... on Collection {
+                          products(first: 10) {
+                            edges {
+                              node {
+                                title
+                                handle
+                                featuredImage {
+                                  url
+                                }
+                                priceRangeV2 {
+                                  minVariantPrice {
+                                    amount
+                                    currencyCode
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
                     }
                   }
                 }
@@ -54,9 +76,22 @@ export async function POST() {
       const collections = data.collections.edges.map((edge) => {
         const node = edge.node;
         const metafields = {};
+        let bestsellerProducts = null;
+
         node.metafields.edges.forEach((mEdge) => {
           const m = mEdge.node;
           metafields[`${m.namespace}.${m.key}`] = m.value;
+
+          // Capture bestseller products if this is the specific metafield
+          if (m.namespace === "custom" && m.key === "bestseller_products" && m.reference?.products) {
+            bestsellerProducts = m.reference.products.edges.map(pEdge => ({
+              title: pEdge.node.title,
+              handle: pEdge.node.handle,
+              image: pEdge.node.featuredImage?.url || null,
+              price: pEdge.node.priceRangeV2.minVariantPrice.amount,
+              currency: pEdge.node.priceRangeV2.minVariantPrice.currencyCode
+            }));
+          }
         });
 
         return {
@@ -67,6 +102,7 @@ export async function POST() {
           descriptionHtml: node.descriptionHtml,
           image: node.image,
           metafields,
+          bestsellerProducts,
           updatedAt: new Date(),
         };
       });

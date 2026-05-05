@@ -679,77 +679,122 @@ export default function CollectionPage({ params: paramsPromise }) {
       {(dbCollection?.metafields?.["custom.seocontent"] || 
         dbCollection?.metafields?.["custom.seo_content"] || 
         dbCollection?.metafields?.["custom.faqquestion"] || 
-        dbCollection?.metafields?.["custom.faq_section"]) && (
+        dbCollection?.metafields?.["custom.faq_section"] ||
+        (dbCollection?.bestsellerProducts && dbCollection.bestsellerProducts.length > 0)) && (
         <div className="seo-content container-main py-12 md:py-20 border-t border-gray-100">
           <div className="w-full px-2 lg:px-6">
             
-            {/* FAQ Section (Show First) */}
-            {(dbCollection.metafields["custom.faqquestion"] || dbCollection.metafields["custom.faq_section"]) && (
-              <div className="mb-16">
-                <h2 className="text-lg lg:text-2xl font-bold mb-5 text-left text-gray-900 uppercase tracking-widest">
-                  FAQ
-                </h2>
-                <div className="w-full">
-                  {(() => {
-                    let questions = [];
-                    let answers = [];
-
-                    try {
-                      const rawQ = dbCollection.metafields["custom.faqquestion"];
-                      const rawA = dbCollection.metafields["custom.faqanswers"];
-
-                      if (rawQ?.startsWith("[")) {
-                        questions = JSON.parse(rawQ);
-                      } else {
-                        questions = (rawQ || "").split("•").filter(Boolean);
-                      }
-
-                      if (rawA?.startsWith("[")) {
-                        answers = JSON.parse(rawA);
-                      } else {
-                        answers = (rawA || "").split("•").filter(Boolean);
-                      }
-                    } catch (e) {
-                      console.error("FAQ parse error:", e);
-                    }
-                    
-                    if (questions.length > 0) {
-                      return (
-                        <Accordion type="single" collapsible className="w-full">
-                          {questions.map((q, idx) => (
-                            <AccordionItem key={idx} value={`item-${idx}`} className="border-b border-gray-200">
-                              <AccordionTrigger className="text-base lg:text-lg font-medium text-gray-900 hover:no-underline py-4">
-                                {q.trim()}
-                              </AccordionTrigger>
-                              {answers[idx] && (
-                                <AccordionContent className="text-gray-600 leading-relaxed pb-6">
-                                  {answers[idx].trim()}
-                                </AccordionContent>
+            <div className="flex flex-col lg:flex-row gap-12 lg:gap-20">
+              {/* Bestseller Products (SEO Links) */}
+              {dbCollection?.bestsellerProducts && dbCollection.bestsellerProducts.length > 0 && (
+                <div className={`${(dbCollection.metafields["custom.faqquestion"] || dbCollection.metafields["custom.faq_section"]) ? "lg:w-1/2" : "w-full"} order-1`}>
+                  <div className="plp-seo-links-section">
+                    <h2 className="text-lg lg:text-2xl font-bold mb-5 text-left text-gray-900 uppercase tracking-widest">
+                      Bestsellers
+                    </h2>
+                    <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm bg-white">
+                      <div className="grid grid-cols-[auto_1fr_auto] bg-gray-50 border-b border-gray-200 px-6 py-4 gap-4">
+                        <div className="w-12 h-6" /> {/* Spacer for image */}
+                        <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">PRODUCT NAME</h3>
+                        <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 text-right">PRICE</h3>
+                      </div>
+                      <div className="divide-y divide-gray-100">
+                        {dbCollection.bestsellerProducts.slice(0, 10).map((item, idx) => (
+                          <div key={idx} className="grid grid-cols-[auto_1fr_auto] px-6 py-4 hover:bg-gray-50/50 transition-colors items-center gap-4">
+                            <div className="w-12 h-12 bg-gray-50 rounded-lg overflow-hidden relative shrink-0 border border-gray-100">
+                              {item.image ? (
+                                <Image src={item.image} alt={item.title} fill className="object-cover" unoptimized />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center text-zinc-200">
+                                  <ShoppingBag size={20} />
+                                </div>
                               )}
-                            </AccordionItem>
-                          ))}
-                        </Accordion>
-                      );
-                    }
-                    
-                    if (dbCollection.metafields["custom.faq_section"]) {
-                      return (
-                        <div className="bg-gray-50 p-6 rounded-xl border border-gray-200">
-                          <div className="text-gray-600 text-sm leading-relaxed">
-                            {dbCollection.metafields["custom.faq_section"]}
+                            </div>
+                            <Link href={`/products/${item.handle}`} className="text-sm font-bold text-gray-900 hover:text-primary transition-colors truncate pr-4">
+                              {item.title}
+                            </Link>
+                            <span className="text-sm font-black text-gray-900 text-right">
+                              ₹{new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(item.price)}
+                            </span>
                           </div>
-                        </div>
-                      );
-                    }
-                    return null;
-                  })()}
+                        ))}
+                      </div>
+                    </div>
+                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-4">
+                      Last Updated: {new Date(dbCollection.updatedAt || Date.now()).toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })}
+                    </p>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* SEO Section (Show Second) */}
+              {/* FAQ Section */}
+              {(dbCollection.metafields["custom.faqquestion"] || dbCollection.metafields["custom.faq_section"]) && (
+                <div className={`${(dbCollection?.bestsellerProducts && dbCollection.bestsellerProducts.length > 0) ? "lg:w-1/2" : "w-full"} order-2 mb-16`}>
+                  <h2 className="text-lg lg:text-2xl font-bold mb-5 text-left text-gray-900 uppercase tracking-widest">
+                    FAQ
+                  </h2>
+                  <div className="w-full">
+                    {(() => {
+                      let questions = [];
+                      let answers = [];
+
+                      try {
+                        const rawQ = dbCollection.metafields["custom.faqquestion"];
+                        const rawA = dbCollection.metafields["custom.faqanswers"];
+
+                        if (rawQ?.startsWith("[")) {
+                          questions = JSON.parse(rawQ);
+                        } else {
+                          questions = (rawQ || "").split("•").filter(Boolean);
+                        }
+
+                        if (rawA?.startsWith("[")) {
+                          answers = JSON.parse(rawA);
+                        } else {
+                          answers = (rawA || "").split("•").filter(Boolean);
+                        }
+                      } catch (e) {
+                        console.error("FAQ parse error:", e);
+                      }
+                      
+                      if (questions.length > 0) {
+                        return (
+                          <Accordion type="single" collapsible className="w-full">
+                            {questions.map((q, idx) => (
+                              <AccordionItem key={idx} value={`item-${idx}`} className="border-b border-gray-200">
+                                <AccordionTrigger className="text-base lg:text-lg font-medium text-gray-900 hover:no-underline py-4">
+                                  {q.trim()}
+                                </AccordionTrigger>
+                                {answers[idx] && (
+                                  <AccordionContent className="text-gray-600 leading-relaxed pb-6">
+                                    {answers[idx].trim()}
+                                  </AccordionContent>
+                                )}
+                              </AccordionItem>
+                            ))}
+                          </Accordion>
+                        );
+                      }
+                      
+                      if (dbCollection.metafields["custom.faq_section"]) {
+                        return (
+                          <div className="bg-gray-50 p-6 rounded-xl border border-gray-200">
+                            <div className="text-gray-600 text-sm leading-relaxed">
+                              {dbCollection.metafields["custom.faq_section"]}
+                            </div>
+                          </div>
+                        );
+                      }
+                      return null;
+                    })()}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* SEO Section */}
             {(dbCollection.metafields["custom.seocontent"] || dbCollection.metafields["custom.seo_content"]) && (
-              <div className="prose prose-sm md:prose-base max-w-none">
+              <div className="prose prose-sm md:prose-base max-w-none mt-8 border-t border-gray-100 pt-12">
                 <div className="text-gray-600 leading-loose">
                   {renderShopifyRichText(dbCollection.metafields["custom.seocontent"] || dbCollection.metafields["custom.seo_content"])}
                 </div>
