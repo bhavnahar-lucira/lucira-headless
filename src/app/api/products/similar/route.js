@@ -39,7 +39,7 @@ export async function GET(request) {
       products: similarProducts.map(p => ({
         ...p,
         tags: Array.isArray(p.tags) ? p.tags : (typeof p.tags === 'string' ? p.tags.split(',').map(t => t.trim()).filter(Boolean) : []),
-        reviews: p.reviews || p.reviewStats || null
+        reviews: p.reviews || (p.reviewStats?.usedFallback ? null : p.reviewStats) || null
       }))
     });
   } catch (error) {

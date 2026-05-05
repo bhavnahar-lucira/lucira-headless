@@ -649,7 +649,7 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle,
               )}
 
               {/* Rating Section */}
-              {((product.reviews?.count || product.reviewStats?.count) > 0) && (
+              {((product.reviews?.count || product.reviewStats?.count) > 0 && !(product.reviews?.usedFallback || product.reviewStats?.usedFallback)) && (
                 <div className="flex items-center gap-1.5">
                   <div className="flex items-center gap-0.5 text-amber-400">
                     {isMobile ? (
