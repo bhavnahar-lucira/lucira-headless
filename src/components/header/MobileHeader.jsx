@@ -196,6 +196,7 @@ export default function MobileHeader() {
   };
 
   const handleResultClick = (href) => {
+    if (!href) return;
     setShowSearch(false);
     setSearchQuery("");
     setSearchResults([]);
