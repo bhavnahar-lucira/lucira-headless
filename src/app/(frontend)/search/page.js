@@ -857,13 +857,13 @@ export default function SearchPage() {
                             >
                               <div className="flex items-center gap-3">
                                 {isSelected ? (
-                                  <div className="w-4 h-4 bg-[#8A70FF] rounded flex items-center justify-center">
+                                  <div className="w-4 h-4 bg-[#5a413f] rounded flex items-center justify-center">
                                     <svg width="10" height="8" viewBox="0 0 10 8" fill="none" xmlns="http://www.w3.org/2000/svg">
                                       <path d="M1 4L4 7L9 1" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                                     </svg>
                                   </div>
                                 ) : (
-                                  <div className="w-4 h-4 border border-gray-300 rounded group-hover:border-[#8A70FF]" />
+                                  <div className="w-4 h-4 border border-gray-300 rounded group-hover:border-[#5a413f]" />
                                 )}
                                 <span className={`text-[13px] ${isSelected ? "text-black font-semibold" : "text-gray-600"}`}>
                                   {option.label}
