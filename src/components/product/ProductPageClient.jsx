@@ -225,6 +225,7 @@ const serviceSlider = [
 
 export default function ProductPageClient({ product, complementaryProducts = [], matchingProducts = [] }) {
   const router = useRouter();
+  const collectionContext = useSelector((state) => state.user.collectionContext);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -264,10 +265,17 @@ export default function ProductPageClient({ product, complementaryProducts = [],
   const [availableStoreCount, setAvailableStoreCount] = useState(0);
   const [isStoreDrawerOpen, setIsStoreDrawerOpen] = useState(false);
 
-  // Initialize with priority for 9KT if it's a 9KT collection product
+  // Initialize with priority for 9KT only if it's exclusively/primarily in the 9KT collection
   const initialVariant = (() => {
-    const is9ktCollection = product.collectionHandles?.includes("9kt-collection");
-    if (is9ktCollection) {
+    const handles = product.collectionHandles || [];
+    // Only apply 9KT priority if it's in 9kt-collection and NOT in other thematic collections
+    // AND the user context is specifically from the 9kt-collection
+    const isStrict9kt = collectionContext === "9kt-collection" && 
+                       handles.includes("9kt-collection") && 
+                       !handles.some(h => h !== "9kt-collection" && h !== "all" && h !== product.type?.toLowerCase() && 
+                       ["sports-collection", "cotton-candy", "hexa-collection", "solitaire-collection"].includes(h));
+
+    if (isStrict9kt) {
       const nineKT = product.variants?.find(v => String(v.color || v.title).includes("9KT"));
       if (nineKT) return nineKT;
     }
@@ -1299,22 +1307,26 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                         }
                       });
                       
-                      // Reorder combinations: 9KT first, then 14KT, then 18KT.
-                      const karatOrder = ["9KT", "14KT", "18KT"];
+                      // Sort combinations based on collection context
+                      const handles = product.collectionHandles || [];
+                      const isStrict9kt = collectionContext === "9kt-collection" &&
+                                         handles.includes("9kt-collection") && 
+                                         !handles.some(h => h !== "9kt-collection" && h !== "all" && h !== product.type?.toLowerCase() && 
+                                         ["sports-collection", "cotton-candy", "hexa-collection", "solitaire-collection"].includes(h));
+
+                      const karatOrder = isStrict9kt ? ["9KT", "14KT", "18KT"] : ["14KT", "18KT", "9KT"];
                       const metalOrder = ["White Gold", "Yellow Gold", "Rose Gold"];
-                      
+
                       combinations.sort((a, b) => {
                         const aKaratIdx = karatOrder.indexOf(a.karat.toUpperCase());
                         const bKaratIdx = karatOrder.indexOf(b.karat.toUpperCase());
-                        
-                        // If one karat isn't in our preferred order, push it to the end
+
                         const aKaratVal = aKaratIdx === -1 ? 99 : aKaratIdx;
                         const bKaratVal = bKaratIdx === -1 ? 99 : bKaratIdx;
 
                         if (aKaratVal !== bKaratVal) return aKaratVal - bKaratVal;
                         return metalOrder.indexOf(a.metal) - metalOrder.indexOf(b.metal);
                       });
-
                       const colorMap = {
                         yellow: "linear-gradient(147.45deg, #c59922 17.98%, #ead59e 48.14%, #c59922 83.84%)",
                         rose: "linear-gradient(154.36deg, #f2b5b5 10.36%, #f8dbdb 68.09%)",
