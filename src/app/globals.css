@@ -606,6 +606,7 @@ img.marquee-img {max-width: 110px;
   gap: 16px !important;
   font-weight: 600 !important;
   color: #000 !important;
+  font-size: 0.875rem !important;
 }
 
 /* Slide-up animation */
@@ -631,9 +632,9 @@ img.marquee-img {max-width: 110px;
 
 /* Icon wrapper — rounded square badge */
 .Toastify__toast-icon {
-  width: 36px !important;
-  height: 36px !important;
-  min-width: 36px !important;
+  width: 30px !important;
+  height: 30px !important;
+  min-width: 30px !important;
   border-radius: 8px !important;
   display: flex !important;
   align-items: center !important;
@@ -642,8 +643,8 @@ img.marquee-img {max-width: 110px;
   align-self: flex-start !important;
 }
 .Toastify__toast-icon svg {
-  width: 18px !important;
-  height: 18px !important;
+  width: 12px !important;
+  height: 12px !important;
 }
 
 /* Progress bar */
@@ -670,8 +671,8 @@ img.marquee-img {max-width: 110px;
   background: rgba(0,0,0,0.06) !important;
 }
 .Toastify__close-button > svg {
-  width: 14px !important;
-  height: 14px !important;
+  width: 12px !important;
+  height: 12px !important;
 }
 
 /* ── SUCCESS ── */
@@ -731,7 +732,7 @@ img.marquee-img {max-width: 110px;
 /* Title — first child element (if multiple lines) */
 .Toastify__toast-body > div:last-child > *:first-child {
   font-family: 'Figtree', var(--font-figtree), sans-serif !important;
-  font-size: 1rem !important;
+  font-size: 0.875rem !important;
   font-weight: 600 !important;
   color: #000 !important;
   line-height: 1.25 !important;
