@@ -507,7 +507,7 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle,
                     animate={{ y: 0 }}
                     exit={{ y: -28 }}
                     transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
-                    className="absolute inset-0 text-black text-[10px] font-bold px-1 lg:px-2 font-figtree uppercase tracking-wider flex items-center justify-center whitespace-nowrap"
+                    className="absolute inset-0 text-black text-xs font-bold px-1 lg:px-2 font-figtree uppercase tracking-wider flex items-center justify-center whitespace-nowrap"
                   >
                     {displayLabels[currentLabelIndex]}
                   </motion.div>
