@@ -1,9 +1,7 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { shopifyStorefrontFetch } from "@/lib/shopify";
+import { shopifyStorefrontFetch, shopifyAdminFetch, uploadFileToShopify, CUSTOMER_METAFIELD_UPDATE_MUTATION } from "@/lib/shopify";
 import clientPromise from "@/lib/mongodb";
-import path from "path";
-import fs from "fs/promises";
 
 async function getCustomerAccessToken() {
   const cookieStore = await cookies();
@@ -45,24 +43,38 @@ export async function POST(req) {
       return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
     }
 
-    // 1. Save locally to public/uploads/avatars
+    // Convert file to buffer for Shopify upload
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // Create unique filename
-    const ext = path.extname(file.name) || ".jpg";
-    const cleanCustomerId = customerId.split("/").pop(); // Get numeric ID if it's GID
-    const filename = `avatar-${cleanCustomerId}-${Date.now()}${ext}`;
-    const publicPath = path.join(process.cwd(), "public", "uploads", "avatars", filename);
-    const relativeUrl = `/uploads/avatars/${filename}`;
-
-    // Ensure directory exists
-    await fs.mkdir(path.dirname(publicPath), { recursive: true });
+    // Create unique filename for Shopify
+    const cleanCustomerId = customerId.split("/").pop();
+    const filename = `avatar-${cleanCustomerId}-${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, "_")}`;
     
-    // Write file
-    await fs.writeFile(publicPath, buffer);
+    // 1. Upload to Shopify Content/Files
+    const shopifyUrl = await uploadFileToShopify(buffer, filename, file.type);
 
-    // 2. Save path to MongoDB
+    // 2. Update Shopify Customer Metafield
+    try {
+      await shopifyAdminFetch(CUSTOMER_METAFIELD_UPDATE_MUTATION, {
+        input: {
+          id: customerId,
+          metafields: [
+            {
+              namespace: "custom",
+              key: "avatar_url",
+              value: shopifyUrl,
+              type: "single_line_text_field"
+            }
+          ]
+        }
+      });
+    } catch (metaError) {
+      console.warn("Failed to update Shopify customer metafield:", metaError.message);
+      // Continue even if metafield update fails, as MongoDB and file upload succeeded
+    }
+
+    // 3. Save Shopify URL to MongoDB
     const client = await clientPromise;
     const db = client.db("next_local_db");
     const collection = db.collection("customer_profiles");
@@ -71,14 +83,14 @@ export async function POST(req) {
       { customerId: customerId },
       { 
         $set: { 
-          avatarUrl: relativeUrl,
+          avatarUrl: shopifyUrl,
           updatedAt: new Date()
         } 
       },
       { upsert: true }
     );
 
-    return NextResponse.json({ url: relativeUrl });
+    return NextResponse.json({ url: shopifyUrl });
   } catch (error) {
     console.error("Avatar upload error:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
@@ -97,6 +109,26 @@ export async function GET() {
       return NextResponse.json({ error: "Customer not found" }, { status: 404 });
     }
 
+    // 1. Try to get from Shopify Metafields first (Admin API)
+    try {
+      const shopifyData = await shopifyAdminFetch(`
+        query($id: ID!) {
+          customer(id: $id) {
+            metafield(namespace: "custom", key: "avatar_url") {
+              value
+            }
+          }
+        }
+      `, { id: customerId });
+
+      if (shopifyData?.customer?.metafield?.value) {
+        return NextResponse.json({ avatar: shopifyData.customer.metafield.value });
+      }
+    } catch (shopifyError) {
+      console.warn("Failed to fetch avatar from Shopify metafields:", shopifyError.message);
+    }
+
+    // 2. Fallback to MongoDB
     const client = await clientPromise;
     const db = client.db("next_local_db");
     const collection = db.collection("customer_profiles");
