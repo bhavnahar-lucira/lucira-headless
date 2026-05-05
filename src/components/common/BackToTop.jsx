@@ -41,12 +41,20 @@ export default function BackToTop() {
 
   if (!shouldShowOnPage) return null;
 
+  const isCollectionPage = pathname.startsWith('/collections');
+
   return (
     <button
       onClick={scrollToTop}
       className={cn(
-        "fixed right-4 z-[100] p-3 rounded-full bg-black text-white shadow-xl transition-all duration-300 hover:scale-110 active:scale-95 group",
-        "bottom-[calc(10%+env(safe-area-inset-bottom))]", "md:top-1/2 md:bottom-auto md:right-5 md:-translate-y-1/2",
+                // POSITIONING: Bottom 10px to stay below FAB. 
+        // Right logic matches your FAB exactly for a perfect line.
+        "fixed bottom-23 md:bottom-25 lg:bottom-23 z-100",
+        isCollectionPage ? "right-[20px] md:right-[30px]" : "right-[30px]",
+        
+        // YOUR ORIGINAL STYLING
+        "w-[50px] h-[50px] flex items-center justify-center text-center rounded-full bg-black text-white shadow-xl transition-all duration-300 group",
+
         
         isVisible 
           ? "translate-x-0 opacity-100" 

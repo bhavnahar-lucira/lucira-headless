@@ -1,5 +1,6 @@
 
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function MetalEducationPage() {
   // Full data for the comparison table to keep the JSX clean
@@ -14,7 +15,7 @@ export default function MetalEducationPage() {
   ];
 
   return (
-    <div className="max-w-[1200px] mx-auto px-4 pt-14 font-figtree text-gray-800 leading-relaxed">
+    <div className="max-w-300 mx-auto px-4 pt-14 font-figtree text-gray-800 leading-relaxed">
       
       {/* Intro Section */}
       <div className="mb-12">
@@ -23,7 +24,7 @@ export default function MetalEducationPage() {
         </h1>
         <div className="space-y-4 text-lg text-gray-600 ">
           <p>
-            At <Link href="https://www.lucirajewelry.com/" className="text-primary no-underline font-medium">Lucira Jewelry</Link>, 
+            At <Link href="/" className="text-primary no-underline font-medium">Lucira Jewelry</Link>, 
             we meticulously source our metals to ensure exceptional quality, longevity, and comfort, so every piece remains as timeless as the moments it represents. 
             Jewellery is not just a product, but a lifelong connection with the milestones achieved and the occasions celebrated.
           </p>
@@ -43,7 +44,15 @@ export default function MetalEducationPage() {
           </div>
           <div className="p-6 md:p-10 flex flex-col md:flex-row gap-10">
             <div className="md:w-1/3">
-              <img src="https://cdn.shopify.com/s/files/1/0739/8516/3482/files/LJ-R00165YG_1F.webp?v=1745852482" alt="Gold Jewelry" className="w-full rounded-md shadow" />
+              <Image
+                src="https://www.lucirajewelry.com/cdn/shop/files/LJ-PGR013YG_1.jpg"
+                alt="Gold Jewelry"
+                width={500}
+                height={500}
+                priority
+                className="w-full rounded-md shadow"
+                sizes="(max-width: 768px) 100vw, 33vw"
+              />
             </div>
             <div className="md:w-2/3 space-y-6">
               <p className="italic">Gold has been treasured for centuries and continues to be a symbol of prosperity and elegance in jewelry design.</p>
@@ -93,7 +102,14 @@ export default function MetalEducationPage() {
           </div>
           <div className="p-6 md:p-10 flex flex-col md:flex-row gap-10">
             <div className="md:w-1/3">
-              <img src="https://cdn.shopify.com/s/files/1/0739/8516/3482/files/LJ-R00341WG_1.webp?v=1745490226" alt="Silver Jewelry" className="w-full rounded-md shadow" />
+              <Image
+                src="https://cdn.shopify.com/s/files/1/0739/8516/3482/files/LJ-R00341WG_1.webp"
+                alt="Silver Jewelry"
+                width={500}
+                height={500}
+                className="w-full rounded-md shadow"
+                sizes="(max-width: 768px) 100vw, 33vw"
+              />
             </div>
             <div className="md:w-2/3 space-y-4">
               <p>Just like pure gold, pure silver is too soft to ensure durability. Sterling silver (92.5% silver and 7.5% alloy) provides an elegant look without costing a fortune.</p>
@@ -125,7 +141,14 @@ export default function MetalEducationPage() {
           </div>
           <div className="p-6 md:p-10 flex flex-col md:flex-row gap-10">
             <div className="md:w-1/3">
-              <img src="https://cdn.shopify.com/s/files/1/0739/8516/3482/files/LJ-R00245PLT_1.webp?v=1745823338" alt="Platinum Jewelry" className="w-full rounded-md shadow" />
+              <Image
+                src="https://www.lucirajewelry.com/cdn/shop/files/LJ-R00820WG_1.jpg"
+                alt="Platinum Jewelry"
+                width={500}
+                height={500}
+                className="w-full rounded-md shadow"
+                sizes="(max-width: 768px) 100vw, 33vw"
+              />
             </div>
             <div className="md:w-2/3 space-y-4">
               <p>If you are someone seeking luster, luxury and longevity, platinum is your answer. Unlike white gold, it doesn&apos;t require a rhodium plating because of its natural whiteness.</p>
@@ -143,7 +166,7 @@ export default function MetalEducationPage() {
                 <p className="text-sm italic">Ensure it is certified and has a purity stamp such as &quot;PT950&quot;</p>
               </div>
               <div className='flex justify-center align-center'>
-                <Link href="/collections/engagement-rings-platinum" className="inline-block bg-primary text-white px-8 py-3 rounded-lg hover:opacity-90 transition-opacity">Browse Platinum</Link>
+                <Link href="/collections/platinum-engagement-bridal-rings" className="inline-block bg-primary text-white px-8 py-3 rounded-lg hover:opacity-90 transition-opacity">Browse Platinum</Link>
                 </div>
             </div>
           </div>
