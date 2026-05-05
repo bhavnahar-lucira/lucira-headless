@@ -451,6 +451,7 @@
 
 @layer components {
   .footer-pages {
+    margin: 20px 0 0;
     font-family: var(--font-figtree), sans-serif !important;
   }
   .footer-pages * {
@@ -466,6 +467,9 @@
   .footer-pages h5,
   .footer-pages h6 {
     font-family: var(--font-abhaya), serif !important;
+  }
+  .footer-pages h1 {
+    @apply text-4xl
   }
   .footer-pages p {
     @apply text-base my-4
