@@ -292,7 +292,30 @@ export default function ProductPageClient({ product, complementaryProducts = [],
   const [selectedSize, setSelectedSize] = useState(initialSize);
   const [activeVariant, setActiveVariant] = useState(initialVariant);
   const [priceBreakup, setPriceBreakup] = useState(null);
+  const [isSchemeOpen, setIsSchemeOpen] = useState(false);
   const shouldToastVariantChange = useRef(false);
+
+  const calculateScheme = useCallback((price) => {
+    if (!price) return null;
+    const priceRupees = Math.floor(price);
+    const rawMonthly = Math.floor(priceRupees / 10);
+    const remainder = rawMonthly % 500;
+    const monthly = rawMonthly - remainder;
+    
+    // Use base URL with amount only as requested
+    const schemeUrl = `https://schemes.lucirajewelry.com/?amount=${monthly}`;
+
+    return {
+      monthly,
+      pay9: monthly * 9,
+      saveAmount: monthly,
+      totalRedeemable: monthly * 10,
+      schemeUrl,
+      productPrice: priceRupees
+    };
+  }, []);
+
+  const schemeData = activeVariant?.price > 20000 ? calculateScheme(activeVariant.price) : null;
 
   // Pincode & Dispatch Logic
   const globalPincode = useSelector((state) => state.user.pincode);
@@ -1132,6 +1155,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
         isBottomVisible={showBottomAtc}
         product={product}
         activeVariant={activeVariant}
+        schemeData={schemeData}
         onAddToCart={handleAddToCart}
         addingToCart={addingToCart}
         onToggleWishlist={handleToggleWishlist}
@@ -1731,15 +1755,104 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                   />
                 </Button>
               </div>
-              <div className="grid grid-cols-2 gap-4 mt-2">
-                <Button variant="outline" className="h-auto py-3 font-medium text-lg flex items-center justify-center gap-2 bg-gray-50 hover:cursor-pointer hover:bg-primary hover:text-white transition-all group">
+              <div className={`grid ${schemeData ? 'grid-cols-[60px_1fr]' : 'grid-cols-2'} gap-3 mt-2`}>
+                <Button variant="outline" className="h-auto py-3 font-medium text-lg flex items-center justify-center bg-gray-50 hover:cursor-pointer hover:bg-primary hover:text-white transition-all group px-0">
                   <Image src="/images/icons/whatsapp.png" alt="Whatsapp icon" width={24} height={24} />
-                  <span className="hidden lg:inline text-base uppercase">Whatsapp Us</span>
+                  <span className={`${schemeData ? 'hidden' : 'hidden lg:inline'} text-base uppercase`}>Whatsapp Us</span>
                 </Button>
-                <Button variant="outline" className="h-auto py-3 font-medium text-lg flex items-center justify-center gap-2 bg-gray-50 hover:cursor-pointer group hover:bg-primary hover:text-white transition-all">
-                  <Video size={30} className="text-black group-hover:text-white transition-all" />
-                  <span className="hidden lg:inline text-base uppercase">Shop Live</span>
-                </Button>
+                {schemeData ? (
+                  <div 
+                    className="relative flex-1"
+                    onMouseEnter={() => { if(typeof window !== 'undefined' && window.innerWidth > 1023) setIsSchemeOpen(true) }}
+                    onMouseLeave={() => { if(typeof window !== 'undefined' && window.innerWidth > 1023) setIsSchemeOpen(false) }}
+                  >
+                    <Button 
+                      type="button"
+                      variant="outline" 
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setIsSchemeOpen((prev) => !prev);
+                      }}
+                      className={`w-full h-auto py-3 px-1.5 sm:px-3 font-medium text-lg flex items-center justify-between gap-1 sm:gap-2 bg-gray-50 hover:cursor-pointer group hover:bg-primary hover:text-white transition-all duration-150 active:scale-[0.98] ${isSchemeOpen ? 'bg-primary text-white border-primary shadow-[0_5px_20px_rgba(163,110,110,0.4)]' : 'border-gray-200'}`}
+                    >
+                      <div className="w-6 sm:w-8 flex justify-start shrink-0">
+                        <div className={`p-1 rounded-full transition-colors duration-150 flex items-center justify-center ${isSchemeOpen ? 'bg-white/20' : 'bg-primary/10'}`}>
+                          <Coins size={16} className={`sm:w-[18px] sm:h-[18px] ${isSchemeOpen ? 'text-white' : 'text-primary'} group-hover:text-white transition-all`} />
+                        </div>
+                      </div>
+                      
+                      <span className="flex-1 text-center text-[10px] min-[375px]:text-[11px] sm:text-[12px] lg:text-[14px] xl:text-[15px] uppercase tracking-tight leading-tight">
+                        SAVE <span className="font-extrabold mx-0.5">₹{formatPrice(schemeData.saveAmount)}</span> WITH SCHEME
+                      </span>
+                      
+                      <div className="w-6 sm:w-8 flex justify-end shrink-0">
+                        <ChevronRight size={16} className={`transition-transform duration-200 ${isSchemeOpen ? 'rotate-90' : ''}`} />
+                      </div>
+                    </Button>
+                    
+                    {isSchemeOpen && (
+                      <div className="absolute top-full right-0 w-[calc(100vw-32px)] sm:w-[350px] lg:w-full mt-2 bg-white border border-primary/10 rounded-2xl overflow-hidden z-[100] shadow-[0_20px_60px_rgba(0,0,0,0.18)] animate-in fade-in zoom-in-95 slide-in-from-top-2 duration-200 ease-out origin-top-right">
+                        <div className="p-4 sm:p-5 lg:p-6 space-y-4 sm:space-y-5">
+
+                          <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+                            <h4 className="text-[12px] sm:text-sm font-bold text-black uppercase tracking-[0.12em]">9 + 1 Scheme Breakdown</h4>
+                            <BadgeCheck size={18} className="text-[#2DB36F]" />
+                          </div>
+                          
+                          <div className="space-y-3 sm:space-y-4">
+                            <div className="flex justify-between items-center text-[12px] sm:text-[13px]">
+                              <span className="text-gray-500 font-medium">Product Price</span>
+                              <span className="font-semibold text-black">₹{formatPrice(schemeData.productPrice)}</span>
+                            </div>
+                            <div className="flex justify-between items-center text-[12px] sm:text-[13px]">
+                              <span className="text-gray-500 font-medium">Monthly Installment</span>
+                              <div className="text-right">
+                                <span className="font-bold text-primary">₹{formatPrice(schemeData.monthly)}</span>
+                                <span className="text-gray-400 ml-1">x 9 Months</span>
+                              </div>
+                            </div>
+                            <div className="flex justify-between items-center text-[12px] sm:text-[13px]">
+                              <span className="text-gray-500 font-medium">You Pay (9 Months)</span>
+                              <span className="font-semibold text-black">₹{formatPrice(schemeData.pay9)}</span>
+                            </div>
+                            <div className="flex justify-between items-center text-[12px] sm:text-[13px]">
+                              <span className="text-gray-500 font-medium">10th Month We Pay</span>
+                              <span className="font-bold text-[#2DB36F]">₹{formatPrice(schemeData.monthly)}</span>
+                            </div>
+                            
+                            <div className="bg-[#FAFAFA] rounded-xl p-4 border border-gray-100 shadow-sm">
+                              <div className="flex justify-between items-center">
+                                <span className="text-sm font-bold text-gray-900">Total Redeemable</span>
+                                <span className="text-lg font-extrabold text-black">₹{formatPrice(schemeData.totalRedeemable)}</span>
+                              </div>
+                              <p className="text-[10px] text-gray-400 mt-1.5 leading-tight font-medium">
+                                You can redeem this amount after 10 months.
+                              </p>
+                            </div>
+                          </div>
+
+                          <Button className="w-full h-12 font-bold uppercase tracking-widest bg-primary hover:bg-accent text-white rounded-xl shadow-lg shadow-primary/20 transition-all duration-200 active:scale-[0.97]" asChild>
+                            <a href={schemeData.schemeUrl} target="_blank" rel="noopener noreferrer">
+                              ENROLL NOW <ArrowRight size={16} className="ml-2" />
+                            </a>
+                          </Button>
+                          
+                          <div className="flex items-center justify-center gap-2 pt-1">
+                            <div className="w-1 h-1 bg-[#2DB36F] rounded-full animate-pulse"></div>
+                            <p className="text-[9px] sm:text-[10px] text-gray-400 font-bold uppercase tracking-widest">
+                              Secure & Instant Enrollment
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <Button variant="outline" className="h-auto py-3 font-medium text-lg flex items-center justify-center gap-2 bg-gray-50 hover:cursor-pointer group hover:bg-primary hover:text-white transition-all">
+                    <Video size={30} className="text-black group-hover:text-white transition-all" />
+                    <span className="hidden lg:inline text-base uppercase">Shop Live</span>
+                  </Button>
+                )}
               </div>
             </div>
 

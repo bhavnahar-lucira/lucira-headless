@@ -5,16 +5,16 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 
-export default function AtcBar({ 
+export default function AtcBar({
   isTopVisible,
-  isBottomVisible, 
-  product, 
-  activeVariant, 
-  onAddToCart, 
-  addingToCart, 
-  onToggleWishlist, 
+  isBottomVisible,
+  product,
+  activeVariant,
+  onAddToCart,
+  addingToCart,
+  onToggleWishlist,
   isWishlisted,
-  wishlistLoading
+  schemeData,
 }) {
   const formatPrice = (num) => {
     if (num === null || num === undefined) return "0";
@@ -24,9 +24,9 @@ export default function AtcBar({
   const currentPrice = activeVariant?.price || product?.price || 0;
   const comparePrice = activeVariant?.compare_price || product?.compare_price || 0;
   const discount = comparePrice > currentPrice ? Math.round(((comparePrice - currentPrice) / comparePrice) * 100) : 0;
-  
-  // Scheme savings - approximately 10% or from metadata if available
-  const schemeSavings = Math.round(currentPrice * 0.1); 
+
+  // Use schemeData if available, otherwise fallback to 0
+  const schemeSavings = schemeData?.saveAmount || 0;
 
   const getValidSrc = (src, fallback = "/images/product/1.jpg") => {
     if (typeof src === 'string' && src.trim() !== '') return src;
@@ -37,7 +37,7 @@ export default function AtcBar({
   return (
     <>
       {/* Sticky Top Bar (atcBar) */}
-      <div 
+      <div
         className={cn(
           "atcBar fixed top-0 left-0 w-full bg-white z-200 border-b border-gray-100 transition-all duration-500 transform shadow-sm px-4 lg:px-17 py-3",
           isTopVisible ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0"
@@ -46,10 +46,10 @@ export default function AtcBar({
         <div className="max-w-480 mx-auto flex items-center justify-between gap-4">
           <div className="flex items-center gap-4 flex-1 min-w-0">
             <div className="relative w-12 h-12 rounded-md overflow-hidden bg-gray-50 shrink-0">
-              <Image 
-                src={getValidSrc(activeVariant?.image || product?.featuredImage || product?.images?.[0])} 
-                alt={product?.title || "Product"} 
-                fill 
+              <Image
+                src={getValidSrc(activeVariant?.image || product?.featuredImage || product?.images?.[0])}
+                alt={product?.title || "Product"}
+                fill
                 className="object-contain p-1"
               />
             </div>
@@ -76,13 +76,20 @@ export default function AtcBar({
           </div>
 
           <div className="flex items-center gap-3 shrink-0">
-            <div className="hidden lg:flex items-center gap-2 mr-2">
-              <button className="h-14 px-6 border border-primary text-primary font-bold text-sm rounded-lg uppercase tracking-wider whitespace-nowrap hover:bg-[#A36E6E]/5 transition-colors">
-                YOU SAVE ₹{formatPrice(schemeSavings)} WITH SCHEME
-              </button>
-            </div>
+            {schemeData && (
+              <div className="hidden lg:flex items-center gap-2 mr-2">
+                <a 
+                  href={schemeData.schemeUrl} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="h-14 px-6 border border-primary text-primary font-bold text-[13px] rounded-lg uppercase tracking-wider whitespace-nowrap hover:bg-primary/5 transition-colors flex items-center justify-center"
+                >
+                  YOU SAVE <span className="mx-1 font-extrabold">₹{formatPrice(schemeData.saveAmount)}</span> WITH SCHEME
+                </a>
+              </div>
+            )}
 
-            <Button 
+            <Button
               onClick={onAddToCart}
               disabled={addingToCart}
               className="h-14 px-10 text-sm font-bold bg-primary hover:bg-accent text-white rounded-lg transition-colors uppercase tracking-wider min-w-40"
@@ -109,7 +116,7 @@ export default function AtcBar({
       </div>
 
       {/* Sticky Bottom Bar (atc-2) */}
-      <div 
+      <div
         className={cn(
           "atc-2 fixed bottom-0 left-0 w-full z-200 transition-all duration-300 transform pointer-events-none",
           isBottomVisible ? "translate-y-0 opacity-100" : "translate-y-full opacity-0"
@@ -120,10 +127,17 @@ export default function AtcBar({
           <div className="hidden lg:grid lg:grid-cols-[1fr_340px] xl:grid-cols-[1fr_420px] 2xl:grid-cols-[1fr_530px] gap-10">
             <div className="hidden lg:block"></div> {/* Spacer for Left Column */}
             <div className="pointer-events-auto bg-white border border-gray-100 rounded-xl p-3 flex items-center gap-2 w-full">
-              <button className="h-14 flex-1 border border-accent text-accent font-bold text-[14px] rounded-lg flex items-center justify-center whitespace-nowrap px-2 hover:bg-accent/5 transition-colors uppercase">
-                9=10 SAVING
-              </button>
-              <button 
+              {schemeData && (
+                <a
+                  href={schemeData.schemeUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="h-14 flex-1 border border-accent text-accent font-bold text-[13px] rounded-lg flex items-center justify-center whitespace-nowrap px-2 hover:bg-accent/5 transition-colors uppercase tracking-tight"
+                >
+                  YOU SAVE <span className="mx-1 font-extrabold">₹{formatPrice(schemeData.saveAmount)}</span> WITH SCHEME
+                </a>
+              )}
+              <button
                 onClick={onAddToCart}
                 disabled={addingToCart}
                 className="h-14 flex-[1.5] bg-accent text-white font-bold text-[14px] rounded-lg flex items-center justify-center gap-2 disabled:opacity-70 hover:bg-[#8F5D5D] transition-colors"
@@ -133,16 +147,16 @@ export default function AtcBar({
                 ) : (
                   "ADD TO CART"
                 )}
-              </button>              
+              </button>
             </div>
           </div>
 
           {/* Mobile Layout: Full Width Style */}
           <div className="lg:hidden pointer-events-auto bg-white border-t border-gray-100 shadow-[0_-4px_10px_rgba(0,0,0,0.05)] -mx-4 px-4 py-3 flex items-center gap-2 w-screen">
             {/* WhatsApp Button */}
-            <a 
-              href="https://wa.me/919172499912" 
-              target="_blank" 
+            <a
+              href="https://wa.me/919172499912"
+              target="_blank"
               rel="noopener noreferrer"
               className="h-14 aspect-square bg-white shadow-md border border-zinc-100 rounded-xl flex items-center justify-center shrink-0"
             >
@@ -151,13 +165,20 @@ export default function AtcBar({
               </div>
             </a>
 
-            {/* 9=10 Saving Button */}
-            <button className="h-14 flex-1 border border-accent text-accent font-bold text-[13px] rounded-xl flex items-center justify-center whitespace-nowrap px-2">
-              9=10 SAVING
-            </button>
+            {/* Scheme Saving Button */}
+            {schemeData && (
+              <a
+                href={schemeData.schemeUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="h-14 flex-1 border border-accent text-accent font-bold text-[12px] rounded-xl flex items-center justify-center whitespace-nowrap px-2 tracking-tight"
+              >
+                SAVE <span className="mx-1 font-extrabold">₹{formatPrice(schemeData.saveAmount)}</span> WITH SCHEME
+              </a>
+            )}
 
             {/* Add to Cart Button */}
-            <button 
+            <button
               onClick={onAddToCart}
               disabled={addingToCart}
               className="h-14 flex-[1.5] bg-accent text-white font-bold text-[13px] rounded-xl flex items-center justify-center gap-2 disabled:opacity-70"
