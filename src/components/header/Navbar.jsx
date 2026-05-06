@@ -195,7 +195,7 @@ export default function Navbar({ hideTop }) {
                           onClick={closeMenu}
                           className="group relative block overflow-hidden rounded-md"
                         >
-                          <div className="relative aspect-[4/5] w-full overflow-hidden rounded-md bg-zinc-100">
+                          <div className="relative aspect-[4/4] w-full overflow-hidden rounded-md bg-zinc-100">
                             <Image
                               src={item.image}
                               alt={item.title}
