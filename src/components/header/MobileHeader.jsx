@@ -22,11 +22,14 @@ import { useAuth } from "@/hooks/useAuth";
 
 const CATEGORY_IMAGES = {
   "BEST SELLERS": "/images/menu/engagement-ring.jpg",
+  "BESTSELLERS": "/images/menu/engagement-ring.jpg",
   "ENGAGEMENT RINGS": "/images/menu/engagement-ring.jpg",
+  "ENGAGEMENT & BRIDAL": "/images/menu/engagement-ring.jpg",
   "RINGS": "/images/menu/wedding-ring.jpg",
   "EARRINGS": "/images/menu/earring.jpg",
   "MORE JEWELRY": "/images/menu/more-jewellery.jpg",
-  "solitaire": "/images/menu/earring.jpg",
+  "SOLITAIRE": "/images/menu/earring.jpg",
+  "SOLITAIRES": "/images/menu/earring.jpg",
   "COLLECTIONS": "/images/menu/hexa.jpg",
   "GIFTING": "/images/menu/gifting.jpg",
   "9KT COLLECTION": "/images/menu/candy.jpg",
@@ -582,24 +585,38 @@ export default function MobileHeader() {
         </div>
 
         {/* Text Category Links Grid */}
-        <div className="grid grid-cols-2 gap-2 px-4 py-4">
+        <div className="grid grid-cols-2 gap-2.5 px-4 py-4">
           {MEGA_MENU.map((item, index) => {
             const label = item.label || item.title;
             const is9kt = label.toLowerCase().includes('9kt');
+            const icon = item.menuIcon || CATEGORY_IMAGES[label.toUpperCase()] || CATEGORY_IMAGES[label] || "/images/menu/engagement-ring.jpg";
+            
             return (
               <button
                 key={index}
                 onClick={() => handleItemClick(item, index)}
-                className="bg-[#f5f5f5] rounded-sm px-3 py-2.5 text-left flex items-center justify-between gap-1 active:bg-gray-200 transition-colors"
+                className="bg-[#f8f8f8] rounded-xl p-2.5 text-left flex items-center gap-3 active:bg-gray-200 transition-all border border-gray-50/50"
               >
-                <span className="text-[12px] font-semibold uppercase tracking-wider font-figtree text-black">
-                  {label}
-                </span>
-                {is9kt && (
-                  <span className="text-[9px] font-bold uppercase tracking-wider bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-sm">
-                    New
-                  </span>
-                )}
+                <div className="w-11 h-11 relative shrink-0 overflow-hidden rounded-lg bg-white flex items-center justify-center p-1">
+                  <Image 
+                    src={icon} 
+                    alt={label} 
+                    fill 
+                    className="object-contain p-0.5" 
+                  />
+                </div>
+                <div className="flex flex-col flex-grow min-w-0">
+                  <div className="flex items-center justify-between gap-1 w-full">
+                    <span className="text-[13px] font-semibold leading-tight font-figtree text-gray-900 line-clamp-2">
+                      {label}
+                    </span>
+                    {is9kt && (
+                      <span className="text-[8px] font-bold uppercase tracking-wider bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-sm shrink-0">
+                        New
+                      </span>
+                    )}
+                  </div>
+                </div>
               </button>
             );
           })}
