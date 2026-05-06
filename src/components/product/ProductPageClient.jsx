@@ -334,7 +334,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
     const rawMonthly = Math.floor(priceRupees / 10);
     const remainder = rawMonthly % 500;
     const monthly = rawMonthly - remainder;
-    
+
     // Use base URL with amount only as requested
     const schemeUrl = `https://schemes.lucirajewelry.com/?amount=${monthly}`;
 
@@ -874,7 +874,6 @@ export default function ProductPageClient({ product, complementaryProducts = [],
       promo_id: activeVariant?.sku || product?.sku || "",
       promo_name: product.title,
       promo_position: promoPosition,
-      position: "-",
 
       // Product Info
       product_id: getNumericId(product.shopifyId || product.id),
@@ -1803,23 +1802,23 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                   </a>
                 </Button>
                 {schemeData && (
-                  <div 
+                  <div
                     className="relative flex-1"
-                    onMouseEnter={() => { 
+                    onMouseEnter={() => {
                       if (schemeTimeoutRef.current) clearTimeout(schemeTimeoutRef.current);
-                      if(typeof window !== 'undefined' && window.innerWidth > 1023) setIsSchemeOpen(true) 
+                      if (typeof window !== 'undefined' && window.innerWidth > 1023) setIsSchemeOpen(true)
                     }}
-                    onMouseLeave={() => { 
-                      if(typeof window !== 'undefined' && window.innerWidth > 1023) {
+                    onMouseLeave={() => {
+                      if (typeof window !== 'undefined' && window.innerWidth > 1023) {
                         schemeTimeoutRef.current = setTimeout(() => {
                           setIsSchemeOpen(false);
                         }, 150);
                       }
                     }}
                   >
-                    <Button 
+                    <Button
                       type="button"
-                      variant="outline" 
+                      variant="outline"
                       onClick={(e) => {
                         e.preventDefault();
                         setIsSchemeOpen((prev) => !prev);
@@ -1831,16 +1830,16 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                           <Coins size={16} className={`sm:w-[18px] sm:h-[18px] ${isSchemeOpen ? 'text-white' : 'text-primary'} group-hover:text-white transition-all`} />
                         </div>
                       </div>
-                      
+
                       <span className="flex-1 text-center text-[12px] sm:text-[13px] lg:text-[14px] xl:text-[15px] uppercase tracking-tight leading-tight font-bold">
                         SAVE <span className="font-extrabold mx-0.5">₹{formatPrice(schemeData.saveAmount)}</span> WITH SCHEME
                       </span>
-                      
+
                       <div className="w-6 sm:w-8 flex justify-end shrink-0">
                         <ChevronRight size={16} className={`transition-transform duration-200 ${isSchemeOpen ? 'rotate-90' : ''}`} />
                       </div>
                     </Button>
-                    
+
                     {isSchemeOpen && (
                       <div className="absolute top-full right-0 w-[calc(100vw-32px)] sm:w-[350px] lg:w-full pt-2 z-[100] animate-in fade-in zoom-in-95 slide-in-from-top-2 duration-200 ease-out origin-top-right">
                         <div className="bg-white border border-primary/10 rounded-2xl overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.18)]">
@@ -1850,7 +1849,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                               <h4 className="text-[12px] sm:text-sm font-bold text-black uppercase tracking-[0.12em]">9 + 1 Scheme Breakdown</h4>
                               <BadgeCheck size={18} className="text-[#2DB36F]" />
                             </div>
-                            
+
                             <div className="space-y-3 sm:space-y-4">
                               <div className="flex justify-between items-center text-[12px] sm:text-[13px]">
                                 <span className="text-gray-500 font-medium">Product Price</span>
@@ -1871,7 +1870,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                                 <span className="text-gray-500 font-medium">10th Month We Pay</span>
                                 <span className="font-bold text-[#2DB36F]">₹{formatPrice(schemeData.monthly)}</span>
                               </div>
-                              
+
                               <div className="bg-[#FAFAFA] rounded-xl p-4 border border-gray-100 shadow-sm">
                                 <div className="flex justify-between items-center">
                                   <span className="text-sm font-bold text-gray-900">Total Redeemable</span>
@@ -1888,7 +1887,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                                 ENROLL NOW <ArrowRight size={16} className="ml-2" />
                               </a>
                             </Button>
-                            
+
                             <div className="flex items-center justify-center gap-2 pt-1">
                               <div className="w-1 h-1 bg-[#2DB36F] rounded-full animate-pulse"></div>
                               <p className="text-[9px] sm:text-[10px] text-gray-400 font-bold uppercase tracking-widest">
@@ -2298,11 +2297,12 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                 priceBreakup={priceBreakup?.price_breakup}
                 onTabChange={(tab) => {
                   if (tab === 'price') {
-                    handlePromoClick('priceBreakup', 'Product Details Section');
+                    const totalSavingsAmount = priceBreakup?.raw_breakup?.total_savings || 0;
+                    handlePromoClick('priceBreakup', 'Product Details Section', { savings_amount: totalSavingsAmount });
                   } else if (tab === 'comparison') {
                     const savingsStr = priceBreakup?.price_breakup?.comparison?.savings || '₹0';
                     const savingsAmount = parseFloat(savingsStr.replace(/[^\d.]/g, '')) || 0;
-                    handlePromoClick('yourSavings', savingsStr, { savings_amount: savingsAmount });
+                    handlePromoClick('yourSavings', savingsAmount, { savings_amount: savingsAmount });
                   }
                 }}
               />
