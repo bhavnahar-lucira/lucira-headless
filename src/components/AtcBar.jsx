@@ -120,13 +120,13 @@ export default function AtcBar({
           <div className="hidden lg:grid lg:grid-cols-[1fr_340px] xl:grid-cols-[1fr_420px] 2xl:grid-cols-[1fr_530px] gap-10">
             <div className="hidden lg:block"></div> {/* Spacer for Left Column */}
             <div className="pointer-events-auto bg-white border border-gray-100 rounded-xl p-3 flex items-center gap-2 w-full">
-              <button className="h-14 flex-1 border border-accent text-accent font-bold text-[14px] rounded-lg flex items-center justify-center whitespace-nowrap px-2 hover:bg-accent/5 transition-colors uppercase">
+              <button className="h-14 flex-1 border border-primary text-primary font-bold text-sm rounded-lg flex items-center justify-center whitespace-nowrap px-2 hover:bg-accent/5 transition-colors uppercase">
                 9=10 SAVING
               </button>
               <button 
                 onClick={onAddToCart}
                 disabled={addingToCart}
-                className="h-14 flex-[1.5] bg-accent text-white font-bold text-[14px] rounded-lg flex items-center justify-center gap-2 disabled:opacity-70 hover:bg-[#8F5D5D] transition-colors"
+                className="h-14 flex-[1.5] bg-primary text-white font-bold text-[14px] rounded-lg flex items-center justify-center gap-2 disabled:opacity-70 hover:bg-[#8F5D5D] transition-colors"
               >
                 {addingToCart ? (
                   <Loader2 className="h-4 w-4 animate-spin" />

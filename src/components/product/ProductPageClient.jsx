@@ -1825,7 +1825,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                   <Button
                     onClick={handlePincodeCheck}
                     disabled={checkingPincode}
-                    className="h-12 px-10 font-bold rounded-md absolute right-1 top-1/2 transform -translate-y-1/2 hover:cursor-pointer"
+                    className="h-12 px-10 font-bold rounded-md absolute right-1 top-1/2 transform -translate-y-1/2 bg-tertiary hover:cursor-pointer"
                   >
                     {checkingPincode ? <Loader2 className="animate-spin" size={18} /> : "CHECK"}
                   </Button>
@@ -1873,7 +1873,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                 )}
                 <Button
                   onClick={() => setIsStoreDrawerOpen(true)}
-                  className="w-full h-12 font-bold rounded-md mt-1 text-sm uppercase tracking-widest"
+                  className="w-full h-12 font-bold rounded-md mt-1 text-sm bg-tertiary uppercase tracking-widest"
                 >
                   {availableStoreCount > 0 ? "FIND IN STORE" : "FIND STORE"}
                 </Button>
@@ -1976,10 +1976,10 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                       });
                     }}
                   >
-                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest group-hover:text-gray-600 transition-colors">
+                    <span className="text-[10px] font-bold text-gray-700 uppercase tracking-widest group-hover:text-gray-600 transition-colors">
                       SKU: {activeVariant.sku}
                     </span>
-                    <Copy size={12} className="text-gray-400 group-hover:text-gray-600 transition-colors" />
+                    <Copy size={12} className="text-gray-700 group-hover:text-gray-600 transition-colors" />
                   </div>
                 )}
               </div>
@@ -2166,7 +2166,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                 </div>
               )}
 
-              <p className="text-[11px] leading-relaxed text-gray-400 italic mt-2">
+              <p className="text-xs leading-relaxed text-gray-900 italic mt-3">
                 * Our products are handcrafted and personalised for your delight, hence a weight variance is expected.
               </p>
             </div>

@@ -20,14 +20,14 @@ export default function PriceSavingsDetails({ priceBreakup, onTabChange }) {
           <TabsList className={`grid ${priceBreakup.comparison ? 'grid-cols-2' : 'grid-cols-1'} bg-gray-100 p-1 rounded-lg mb-6 w-full h-12!`}>
             <TabsTrigger 
               value="price" 
-              className="flex items-center justify-center gap-2 text-[13px] font-bold data-[state=active]:bg-primary data-[state=active]:text-white rounded-md transition-all h-full hover:cursor-pointer uppercase tracking-tight"
+              className="flex items-center justify-center gap-2 text-[13px] font-bold data-[state=active]:bg-tertiary data-[state=active]:text-white rounded-md transition-all h-full hover:cursor-pointer uppercase tracking-tight"
             >
               Price Breakup
             </TabsTrigger>
             {priceBreakup.comparison && (
               <TabsTrigger 
                 value="comparison" 
-                className="flex items-center justify-center gap-2 text-[13px] font-bold data-[state=active]:bg-primary data-[state=active]:text-white rounded-md transition-all h-full hover:cursor-pointer uppercase tracking-tight"
+                className="flex items-center justify-center gap-2 text-[13px] font-bold data-[state=active]:bg-tertiary data-[state=active]:text-white rounded-md transition-all h-full hover:cursor-pointer uppercase tracking-tight"
               >
                 Comparison
               </TabsTrigger>
@@ -112,7 +112,7 @@ function PriceRow({ label, value, oldValue, isSaving, discount }) {
       </div>
       <div className="flex items-center gap-3">
         {oldValue && (
-          <span className="text-gray-300 line-through font-bold">{oldValue}</span>
+          <span className="text-gray-400 line-through font-bold">{oldValue}</span>
         )}
         <span className={`font-bold ${isSaving ? 'text-[#1E7D4E]' : 'text-gray-900'}`}>{value}</span>
       </div>
