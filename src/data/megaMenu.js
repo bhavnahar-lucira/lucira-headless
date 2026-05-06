@@ -21,9 +21,9 @@ export const MEGA_MENU = [
             featuredIn: {
                 title: "Featured In",
                 items: [
-                    { label: "New Arrivals", icon: "/images/icons/style/solitaire.svg", href: "/collections/new-arrivals" },
-                    { label: "Men's Ring", icon: "/images/icons/style/solitaire.svg", href: "/collections/mens-ring" },
-                    { label: "Best Selling", icon: "/images/icons/style/solitaire.svg", href: "/collections/bestsellers" }
+                    { label: "New Arrivals", href: "/collections/new-arrivals" },
+                    { label: "Men's Ring", href: "/collections/mens-ring" },
+                    { label: "Best Selling", href: "/collections/bestsellers" }
                 ]
             }
         },
@@ -32,14 +32,14 @@ export const MEGA_MENU = [
                 title: "Shop By Style",
                 type: "icon",
                 items: [
-                    { label: "Solitaire", icon: "/images/icons/style/solitaire.svg", href: "/collections/solitaire-engagement-rings" },
-                    { label: "Halo", icon: "/images/icons/style/halo.svg", href: "/collections/halo-rings" },
-                    { label: "Side-Stone", icon: "/images/icons/style/side-stone.svg", href: "/collections/side-stone-rings" },
-                    { label: "Trilogy", icon: "/images/icons/style/trilogy.svg", href: "/collections/trilogy-rings" },
-                    { label: "Toi et Moi", icon: "/images/icons/style/trilogy.svg", href: "/collections/toi-et-moi-rings" },
-                    { label: "Eternity", icon: "/images/icons/style/trilogy.svg", href: "/collections/eternity-rings" },
-                    { label: "Stackable", icon: "/images/icons/style/trilogy.svg", href: "/collections/stackable-rings" },
-                    { label: "Couple Bands", icon: "/images/icons/style/trilogy.svg", href: "/collections/couple-bands" },
+                    { label: "Solitaire", href: "/collections/solitaire-engagement-rings" },
+                    { label: "Halo", href: "/collections/halo-rings" },
+                    { label: "Side-Stone", href: "/collections/side-stone-rings" },
+                    { label: "Trilogy", href: "/collections/trilogy-rings" },
+                    { label: "Toi et Moi", href: "/collections/toi-et-moi-rings" },
+                    { label: "Eternity", href: "/collections/eternity-rings" },
+                    { label: "Stackable", href: "/collections/stackable-rings" },
+                    { label: "Couple Bands", href: "/collections/couple-bands" },
                     { label: "Shop All Styles", href: "/collections/engagement-rings" }
                 ]
             },
@@ -48,15 +48,15 @@ export const MEGA_MENU = [
                 title: "Shop By Shape",
                 type: "icon",
                 items: [
-                    { label: "Round", icon: "/images/icons/style/solitaire.svg", href: "/collections/round-rings" },
-                    { label: "Oval", icon: "/images/icons/style/solitaire.svg", href: "/collections/oval-rings" },
-                    { label: "Emerald", icon: "/images/icons/style/solitaire.svg", href: "/collections/emerald-rings" },
-                    { label: "Pear", icon: "/images/icons/style/solitaire.svg", href: "/collections/pear-rings" },
-                    { label: "Marquise", icon: "/images/icons/style/solitaire.svg", href: "/collections/marquise-rings" },
-                    { label: "Cushion", icon: "/images/icons/style/solitaire.svg", href: "/collections/cushion-rings" },
-                    { label: "Princess", icon: "/images/icons/style/solitaire.svg", href: "/collections/princess-rings" },
-                    { label: "Heart", icon: "/images/icons/style/solitaire.svg", href: "/collections/heart-rings" },
-                    { label: "Special Cuts", icon: "/images/icons/style/solitaire.svg", href: "/collections/special-cuts-rings" },
+                    { label: "Round", href: "/collections/round-rings" },
+                    { label: "Oval", href: "/collections/oval-rings" },
+                    { label: "Emerald", href: "/collections/emerald-rings" },
+                    { label: "Pear", href: "/collections/pear-rings" },
+                    { label: "Marquise", href: "/collections/marquise-rings" },
+                    { label: "Cushion", href: "/collections/cushion-rings" },
+                    { label: "Princess", href: "/collections/princess-rings" },
+                    { label: "Heart", href: "/collections/heart-rings" },
+                    { label: "Special Cuts", href: "/collections/special-cuts-rings" },
                     { label: "Shop All Shapes", href: "/collections/engagement-rings" }
                 ]
             },
@@ -65,10 +65,10 @@ export const MEGA_MENU = [
                 title: "Shop By Metal",
                 type: "icon",
                 items: [                    
-                    { label: "Yellow Gold", icon: "/images/icons/style/solitaire.svg", href: "/collections/yellow-gold-rings" },
-                    { label: "White Gold", icon: "/images/icons/style/solitaire.svg", href: "/collections/white-gold-rings" },
-                    { label: "Rose Gold", icon: "/images/icons/style/solitaire.svg", href: "/collections/rose-gold-rings" },
-                    { label: "Platinum", icon: "/images/icons/style/solitaire.svg", href: "/collections/platinum-rings" },
+                    { label: "Yellow Gold", href: "/collections/yellow-gold-rings" },
+                    { label: "White Gold", href: "/collections/white-gold-rings" },
+                    { label: "Rose Gold", href: "/collections/rose-gold-rings" },
+                    { label: "Platinum", href: "/collections/platinum-rings" },
                 ]
             },
 
@@ -107,14 +107,14 @@ export const MEGA_MENU = [
                 title: "Shop By Style",
                 type: "icon",
                 items: [
-                    { label: "Solitaire", icon: "/images/icons/style/solitaire.svg", href: "/collections/solitaire-rings" },
-                    { label: "Halo", icon: "/images/icons/style/halo.svg", href: "/collections/halo-rings" },
-                    { label: "Side-Stone", icon: "/images/icons/style/side-stone.svg", href: "/collections/side-stone-rings" },
-                    { label: "Trilogy", icon: "/images/icons/style/trilogy.svg", href: "/collections/trilogy-rings" },
-                    { label: "Toi et Moi", icon: "/images/icons/style/trilogy.svg", href: "/collections/toi-et-moi-rings" },
-                    { label: "Eternity", icon: "/images/icons/style/trilogy.svg", href: "/collections/eternity-rings" },
-                    { label: "Stackable", icon: "/images/icons/style/trilogy.svg", href: "/collections/stackable-rings" },
-                    { label: "Couple Bands", icon: "/images/icons/style/trilogy.svg", href: "/collections/couple-bands" },
+                    { label: "Solitaire", href: "/collections/solitaire-rings" },
+                    { label: "Halo", href: "/collections/halo-rings" },
+                    { label: "Side-Stone", href: "/collections/side-stone-rings" },
+                    { label: "Trilogy", href: "/collections/trilogy-rings" },
+                    { label: "Toi et Moi", href: "/collections/toi-et-moi-rings" },
+                    { label: "Eternity", href: "/collections/eternity-rings" },
+                    { label: "Stackable", href: "/collections/stackable-rings" },
+                    { label: "Couple Bands", href: "/collections/couple-bands" },
                     { label: "Shop All Styles", href: "/collections/all-rings" }
                 ]
             },
@@ -123,15 +123,15 @@ export const MEGA_MENU = [
                 title: "Shop By Shape",
                 type: "icon",
                 items: [
-                    { label: "Round", icon: "/images/icons/style/solitaire.svg", href: "/collections/round-rings" },
-                    { label: "Oval", icon: "/images/icons/style/solitaire.svg", href: "/collections/oval-rings" },
-                    { label: "Emerald", icon: "/images/icons/style/solitaire.svg", href: "/collections/emerald-rings" },
-                    { label: "Pear", icon: "/images/icons/style/solitaire.svg", href: "/collections/pear-rings" },
-                    { label: "Marquise", icon: "/images/icons/style/solitaire.svg", href: "/collections/marquise-rings" },
-                    { label: "Cushion", icon: "/images/icons/style/solitaire.svg", href: "/collections/cushion-rings" },
-                    { label: "Princess", icon: "/images/icons/style/solitaire.svg", href: "/collections/princess-rings" },
-                    { label: "Heart", icon: "/images/icons/style/solitaire.svg", href: "/collections/heart-rings" },
-                    { label: "Special Cuts", icon: "/images/icons/style/solitaire.svg", href: "/collections/special-cuts-rings" },
+                    { label: "Round", href: "/collections/round-rings" },
+                    { label: "Oval", href: "/collections/oval-rings" },
+                    { label: "Emerald", href: "/collections/emerald-rings" },
+                    { label: "Pear", href: "/collections/pear-rings" },
+                    { label: "Marquise", href: "/collections/marquise-rings" },
+                    { label: "Cushion", href: "/collections/cushion-rings" },
+                    { label: "Princess", href: "/collections/princess-rings" },
+                    { label: "Heart", href: "/collections/heart-rings" },
+                    { label: "Special Cuts", href: "/collections/special-cuts-rings" },
                     { label: "Shop All Shapes", href: "/collections/all-rings" }
                 ]
             },
@@ -140,10 +140,10 @@ export const MEGA_MENU = [
                 title: "Shop By Metal",
                 type: "icon",
                 items: [                    
-                    { label: "Yellow Gold", icon: "/images/icons/style/solitaire.svg", href: "/collections/yellow-gold-rings" },
-                    { label: "White Gold", icon: "/images/icons/style/solitaire.svg", href: "/collections/white-gold-rings" },
-                    { label: "Rose Gold", icon: "/images/icons/style/solitaire.svg", href: "/collections/rose-gold-rings" },
-                    { label: "Platinum", icon: "/images/icons/style/solitaire.svg", href: "/collections/platinum-rings" },
+                    { label: "Yellow Gold", href: "/collections/yellow-gold-rings" },
+                    { label: "White Gold", href: "/collections/white-gold-rings" },
+                    { label: "Rose Gold", href: "/collections/rose-gold-rings" },
+                    { label: "Platinum", href: "/collections/platinum-rings" },
                 ]
             },
 
@@ -182,14 +182,14 @@ export const MEGA_MENU = [
                 title: "Shop By Style",
                 type: "icon",
                 items: [
-                    { label: "Hoops", icon: "/images/icons/style/solitaire.svg", href: "/collections/diamond-hoop-earrings" },
-                    { label: "Studs", icon: "/images/icons/style/halo.svg", href: "/collections/stud-earrings" },
-                    { label: "Sui Dhagas", icon: "/images/icons/style/side-stone.svg", href: "/collections/sui-dhagas" },
-                    { label: "Dangles", icon: "/images/icons/style/trilogy.svg", href: "/collections/dangles" },
-                    { label: "Solitaire", icon: "/images/icons/style/trilogy.svg", href: "/collections/solitaire-earrings" },
-                    { label: "Halo", icon: "/images/icons/style/trilogy.svg", href: "/collections/earrings-halo" },
-                    { label: "Gemstone", icon: "/images/icons/style/trilogy.svg", href: "/collections/earrings-gemstone" },
-                    { label: "Couple Bands", icon: "/images/icons/style/trilogy.svg", href: "/collections/mens-stud" },
+                    { label: "Hoops", href: "/collections/diamond-hoop-earrings" },
+                    { label: "Studs", href: "/collections/stud-earrings" },
+                    { label: "Sui Dhagas", href: "/collections/sui-dhagas" },
+                    { label: "Dangles", href: "/collections/dangles" },
+                    { label: "Solitaire", href: "/collections/solitaire-earrings" },
+                    { label: "Halo", href: "/collections/earrings-halo" },
+                    { label: "Gemstone", href: "/collections/earrings-gemstone" },
+                    { label: "Couple Bands", href: "/collections/mens-stud" },
                 ]
             },
 
@@ -197,14 +197,14 @@ export const MEGA_MENU = [
                 title: "Shop By Shape",
                 type: "icon",
                 items: [
-                    { label: "Round", icon: "/images/icons/style/solitaire.svg", href: "/collections/earrings-round" },
-                    { label: "Oval", icon: "/images/icons/style/solitaire.svg", href: "/collections/earrings-oval" },
-                    { label: "Emerald", icon: "/images/icons/style/solitaire.svg", href: "/collections/earrings-emerald" },
-                    { label: "Pear", icon: "/images/icons/style/solitaire.svg", href: "/collections/earrings-pear" },
-                    { label: "Marquise", icon: "/images/icons/style/solitaire.svg", href: "/collections/earrings-marquise" },
-                    { label: "Cushion", icon: "/images/icons/style/solitaire.svg", href: "/collections/earrings-cushion" },
-                    { label: "Princess", icon: "/images/icons/style/solitaire.svg", href: "/collections/earrings-princess" },
-                    { label: "Special Cuts", icon: "/images/icons/style/solitaire.svg", href: "/collections/earrings-special-cuts" },
+                    { label: "Round", href: "/collections/earrings-round" },
+                    { label: "Oval", href: "/collections/earrings-oval" },
+                    { label: "Emerald", href: "/collections/earrings-emerald" },
+                    { label: "Pear", href: "/collections/earrings-pear" },
+                    { label: "Marquise", href: "/collections/earrings-marquise" },
+                    { label: "Cushion", href: "/collections/earrings-cushion" },
+                    { label: "Princess", href: "/collections/earrings-princess" },
+                    { label: "Special Cuts", href: "/collections/earrings-special-cuts" },
                 ]
             },
 
@@ -212,10 +212,10 @@ export const MEGA_MENU = [
                 title: "Shop By Metal",
                 type: "icon",
                 items: [                   
-                    { label: "Yellow Gold", icon: "/images/icons/style/solitaire.svg", href: "/collections/earrings-yellow-gold" },
-                    { label: "White Gold", icon: "/images/icons/style/solitaire.svg", href: "/collections/earrings-white-gold" },
-                    { label: "Rose Gold", icon: "/images/icons/style/solitaire.svg", href: "/collections/earrings-rose-gold" },
-                    { label: "Platinum", icon: "/images/icons/style/solitaire.svg", href: "/collections/earrings-platinum" },
+                    { label: "Yellow Gold", href: "/collections/earrings-yellow-gold" },
+                    { label: "White Gold", href: "/collections/earrings-white-gold" },
+                    { label: "Rose Gold", href: "/collections/earrings-rose-gold" },
+                    { label: "Platinum", href: "/collections/earrings-platinum" },
                     // { label: "Shop All Metal", href: "#" }
                 ]
             },
@@ -321,14 +321,14 @@ export const MEGA_MENU = [
                 title: "Shop By Shape",
                 type: "icon",
                 items: [
-                    { label: "Round", icon: "/images/icons/style/solitaire.svg", href: "/collections/solitaire-round" },
-                    { label: "Heart", icon: "/images/icons/style/halo.svg", href: "/collections/solitaires-heart" },
-                    { label: "Oval", icon: "/images/icons/style/side-stone.svg", href: "/collections/solitaires-oval" },
-                    { label: "Marquise", icon: "/images/icons/style/trilogy.svg", href: "/collections/solitaires-marquise" },
-                    { label: "Princess", icon: "/images/icons/style/trilogy.svg", href: "/collections/solitaires-princess" },
-                    { label: "Emerald", icon: "/images/icons/style/trilogy.svg", href: "/collections/solitaires-emerald" },
-                    { label: "Pear", icon: "/images/icons/style/trilogy.svg", href: "/collections/solitaires-pear" },
-                    { label: "Cushion", icon: "/images/icons/style/trilogy.svg", href: "/collections/solitaires-cushion" },
+                    { label: "Round", href: "/collections/solitaire-round" },
+                    { label: "Heart", href: "/collections/solitaires-heart" },
+                    { label: "Oval", href: "/collections/solitaires-oval" },
+                    { label: "Marquise", href: "/collections/solitaires-marquise" },
+                    { label: "Princess", href: "/collections/solitaires-princess" },
+                    { label: "Emerald", href: "/collections/solitaires-emerald" },
+                    { label: "Pear", href: "/collections/solitaires-pear" },
+                    { label: "Cushion", href: "/collections/solitaires-cushion" },
                 ]
             },            
 
@@ -336,9 +336,9 @@ export const MEGA_MENU = [
                 title: "Shop By Metal",
                 type: "icon",
                 items: [                   
-                    { label: "Yellow Gold", icon: "/images/icons/style/solitaire.svg", href: "/collections/solitaires-yellow-gold" },
-                    { label: "White Gold", icon: "/images/icons/style/solitaire.svg", href: "/collections/solitaires-white-gold" },
-                    { label: "Rose Gold", icon: "/images/icons/style/solitaire.svg", href: "/collections/solitaires-rose-gold" },
+                    { label: "Yellow Gold", href: "/collections/solitaires-yellow-gold" },
+                    { label: "White Gold", href: "/collections/solitaires-white-gold" },
+                    { label: "Rose Gold", href: "/collections/solitaires-rose-gold" },
                 ]
             },
 

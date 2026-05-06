@@ -195,7 +195,7 @@ export default function Navbar({ hideTop }) {
                           onClick={closeMenu}
                           className="group relative block overflow-hidden rounded-md"
                         >
-                          <div className="relative aspect-4/5 w-full overflow-hidden rounded-md">
+                          <div className="relative aspect-[4/5] w-full overflow-hidden rounded-md bg-zinc-100">
                             <Image
                               src={item.image}
                               alt={item.title}
@@ -300,7 +300,7 @@ export default function Navbar({ hideTop }) {
                                       />
                                     ) : item.menuIcon || item.megaMenuImage || (col.type === "icon" && item.icon) ? (
                                       <div className={cn(
-                                        "relative shrink-0 flex items-center justify-center rounded-full overflow-hidden transition-all",
+                                        "relative shrink-0 flex items-center justify-center rounded-full overflow-hidden transition-all bg-zinc-50",
                                         isByShape ? "h-12 w-12" : "h-16 w-16"
                                       )}>
                                         <Image
@@ -329,7 +329,7 @@ export default function Navbar({ hideTop }) {
                             onClick={closeMenu}
                             className="group relative block"
                           >
-                            <div className="relative aspect-4/4 overflow-hidden rounded-md">
+                            <div className="relative aspect-square overflow-hidden rounded-md bg-zinc-100">
                               <Image
                                 src={card.image}
                                 alt={card.title}
