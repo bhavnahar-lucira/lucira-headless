@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 // Helper to ensure image src is a valid string URL
-const getValidSrc = (src, fallback = "/images/product/1.jpg") => {
+const getValidSrc = (src) => {
   if (typeof src === 'string' && src.trim() !== '') return src;
   if (src && typeof src === 'object' && src.url) return src.url;
   return fallback;
@@ -49,7 +49,6 @@ export default function ReviewDetailedPopup({ isOpen, onClose, reviews, activeIn
     : (review.personImage || "/images/review/1.jpg");
     
   const currentImage = getValidSrc(currentImageRaw);
-  console.log("Review log:- ", review);
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 md:p-10 transition-all duration-300">
       
@@ -168,9 +167,9 @@ export default function ReviewDetailedPopup({ isOpen, onClose, reviews, activeIn
                 onClick={onClose}
                 className="mt-auto p-4 bg-gray-50 rounded-xl border border-gray-100 flex items-center gap-4 group hover:bg-gray-100 transition-all"
             >
-              <div className="w-16 h-16 bg-white rounded-lg border border-gray-100 overflow-hidden relative flex-shrink-0">
-                <Image src={getValidSrc(review.productImage)} alt={review.productTitle} fill className="object-cover group-hover:scale-110 transition-transform duration-500" />
-              </div>
+              {/* <div className="w-16 h-16 bg-white rounded-lg border border-gray-100 overflow-hidden relative flex-shrink-0">
+                <Image src={review.productImage} alt={review.productTitle} fill className="object-cover group-hover:scale-110 transition-transform duration-500" />
+              </div> */}
               <div className="min-w-0">
                 <span className="text-[10px] font-bold text-gray-700 uppercase tracking-widest block mb-1">Reviewed product</span>
                 <h4 className="text-sm font-bold text-black truncate group-hover:text-primary transition-colors">

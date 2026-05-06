@@ -84,6 +84,7 @@ import {
 } from "@/components/ui/sheet";
 import StyledByLucira from "../home/StyledByLucira";
 import PdpInfoSheet from "@/components/product/PdpInfoSheet";
+import { loadNectorReviews } from "@/lib/nector";
 
 import { Sheet as MobileSheet } from "react-modal-sheet";
 
@@ -265,6 +266,37 @@ export default function ProductPageClient({ product, complementaryProducts = [],
   const [availableStoreCount, setAvailableStoreCount] = useState(0);
   const [isStoreDrawerOpen, setIsStoreDrawerOpen] = useState(false);
 
+  const [reviewStats, setReviewStats] = useState({
+    average: product.reviews?.average || product.reviewStats?.average || 0,
+    count: product.reviews?.count || product.reviewStats?.count || 0,
+  });
+
+  useEffect(() => {
+    async function fetchReviewStats() {
+      if (reviewStats.count === 0) {
+        try {
+          const result = await loadNectorReviews(product.shopifyId);
+          let average = result.average || 0;
+          if (!average && result.items?.length > 0) {
+            const sum = result.items.reduce(
+              (s, r) => s + (parseFloat(r.rating) || 0),
+              0,
+            );
+            average = (sum / result.items.length).toFixed(1);
+          }
+          setReviewStats({
+            average: average,
+            count: result.count,
+          });
+        } catch (error) {
+          console.error("Error fetching review stats:", error);
+        }
+      }
+    }
+    fetchReviewStats();
+  }, [product.shopifyId]);
+
+
   // Initialize with priority for 9KT only if it's exclusively/primarily in the 9KT collection
   const initialVariant = (() => {
     const handles = product.collectionHandles || [];
@@ -359,7 +391,6 @@ export default function ProductPageClient({ product, complementaryProducts = [],
 
       // GTM tracking for pincode entry
       handlePromoClick('pincodeEntered', pincodeToCheck, {}, true);
-
       if (data.success && data.deliverable) {
         const dispatchMsg = calculateDispatchDate();
         setDeliveryInfo({
@@ -1231,11 +1262,19 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                     {((product.reviews?.count || product.reviewStats?.count) > 0) && (
                       <div
                         className="flex items-center gap-1.5 cursor-pointer hover:opacity-80 transition-opacity"
-                        onClick={() => reviewsRef.current?.scrollIntoView({ behavior: "smooth" })}
+                        onClick={() =>
+                          reviewsRef.current?.scrollIntoView({
+                            behavior: "smooth",
+                          })
+                        }
                       >
-                        <Star size={14} fill="currentColor" className="text-amber-400" />
+                        <Star
+                          size={14}
+                          fill="currentColor"
+                          className="text-amber-400"
+                        />
                         <span className="font-figtree text-[10px] lg:text-sm font-semibold text-gray-800 uppercase tracking-tight">
-                          {product.reviews?.average || product.reviewStats?.average || 0} ({product.reviews?.count || product.reviewStats?.count || 0})
+                          {reviewStats.average} ({reviewStats.count})
                         </span>
                       </div>
                     )}

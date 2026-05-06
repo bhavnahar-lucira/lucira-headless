@@ -222,7 +222,7 @@ export async function POST(req) {
 
               let reviewsData = { count: 0, average: 0, list: [], stats: [] };
               try {
-                reviewsData = await fetchNectorReviews(p.id);
+                reviewsData = await fetchNectorReviews(p.id, { noFallback: true });
                 if (reviewsData.list && reviewsData.list.length > 0) {
                   const reviewsCollection = db.collection("reviews");
                   const productIdSimple = p.id.split("/").pop();
@@ -275,7 +275,12 @@ export async function POST(req) {
                 diamondDiscount: representativeVariant?.price_breakup?.diamond?.discount_percent || 0,
                 makingDiscount: representativeVariant?.price_breakup?.making_charges?.discount_percent || 0,
                 seo: { title: p.seo?.title || p.title, description: p.seo?.description || p.descriptionHtml?.replace(/<[^>]*>?/gm, '').slice(0, 160) },
-                reviewStats: { count: reviewsData.count || 0, average: reviewsData.average || 0, stats: reviewsData.stats || [] },
+                reviewStats: { 
+                  count: reviewsData.count || 0, 
+                  average: reviewsData.average || 0, 
+                  stats: reviewsData.stats || [],
+                  usedFallback: reviewsData.usedFallback || false
+                },
                 collectionHandles: p.collections.edges.map(e => e.node.handle),
                 matchingProductIds,
                 complementaryProductIds,

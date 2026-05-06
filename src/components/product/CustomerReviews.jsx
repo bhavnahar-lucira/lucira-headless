@@ -171,17 +171,17 @@ export default function CustomerReviews({
       >
         <div className="container-main text-center">
           <h2 className="text-3xl md:text-4xl font-extrabold mb-4 font-abhaya">
-            Customer Reviews
+            This product does not have review
           </h2>
           <div className="py-20 bg-white/30 rounded-3xl border-2 border-dashed border-gray-200 max-w-2xl mx-auto">
             <p className="text-gray-400 font-black uppercase tracking-widest mb-6">
-              No reviews yet for this product.
+              Be the first to review this product.
             </p>
             <button
               onClick={() => setIsWriteReviewOpen(true)}
               className="px-10 py-4 bg-[#5A413F] text-white font-black text-xs uppercase tracking-[0.2em] rounded shadow-lg hover:bg-[#4a3533] transition-all active:scale-95"
             >
-              Be the first to review
+              Write a review
             </button>
           </div>
         </div>
@@ -206,7 +206,7 @@ export default function CustomerReviews({
   };
 
   const getPercentage = (count) => {
-    const total = isGlobal ? data.stats.total : data.count;
+    const total = data.count;
     if (!total) return 0;
     return Math.round((count / total) * 100);
   };
@@ -261,39 +261,25 @@ export default function CustomerReviews({
       : 97;
 
   return (
-    <section className="w-full md:py-20 py-15 bg-[#FEF5F1] mt-15" id="reviews">
+    <section className="w-full md:py-20 py-15 bg-[#F9F9F9] mt-15" id="reviews">
       <div className="container-main">
-        {/* Heading */}
-        <div className="md:mb-16 mb:10 flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex-1 text-center md:text-left">
-            <h2 className="text-3xl md:text-4xl font-extrabold mb-2 font-abhaya">
-              {isGlobal ? "Customer Stories" : "Customer Reviews"}
-            </h2>
-            {isGlobal && (
-              <p className="text-gray-500 font-black text-[10px] uppercase tracking-[0.2em]">
-                Showing top experiences from across our collections
-              </p>
-            )}
-          </div>
-          <button
-            onClick={() => setIsWriteReviewOpen(true)}
-            className="px-8 py-4 bg-[#5A413F] text-white font-black text-[10px] uppercase tracking-[0.2em] rounded shadow-lg hover:bg-[#4a3533] transition-all active:scale-95 shrink-0"
-          >
-            Write a Review
-          </button>
-        </div>
+        {/* Title */}
+        <h2 className="text-2xl md:text-3xl font-normal text-center mb-16 tracking-[0.2em] uppercase text-[#1A1A1A]">
+          Customer Reviews
+        </h2>
 
         {/* Stats Summary */}
-        <div className="flex flex-col md:flex-row items-center justify-between gap-12 bg-white/30 p-8 rounded-2xl backdrop-blur-sm border border-white/20 shadow-sm mb-10">
+        <div className="flex flex-col md:flex-row items-center justify-center gap-10 md:gap-24 mb-12">
+          {/* Average Score */}
           <div className="flex flex-col items-center">
-            <span className="text-4xl font-black text-gray-700 mb-2">
+            <span className="text-6xl font-medium text-[#1A1A1A] mb-4">
               {data.average}
             </span>
-            <div className="flex gap-1 mb-2 text-amber-400">
+            <div className="flex gap-1 mb-4 text-[#D4A373]">
               {[1, 2, 3, 4, 5].map((i) => (
                 <Star
                   key={`summary-star-${i}`}
-                  size={24}
+                  size={18}
                   fill={i <= Math.round(data.average) ? "currentColor" : "none"}
                   className={
                     i <= Math.round(data.average) ? "" : "text-zinc-200"
@@ -301,12 +287,13 @@ export default function CustomerReviews({
                 />
               ))}
             </div>
-            <span className="text-sm font-bold text-gray-500 uppercase">
+            <span className="text-xs font-medium text-gray-500 uppercase tracking-widest">
               {data.count} reviews
             </span>
           </div>
 
-          <div className="flex-grow max-w-md w-full space-y-3">
+          {/* Progress Bars */}
+          <div className="flex-grow max-w-lg w-full space-y-2">
             {[5, 4, 3, 2, 1].map((num) => {
               const count = isGlobal
                 ? data.stats.breakdown[num] || 0
@@ -316,18 +303,18 @@ export default function CustomerReviews({
               return (
                 <div
                   key={`progress-${num}`}
-                  className="flex items-center gap-4 group"
+                  className="flex items-center gap-6 group"
                 >
-                  <span className="text-[10px] font-black text-gray-600 w-14 whitespace-nowrap uppercase tracking-tighter">
+                  <span className="text-[11px] font-normal text-gray-600 w-12 whitespace-nowrap">
                     {num} Stars
                   </span>
-                  <div className="flex-grow h-2 bg-gray-200 rounded-full overflow-hidden">
+                  <div className="flex-grow h-[3px] bg-[#EBE0D8] rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-amber-400 transition-all duration-500"
+                      className="h-full bg-[#A36B6F] transition-all duration-500"
                       style={{ width: `${percent}%` }}
                     ></div>
                   </div>
-                  <span className="text-[10px] font-black text-gray-400 w-10 text-right">
+                  <span className="text-[11px] font-normal text-gray-400 w-8 text-right">
                     {percent}%
                   </span>
                 </div>
@@ -335,14 +322,37 @@ export default function CustomerReviews({
             })}
           </div>
 
+          {/* Recommendation */}
           <div className="flex flex-col items-center">
-            <span className="text-3xl font-black text-gray-900 mb-2">
+            <span className="text-5xl font-medium text-[#1A1A1A] mb-2">
               {recommendPercent}%
             </span>
-            <p className="text-xs font-black text-gray-600 max-w-[120px] uppercase tracking-widest leading-relaxed text-center">
-              Would recommend Lucira
+            <p className="text-[10px] text-gray-500 max-w-[120px] uppercase tracking-widest leading-relaxed text-center">
+              Would recommend this product
             </p>
           </div>
+        </div>
+
+        {/* Fallback Message */}
+        {usedFallback && (
+          <div className="bg-[#F3F4F6] border-l-[3px] border-[#A36B6F] py-3 px-5 mb-12 flex items-center gap-3">
+            <div className="w-4 h-4 rounded-full bg-[#3B82F6] flex items-center justify-center text-white text-[10px] font-bold">
+              i
+            </div>
+            <p className="text-[13px] text-gray-600">
+              No reviews yet for this product. Showing reviews from other products instead.
+            </p>
+          </div>
+        )}
+
+        {/* Action Button */}
+        <div className="flex justify-end mb-10">
+          <button
+            onClick={() => setIsWriteReviewOpen(true)}
+            className="text-xs font-bold uppercase tracking-widest border-b border-black pb-1 hover:text-gray-500 hover:border-gray-500 transition-colors"
+          >
+            Write a Review
+          </button>
         </div>
 
         {/* Gallery Slider */}

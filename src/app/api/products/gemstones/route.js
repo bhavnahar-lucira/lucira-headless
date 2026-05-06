@@ -68,7 +68,7 @@ export async function GET(request) {
     return NextResponse.json({ 
       products: products.map(p => ({
         ...p,
-        reviews: p.reviews || p.reviewStats || null
+        reviews: p.reviews || (p.reviewStats?.usedFallback ? null : p.reviewStats) || null
       }))
     });
 
