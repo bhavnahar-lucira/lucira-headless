@@ -10,7 +10,8 @@ import {
   ChevronLeft,
   ChevronRight,
   ChevronsLeft,
-  ChevronsRight
+  ChevronsRight,
+  Activity
 } from "lucide-react";
 import {
   useReactTable,
@@ -21,12 +22,15 @@ import {
 
 const columnHelper = createColumnHelper();
 
+import SyncStatusMonitor from "@/components/dashboard/SyncStatusMonitor";
+
 export default function CollectionsDashboardPage() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
   const [collections, setCollections] = useState([]);
   const [fetchingList, setFetchingList] = useState(true);
+  const [showSyncMonitor, setShowSyncMonitor] = useState(false);
   
   // Search & Pagination State
   const [searchQuery, setSearchQuery] = useState("");
@@ -163,6 +167,17 @@ export default function CollectionsDashboardPage() {
           </p>
         </div>
         <div className="flex items-center gap-4">
+          <button
+            onClick={() => setShowSyncMonitor(!showSyncMonitor)}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium transition-colors border ${
+              showSyncMonitor 
+                ? "bg-zinc-100 border-zinc-300 text-zinc-900" 
+                : "bg-white border-zinc-200 text-zinc-600 hover:bg-zinc-50"
+            }`}
+          >
+            <Activity size={18} />
+            {showSyncMonitor ? "Hide Sync Status" : "View Sync Status"}
+          </button>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" size={18} />
             <input
@@ -187,6 +202,12 @@ export default function CollectionsDashboardPage() {
           </button>
         </div>
       </div>
+
+      {showSyncMonitor && (
+        <div className="mb-12 max-w-2xl">
+          <SyncStatusMonitor />
+        </div>
+      )}
 
       {result && (
         <div className="mb-8 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">

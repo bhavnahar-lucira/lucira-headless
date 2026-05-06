@@ -5,6 +5,8 @@ import Link from "next/link";
 import ProductTable from "./ProductTable";
 import { RefreshCw, LayoutDashboard, Store, MessageSquare, Menu, Search } from "lucide-react";
 
+import SyncStatusMonitor from "@/components/dashboard/SyncStatusMonitor";
+
 export default function Dashboard() {
   const [syncing, setSyncing] = useState(false);
   const [syncType, setSyncType] = useState(""); // "products", "reviews", or "menu"
@@ -267,6 +269,8 @@ export default function Dashboard() {
             )}
           </div>
         )}
+
+        <SyncStatusMonitor />
 
         {/* Product Table Section */}
         <div className="bg-white dark:bg-zinc-950 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm overflow-hidden">

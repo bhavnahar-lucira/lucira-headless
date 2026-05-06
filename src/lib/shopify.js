@@ -52,6 +52,12 @@ export async function shopifyAdminFetch(query, variables = {}) {
     }
   );
 
+  if (!res.ok) {
+    const errorText = await res.text();
+    console.error(`Admin Fetch Error (${res.status}):`, errorText);
+    throw new Error(`Shopify Admin API error ${res.status}: ${errorText.substring(0, 100)}`);
+  }
+
   const data = await res.json();
 
   if (data.errors) {
