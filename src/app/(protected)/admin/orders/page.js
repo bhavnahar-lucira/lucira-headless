@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import {
   ShoppingBag, ChevronRight, Package, Truck,
-  CheckCircle2, Clock, Loader2,
+  CheckCircle2, Clock, Loader2, ChevronDown, RefreshCcw
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -15,6 +15,7 @@ export default function MyOrdersPage() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+  const [returnLoading, setReturnLoading] = useState(null); // Track which order is loading return
 
   useEffect(() => {
     async function fetchOrders() {
@@ -34,6 +35,36 @@ export default function MyOrdersPage() {
     }
     fetchOrders();
   }, []);
+
+  const handleReturnClick = async (e, order) => {
+    e.preventDefault();
+    if (order.status !== 'Delivered') {
+      toast.info("Returns are only available after delivery");
+      return;
+    }
+
+    try {
+      setReturnLoading(order.id);
+      const res = await fetch('/api/customer/returns', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          orderNumber: order.orderNumber,
+          customerEmail: order.customerEmail,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        window.location.href = data.url;
+      } else {
+        toast.error(data.message || "Failed to initiate return");
+      }
+    } catch (err) {
+      toast.error("Failed to connect to Return Prime");
+    } finally {
+      setReturnLoading(null);
+    }
+  };
 
   useEffect(() => {
     let result = orders;
@@ -100,17 +131,20 @@ export default function MyOrdersPage() {
               <ShoppingBag size={18} />
             </div>
           </div>
-          <div className="w-full md:w-56">
+          <div className="w-full md:w-56 relative">
             <select
               className="font-figtree w-full px-4 py-3.5 md:py-4 bg-white border border-zinc-100 rounded-2xl text-sm font-normal text-zinc-700 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all appearance-none shadow-none"
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
             >
-              <option value="">All Statuses</option>
+              <option value="">All Status</option>
               {uniqueStatuses.map((status) => (
                 <option key={status} value={status}>{status}</option>
               ))}
             </select>
+            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-400">
+              <ChevronDown size={18} />
+            </div>
           </div>
         </div>
       ) : null}
@@ -190,6 +224,18 @@ export default function MyOrdersPage() {
 
                 {/* CTA */}
                 <div className="flex flex-col gap-3 w-full md:w-auto shrink-0">
+                  <button
+                    onClick={(e) => handleReturnClick(e, order)}
+                    disabled={returnLoading === order.id || order.status !== "Delivered"}
+                    className="font-figtree w-full md:px-8 py-3 md:py-3.5 border-2 border-primary text-primary text-xs text-center font-bold uppercase tracking-[0.15em] rounded-2xl hover:bg-primary/5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  >
+                    {returnLoading === order.id ? (
+                      <Loader2 size={14} className="animate-spin" />
+                    ) : (
+                      <RefreshCcw size={14} />
+                    )}
+                    Return / Exchange
+                  </button>
                   <Link
                     href={`/admin/orders/${order.id.split("/").pop()}`}
                     className="font-figtree w-full md:px-8 py-3 md:py-3.5 bg-primary text-white text-xs text-center font-semibold uppercase tracking-[0.15em] rounded-2xl hover:opacity-90 transition-colors shadow-lg shadow-primary/20"

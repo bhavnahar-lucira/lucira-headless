@@ -53,6 +53,7 @@ function transformMenu(shopifyMenu) {
       type: menuType,
       layout: layout,
       mobileBanner: getFileUrl(getMetafield(metafields, "custom", "mobile_menu_banner_image")),
+      menuIcon: getFileUrl(getMetafield(metafields, "custom", "menu_links_image_icon")),
     };
 
     if (menuType === "mega") {

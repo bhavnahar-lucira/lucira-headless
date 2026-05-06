@@ -22,13 +22,16 @@ import { useAuth } from "@/hooks/useAuth";
 
 const CATEGORY_IMAGES = {
   "BEST SELLERS": "/images/menu/engagement-ring.jpg",
+  "BESTSELLERS": "/images/menu/engagement-ring.jpg",
   "ENGAGEMENT RINGS": "/images/menu/engagement-ring.jpg",
+  "ENGAGEMENT & BRIDAL": "/images/menu/engagement-ring.jpg",
   "RINGS": "/images/menu/wedding-ring.jpg",
   "EARRINGS": "/images/menu/earring.jpg",
   "MORE JEWELRY": "/images/menu/more-jewellery.jpg",
-  "solitaire": "/images/menu/earring.jpg",
+  "SOLITAIRE": "/images/menu/earring.jpg",
+  "SOLITAIRES": "/images/menu/earring.jpg",
   "COLLECTIONS": "/images/menu/hexa.jpg",
-  "GIFTING": "/images/menu/gifting.jpg",
+  "GIFTING": "https://cdn.shopify.com/s/files/1/0739/8516/3482/files/Untitled_design_38_2.png?v=1778047861",
   "9KT COLLECTION": "/images/menu/candy.jpg",
 };
 
@@ -287,9 +290,9 @@ export default function MobileHeader() {
                       onClick={() => handleResultClick(item.href || "#")}
                       className="relative aspect-[16/9] overflow-hidden rounded-xl group border border-gray-100 bg-zinc-100"
                     >
-                      <Image src={image} alt={label} fill className="object-cover" />
+                      <Image src={image} alt={label} fill priority={index < 4} className="object-cover transition-opacity duration-300" />
                       <div className="absolute inset-0 bg-black/20 group-active:bg-black/40 transition-colors" />
-                      <span className="absolute inset-0 flex items-center justify-center text-white text-[13px] font-bold tracking-wider px-2 text-center drop-shadow-md">
+                      <span className="absolute inset-0 flex items-center justify-center text-white text-[13px] font-bold tracking-wider px-2 text-center">
                         {label}
                       </span>
                     </button>
@@ -404,7 +407,7 @@ export default function MobileHeader() {
                             className="flex flex-col items-center gap-2"
                           >
                             <div 
-                              className="w-12 h-12 rounded-full border border-gray-100 shadow-sm"
+                              className="w-12 h-12 rounded-full border border-gray-100"
                               style={{ background: METAL_COLORS[item.label] || "#eee" }}
                             />
                             <span className="text-[13px] font-figtree text-center font-normal leading-tight">{item.label}</span>
@@ -420,7 +423,7 @@ export default function MobileHeader() {
                           onClick={() => setIsMenuOpen(false)}
                           className="flex flex-col items-center gap-2"
                         >
-                          <div className="w-20 h-20 relative flex items-center justify-center overflow-hidden bg-zinc-50 rounded-full">
+                          <div className="w-20 h-20 relative flex items-center justify-center overflow-hidden">
                             <SafeImage 
                               src={iconPath} 
                               alt={item.label} 
@@ -567,38 +570,50 @@ export default function MobileHeader() {
               key={index}
               href={banner.href}
               onClick={() => setIsMenuOpen(false)}
-              className="shrink-0 snap-center rounded-xl overflow-hidden"
-              style={{ width: 'calc(100% - 32px)' }}
+              className="shrink-0 snap-center rounded-xl overflow-hidden relative"
+              style={{ width: 'calc(100% - 32px)', height: '165px' }}
             >
-              <img
+              <Image
                 src={banner.image}
                 alt={banner.alt}
-                className="w-full h-[180px] object-cover rounded-xl block"
-                loading="lazy"
+                fill
+                priority={index === 0}
+                className="object-cover rounded-xl block transition-opacity duration-300"
               />
             </Link>
           ))}
         </div>
 
         {/* Text Category Links Grid */}
-        <div className="grid grid-cols-2 gap-2 px-4 py-4">
+        <div className="grid grid-cols-2 gap-2.5 px-4 py-4">
           {MEGA_MENU.map((item, index) => {
             const label = item.label || item.title;
             const is9kt = label.toLowerCase().includes('9kt');
+            const icon = item.menuIcon || (label.toUpperCase() === "GIFTING" ? CATEGORY_IMAGES["GIFTING"] : null);
+            
             return (
               <button
                 key={index}
                 onClick={() => handleItemClick(item, index)}
-                className="bg-[#f5f5f5] rounded-sm px-3 py-2.5 text-left flex items-center justify-between gap-1 active:bg-gray-200 transition-colors"
+                className="bg-[#f8f8f8] rounded-xl p-2 text-left flex items-center gap-2 active:bg-gray-200 transition-all border border-gray-50/50"
               >
-                <span className="text-[12px] font-semibold uppercase tracking-wider font-figtree text-black">
-                  {label}
-                </span>
-                {is9kt && (
-                  <span className="text-[9px] font-bold uppercase tracking-wider bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-sm">
-                    New
-                  </span>
-                )}
+                <div className="w-11 h-11 relative shrink-0 overflow-hidden rounded-lg flex items-center justify-center p-1">
+                  {icon && (
+                    <Image 
+                      src={icon} 
+                      alt={label} 
+                      fill 
+                      className="object-contain p-0.5" 
+                    />
+                  )}
+                </div>
+                <div className="flex flex-col flex-grow min-w-0">
+                  <div className="flex items-center justify-between gap-1 w-full">
+                    <span className="text-[13px] font-semibold leading-tight font-figtree text-gray-900 line-clamp-2">
+                      {label}
+                    </span>
+                  </div>
+                </div>
               </button>
             );
           })}
@@ -761,7 +776,7 @@ export default function MobileHeader() {
                   <div className="flex items-center gap-4">
                     {user ? (
                       <Link href="/admin" onClick={() => setIsMenuOpen(false)} className="p-1">
-                        <Avatar className="h-7 w-7 cursor-pointer border border-gray-100 shadow-sm">
+                        <Avatar className="h-7 w-7 cursor-pointer border border-gray-100">
                           {user.avatar && <AvatarImage src={user.avatar} alt={user.name} />}
                           <AvatarFallback className="bg-[#5a413f] text-white font-bold text-[10px]">{getInitials(user?.name)}</AvatarFallback>
                         </Avatar>
@@ -834,7 +849,7 @@ export default function MobileHeader() {
 
           {user ? (
             <Link href="/admin" className="p-1">
-              <Avatar className="h-7 w-7 cursor-pointer border border-gray-100 shadow-sm">
+              <Avatar className="h-7 w-7 cursor-pointer border border-gray-100">
                 {user.avatar && <AvatarImage src={user.avatar} alt={user.name} />}
                 <AvatarFallback className="bg-[#5a413f] text-white font-bold text-[10px]">{getInitials(user?.name)}</AvatarFallback>
               </Avatar>
@@ -867,7 +882,7 @@ export default function MobileHeader() {
         <div className="px-4 py-2 bg-white">
           <div 
             onClick={() => setShowSearch(true)}
-            className="relative w-full bg-[#f9f9f9] h-[40px] pl-[40px] pr-4 rounded-full flex items-center cursor-pointer border border-transparent shadow-sm active:shadow-inner transition-all overflow-hidden"
+            className="relative w-full bg-[#f9f9f9] h-[40px] pl-[40px] pr-4 rounded-full flex items-center cursor-pointer border border-transparent transition-all overflow-hidden"
           >
             <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500">
               <SearchIcon />

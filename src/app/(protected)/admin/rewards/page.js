@@ -490,24 +490,29 @@ export default function EarnRewardsPage() {
 
       const rewardedSteps  = (d.rewarded_steps  || []).map(Number);
       const completedSteps = (d.completed_steps || []).map(Number);
-      // Only treat as complete if the server says so AND step 4 (final reward) is already granted.
-      // This prevents the completion screen from showing prematurely if auto-save marks the profile as complete
-      // before the user explicitly clicks the final button.
+      
+      // Verification check: ensure all completed steps that SHOULD be rewarded ARE rewarded.
+      // This handles cases where a user might have filled a step but not clicked 'Continue'.
+      // However, per requirements, we only reward ONCE and explicitly.
+      
       const profileComplete = !!d.profile_complete && rewardedSteps.includes(4);
 
       let formData = { ...blank };
       if (d.form_data && typeof d.form_data === "object") {
         Object.entries(d.form_data).forEach(([k,v]) => { if (v && typeof v === "object") formData[k] = v; });
       }
+
       setState(prev => {
+        // Resume from the first step that is NOT BOTH completed AND rewarded, 
+        // to give the user the chance to get their coins.
         let firstIncomplete = 1;
         for (let i = 1; i <= CONFIG.totalSteps; i++) {
-          if (!completedSteps.includes(i)) {
+          if (!rewardedSteps.includes(i)) {
             firstIncomplete = i;
             break;
           }
         }
-        if (profileComplete) firstIncomplete = 1; // Doesn't matter much if complete
+        if (profileComplete) firstIncomplete = 1;
 
         const ns = { 
           ...prev, 
@@ -524,7 +529,7 @@ export default function EarnRewardsPage() {
   }
 
   /* ── API save (with coin reward on first time) ── */
-  async function apiSave(step, stepData, autoSave = false) {
+  async function apiSave(step, stepData, autoSave = false, allFormData = null) {
     try {
       const profileRes = await fetch("/api/customer/profile");
       if (!profileRes.ok) return;
@@ -533,35 +538,41 @@ export default function EarnRewardsPage() {
       if (!simpleId) return;
 
       const customerId = `shopify-${simpleId}`;
-      setState(cur => {
-        const all = {
-          step_1: cur.formData.step_1 || {},
-          step_2: cur.formData.step_2 || {},
-          step_3: cur.formData.step_3 || {},
-          step_4: cur.formData.step_4 || {},
-          [`step_${step}`]: stepData,
-        };
-        fetch(`${CONFIG.apiBase}/save-step.php`, {
-          method:"POST", headers:{"Content-Type":"application/json"}, keepalive:true,
-          body: JSON.stringify({ customer_id:customerId, step, form_data:stepData, all_form_data:all, auto_save:autoSave }),
-        }).then(r => r.json()).then(d => {
-          if (!autoSave && d.coins_awarded) fetchCoins();
-        }).catch(() => {});
-        return cur;
+      const payload = { 
+        customer_id: customerId, 
+        step, 
+        form_data: stepData, 
+        all_form_data: allFormData || state.formData, 
+        auto_save: autoSave 
+      };
+
+      const res = await fetch(`${CONFIG.apiBase}/save-step.php`, {
+        method: "POST", 
+        headers: { "Content-Type": "application/json" }, 
+        keepalive: true,
+        body: JSON.stringify(payload),
       });
-    } catch (_) {}
+      
+      const d = await res.json();
+      if (!autoSave && d.coins_awarded) {
+        fetchCoins();
+      }
+      return d;
+    } catch (e) {
+      console.warn("apiSave error:", e);
+    }
   }
 
   /* ── Debounced auto-save ── */
   const debouncedSave = useCallback(
-    debounce((step, stepData) => {
-      // Prevent premature completion on backend by skipping auto-save for the last step.
-      // The final step data is still preserved in localStorage via saveLocal in handleChange.
+    debounce((step, stepData, allFormData) => {
       if (step === 4) return;
-
       setSaveStatus("saving");
-      apiSave(step, stepData, true)
-        .then(() => { setSaveStatus("saved"); setTimeout(() => setSaveStatus(""), 2000); })
+      apiSave(step, stepData, true, allFormData)
+        .then(() => { 
+          setSaveStatus("saved"); 
+          setTimeout(() => setSaveStatus(""), 2000); 
+        })
         .catch(() => setSaveStatus(""));
     }, 800),
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -570,9 +581,12 @@ export default function EarnRewardsPage() {
   /* ── Field change ── */
   function handleChange(stepKey, field, value) {
     setState(prev => {
-      const ns = { ...prev, formData: { ...prev.formData, [stepKey]: { ...prev.formData[stepKey], [field]:value } } };
+      const updatedStepData = { ...prev.formData[stepKey], [field]: value };
+      const updatedAllData = { ...prev.formData, [stepKey]: updatedStepData };
+      const ns = { ...prev, formData: updatedAllData };
+      
       saveLocal(ns);
-      debouncedSave(prev.currentStep, ns.formData[stepKey]);
+      debouncedSave(prev.currentStep, updatedStepData, updatedAllData);
       return ns;
     });
     setErrors([]);
@@ -586,65 +600,74 @@ export default function EarnRewardsPage() {
       return; 
     }
 
-    // Validate ALL steps up to currentStep before proceeding forward
-    for (let s = 1; s <= state.currentStep; s++) {
-      const key  = `step_${s}`;
-      const data = state.formData[key] || {};
-      const errs = validate(s, data);
-      if (errs.length) {
-        if (s !== state.currentStep) {
-          // If a previous step is now invalid, jump back to it
-          setState(p => ({ ...p, currentStep: s }));
-        }
-        setErrors(errs);
-        return;
-      }
+    // Validate current step before proceeding forward
+    const currentStepKey = `step_${state.currentStep}`;
+    const currentData = state.formData[currentStepKey] || {};
+    const errs = validate(state.currentStep, currentData);
+    if (errs.length) {
+      setErrors(errs);
+      return;
     }
+    
     setErrors([]);
 
+    const n = state.currentStep;
+    const isNewReward = !state.rewardedSteps.includes(n);
+    const stepData = state.formData[currentStepKey];
+    const allData = state.formData;
+
     setState(prev => {
-      const n   = prev.currentStep;
-      const alreadyRewarded = prev.rewardedSteps.includes(n);
-      const isN = !alreadyRewarded;
       const ns  = {
-        ...prev, currentStep:next,
-        rewardedSteps : isN ? [...prev.rewardedSteps, n]  : prev.rewardedSteps,
+        ...prev, 
+        currentStep: next,
+        rewardedSteps : isNewReward ? [...prev.rewardedSteps, n]  : prev.rewardedSteps,
         completedSteps: prev.completedSteps.includes(n) ? prev.completedSteps : [...prev.completedSteps, n],
       };
       saveLocal(ns);
-      if (isN) apiSave(n, prev.formData[`step_${n}`], false);
       return ns;
     });
+
+    // Award coins only if this step hasn't been rewarded before
+    if (isNewReward) {
+      apiSave(n, stepData, false, allData);
+    } else {
+      // Still save the data if it's already rewarded, but as auto_save to avoid double coins
+      apiSave(n, stepData, true, allData);
+    }
   }
 
   function completeProfile() {
-    // Validate ALL steps 1-4
-    for (let s = 1; s <= 4; s++) {
-      const key  = `step_${s}`;
-      const data = state.formData[key] || {};
-      const errs = validate(s, data);
-      if (errs.length) {
-        setState(p => ({ ...p, currentStep: s }));
-        setErrors(errs);
-        return;
-      }
+    // Validate final step
+    const step4Data = state.formData.step_4 || {};
+    const errs = validate(4, step4Data);
+    if (errs.length) {
+      setErrors(errs);
+      return;
     }
+
     setErrors([]);
     setCompleting(true);
 
+    const isNewReward = !state.rewardedSteps.includes(4);
+    const stepData = state.formData.step_4;
+    const allData = state.formData;
+
     setState(prev => {
-      const alreadyRewarded = prev.rewardedSteps.includes(4);
-      const isN = !alreadyRewarded;
       const ns  = {
-        ...prev, profileComplete:true,
-        rewardedSteps : isN ? [...prev.rewardedSteps, 4]  : prev.rewardedSteps,
+        ...prev, 
+        profileComplete: true,
+        rewardedSteps : isNewReward ? [...prev.rewardedSteps, 4]  : prev.rewardedSteps,
         completedSteps: prev.completedSteps.includes(4) ? prev.completedSteps : [...prev.completedSteps, 4],
       };
       saveLocal(ns);
-      if (isN) apiSave(4, prev.formData.step_4, false).finally(() => setCompleting(false));
-      else setCompleting(false);
       return ns;
     });
+
+    if (isNewReward) {
+      apiSave(4, stepData, false, allData).finally(() => setCompleting(false));
+    } else {
+      apiSave(4, stepData, true, allData).finally(() => setCompleting(false));
+    }
   }
 
   /* ── Derived ── */

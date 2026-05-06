@@ -11,7 +11,8 @@ import {
   MapPin, 
   HelpCircle,
   AlertCircle,
-  Loader2
+  Loader2,
+  RefreshCcw
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -22,6 +23,7 @@ export default function OrderDetailsPage() {
   const { id } = useParams();
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [returnLoading, setReturnLoading] = useState(false);
 
   useEffect(() => {
     async function fetchOrderDetails() {
@@ -42,6 +44,35 @@ export default function OrderDetailsPage() {
     }
     fetchOrderDetails();
   }, [id]);
+
+  const handleReturnClick = async () => {
+    if (order.fulfillmentStatus !== 'FULFILLED') {
+      toast.info("Returns are only available after delivery");
+      return;
+    }
+
+    try {
+      setReturnLoading(true);
+      const res = await fetch('/api/customer/returns', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          orderNumber: order.orderNumber,
+          customerEmail: order.customerEmail,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        window.location.href = data.url;
+      } else {
+        toast.error(data.message || "Failed to initiate return");
+      }
+    } catch (err) {
+      toast.error("Failed to connect to Return Prime");
+    } finally {
+      setReturnLoading(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -293,7 +324,7 @@ export default function OrderDetailsPage() {
           </div>
 
           {/* Help Center */}
-          <div className="bg-zinc-900 rounded-[2.5rem] p-8 text-white relative overflow-hidden shadow-xl shadow-zinc-200">
+          <div className="bg-zinc-900 rounded-[4px] p-8 text-white relative overflow-hidden shadow-xl shadow-zinc-200">
             <div className="absolute -right-10 -bottom-10 size-40 bg-white/5 rounded-full blur-2xl" />
             <div className="relative z-10 space-y-6">
               <div className="flex items-center gap-3">
@@ -304,12 +335,23 @@ export default function OrderDetailsPage() {
               </div>
               <p className="text-sm text-zinc-400 font-medium">Have questions about your order or our delivery process?</p>
               <div className="space-y-3">
-                <a href="https://wa.me/919004435760" target="_blank" className="flex items-center justify-between p-4 bg-white/5 rounded-2xl hover:bg-white/10 transition-colors border border-white/5">
-                  <span className="text-lg font-bold">Chat with Support</span>
+                <button 
+                  onClick={handleReturnClick}
+                  disabled={returnLoading || order.fulfillmentStatus !== 'FULFILLED'}
+                  className="w-full flex items-center justify-between p-4 bg-white/5 rounded-sm hover:bg-white/10 transition-colors border border-white/5 disabled:opacity-50 disabled:cursor-not-allowed group"
+                >
+                  <div className="flex items-center gap-3">
+                    {returnLoading ? <Loader2 className="size-5 animate-spin" /> : <RefreshCcw size={20} className="group-hover:rotate-180 transition-transform duration-500" />}
+                    <span className="text-base font-bold">Returns & Exchange</span>
+                  </div>
+                  <ChevronLeft className="rotate-180 size-6" />
+                </button>
+                <a href="https://wa.me/919004435760" target="_blank" className="flex items-center justify-between p-4 bg-white/5 rounded-sm hover:bg-white/10 transition-colors border border-white/5">
+                  <span className="text-base font-bold">Chat with Support</span>
                   <ChevronLeft className="rotate-180 size-6" />
                 </a>
-                <Link href="/pages/shipping-policy" className="flex items-center justify-between p-4 bg-white/5 rounded-2xl hover:bg-white/10 transition-colors border border-white/5">
-                  <span className="text-lg font-bold">Shipping Policy</span>
+                <Link href="/pages/shipping-policy" className="flex items-center justify-between p-4 bg-white/5 rounded-sm hover:bg-white/10 transition-colors border border-white/5">
+                  <span className="text-base font-bold">Shipping Policy</span>
                   <ChevronLeft className="rotate-180 size-6" />
                 </Link>
               </div>

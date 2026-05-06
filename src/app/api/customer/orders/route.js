@@ -74,6 +74,7 @@ export async function GET() {
       return {
         id: order.admin_graphql_api_id,
         orderNumber: order.order_number.toString(),
+        customerEmail: order.customer?.email || "",
         date: new Date(order.processed_at).toLocaleDateString('en-IN', {
           year: 'numeric',
           month: 'long',

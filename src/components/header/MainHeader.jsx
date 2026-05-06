@@ -304,7 +304,7 @@ export default function MainHeader() {
           {user ? (
             <div className="relative group flex items-center">
               <Link href="/admin">
-                <Avatar className="h-9 w-9 cursor-pointer border border-gray-100 shadow-sm">
+                <Avatar className="h-9 w-9 cursor-pointer border border-gray-100">
                   {user.avatar && <AvatarImage src={user.avatar} alt={user.name} />}
                   <AvatarFallback className="bg-[#5a413f] text-white font-bold text-xs">{getInitials(user?.name)}</AvatarFallback>
                 </Avatar>
