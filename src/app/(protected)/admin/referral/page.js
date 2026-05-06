@@ -328,7 +328,7 @@ export default function ReferralPage() {
 
           {/* Stats pills */}
           <div className="flex flex-wrap gap-3 md:gap-4 w-full md:w-auto">
-            <div className="bg-zinc-50 border border-zinc-100 rounded-2xl px-4 md:px-6 py-3 text-center flex-1 min-w-[100px]">
+            <div className="bg-zinc-50 border border-zinc-100 rounded-2xl px-4 md:px-6 py-3 text-center flex-1 min-w-[140px]">
               <p className="font-figtree text-[10px] font-semibold uppercase tracking-[0.13em] text-zinc-400 mb-1">
                 Total Transactions
               </p>
