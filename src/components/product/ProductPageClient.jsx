@@ -1757,11 +1757,13 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                 </Button>
               </div>
               <div className="flex gap-2 mt-2">
-                <Button variant="outline" className={`h-14 flex items-center justify-center bg-gray-50 hover:cursor-pointer hover:bg-primary hover:text-white transition-all group px-0 shrink-0 ${schemeData ? 'w-14 rounded-md' : 'flex-1 gap-2 rounded-md'}`}>
-                  <Image src="/images/icons/whatsapp.png" alt="Whatsapp icon" width={24} height={24} />
-                  <span className={`${schemeData ? 'hidden' : 'inline'} text-[14px] sm:text-base uppercase font-bold tracking-wider`}>Whatsapp Us</span>
+                <Button asChild variant="outline" className={`h-14 flex items-center justify-center bg-gray-50 hover:cursor-pointer hover:bg-primary hover:text-white transition-all group px-0 shrink-0 ${schemeData ? 'w-14 rounded-md' : 'flex-1 gap-2 rounded-md'}`}>
+                  <a href={`https://api.whatsapp.com/send/?phone=919004435760&text=Hi%2C+I+want+to+get+more+information+about+this+product%3A+${encodeURIComponent(product?.title || '')}&type=phone_number&app_absent=0`} target="_blank" rel="noopener noreferrer">
+                    <Image src="/images/icons/whatsapp.png" alt="Whatsapp icon" width={24} height={24} />
+                    <span className={`${schemeData ? 'hidden' : 'inline'} text-[14px] sm:text-base uppercase font-bold tracking-wider`}>Whatsapp Us</span>
+                  </a>
                 </Button>
-                {schemeData ? (
+                {schemeData && (
                   <div 
                     className="relative flex-1"
                     onMouseEnter={() => { 
@@ -1859,11 +1861,6 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                       </div>
                     )}
                   </div>
-                ) : (
-                  <Button variant="outline" className="h-auto py-3 font-medium text-lg flex items-center justify-center gap-2 bg-gray-50 hover:cursor-pointer group hover:bg-primary hover:text-white transition-all">
-                    <Video size={30} className="text-black group-hover:text-white transition-all" />
-                    <span className="hidden lg:inline text-base uppercase">Shop Live</span>
-                  </Button>
                 )}
               </div>
             </div>
