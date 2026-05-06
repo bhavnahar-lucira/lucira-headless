@@ -31,7 +31,7 @@ const CATEGORY_IMAGES = {
   "SOLITAIRE": "/images/menu/earring.jpg",
   "SOLITAIRES": "/images/menu/earring.jpg",
   "COLLECTIONS": "/images/menu/hexa.jpg",
-  "GIFTING": "/images/menu/gifting.jpg",
+  "GIFTING": "https://cdn.shopify.com/s/files/1/0739/8516/3482/files/Untitled_design_38_2.png?v=1778047861",
   "9KT COLLECTION": "/images/menu/candy.jpg",
 };
 
@@ -571,7 +571,7 @@ export default function MobileHeader() {
               href={banner.href}
               onClick={() => setIsMenuOpen(false)}
               className="shrink-0 snap-center rounded-xl overflow-hidden relative"
-              style={{ width: 'calc(100% - 32px)', height: '180px' }}
+              style={{ width: 'calc(100% - 32px)', height: '165px' }}
             >
               <Image
                 src={banner.image}
@@ -597,7 +597,7 @@ export default function MobileHeader() {
                 onClick={() => handleItemClick(item, index)}
                 className="bg-[#f8f8f8] rounded-xl p-2.5 text-left flex items-center gap-3 active:bg-gray-200 transition-all border border-gray-50/50"
               >
-                <div className="w-11 h-11 relative shrink-0 overflow-hidden rounded-lg bg-white flex items-center justify-center p-1">
+                <div className="w-11 h-11 relative shrink-0 overflow-hidden rounded-lg flex items-center justify-center p-1">
                   <Image 
                     src={icon} 
                     alt={label} 
