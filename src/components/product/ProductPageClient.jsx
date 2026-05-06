@@ -141,6 +141,30 @@ function useMounted() {
   return mounted;
 }
 
+const handleSafeScroll = (elementRef) => {
+  if (!elementRef.current) return;  
+  const isDesktop = window.innerWidth >= 768;  
+  const bodyRect = document.body.getBoundingClientRect().top;
+  const elementRect = elementRef.current.getBoundingClientRect().top;
+  const absoluteElementTop = elementRect - bodyRect;
+  const offset = isDesktop ? 80 : 20; 
+  const targetPosition = absoluteElementTop - offset;
+  
+  window.scrollTo({
+    top: targetPosition,
+    behavior: "smooth",
+  });
+  
+  if (isDesktop) {
+    setTimeout(() => {
+      window.scrollTo({
+        top: targetPosition,
+        behavior: "smooth",
+      });
+    }, 300);
+  }
+};
+
 // Force en-IN formatting to be consistent across environments
 const formatPrice = (num) => {
   if (num === null || num === undefined) return "0";
@@ -1103,12 +1127,12 @@ export default function ProductPageClient({ product, complementaryProducts = [],
               <button
                 key={font}
                 onClick={() => setEngravingFont(font)}
-                className={`px-4 py-3 rounded-xl border text-sm transition-all duration-300 ${engravingFont === font
+                className={`px-2 py-3 rounded-sm border text-lg transition-all duration-300 ${engravingFont === font
                   ? "border-black bg-zinc-900 text-white shadow-md scale-[1.02]"
                   : "border-gray-200 text-gray-600 hover:border-gray-400 bg-white"
                   }`}
               >
-                <span style={{ fontFamily: `var(--font-${font.toLowerCase()})` }} className="text-lg">Aa - {font}</span>
+                <span style={{ fontFamily: `var(--font-${font.toLowerCase()})` }} className="text-base">Aa - {font}</span>
               </button>
             ))}
           </div>
@@ -1130,21 +1154,21 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                 maxLength={8}
                 onChange={(e) => setEngraving(e.target.value)}
                 placeholder="Type your text here"
-                className="h-14 border-gray-300 pr-4 text-lg focus-visible:ring-black rounded-xl"
+                className="h-14 border-gray-300 pr-4 text-lg focus-visible:ring-2 rounded-sm"
                 style={{ fontFamily: `var(--font-${engravingFont.toLowerCase()})` }}
               />
             </div>
             <div className="flex gap-2 shrink-0">
               <button
                 onClick={() => insertSymbol("♥")}
-                className="w-12 h-12 flex items-center justify-center border-2 border-zinc-100 rounded-xl hover:border-black hover:bg-zinc-50 transition-all active:scale-95"
+                className="w-12 h-12 flex items-center justify-center border-2 border-zinc-100 rounded-sm hover:border-black hover:bg-zinc-50 transition-all active:scale-95"
                 title="Insert Heart"
               >
                 <span className="text-2xl text-black">♥</span>
               </button>
               <button
                 onClick={() => insertSymbol("∞")}
-                className="w-12 h-12 flex items-center justify-center border-2 border-zinc-100 rounded-xl hover:border-black hover:bg-zinc-50 transition-all active:scale-95"
+                className="w-12 h-12 flex items-center justify-center border-2 border-zinc-100 rounded-sm hover:border-black hover:bg-zinc-50 transition-all active:scale-95"
                 title="Insert Infinity"
               >
                 <span className="text-2xl text-black">∞</span>
@@ -1262,11 +1286,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                     {((product.reviews?.count || product.reviewStats?.count) > 0) && (
                       <div
                         className="flex items-center gap-1.5 cursor-pointer hover:opacity-80 transition-opacity"
-                        onClick={() =>
-                          reviewsRef.current?.scrollIntoView({
-                            behavior: "smooth",
-                          })
-                        }
+                        onClick={() => handleSafeScroll(reviewsRef)}
                       >
                         <Star
                           size={14}
@@ -1299,9 +1319,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                     )}
                   </div>
                   <button
-                    onClick={() =>
-                      productDetailsRef.current?.scrollIntoView({ behavior: "smooth" })
-                    }
+                    onClick={() => handleSafeScroll(productDetailsRef)}
                     className="text-xs sm:text-sm font-semibold underline underline-offset-4 decoration-gray-300 hover:cursor-pointer sm:ml-auto whitespace-nowrap">
                     See Savings Breakup
                   </button>
@@ -1347,35 +1365,20 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                   <div className="w-full">
                     <Swiper
                       modules={[Autoplay]}
-                      spaceBetween={8}
-                      // slidesPerView={slides.length > 1 ? 1.1 : 1}
+                      spaceBetween={16}
+                      slidesPerView={'auto'}
                       speed={1800}
+                      loopPreventsSliding
                       autoplay={{ delay: 3000, disableOnInteraction: false }}
                       loop={slides.length > 2}
-                      breakpoints={{
-                        0: {
-                          slidesPerView: slides.length > 1 ? 1 : 1,
-                          spaceBetween: 8,
-                        },
-                        768: {
-                          slidesPerView: slides.length > 1 ? 1.8 : 1,
-                          spaceBetween: 12,
-                        },
-                        1024: {
-                          slidesPerView: slides.length > 1 ? 1.1 : 1,
-                          spaceBetween: 16,
-                        },
-                        1280: {
-                          slidesPerView: slides.length > 1 ? 1.4 : 1,
-                          spaceBetween: 20,
-                        }
-                      }}
+                      // loopedSlides={slides.length} 
+                      className="w-full"
                     >
                       {slides.map((slide, idx) => (
-                        <SwiperSlide key={`promo-slide-${idx}`}>
-                          <div className="border border-dashed border-gray-400 rounded-lg px-3 py-3 flex items-center gap-2 bg-secondary/50 h-full w-fit">
+                        <SwiperSlide key={`promo-slide-${idx}`} style={{ width: 'auto', display: 'flex' }}>
+                          <div className="border border-dashed border-gray-400 rounded-lg px-3 py-3 flex items-center gap-2 bg-secondary/50 h-full w-fit whitespace-nowrap">
                             <span className="text-base shrink-0">{slide.icon}</span>
-                            <p className="text-sm font-semibold text-black whitespace-nowrap">
+                            <p className="text-sm font-semibold text-black whitespace-normal md:whitespace-nowrap">
                               {slide.text}
                             </p>
                           </div>
@@ -1617,7 +1620,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                           <div className="p-3 border-t border-gray-100">
                             <Button
                               onClick={handleSaveEngraving}
-                              className="w-full h-12 font-bold rounded-full uppercase tracking-wider disabled:opacity-50"
+                              className="w-full h-12 font-bold rounded-sm bg-tertiary uppercase tracking-wider disabled:opacity-50"
                               disabled={!engraving}
                             >
                               SAVE
@@ -1645,7 +1648,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                       <div className="p-6 border-t border-gray-100">
                         <Button
                           onClick={handleSaveEngraving}
-                          className="w-full h-12 font-bold rounded-full uppercase tracking-wider disabled:opacity-50"
+                          className="w-full h-12 font-bold rounded-sm bg-tertiary uppercase tracking-wider disabled:opacity-50"
                           disabled={!engraving}
                         >
                           SAVE
@@ -1667,7 +1670,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                         setSavedEngraving({ text: "", font: "" });
                         setEngraving("");
                       }}
-                      className="ml-2 p-1 hover:bg-primary/10 rounded-full transition-colors"
+                      className="ml-2 p-1 hover:bg-primary/10 rounded-sm transition-colors"
                     >
                       <X size={12} />
                     </button>
@@ -2228,7 +2231,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
           </div>
         </div>
       </div>
-      <LuxuryMarquee prop={["bg-primary", "text-white", "mt-10", "text-md", "font-semibold"]} />
+      <LuxuryMarquee prop={["bg-tertiary", "text-white", "mt-10", "text-md", "font-semibold"]} />
       <ProductStory description={product.description} />
       <Suspense fallback={<div className="h-20 bg-gray-100 animate-pulse"></div>}>
         <StyledByLucira />

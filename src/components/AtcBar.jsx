@@ -152,7 +152,7 @@ export default function AtcBar({
             </a>
 
             {/* 9=10 Saving Button */}
-            <button className="h-14 flex-1 border border-accent text-accent font-bold text-[13px] rounded-xl flex items-center justify-center whitespace-nowrap px-2">
+            <button className="h-14 flex-1 border border-primary text-primary font-bold text-[13px] rounded-xl flex items-center justify-center whitespace-nowrap px-2">
               9=10 SAVING
             </button>
 
@@ -160,7 +160,7 @@ export default function AtcBar({
             <button 
               onClick={onAddToCart}
               disabled={addingToCart}
-              className="h-14 flex-[1.5] bg-accent text-white font-bold text-[13px] rounded-xl flex items-center justify-center gap-2 disabled:opacity-70"
+              className="h-14 flex-[1.5] bg-primary text-white font-bold text-[13px] rounded-xl flex items-center justify-center gap-2 disabled:opacity-70"
             >
               {addingToCart ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
