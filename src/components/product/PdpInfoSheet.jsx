@@ -9,6 +9,7 @@ import {
   SheetTitle,
   SheetClose
 } from "@/components/ui/sheet";
+import { Sheet as MobileSheet } from "react-modal-sheet";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { X } from "lucide-react";
 
@@ -203,23 +204,53 @@ const PdpInfoSheet = ({ type, isOpen, onOpenChange }) => {
     }
   };
 
+  if (isMobile) {
+    return (
+      <MobileSheet
+        isOpen={isOpen}
+        onClose={() => onOpenChange(false)}
+        detent="content"
+      >
+        <MobileSheet.Container className="z-[9999]">
+          <MobileSheet.Header />
+          <MobileSheet.Content>
+            <div className="flex flex-col pb-6">
+              <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-100 shrink-0">
+                <h2 className="text-[15px] font-bold font-figtree text-zinc-900 uppercase tracking-widest">
+                  {getTitle()}
+                </h2>
+                <button onClick={() => onOpenChange(false)} className="hover:bg-zinc-100 p-2 rounded-full transition-colors">
+                  <X size={20} className="text-zinc-500" />
+                </button>
+              </div>
+              <div className="px-4 py-6">
+                {renderContent()}
+              </div>
+            </div>
+          </MobileSheet.Content>
+        </MobileSheet.Container>
+        <MobileSheet.Backdrop onTap={() => onOpenChange(false)} />
+      </MobileSheet>
+    );
+  }
+
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
       <SheetContent
-        side={side}
-        className={side === "bottom" ? "rounded-t-[32px] min-h-[50vh] max-h-[90vh] overflow-y-auto p-0" : "sm:max-w-[450px] p-0"}
+        side="right"
+        className="sm:max-w-[450px] p-0"
         showCloseButton={false}
       >
         <div className="flex flex-col h-full">
-          <SheetHeader className="flex flex-row items-center justify-between px-5 py-5 lg:p-6 border-b border-zinc-100 shrink-0">
-            <SheetTitle className="text-[15px] lg:text-[16px] font-bold font-figtree text-zinc-900 uppercase tracking-widest">
+          <SheetHeader className="flex flex-row items-center justify-between p-6 border-b border-zinc-100 shrink-0 mt-0">
+            <SheetTitle className="text-[16px] font-bold font-figtree text-zinc-900 uppercase tracking-widest mt-0">
               {getTitle()}
             </SheetTitle>
             <SheetClose className="hover:bg-zinc-100 p-2 rounded-full transition-colors">
               <X size={20} className="text-zinc-500" />
             </SheetClose>
           </SheetHeader>
-          <div className="flex-1 overflow-y-auto px-4 py-6 lg:p-6 custom-scrollbar">
+          <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
             {renderContent()}
           </div>
         </div>

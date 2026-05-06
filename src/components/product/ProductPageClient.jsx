@@ -293,6 +293,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
   const [activeVariant, setActiveVariant] = useState(initialVariant);
   const [priceBreakup, setPriceBreakup] = useState(null);
   const [isSchemeOpen, setIsSchemeOpen] = useState(false);
+  const schemeTimeoutRef = useRef(null);
   const shouldToastVariantChange = useRef(false);
 
   const calculateScheme = useCallback((price) => {
@@ -1732,7 +1733,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                 <Button
                   onClick={handleAddToCart}
                   disabled={addingToCart}
-                  className="flex-1 h-12 text-lg font-bold rounded-md hover:cursor-pointer"
+                  className="flex-1 h-14 text-[14px] sm:text-base lg:text-lg font-bold rounded-md hover:cursor-pointer tracking-wider"
                 >
                   {addingToCart ? (
                     <>
@@ -1746,7 +1747,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                   size="icon"
                   onClick={handleToggleWishlist}
                   disabled={wishlistLoading}
-                  className={`h-12 w-12 rounded-md bg-gray-50 hover:cursor-pointer ${isWishlisted ? "text-rose-500" : "text-black"}`}
+                  className={`h-14 w-14 shrink-0 rounded-md bg-gray-50 hover:cursor-pointer ${isWishlisted ? "text-rose-500" : "text-black"}`}
                 >
                   <Heart
                     size={24}
@@ -1755,16 +1756,25 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                   />
                 </Button>
               </div>
-              <div className={`grid ${schemeData ? 'grid-cols-[60px_1fr]' : 'grid-cols-2'} gap-3 mt-2`}>
-                <Button variant="outline" className="h-auto py-3 font-medium text-lg flex items-center justify-center bg-gray-50 hover:cursor-pointer hover:bg-primary hover:text-white transition-all group px-0">
+              <div className="flex gap-2 mt-2">
+                <Button variant="outline" className={`h-14 flex items-center justify-center bg-gray-50 hover:cursor-pointer hover:bg-primary hover:text-white transition-all group px-0 shrink-0 ${schemeData ? 'w-14 rounded-md' : 'flex-1 gap-2 rounded-md'}`}>
                   <Image src="/images/icons/whatsapp.png" alt="Whatsapp icon" width={24} height={24} />
-                  <span className={`${schemeData ? 'hidden' : 'hidden lg:inline'} text-base uppercase`}>Whatsapp Us</span>
+                  <span className={`${schemeData ? 'hidden' : 'inline'} text-[14px] sm:text-base uppercase font-bold tracking-wider`}>Whatsapp Us</span>
                 </Button>
                 {schemeData ? (
                   <div 
                     className="relative flex-1"
-                    onMouseEnter={() => { if(typeof window !== 'undefined' && window.innerWidth > 1023) setIsSchemeOpen(true) }}
-                    onMouseLeave={() => { if(typeof window !== 'undefined' && window.innerWidth > 1023) setIsSchemeOpen(false) }}
+                    onMouseEnter={() => { 
+                      if (schemeTimeoutRef.current) clearTimeout(schemeTimeoutRef.current);
+                      if(typeof window !== 'undefined' && window.innerWidth > 1023) setIsSchemeOpen(true) 
+                    }}
+                    onMouseLeave={() => { 
+                      if(typeof window !== 'undefined' && window.innerWidth > 1023) {
+                        schemeTimeoutRef.current = setTimeout(() => {
+                          setIsSchemeOpen(false);
+                        }, 150);
+                      }
+                    }}
                   >
                     <Button 
                       type="button"
@@ -1773,7 +1783,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                         e.preventDefault();
                         setIsSchemeOpen((prev) => !prev);
                       }}
-                      className={`w-full h-auto py-3 px-1.5 sm:px-3 font-medium text-lg flex items-center justify-between gap-1 sm:gap-2 bg-gray-50 hover:cursor-pointer group hover:bg-primary hover:text-white transition-all duration-150 active:scale-[0.98] ${isSchemeOpen ? 'bg-primary text-white border-primary shadow-[0_5px_20px_rgba(163,110,110,0.4)]' : 'border-gray-200'}`}
+                      className={`w-full h-14 px-1.5 sm:px-3 font-medium flex items-center justify-between gap-1 sm:gap-2 bg-gray-50 hover:cursor-pointer group hover:bg-primary hover:text-white transition-all duration-150 active:scale-[0.98] rounded-md ${isSchemeOpen ? 'bg-primary text-white border-primary shadow-[0_5px_20px_rgba(163,110,110,0.4)]' : 'border-gray-200'}`}
                     >
                       <div className="w-6 sm:w-8 flex justify-start shrink-0">
                         <div className={`p-1 rounded-full transition-colors duration-150 flex items-center justify-center ${isSchemeOpen ? 'bg-white/20' : 'bg-primary/10'}`}>
@@ -1781,7 +1791,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                         </div>
                       </div>
                       
-                      <span className="flex-1 text-center text-[10px] min-[375px]:text-[11px] sm:text-[12px] lg:text-[14px] xl:text-[15px] uppercase tracking-tight leading-tight">
+                      <span className="flex-1 text-center text-[12px] sm:text-[13px] lg:text-[14px] xl:text-[15px] uppercase tracking-tight leading-tight font-bold">
                         SAVE <span className="font-extrabold mx-0.5">₹{formatPrice(schemeData.saveAmount)}</span> WITH SCHEME
                       </span>
                       
@@ -1791,57 +1801,59 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                     </Button>
                     
                     {isSchemeOpen && (
-                      <div className="absolute top-full right-0 w-[calc(100vw-32px)] sm:w-[350px] lg:w-full mt-2 bg-white border border-primary/10 rounded-2xl overflow-hidden z-[100] shadow-[0_20px_60px_rgba(0,0,0,0.18)] animate-in fade-in zoom-in-95 slide-in-from-top-2 duration-200 ease-out origin-top-right">
-                        <div className="p-4 sm:p-5 lg:p-6 space-y-4 sm:space-y-5">
+                      <div className="absolute top-full right-0 w-[calc(100vw-32px)] sm:w-[350px] lg:w-full pt-2 z-[100] animate-in fade-in zoom-in-95 slide-in-from-top-2 duration-200 ease-out origin-top-right">
+                        <div className="bg-white border border-primary/10 rounded-2xl overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.18)]">
+                          <div className="p-4 sm:p-5 lg:p-6 space-y-4 sm:space-y-5">
 
-                          <div className="flex items-center justify-between border-b border-gray-100 pb-3">
-                            <h4 className="text-[12px] sm:text-sm font-bold text-black uppercase tracking-[0.12em]">9 + 1 Scheme Breakdown</h4>
-                            <BadgeCheck size={18} className="text-[#2DB36F]" />
-                          </div>
-                          
-                          <div className="space-y-3 sm:space-y-4">
-                            <div className="flex justify-between items-center text-[12px] sm:text-[13px]">
-                              <span className="text-gray-500 font-medium">Product Price</span>
-                              <span className="font-semibold text-black">₹{formatPrice(schemeData.productPrice)}</span>
-                            </div>
-                            <div className="flex justify-between items-center text-[12px] sm:text-[13px]">
-                              <span className="text-gray-500 font-medium">Monthly Installment</span>
-                              <div className="text-right">
-                                <span className="font-bold text-primary">₹{formatPrice(schemeData.monthly)}</span>
-                                <span className="text-gray-400 ml-1">x 9 Months</span>
-                              </div>
-                            </div>
-                            <div className="flex justify-between items-center text-[12px] sm:text-[13px]">
-                              <span className="text-gray-500 font-medium">You Pay (9 Months)</span>
-                              <span className="font-semibold text-black">₹{formatPrice(schemeData.pay9)}</span>
-                            </div>
-                            <div className="flex justify-between items-center text-[12px] sm:text-[13px]">
-                              <span className="text-gray-500 font-medium">10th Month We Pay</span>
-                              <span className="font-bold text-[#2DB36F]">₹{formatPrice(schemeData.monthly)}</span>
+                            <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+                              <h4 className="text-[12px] sm:text-sm font-bold text-black uppercase tracking-[0.12em]">9 + 1 Scheme Breakdown</h4>
+                              <BadgeCheck size={18} className="text-[#2DB36F]" />
                             </div>
                             
-                            <div className="bg-[#FAFAFA] rounded-xl p-4 border border-gray-100 shadow-sm">
-                              <div className="flex justify-between items-center">
-                                <span className="text-sm font-bold text-gray-900">Total Redeemable</span>
-                                <span className="text-lg font-extrabold text-black">₹{formatPrice(schemeData.totalRedeemable)}</span>
+                            <div className="space-y-3 sm:space-y-4">
+                              <div className="flex justify-between items-center text-[12px] sm:text-[13px]">
+                                <span className="text-gray-500 font-medium">Product Price</span>
+                                <span className="font-semibold text-black">₹{formatPrice(schemeData.productPrice)}</span>
                               </div>
-                              <p className="text-[10px] text-gray-400 mt-1.5 leading-tight font-medium">
-                                You can redeem this amount after 10 months.
+                              <div className="flex justify-between items-center text-[12px] sm:text-[13px]">
+                                <span className="text-gray-500 font-medium">Monthly Installment</span>
+                                <div className="text-right">
+                                  <span className="font-bold text-primary">₹{formatPrice(schemeData.monthly)}</span>
+                                  <span className="text-gray-400 ml-1">x 9 Months</span>
+                                </div>
+                              </div>
+                              <div className="flex justify-between items-center text-[12px] sm:text-[13px]">
+                                <span className="text-gray-500 font-medium">You Pay (9 Months)</span>
+                                <span className="font-semibold text-black">₹{formatPrice(schemeData.pay9)}</span>
+                              </div>
+                              <div className="flex justify-between items-center text-[12px] sm:text-[13px]">
+                                <span className="text-gray-500 font-medium">10th Month We Pay</span>
+                                <span className="font-bold text-[#2DB36F]">₹{formatPrice(schemeData.monthly)}</span>
+                              </div>
+                              
+                              <div className="bg-[#FAFAFA] rounded-xl p-4 border border-gray-100 shadow-sm">
+                                <div className="flex justify-between items-center">
+                                  <span className="text-sm font-bold text-gray-900">Total Redeemable</span>
+                                  <span className="text-lg font-extrabold text-black">₹{formatPrice(schemeData.totalRedeemable)}</span>
+                                </div>
+                                <p className="text-[10px] text-gray-400 mt-1.5 leading-tight font-medium">
+                                  You can redeem this amount after 10 months.
+                                </p>
+                              </div>
+                            </div>
+
+                            <Button className="w-full h-12 font-bold uppercase tracking-widest bg-primary hover:bg-accent text-white rounded-xl shadow-lg shadow-primary/20 transition-all duration-200 active:scale-[0.97]" asChild>
+                              <a href={schemeData.schemeUrl} target="_blank" rel="noopener noreferrer">
+                                ENROLL NOW <ArrowRight size={16} className="ml-2" />
+                              </a>
+                            </Button>
+                            
+                            <div className="flex items-center justify-center gap-2 pt-1">
+                              <div className="w-1 h-1 bg-[#2DB36F] rounded-full animate-pulse"></div>
+                              <p className="text-[9px] sm:text-[10px] text-gray-400 font-bold uppercase tracking-widest">
+                                Secure & Instant Enrollment
                               </p>
                             </div>
-                          </div>
-
-                          <Button className="w-full h-12 font-bold uppercase tracking-widest bg-primary hover:bg-accent text-white rounded-xl shadow-lg shadow-primary/20 transition-all duration-200 active:scale-[0.97]" asChild>
-                            <a href={schemeData.schemeUrl} target="_blank" rel="noopener noreferrer">
-                              ENROLL NOW <ArrowRight size={16} className="ml-2" />
-                            </a>
-                          </Button>
-                          
-                          <div className="flex items-center justify-center gap-2 pt-1">
-                            <div className="w-1 h-1 bg-[#2DB36F] rounded-full animate-pulse"></div>
-                            <p className="text-[9px] sm:text-[10px] text-gray-400 font-bold uppercase tracking-widest">
-                              Secure & Instant Enrollment
-                            </p>
                           </div>
                         </div>
                       </div>
