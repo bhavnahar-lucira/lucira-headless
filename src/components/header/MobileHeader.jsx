@@ -595,7 +595,7 @@ export default function MobileHeader() {
               <button
                 key={index}
                 onClick={() => handleItemClick(item, index)}
-                className="bg-[#f8f8f8] rounded-xl p-2.5 text-left flex items-center gap-3 active:bg-gray-200 transition-all border border-gray-50/50"
+                className="bg-[#f8f8f8] rounded-xl p-2 text-left flex items-center gap-2 active:bg-gray-200 transition-all border border-gray-50/50"
               >
                 <div className="w-11 h-11 relative shrink-0 overflow-hidden rounded-lg flex items-center justify-center p-1">
                   <Image 
@@ -610,11 +610,11 @@ export default function MobileHeader() {
                     <span className="text-[13px] font-semibold leading-tight font-figtree text-gray-900 line-clamp-2">
                       {label}
                     </span>
-                    {is9kt && (
+                    {/* {is9kt && (
                       <span className="text-[8px] font-bold uppercase tracking-wider bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-sm shrink-0">
                         New
                       </span>
-                    )}
+                    )} */}
                   </div>
                 </div>
               </button>
