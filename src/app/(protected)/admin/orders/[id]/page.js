@@ -115,7 +115,7 @@ export default function OrderDetailsPage() {
       </div>
 
       {/* Order Status Timeline */}
-      <div className="bg-white rounded-[2.5rem] border border-zinc-100 p-8 shadow-sm">
+      <div className="bg-white rounded-[8px] border border-zinc-100 p-8 shadow-sm">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
           <div className="flex items-center gap-3">
             <span className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest flex items-center gap-2 ${
@@ -148,7 +148,7 @@ export default function OrderDetailsPage() {
             />
           </div>
           
-          <div className="flex flex-col md:flex-row relative z-10 w-full">
+          <div className="flex flex-col md:flex-row relative z-10 w-full gap-4">
             {stages.map((stage, index) => {
               const isCompleted = index <= currentStageIndex;
               const isCurrent = index === currentStageIndex;
@@ -188,7 +188,7 @@ export default function OrderDetailsPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-8">
           {/* Order Items */}
-          <div className="bg-white rounded-[2.5rem] border border-zinc-100 overflow-hidden shadow-sm">
+          <div className="bg-white rounded-[8px] border border-zinc-100 overflow-hidden shadow-sm">
             <div className="p-8 border-b border-zinc-100">
               <h3 className="text-lg font-bold text-primary uppercase tracking-tight">Items in this order</h3>
             </div>
@@ -217,7 +217,7 @@ export default function OrderDetailsPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* Payment Details */}
-            <div className="bg-white rounded-[2.5rem] border border-zinc-100 p-8 shadow-sm">
+            <div className="bg-white rounded-[8px] border border-zinc-100 p-8 shadow-sm">
               <div className="flex items-center gap-3 mb-6">
                 <div className="size-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
                   <CreditCard size={20} />
@@ -241,7 +241,7 @@ export default function OrderDetailsPage() {
             </div>
 
             {/* Shipping Address */}
-            <div className="bg-white rounded-[2.5rem] border border-zinc-100 p-8 shadow-sm h-full">
+            <div className="bg-white rounded-[8px] border border-zinc-100 p-8 shadow-sm h-full">
               <div className="flex items-center gap-3 mb-6">
                 <div className="size-10 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center">
                   <MapPin size={20} />
@@ -268,7 +268,7 @@ export default function OrderDetailsPage() {
 
         <div className="space-y-8">
           {/* Order Summary */}
-          <div className="bg-white rounded-[2.5rem] border border-zinc-100 p-8 shadow-sm">
+          <div className="bg-white rounded-[8px] border border-zinc-100 p-8 shadow-sm">
             <h3 className="text-xl font-bold text-primary uppercase tracking-tight mb-6">Order Summary</h3>
             <div className="space-y-4">
               <div className="flex justify-between text-sm">

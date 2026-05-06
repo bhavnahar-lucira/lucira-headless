@@ -111,25 +111,25 @@ export default function CustomerDashboard() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-2 xl:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 sm:grid-cols-2 xl:grid-cols-4 gap-3">
         {customerStats.map((stat, index) => {
           const Icon = stat.icon;
           return (
             <Link
               key={index}
               href={stat.link}
-              className="bg-white rounded-3xl p-6 border border-zinc-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group"
+              className="bg-white rounded-3xl p-4 border border-zinc-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group"
             >
               <div className="flex justify-between items-start mb-6">
-                <div className={`size-12 rounded-2xl bg-gradient-to-br ${stat.color} ${stat.shadow} flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform`}>
-                  <Icon size={22} strokeWidth={2.5} />
+                <div className={`size-8 md:size-12 rounded-2xl bg-gradient-to-br ${stat.color} ${stat.shadow} flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform`}>
+                  <Icon className="size-4 md:size-[22px]" strokeWidth={2.5} />
                 </div>
                 <div className="text-right">
                   <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">{stat.title}</p>
                   <h3 className="text-xl md:text-2xl font-bold text-primary">{stat.value}</h3>
                 </div>
               </div>
-              <p className="text-base font-bold text-primary flex items-center gap-1 cursor-pointer hover:underline">
+              <p className="text-sm sm:text-base font-bold text-primary flex items-center gap-1 cursor-pointer hover:underline">
                 {stat.subtitle} <ChevronRight size={14} />
               </p>
             </Link>
