@@ -73,7 +73,8 @@ function verifyShopifyWebhook(rawBody, hmacHeader) {
  */
 async function fetchFullProduct(productId) {
   try {
-    const gid = productId.startsWith('gid://') ? productId : `gid://shopify/Product/${productId}`;
+    const stringId = String(productId);
+    const gid = stringId.startsWith('gid://') ? stringId : `gid://shopify/Product/${stringId}`;
     const data = await shopifyAdminFetch(PRODUCT_FULL_QUERY, { id: gid });
     return data.product;
   } catch (error) {

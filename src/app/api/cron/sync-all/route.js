@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import clientPromise from "@/lib/mongodb";
 
 export const dynamic = "force-dynamic";
 
@@ -7,10 +8,26 @@ const RETRY_ATTEMPTS = 3;
 const BACKOFF_MS = 2000;
 
 /**
- * Helper to consume a streaming NDJSON response and wait for completion.
- * Used for Products and Variants sync which return streams.
+ * Helper to update sync status in MongoDB
  */
-async function consumeStream(url, method = "POST", secret) {
+async function updateSyncStatus(data) {
+  try {
+    const client = await clientPromise;
+    const db = client.db("next_local_db");
+    await db.collection("sync_history").updateOne(
+      { type: "cron_sync_all" },
+      { $set: { ...data, lastUpdated: new Date() } },
+      { upsert: true }
+    );
+  } catch (e) {
+    console.error("[Cron] Failed to update sync status in DB:", e);
+  }
+}
+
+/**
+ * Helper to consume a streaming NDJSON response and wait for completion.
+ */
+async function consumeStream(url, method = "POST", secret, stepLabel, currentResults) {
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
   const fullUrl = url.startsWith("http") ? url : `${baseUrl}${url}`;
   
@@ -20,7 +37,7 @@ async function consumeStream(url, method = "POST", secret) {
     method,
     headers: { 
       "Content-Type": "application/json",
-      "x-cron-secret": secret // Security header
+      "x-cron-secret": secret
     },
     body: method === "POST" ? JSON.stringify({}) : undefined,
   });
@@ -43,6 +60,17 @@ async function consumeStream(url, method = "POST", secret) {
       for (const line of lines) {
         try {
           const data = JSON.parse(line);
+          
+          // Update progress in DB if available
+          if (data.status === "progress" || data.status === "starting") {
+             const stepIndex = currentResults.steps.findIndex(s => s.step === stepLabel);
+             if (stepIndex !== -1) {
+               currentResults.steps[stepIndex].progress = data.progress;
+               currentResults.steps[stepIndex].message = data.message;
+               await updateSyncStatus(currentResults);
+             }
+          }
+
           if (data.status === "error") {
             throw new Error(data.message || "Sync failed in stream");
           }
@@ -52,7 +80,6 @@ async function consumeStream(url, method = "POST", secret) {
           }
         } catch (e) {
           if (e.message.includes("Sync failed in stream")) throw e;
-          // Ignore parse errors for partial chunks
         }
       }
     }
@@ -61,7 +88,6 @@ async function consumeStream(url, method = "POST", secret) {
 
 /**
  * Helper for standard JSON endpoints.
- * Used for Collections and Pages/Blogs sync.
  */
 async function executeSimple(url, method = "POST", secret) {
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
@@ -112,51 +138,88 @@ export async function GET(req) {
   const secret = searchParams.get("secret");
   const CRON_SECRET = process.env.CRON_SECRET;
 
-  // Security check
   if (!CRON_SECRET || secret !== CRON_SECRET) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const results = {
+    type: "cron_sync_all",
+    status: "in_progress",
     startTime: new Date().toISOString(),
-    steps: []
+    steps: [
+      { step: "Products", status: "pending", progress: 0 },
+      { step: "Variants", status: "pending", progress: 0 },
+      { step: "Collections", status: "pending", progress: 0 },
+      { step: "PagesBlogs", status: "pending", progress: 0 }
+    ]
   };
 
+  await updateSyncStatus(results);
+
   try {
-    // 1. Products Sync (Stream)
+    // 1. Products Sync
+    const productStep = results.steps.find(s => s.step === "Products");
+    productStep.status = "running";
+    await updateSyncStatus(results);
+
     await withRetry(async () => {
-      await consumeStream("/api/sync-shopify", "POST", secret);
-      results.steps.push({ step: "Products", status: "success" });
+      await consumeStream("/api/sync-shopify", "POST", secret, "Products", results);
+      productStep.status = "success";
+      productStep.progress = 100;
+      await updateSyncStatus(results);
     }, "Products");
 
-    // 2. Variants Sync (Stream)
+    // 2. Variants Sync
+    const variantStep = results.steps.find(s => s.step === "Variants");
+    variantStep.status = "running";
+    await updateSyncStatus(results);
+
     await withRetry(async () => {
-      await consumeStream("/api/sync-variants", "POST", secret);
-      results.steps.push({ step: "Variants", status: "success" });
+      await consumeStream("/api/sync-variants", "POST", secret, "Variants", results);
+      variantStep.status = "success";
+      variantStep.progress = 100;
+      await updateSyncStatus(results);
     }, "Variants");
 
-    // 3. Collections Sync (JSON)
+    // 3. Collections Sync
+    const collectionStep = results.steps.find(s => s.step === "Collections");
+    collectionStep.status = "running";
+    await updateSyncStatus(results);
+
     await withRetry(async () => {
       await executeSimple("/api/sync-collections", "POST", secret);
-      results.steps.push({ step: "Collections", status: "success" });
+      collectionStep.status = "success";
+      collectionStep.progress = 100;
+      await updateSyncStatus(results);
     }, "Collections");
 
-    // 4. Pages & Blogs Sync (JSON)
+    // 4. Pages & Blogs Sync
+    const pageStep = results.steps.find(s => s.step === "PagesBlogs");
+    pageStep.status = "running";
+    await updateSyncStatus(results);
+
     await withRetry(async () => {
       await executeSimple("/api/sync/shopify", "POST", secret);
-      results.steps.push({ step: "PagesBlogs", status: "success" });
+      pageStep.status = "success";
+      pageStep.progress = 100;
+      await updateSyncStatus(results);
     }, "PagesBlogs");
 
+    results.status = "success";
     results.endTime = new Date().toISOString();
     results.success = true;
+    await updateSyncStatus(results);
 
     return NextResponse.json(results);
   } catch (error) {
     console.error("[Cron] Sequence Failed:", error);
+    results.status = "failed";
     results.success = false;
     results.error = error.message;
     results.failedAt = new Date().toISOString();
+    await updateSyncStatus(results);
     
     return NextResponse.json(results, { status: 500 });
   }
 }
+

@@ -269,12 +269,18 @@ export async function GET(req) {
             }
           }
         `;
-        const adminData = await shopifyAdminFetch(variantQuery, { ids: variantGids });
-        adminData?.nodes?.forEach(node => {
-          if (node?.metafield?.value) {
-            variantConfigs[node.id] = node.metafield.value;
-          }
-        });
+        
+        // Chunk IDs to avoid Shopify limit of 250
+        const CHUNK_SIZE = 250;
+        for (let i = 0; i < variantGids.length; i += CHUNK_SIZE) {
+          const chunk = variantGids.slice(i, i + CHUNK_SIZE);
+          const adminData = await shopifyAdminFetch(variantQuery, { ids: chunk });
+          adminData?.nodes?.forEach(node => {
+            if (node?.metafield?.value) {
+              variantConfigs[node.id] = node.metafield.value;
+            }
+          });
+        }
       } catch (e) {
         console.warn("⚠️ Bulk variant metadata fetch failed:", e.message);
       }
