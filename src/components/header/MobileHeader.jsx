@@ -63,9 +63,6 @@ const METAL_COLORS = {
   "Silver": "linear-gradient(143.06deg, #dfdfdf 29.61%, #f3f3f3 48.83%, #dfdfdf 66.43%)",
 };
 
-const STYLE_ICON_FALLBACK = (label) => `/images/styles/${label.toLowerCase().replace(/ /g, "")}.png`;
-const SHAPE_ICON_FALLBACK = (label) => `/images/shapes/${label.toLowerCase()}.png`;
-
 const SEARCH_PLACEHOLDERS = [
   "Engagement Rings",
   "Solitaire Rings",
@@ -74,7 +71,7 @@ const SEARCH_PLACEHOLDERS = [
   "Silver Bracelets"
 ];
 
-function SafeImage({ src, alt, fallback = "/images/icons/diamond.svg", ...props }) {
+function SafeImage({ src, alt, fallback = null, ...props }) {
   const [imgSrc, setImgSrc] = useState(src);
   const [hasError, setHasError] = useState(false);
 
@@ -89,7 +86,7 @@ function SafeImage({ src, alt, fallback = "/images/icons/diamond.svg", ...props 
       src={imgSrc}
       alt={alt}
       onError={() => {
-        if (!hasError) {
+        if (!hasError && fallback) {
           setHasError(true);
           setImgSrc(fallback);
         }
@@ -288,7 +285,7 @@ export default function MobileHeader() {
                     <button
                       key={index}
                       onClick={() => handleResultClick(item.href || "#")}
-                      className="relative aspect-[16/9] overflow-hidden rounded-xl group border border-gray-100"
+                      className="relative aspect-[16/9] overflow-hidden rounded-xl group border border-gray-100 bg-zinc-100"
                     >
                       <Image src={image} alt={label} fill className="object-cover" />
                       <div className="absolute inset-0 bg-black/20 group-active:bg-black/40 transition-colors" />
@@ -415,7 +412,7 @@ export default function MobileHeader() {
                         );
                       }
 
-                      const iconPath = item.menuIcon || item.megaMenuImage || item.icon || (isShape ? SHAPE_ICON_FALLBACK(item.label) : STYLE_ICON_FALLBACK(item.label));
+                      const iconPath = item.menuIcon || item.megaMenuImage || item.icon;
                       return (
                         <Link 
                           key={i} 
@@ -423,7 +420,7 @@ export default function MobileHeader() {
                           onClick={() => setIsMenuOpen(false)}
                           className="flex flex-col items-center gap-2"
                         >
-                          <div className="w-20 h-20 relative flex items-center justify-center overflow-hidden">
+                          <div className="w-20 h-20 relative flex items-center justify-center overflow-hidden bg-zinc-50 rounded-full">
                             <SafeImage 
                               src={iconPath} 
                               alt={item.label} 
@@ -538,7 +535,7 @@ export default function MobileHeader() {
                 key={index}
                 href={item.href || "#"}
                 onClick={() => setIsMenuOpen(false)}
-                className="relative aspect-[4/4] overflow-hidden rounded-lg group"
+                className="relative aspect-[4/4] overflow-hidden rounded-lg group bg-zinc-100"
               >
                 <Image
                   src={image}
