@@ -157,7 +157,8 @@ function transformMenu(shopifyMenu) {
                 })();
 
                 const explicitType = getMetafield(childMetafields, "custom", "column_type")?.value;
-                const isText = child.title.toLowerCase().includes("price") || child.title.toLowerCase().includes("occasion") || child.title.toLowerCase().includes("shop for");
+                const hasIcons = processedItems.some(item => item.icon || item.megaMenuImage || item.menuIcon);
+                const isText = (child.title.toLowerCase().includes("price") || child.title.toLowerCase().includes("occasion") || child.title.toLowerCase().includes("shop for")) && !hasIcons;
                 const finalType = isMetal ? "metal" : (explicitType || (!isText ? "icon" : "text"));
 
                 columns.push({
