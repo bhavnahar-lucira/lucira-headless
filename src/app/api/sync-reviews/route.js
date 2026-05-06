@@ -46,7 +46,7 @@ export async function POST(req) {
         for (let i = skip; i < products.length; i++) {
           const product = products[i];
           try {
-            const reviewsData = await fetchNectorReviews(product.shopifyId);
+            const reviewsData = await fetchNectorReviews(product.shopifyId, { noFallback: true });
             
             // 1. Update Detailed Reviews Collection
             if (reviewsData.list && reviewsData.list.length > 0) {
@@ -77,7 +77,8 @@ export async function POST(req) {
                   reviewStats: {
                     count: reviewsData.count || 0,
                     average: reviewsData.average || 0,
-                    stats: reviewsData.stats || []
+                    stats: reviewsData.stats || [],
+                    usedFallback: reviewsData.usedFallback || false
                   },
                   lastReviewsUpdated: new Date()
                 } 
