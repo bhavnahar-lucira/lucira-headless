@@ -355,6 +355,14 @@ export default function SavedAddressesPage() {
                   />
                   {showErrors && !addressForm.address1 && <p className="text-[10px] text-rose-500 font-bold uppercase tracking-widest ml-4 animate-in fade-in slide-in-from-top-1">Required</p>}
                 </div>
+                <div className="md:col-span-2 space-y-1">
+                  <Input
+                    placeholder="Street / Locality"
+                    value={addressForm.address2}
+                    onChange={(e) => setAddressForm({ ...addressForm, address2: e.target.value })}
+                    className="font-figtree h-12 md:h-14 rounded-2xl border-zinc-100 bg-zinc-50/50 focus:bg-white transition-all font-medium text-sm placeholder:text-zinc-400"
+                  />
+                </div>
                 <div className="space-y-1">
                   <Input
                     placeholder="City *"

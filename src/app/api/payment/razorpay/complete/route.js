@@ -44,15 +44,15 @@ function buildMailingAddress(address = null) {
   if (!address) return null;
 
   return {
-    firstName: address.firstName || "",
+    firstName: address.firstName || address.name || "",
     lastName: address.lastName || "",
     company: formatCompanyWithGstin(address.company, address.gstin),
-    address1: address.address1 || "",
+    address1: address.address1 || address.address || "",
     address2: address.address2 || "",
     city: address.city || "",
-    province: address.province || "",
+    province: address.province || address.state || "",
     zip: address.zip || "",
-    country: address.country || "",
+    country: address.country || "India",
     phone: normalizePhone(address.phone || ""),
   };
 }
@@ -175,13 +175,37 @@ export async function POST(req) {
       return NextResponse.json({ error: "Invalid payment signature" }, { status: 400 });
     }
 
-    const client = await clientPromise;
-    const db = client.db("next_local_db");
-    const cartCollection = db.collection("carts");
-    const paymentCollection = db.collection("shopify_order_payments");
-    const ordersCollection = db.collection("orders");
+    // STEP 1: Update Draft Order with Addresses and Notes
+    const shippingAddress = body?.shippingAddress;
+    const billingAddress = body?.billingAddress;
 
-    // STEP 1: Complete Shopify Draft Order
+    const updateInput = {
+      shippingAddress: buildMailingAddress(shippingAddress),
+      billingAddress: buildMailingAddress(billingAddress),
+      note: buildOrderNote({ razorpayOrderId, razorpayPaymentId, shippingAddress, billingAddress }),
+      customAttributes: buildOrderCustomAttributes({ shippingAddress, billingAddress, razorpayOrderId, razorpayPaymentId })
+    };
+
+    const updateData = await shopifyAdminFetch(`
+      mutation draftOrderUpdate($id: ID!, $input: DraftOrderInput!) {
+        draftOrderUpdate(id: $id, input: $input) {
+          draftOrder {
+            id
+          }
+          userErrors {
+            field
+            message
+          }
+        }
+      }
+    `, { id: draftId, input: updateInput });
+
+    if (updateData?.draftOrderUpdate?.userErrors?.length) {
+      console.error("Draft Order Update Error:", updateData.draftOrderUpdate.userErrors);
+      // We continue even if update fails, to not lose the payment, but it's better to log it
+    }
+
+    // STEP 2: Complete Shopify Draft Order
     const shopifyData = await shopifyAdminFetch(`
       mutation draftOrderComplete($id: ID!) {
         draftOrderComplete(id: $id) {
@@ -212,7 +236,7 @@ export async function POST(req) {
 
     const order = payload.draftOrder.order;
 
-    // STEP 2: Save to Local MongoDB
+    // STEP 3: Save to Local MongoDB
     const orderRecord = {
       shopifyOrderId: order.id,
       shopifyOrderName: order.name,
@@ -235,7 +259,7 @@ export async function POST(req) {
       updatedAt: new Date()
     });
 
-    // STEP 3: Clear Cart
+    // STEP 4: Clear Cart
     const cartLookup = buildCartLookup({ userId, sessionId });
     await cartCollection.updateOne(cartLookup, { $set: { items: [], updatedAt: new Date() } });
 

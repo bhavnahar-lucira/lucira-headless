@@ -7,15 +7,27 @@ async function getCustomerAccessToken() {
   return cookieStore.get("customerAccessToken")?.value || "";
 }
 
-async function getCustomerId(customerAccessToken) {
+async function getCustomerData(customerAccessToken) {
   const data = await shopifyStorefrontFetch(`
     query($customerAccessToken: String!) {
       customer(customerAccessToken: $customerAccessToken) {
         id
+        defaultAddress {
+          address1
+          address2
+          city
+          company
+          country
+          firstName
+          lastName
+          phone
+          province
+          zip
+        }
       }
     }
   `, { customerAccessToken });
-  return data?.customer?.id;
+  return data?.customer;
 }
 
 export async function GET(request, { params }) {
@@ -26,8 +38,8 @@ export async function GET(request, { params }) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const customerId = await getCustomerId(customerAccessToken);
-    if (!customerId) {
+    const customer = await getCustomerData(customerAccessToken);
+    if (!customer?.id) {
       return NextResponse.json({ error: "Customer not found" }, { status: 404 });
     }
 
@@ -43,7 +55,7 @@ export async function GET(request, { params }) {
     }
 
     // Security check: Ensure the order belongs to the authenticated customer
-    const numericCustomerId = customerId.split('/').pop();
+    const numericCustomerId = customer.id.split('/').pop();
     if (restOrder.customer.id.toString() !== numericCustomerId.toString()) {
       return NextResponse.json({ error: "Unauthorized access to order" }, { status: 403 });
     }
@@ -71,6 +83,7 @@ export async function GET(request, { params }) {
     const order = {
       id: restOrder.admin_graphql_api_id,
       orderNumber: restOrder.order_number.toString(),
+      customerEmail: restOrder.customer?.email || "",
       processedAt: restOrder.processed_at,
       financialStatus: restOrder.financial_status.toUpperCase(),
       fulfillmentStatus: (restOrder.fulfillment_status || 'unfulfilled').toUpperCase(),
@@ -90,7 +103,8 @@ export async function GET(request, { params }) {
         amount: restOrder.total_shipping_price_set?.shop_money?.amount || "0.00",
         currencyCode: restOrder.currency
       },
-      shippingAddress: restOrder.shipping_address,
+      shippingAddress: restOrder.shipping_address || customer.defaultAddress,
+      isDefaultFallback: !restOrder.shipping_address && !!customer.defaultAddress,
       lineItems: restOrder.line_items.map((li) => {
         const prodData = productImages[li.product_id] || {};
         return {
