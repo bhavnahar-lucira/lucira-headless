@@ -200,6 +200,7 @@ export default function Navbar({ hideTop }) {
                               src={item.image}
                               alt={item.title}
                               fill
+                              priority={true}
                               className="object-cover transition duration-500 group-hover:scale-105"
                             />
                             <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/20 to-transparent" />
@@ -300,14 +301,15 @@ export default function Navbar({ hideTop }) {
                                       />
                                     ) : item.menuIcon || item.megaMenuImage || (col.type === "icon" && item.icon) ? (
                                       <div className={cn(
-                                        "relative shrink-0 flex items-center justify-center rounded-full overflow-hidden transition-all bg-zinc-50",
+                                        "relative shrink-0 flex items-center justify-center rounded-full overflow-hidden transition-all",
                                         isByShape ? "h-12 w-12" : "h-16 w-16"
                                       )}>
                                         <Image
                                           src={item.menuIcon || item.megaMenuImage || item.icon}
                                           alt={item.label}
                                           fill
-                                          className="object-contain p-1"
+                                          priority={j < 6}
+                                          className="object-contain p-1 transition-opacity duration-300"
                                         />
                                       </div>
                                     ) : null}
@@ -334,7 +336,8 @@ export default function Navbar({ hideTop }) {
                                 src={card.image}
                                 alt={card.title}
                                 fill
-                                className="object-cover"
+                                priority={true}
+                                className="object-cover transition-opacity duration-300"
                               />
                               <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/20 to-transparent" />
                             </div>

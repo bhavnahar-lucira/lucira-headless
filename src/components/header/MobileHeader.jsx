@@ -287,9 +287,9 @@ export default function MobileHeader() {
                       onClick={() => handleResultClick(item.href || "#")}
                       className="relative aspect-[16/9] overflow-hidden rounded-xl group border border-gray-100 bg-zinc-100"
                     >
-                      <Image src={image} alt={label} fill className="object-cover" />
+                      <Image src={image} alt={label} fill priority={index < 4} className="object-cover transition-opacity duration-300" />
                       <div className="absolute inset-0 bg-black/20 group-active:bg-black/40 transition-colors" />
-                      <span className="absolute inset-0 flex items-center justify-center text-white text-[13px] font-bold tracking-wider px-2 text-center drop-shadow-md">
+                      <span className="absolute inset-0 flex items-center justify-center text-white text-[13px] font-bold tracking-wider px-2 text-center">
                         {label}
                       </span>
                     </button>
@@ -404,7 +404,7 @@ export default function MobileHeader() {
                             className="flex flex-col items-center gap-2"
                           >
                             <div 
-                              className="w-12 h-12 rounded-full border border-gray-100 shadow-sm"
+                              className="w-12 h-12 rounded-full border border-gray-100"
                               style={{ background: METAL_COLORS[item.label] || "#eee" }}
                             />
                             <span className="text-[13px] font-figtree text-center font-normal leading-tight">{item.label}</span>
@@ -420,7 +420,7 @@ export default function MobileHeader() {
                           onClick={() => setIsMenuOpen(false)}
                           className="flex flex-col items-center gap-2"
                         >
-                          <div className="w-20 h-20 relative flex items-center justify-center overflow-hidden bg-zinc-50 rounded-full">
+                          <div className="w-20 h-20 relative flex items-center justify-center overflow-hidden">
                             <SafeImage 
                               src={iconPath} 
                               alt={item.label} 
@@ -567,14 +567,15 @@ export default function MobileHeader() {
               key={index}
               href={banner.href}
               onClick={() => setIsMenuOpen(false)}
-              className="shrink-0 snap-center rounded-xl overflow-hidden"
-              style={{ width: 'calc(100% - 32px)' }}
+              className="shrink-0 snap-center rounded-xl overflow-hidden relative"
+              style={{ width: 'calc(100% - 32px)', height: '180px' }}
             >
-              <img
+              <Image
                 src={banner.image}
                 alt={banner.alt}
-                className="w-full h-[180px] object-cover rounded-xl block"
-                loading="lazy"
+                fill
+                priority={index === 0}
+                className="object-cover rounded-xl block transition-opacity duration-300"
               />
             </Link>
           ))}
@@ -761,7 +762,7 @@ export default function MobileHeader() {
                   <div className="flex items-center gap-4">
                     {user ? (
                       <Link href="/admin" onClick={() => setIsMenuOpen(false)} className="p-1">
-                        <Avatar className="h-7 w-7 cursor-pointer border border-gray-100 shadow-sm">
+                        <Avatar className="h-7 w-7 cursor-pointer border border-gray-100">
                           {user.avatar && <AvatarImage src={user.avatar} alt={user.name} />}
                           <AvatarFallback className="bg-[#5a413f] text-white font-bold text-[10px]">{getInitials(user?.name)}</AvatarFallback>
                         </Avatar>
@@ -834,7 +835,7 @@ export default function MobileHeader() {
 
           {user ? (
             <Link href="/admin" className="p-1">
-              <Avatar className="h-7 w-7 cursor-pointer border border-gray-100 shadow-sm">
+              <Avatar className="h-7 w-7 cursor-pointer border border-gray-100">
                 {user.avatar && <AvatarImage src={user.avatar} alt={user.name} />}
                 <AvatarFallback className="bg-[#5a413f] text-white font-bold text-[10px]">{getInitials(user?.name)}</AvatarFallback>
               </Avatar>
@@ -867,7 +868,7 @@ export default function MobileHeader() {
         <div className="px-4 py-2 bg-white">
           <div 
             onClick={() => setShowSearch(true)}
-            className="relative w-full bg-[#f9f9f9] h-[40px] pl-[40px] pr-4 rounded-full flex items-center cursor-pointer border border-transparent shadow-sm active:shadow-inner transition-all overflow-hidden"
+            className="relative w-full bg-[#f9f9f9] h-[40px] pl-[40px] pr-4 rounded-full flex items-center cursor-pointer border border-transparent transition-all overflow-hidden"
           >
             <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500">
               <SearchIcon />
