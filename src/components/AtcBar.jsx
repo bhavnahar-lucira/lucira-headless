@@ -165,18 +165,13 @@ export default function AtcBar({
               </div>
             </a>
 
-            {/* 9=10 Saving Button */}
-            {/* <button className="h-14 flex-1 border border-accent text-accent font-bold text-[13px] rounded-sm flex items-center justify-center whitespace-nowrap px-2">
-              9=10 SAVING
-            </button> */}
-
             {/* Scheme Saving Button */}
             {schemeData && (
               <a
                 href={schemeData.schemeUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="h-14 flex-1 border border-accent text-accent font-bold text-[12px] rounded-sm flex items-center justify-center whitespace-nowrap px-2 tracking-tight"
+                className="h-14 flex-1 border border-primary text-primary font-bold text-[12px] rounded-sm flex items-center justify-center whitespace-nowrap px-2 tracking-tight"
               >
                 9 = 10 SAVING
               </a>

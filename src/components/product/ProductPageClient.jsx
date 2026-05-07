@@ -2010,19 +2010,19 @@ export default function ProductPageClient({ product, complementaryProducts = [],
               <div className="overflow-hidden">
                 <Swiper
                   spaceBetween={12}
-                  slidesPerView={1.2}
+                  slidesPerView={1.1}
                   onSlideChange={(swiper) => setActivePromoSlide(swiper.activeIndex + 1)}
                   className="w-full overflow-visible!"
                 >
                   {serviceSlider.map((item, i) => (
                     <SwiperSlide key={`promo-${i}`}>
-                      <div className="bg-[#F9F9F9] border border-gray-100 rounded-xl p-5 flex items-center gap-5 h-full">
+                      <div className="bg-[#F9F9F9] border border-gray-100 rounded-xl p-2 md:p-5 flex items-stretch gap-2.5 md:gap-5 h-full">
                         <div className="relative w-18 h-18 rounded-lg overflow-hidden shrink-0">
                           <Image src={item.img} alt={item.title} fill className="object-cover" />
                         </div>
                         <div className="space-y-2">
-                          <p className="text-lg font-semibold italic leading-tight">{item.title}</p>
-                          <p className="text-sm leading-relaxed">
+                          <p className="text-base md:text-lg font-semibold italic leading-tight">{item.title}</p>
+                          <p className="text-xs md:text-sm leading-relaxed">
                             {item.desc}
                           </p>
                         </div>
@@ -2108,9 +2108,9 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                 )}
               </div>
 
-              <div className="grid grid-cols-2 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-2 gap-4 [&>*:last-child:nth-child(odd)]:col-span-2">
                 {/* Metal Card */}
-                <div className="bg-[#F9F9F9] rounded-2xl p-5 space-y-4">
+                <div className="bg-[#F9F9F9] rounded-2xl p-4 space-y-4">
                   <div className="flex items-center gap-2 font-bold text-sm uppercase text-gray-700">
                     <Image src="/images/icons/metal.svg" alt="Metal" width={18} height={18} />
                     Metal <Info size={14} className="text-gray-400 cursor-pointer ml-auto" onClick={() => setActiveInfoSheet("metal")} />
@@ -2138,7 +2138,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                 </div>
 
                 {/* Dimensions Card */}
-                <div className="bg-[#F9F9F9] rounded-2xl p-5 space-y-4">
+                <div className="bg-[#F9F9F9] rounded-2xl p-4 space-y-4">
                   <div className="flex items-center gap-2 font-bold text-sm uppercase text-gray-700">
                     <Image src="/images/icons/dimension.svg" alt="Dimensions" width={18} height={18} />
                     Dimension <Info size={14} className="text-gray-400 cursor-pointer ml-auto" onClick={() => setActiveInfoSheet("dimension")} />
@@ -2167,7 +2167,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
 
                 {/* Single Diamond Card */}
                 {!isGoldCoin && activeVariant?.metafields?.diamonds && activeVariant.metafields.diamonds.length === 1 && (
-                  <div className="bg-[#F9F9F9] rounded-2xl p-5 space-y-4">
+                  <div className="bg-[#F9F9F9] rounded-2xl p-4 space-y-4">
                     <div className="flex items-center gap-2 font-bold text-sm uppercase text-gray-700">
                       <Image src="/images/icons/diamond.svg" alt="Diamond" width={18} height={18} />
                       Diamond <Info size={14} className="text-gray-400 cursor-pointer ml-auto" onClick={() => setActiveInfoSheet("diamond")} />
@@ -2199,9 +2199,9 @@ export default function ProductPageClient({ product, complementaryProducts = [],
 
                 {/* Single Gemstone Card */}
                 {activeVariant?.metafields?.gemstones && activeVariant.metafields.gemstones.length === 1 && (
-                  <div className="bg-[#F9F9F9] rounded-2xl p-5 space-y-4">
+                  <div className="bg-[#F9F9F9] rounded-2xl p-4 space-y-4">
                     <div className="flex items-center gap-2 font-bold text-sm uppercase text-gray-700">
-                      <Image src="/images/icons/diamond.svg" alt="Gemstone" width={18} height={18} className="grayscale opacity-70" />
+                      <Image src="/images/icons/gemstone.svg" alt="Gemstone" width={18} height={18} className="grayscale opacity-70" />
                       Gemstone <Info size={14} className="text-gray-400 cursor-pointer ml-auto" onClick={() => setActiveInfoSheet("gemstone")} />
                     </div>
                     <div className="space-y-2.5">
