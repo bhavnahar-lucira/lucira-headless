@@ -57,7 +57,7 @@ export default function HomeFAQSection() {
 
   return (
 
-    <section className="w-full py-12 bg-gray-50"> 
+    <section className="w-full py-12 bg-gray-50">
 
       <div className="max-w-480 mx-auto px-5 md:px-17 min-[1440px]:px-17 grid lg:grid-cols-[1fr_480px] gap-16">
 
@@ -108,8 +108,8 @@ export default function HomeFAQSection() {
                         transition={{ duration: 0.25 }}
                         className="overflow-hidden"
                       >
-                        <div 
-                          className="text-sm leading-relaxed mt-4 max-w-130 [&>p]:mb-2 last:[&>p]:mb-0"
+                        <div
+                          className="text-sm leading-relaxed mt-4 max-w-full [&>p]:mb-2 last:[&>p]:mb-0"
                           dangerouslySetInnerHTML={{ __html: faq.answer }}
                         />
                       </motion.div>
