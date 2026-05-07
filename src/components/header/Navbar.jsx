@@ -90,7 +90,7 @@ export default function Navbar({ hideTop }) {
         </motion.div>
 
         {/* Navigation Menu */}
-        <ul className="flex items-center xl:gap-8 2xl:gap-8 lg:text-xs xl:text-sm uppercase transition-all duration-300 gap-12 mx-auto">
+        <ul className="flex items-center lg:text-xs xl:text-sm uppercase transition-all duration-300 gap-12 mx-auto">
           {MEGA_MENU.map((menu, index) => {
             const isActive =
               pathname === menu.href ||
