@@ -178,7 +178,7 @@ export default function AtcBar({
                 rel="noopener noreferrer"
                 className="h-14 flex-1 border border-accent text-accent font-bold text-[12px] rounded-sm flex items-center justify-center whitespace-nowrap px-2 tracking-tight"
               >
-                SAVE <span className="mx-1 font-extrabold">₹{formatPrice(schemeData.saveAmount)}</span> WITH SCHEME
+                9 = 10 SAVING
               </a>
             )}
 

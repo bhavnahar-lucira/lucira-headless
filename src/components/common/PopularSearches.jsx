@@ -118,7 +118,7 @@ export default function PopularSearches() {
   const isMobile = useMediaQuery("(max-width: 1024px)");
 
   return (
-    <div className="w-full bg-white pb-12 lg:pb-16">
+    <div className="w-full bg-white pb-12 lg:pb-16 lg:pt-4 pt-2">
       <div className="container-main">
         <h2 className="text-lg lg:text-2xl font-bold font-abhaya text-zinc-900 mb-6 lg:mb-8 pb-4 border-b border-zinc-100 tracking-tight uppercase">
           Popular Searches

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
-const ORN_TOKEN_URL = "https://lucira.uat.ornaverse.in/connect/token";
-const ORN_LIST_URL = "https://lucira.uat.ornaverse.in/Services/POS/SchemeEnrollment/List";
+const ORN_TOKEN_URL = "https://lucira.live.ornaverse.in/connect/token";
+const ORN_LIST_URL = "https://lucira.live.ornaverse.in/Services/POS/SchemeEnrollment/List";
 
 let cachedToken = null;
 let tokenExpiry = 0;
