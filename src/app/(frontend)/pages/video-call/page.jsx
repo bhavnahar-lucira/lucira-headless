@@ -135,6 +135,11 @@ export default function VideoCallPage() {
     if (validateForm()) {
       setSubmitted(true);
 
+      const message = encodeURIComponent(`Hi Lucira, I would like to schedule a video call. \nName: ${formData.firstName}\nEmail: ${formData.email}\nPhone: ${formData.phone}`);
+      const whatsappUrl = `https://api.whatsapp.com/send?phone=+919004435760&text=${message}`;
+      
+      window.open(whatsappUrl, "_blank");
+
       console.log(formData);
     }
   };
