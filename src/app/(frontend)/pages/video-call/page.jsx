@@ -169,14 +169,14 @@ export default function VideoCallPage() {
       </section>
 
       {/* HOW IT WORKS SECTION */}
-      <section className="w-full py-10 md:py-20">
+      <section className="w-full">
         <div className="max-w-[1320px] mx-auto px-5">
           <div className="text-center mb-10 md:mb-14">
-            <h2 className="font-abhaya text-[28px] md:text-[42px] leading-none uppercase mb-3">
+            <h2 className="text-3xl lg:text-4xl font-extrabold font-abhaya mb-2 text-black">
               HOW IT WORKS
             </h2>
 
-            <p className="font-figtree text-sm md:text-lg text-[#4B4B4B] max-w-[700px] mx-auto">
+            <p className="text-black text-base font-normal">
               Shopping made personal - get real-time guidance from Lucira
               experts.
             </p>
@@ -233,17 +233,17 @@ export default function VideoCallPage() {
           <div className="w-full md:max-w-[450px]">
             {!submitted ? (
               <>
-                <h2 className="font-abhaya text-[28px] md:text-[36px] uppercase leading-none mb-3">
+                <h2 className="text-3xl lg:text-4xl font-extrabold font-abhaya mb-2 text-black">
                   Schedule a Video Call
                 </h2>
 
-                <p className="font-figtree text-sm md:text-base leading-6 text-[#1A1A1A] mb-8">
+                <p className="text-black text-base font-normal">
                   Let our team bring the Lucira experience to you - curated, personal, and without pressure.
                 </p>
 
                 <form onSubmit={handleSubmit}>
                   <div className="mb-5">
-                    <label className="block text-xs font-medium uppercase mb-2">
+                    <label className="block text-xs font-medium uppercase mb-2 pt-5">
                       First Name
                     </label>
 
@@ -390,11 +390,11 @@ export default function VideoCallPage() {
         <div className="w-[96%] max-w-[1920px] mx-auto">
           {/* Heading */}
           <div className="text-center">
-            <h2 className="font-abhaya text-[18px] md:text-[24px] uppercase text-[#1A1A1A] leading-[150%]">
+            <h2 className="text-3xl lg:text-4xl font-extrabold font-abhaya mb-2 text-black">
               Shop By Category
             </h2>
 
-            <p className="text-[12px] md:text-[18px] text-[#666666] leading-[2] md:leading-[34px] mt-0">
+            <p className="text-black text-base font-normal">
               Discover our signature jewelry collections
             </p>
           </div>
