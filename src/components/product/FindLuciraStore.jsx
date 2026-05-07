@@ -87,8 +87,8 @@ export function FindLuciraStore({
               pagination={{
                 clickable: true,
                 el: ".store-pagination",
-                bulletClass: "swiper-pagination-bullet !w-1.5 !h-1.5 md:!w-2 md:!h-2 !bg-gray-300 !opacity-100",
-                bulletActiveClass: "swiper-pagination-bullet-active !w-6 md:!w-8 !rounded-full !bg-black",
+                bulletClass: "swiper-pagination-bullet !w-2 !h-2 !bg-gray-300 !opacity-100",
+                bulletActiveClass: "swiper-pagination-bullet-active !w-[46px] !h-2 !rounded-full !bg-black",
               }}
               className="w-full"
             >

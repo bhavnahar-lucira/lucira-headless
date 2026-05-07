@@ -880,7 +880,7 @@ export default function EarnRewardsPage() {
                 const done = state.profileComplete || state.completedSteps.includes(n);
                 return (
                   <li key={n} className={`flex items-center gap-[9px] text-[11.5px] ${done ? "text-[#1c1410]" : "text-[#9a8f85]"}`}>
-                    <div className={`w-[18px] h-[18px] rounded-full border-[1.5px] flex items-center justify-center shrink-0 ${done ? "bg-[#5A413F] border-transparent" : "bg-white border-[#e5ddd4]"}`}>
+                    <div className={`w-[46px] h-[18px] rounded-full border-[1.5px] flex items-center justify-center shrink-0 ${done ? "bg-[#5A413F] border-transparent" : "bg-white border-[#e5ddd4]"}`}>
                       {done ? <Check size={8} className="text-white" strokeWidth={3}/> : <div className="w-1.5 h-1.5 rounded-full bg-[#e5ddd4]" />}
                     </div>
                     {STEP_NAMES[n]}

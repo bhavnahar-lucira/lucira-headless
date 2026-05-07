@@ -233,6 +233,7 @@ export default function MainHeader() {
             alt="Lucira Jewelry"
             width={100}
             height={40}
+            className="w-[85px] h-[30px] lg:w-[100px] lg:h-[40px]"
             priority
           />
         </Link>

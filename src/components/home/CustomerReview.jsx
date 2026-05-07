@@ -147,7 +147,7 @@ export default function CustomerReview({
     <section className="w-full my-10 md:my-15 bg-white overflow-hidden">
       <div className="container-main">
         <div className={`mb-8 ${isMobile ? "text-left" : "text-center md:text-left"}`}>
-          <h2 className="text-3xl md:text-4xl font-extrabold mb-4 font-abhaya text-black">
+          <h2 className="text-2xl lg:text-4xl font-extrabold font-abhaya mb-1 text-black">
             {title}
           </h2>
           {subtitle && <p className="text-sm md:text-base text-zinc-600">{subtitle}</p>}
@@ -260,7 +260,7 @@ export default function CustomerReview({
           transition: all 0.3s ease;
         }
         .${paginationElClass} .swiper-pagination-bullet-active {
-          width: 32px;
+          width: 46px;
           background: #000;
         }
       `}</style>

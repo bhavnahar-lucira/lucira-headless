@@ -32,7 +32,7 @@ export default function ExploreRange() {
   return (
     <section className="w-full pt-5 bg-white overflow-hidden">
       <div className="container-main">
-        <div className="text-left lg:text-center mb-8 px-1 lg:px-0">
+        <div className="text-left lg:text-center mb-6 px-1 lg:px-0">
           <h2 className="text-2xl lg:text-4xl font-extrabold font-abhaya mb-1 text-black">
             Explore Our Range
           </h2>

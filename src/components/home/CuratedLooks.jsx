@@ -314,7 +314,7 @@ export default function CuratedLooks() {
 
         <style jsx global>{`
           .curated-pagination .swiper-pagination-bullet { width: 8px; height: 8px; background: #D1D1D1; opacity: 1; border-radius: 4px; transition: all 0.3s ease; }
-          .curated-pagination .swiper-pagination-bullet-active { width: 32px; background: #000; }
+          .curated-pagination .swiper-pagination-bullet-active { width: 46px; background: #000; }
         `}</style>
       </section>
     );

@@ -53,7 +53,7 @@ export default function CategorySlider() {
               el: `.${paginationElClass}`,
               clickable: true,
               renderBullet: (index, className) => {
-                return `<span class="${className} w-6! h-1! rounded-full! bg-gray-300! transition-all duration-300 [&.swiper-pagination-bullet-active]:bg-black! [&.swiper-pagination-bullet-active]:w-10!"></span>`;
+                return `<span class="${className} w-2! h-2! rounded-full! bg-gray-300! transition-all duration-300 [&.swiper-pagination-bullet-active]:bg-black! [&.swiper-pagination-bullet-active]:w-[46px]!"></span>`;
               },
             }}
             breakpoints={{

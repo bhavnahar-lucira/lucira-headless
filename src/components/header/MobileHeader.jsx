@@ -621,13 +621,13 @@ export default function MobileHeader() {
 
         <div className="mt-4 space-y-6">
           <div className="bg-[#FAF6F3] mx-4 p-4 space-y-4 rounded-lg">
-            <Link href="/account/orders" onClick={() => setIsMenuOpen(false)} className="block tracking-wider border-b border-gray-200 pb-3 font-figtree font-medium text-base leading-none align-middle capitalize text-black">
+            <Link href="/admin/orders" onClick={() => setIsMenuOpen(false)} className="block tracking-wider border-b border-gray-200 pb-3 font-figtree font-medium text-sm leading-none align-middle capitalize text-black">
               Track Your Order
             </Link>
-            <Link href="/pages/contact-us" onClick={() => setIsMenuOpen(false)} className="block tracking-wider border-b border-gray-200 pb-3 font-figtree font-medium text-base leading-none align-middle capitalize text-black">
+            <Link href="/pages/contact-us" onClick={() => setIsMenuOpen(false)} className="block tracking-wider border-b border-gray-200 pb-3 font-figtree font-medium text-sm leading-none align-middle capitalize text-black">
               Contact Us
             </Link>
-            <Link href="/pages/faqs" onClick={() => setIsMenuOpen(false)} className="block text-[16px] tracking-wider font-figtree font-medium text-base leading-none align-middle capitalize text-black">
+            <Link href="/pages/faqs" onClick={() => setIsMenuOpen(false)} className="block text-[16px] tracking-wider font-figtree font-medium text-sm leading-none align-middle capitalize text-black">
               FAQs
             </Link>
           </div>
@@ -740,7 +740,7 @@ export default function MobileHeader() {
   const activeItem = getActiveItem();
 
   return (
-    <div className="bg-white border-b border-gray-100 lg:hidden">
+    <div className="bg-white border-b border-gray-200 lg:hidden">
       <div className="flex items-center justify-between px-4 py-3">
         <div className="flex items-center gap-4">
           <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
@@ -882,7 +882,7 @@ export default function MobileHeader() {
         <div className="px-4 py-2 bg-white">
           <div 
             onClick={() => setShowSearch(true)}
-            className="relative w-full bg-[#f9f9f9] h-[40px] pl-[40px] pr-4 rounded-full flex items-center cursor-pointer border border-transparent transition-all overflow-hidden"
+            className="relative w-full bg-[#f9f9f9] h-[40px] pl-[40px] pr-4 rounded-[4px] flex items-center cursor-pointer border border-transparent transition-all overflow-hidden"
           >
             <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500">
               <SearchIcon />

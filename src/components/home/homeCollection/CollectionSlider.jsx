@@ -64,10 +64,9 @@ export default function CollectionSlider ({ products = [], loading = false, coll
             disableOnInteraction: false,
             pauseOnMouseEnter: true,
           }}
-          onSlideChange={(swiper) => {
-            const progress = (swiper.activeIndex / (swiper.slides.length - swiper.params.slidesPerView)) * 100;
-            const bar = document.getElementById(`progress-bar-${id}`);
-            if (bar) bar.style.width = `${Math.min(100, Math.max(0, progress + (100 / swiper.slides.length)))}%`;
+          pagination={{
+            el: `.${paginationElClass}`,
+            clickable: true,
           }}
           navigation={{
             nextEl: `.${nextElClass}`,
@@ -75,8 +74,8 @@ export default function CollectionSlider ({ products = [], loading = false, coll
           }}
           breakpoints={{
             640: { slidesPerView: 2, spaceBetween: 20 },
-            1024: { slidesPerView: 3, spaceBetween: 24 },
-            1280: { slidesPerView: 4, spaceBetween: 30, freeMode: false },
+            1024: { slidesPerView: 3, spaceBetween: 16 },
+            1280: { slidesPerView: 4, spaceBetween: 16, freeMode: false },
           }}
           className="w-full overflow-visible!"
         >
@@ -93,14 +92,9 @@ export default function CollectionSlider ({ products = [], loading = false, coll
 
         {/* Navigation & Progress Controls (Updated for design) */}
         <div className="flex justify-between items-center mt-8 md:mt-6 px-1">
-          {/* Progress Bar (Global) */}
-          <div className="flex-1 max-w-30 md:max-w-50 h-0.5 bg-zinc-100 relative overflow-hidden">
-            <div 
-              id={`progress-bar-${id}`}
-              className="absolute top-0 left-0 h-full bg-[#5B4740] transition-all duration-300"
-              style={{ width: `${100 / displayProducts.length}%` }}
-            />
-          </div>
+          {/* Custom Dots Pagination */}
+          <div className={`${paginationElClass} swiper-pagination-bullets-custom`} />
+          
           
           <div className="flex items-center gap-3">
             <button className={`${prevElClass} w-10 h-10 md:w-12 md:h-12 rounded-full border border-zinc-200 flex items-center justify-center hover:bg-black transition-all text-zinc-400 hover:border-black hover:text-white`}>

@@ -218,7 +218,7 @@ export default function WaysToExplore() {
           transition: all 0.3s ease;
         }
         .explore-pagination .swiper-pagination-bullet-active {
-          width: 32px;
+          width: 46px;
           background: #000;
         }
       `}</style>
