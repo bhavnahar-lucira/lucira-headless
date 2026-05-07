@@ -38,8 +38,8 @@ export async function GET(request) {
               { collectionHandles: "bestsellers" },
               {
                 $or: [
-                  { type: { $regex: new RegExp(categoryTerm, "i") } },
-                  { tags: { $regex: new RegExp(categoryTerm, "i") } }
+                  { type: { $regex: new RegExp(`\\b${categoryTerm}s?\\b`, "i") } },
+                  { tags: { $regex: new RegExp(`\\b${categoryTerm}s?\\b`, "i") } }
                 ]
               }
             ]
