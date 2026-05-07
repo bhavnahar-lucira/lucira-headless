@@ -114,18 +114,29 @@ export async function POST(req) {
 
       let entitledCollectionHandles = [];
       if (entitledCollectionIds.length > 0) {
-        // Fetch handles for the entitled collection IDs
-        const collectionsData = await shopifyAdminFetch(`
-          query getCollections($ids: [ID!]!) {
-            nodes(ids: $ids) {
-              ... on Collection {
-                id
-                handle
+        // Fetch handles for the entitled collection IDs with chunking
+        const uniqueCollIds = [...new Set(entitledCollectionIds)];
+        const CHUNK_SIZE = 100;
+        const collNodes = [];
+
+        for (let i = 0; i < uniqueCollIds.length; i += CHUNK_SIZE) {
+          const chunk = uniqueCollIds.slice(i, i + CHUNK_SIZE);
+          const collectionsData = await shopifyAdminFetch(`
+            query getCollections($ids: [ID!]!) {
+              nodes(ids: $ids) {
+                ... on Collection {
+                  id
+                  handle
+                }
               }
             }
+          `, { ids: chunk });
+          if (collectionsData?.nodes) {
+            collNodes.push(...collectionsData.nodes);
           }
-        `, { ids: entitledCollectionIds });
-        entitledCollectionHandles = collectionsData?.nodes?.map(n => n.handle).filter(Boolean) || [];
+        }
+        
+        entitledCollectionHandles = collNodes.map(n => n.handle).filter(Boolean) || [];
         console.log("DEBUG: Entitled Collection Handles:", entitledCollectionHandles);
       }
 
