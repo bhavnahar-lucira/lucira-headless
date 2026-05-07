@@ -473,7 +473,7 @@ export default function DiamondShapesPage() {
       <section
         className="relative w-full h-[535px] md:h-[605px] flex items-end justify-center bg-cover bg-center bg-no-repeat
           bg-[url('https://cdn.shopify.com/s/files/1/0739/8516/3482/files/Mobile_20Banner.png?v=1766751093')]
-          md:bg-[url('https://cdn.shopify.com/s/files/1/0739/8516/3482/files/Banner_ae70017f-02f2-4878-93e0-6701ae57fa5a.png?v=1766751082')]"
+          md:bg-[url('https://cdn.shopify.com/s/files/1/0739/8516/3482/files/Banner_jpg_3ff8f3ed-a047-46c0-b322-c7d4cf4d07f7.jpg?v=1778149414')]"
       >
         <div className="absolute inset-0 bg-black/0 z-10" />
         <div className="relative z-20 text-center text-white p-5 pb-[10px] md:pb-[20px] max-w-[800px] mb-[10px] md:mb-[20px]">
