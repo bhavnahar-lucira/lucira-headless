@@ -887,7 +887,8 @@ export default function ProductPageClient({ product, complementaryProducts = [],
       product_image: getValidSrc(activeVariant?.image || product.featuredImage || (product.media && product.media[0]?.url)),
 
       // Pricing
-      price: Number(activeVariant?.compare_price || activeVariant?.compareAtPrice || product.compare_price || product.compareAtPrice || activeVariant?.price || product.price || 0),
+      // price: Number(activeVariant?.compare_price || activeVariant?.compareAtPrice || product.compare_price || product.compareAtPrice || activeVariant?.price || product.price || 0),
+      price: Number(raw?.original_total || activeVariant?.compare_price || activeVariant?.price || 0),
       offer_price: Number(activeVariant?.price || product.price || 0),
 
       // Price Breakup Values
