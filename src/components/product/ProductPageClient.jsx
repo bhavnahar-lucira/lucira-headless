@@ -777,10 +777,10 @@ export default function ProductPageClient({ product, complementaryProducts = [],
           productName: product.title,
           productType: product.type || "",
           vendor: product.vendor || "Lucira Jewelry",
-          price: String(originalPrice.toFixed(2)),
+          offerPrice: String(originalPrice.toFixed(2)),
           productUrl: currentUrl,
           image: productImageUrl,
-          offerPrice: Number(sellingPrice),
+          price: Number(sellingPrice),
           category: "",
           subCategory: "",
           productPersona: ""
@@ -887,8 +887,8 @@ export default function ProductPageClient({ product, complementaryProducts = [],
       product_image: getValidSrc(activeVariant?.image || product.featuredImage || (product.media && product.media[0]?.url)),
 
       // Pricing
-      price: (activeVariant?.price || product.price),
-      offer_price: (activeVariant?.price || product.price),
+      price: Number(activeVariant?.compare_price || activeVariant?.compareAtPrice || product.compare_price || product.compareAtPrice || activeVariant?.price || product.price || 0),
+      offer_price: Number(activeVariant?.price || product.price || 0),
 
       // Price Breakup Values
       metal_label: (activeVariant?.metafields?.metal_purity || activeKarat) + ' ' + (activeVariant?.metafields?.metal_color || activeColor),
@@ -1603,7 +1603,6 @@ export default function ProductPageClient({ product, complementaryProducts = [],
 
                 <div className="flex gap-4 items-center mt-4 group cursor-pointer" onClick={() => {
                   setIsEngravingDrawerOpen(true);
-                  handlePromoClick('Add Engraving Clicked', null, {}, true);
                 }}>
                   <div className="relative flex-1">
                     <div className="h-12 bg-white border border-gray-300 rounded-md px-4 flex items-center text-gray-400 text-sm group-hover:border-primary transition-colors">
@@ -2069,10 +2068,10 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                 onClick={() => pushToDataLayer({
                   event: 'promoClick',
                   promoClick: {
-                    promo_id: 'Try at Home',
-                    promo_name: 'Try at Home Button',
+                    promo_id: activeVariant?.sku || product.id,
+                    promo_name: product.title,
                     creative_name: 'Try at Home Section',
-                    location_id: 'TryAtHomeOverlay',
+                    location_id: 'PDP',
                   }
                 })}
               />
