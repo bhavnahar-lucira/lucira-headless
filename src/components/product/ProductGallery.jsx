@@ -440,7 +440,7 @@ export default function ProductGallery({ media = [], title = "", activeColor = "
             className="fixed inset-0 z-[2000] bg-black/95 flex flex-col"
           >
             {/* Header */}
-            <div className="flex justify-between items-center px-8 py-6 text-white z-[2001]">
+            <div className="flex justify-between items-center px-8 py-6 text-white z-[2001] static md:absolute w-full">
               <div className="text-xl font-medium tracking-wider">
                 {currentIndex + 1} / {sortedMedia.length}
               </div>

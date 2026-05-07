@@ -264,7 +264,7 @@ export default function CustomerReviews({
     <section className="w-full md:py-20 py-15 bg-[#F9F9F9] mt-15" id="reviews">
       <div className="container-main">
         {/* Title */}
-        <h2 className="text-2xl md:text-3xl font-normal text-center mb-16 tracking-[0.2em] uppercase text-[#1A1A1A]">
+        <h2 className="text-4xl md:text-5xl font-bold text-center mb-16 font-abhaya capitalize text-black">
           Customer Reviews
         </h2>
 
