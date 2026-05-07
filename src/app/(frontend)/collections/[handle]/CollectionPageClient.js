@@ -840,13 +840,13 @@ export default function CollectionPage({ params: paramsPromise }) {
                           <div className="grid lg:grid-cols-2 bg-gray-50 border-b border-gray-200 divide-x divide-gray-200 hidden lg:grid">
                             <div className="grid grid-cols-[auto_1fr_auto] px-6 py-4 gap-4">
                               <div className="w-12 h-6" />
-                              <h3 className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">PRODUCT NAME</h3>
-                              <h3 className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 text-right">PRICE</h3>
+                              <h3 className="text-[0.625rem] font-bold uppercase tracking-widest text-zinc-400">PRODUCT NAME</h3>
+                              <h3 className="text-[0.625rem] font-bold uppercase tracking-widest text-zinc-400 text-right">PRICE</h3>
                             </div>
                             <div className="grid grid-cols-[auto_1fr_auto] px-6 py-4 gap-4">
                               <div className="w-12 h-6" />
-                              <h3 className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">PRODUCT NAME</h3>
-                              <h3 className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 text-right">PRICE</h3>
+                              <h3 className="text-[0.625rem] font-bold uppercase tracking-widest text-zinc-400">PRODUCT NAME</h3>
+                              <h3 className="text-[0.625rem] font-bold uppercase tracking-widest text-zinc-400 text-right">PRICE</h3>
                             </div>
                           </div>
                         )}
