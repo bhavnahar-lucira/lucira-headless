@@ -851,10 +851,10 @@ export default function CollectionPage({ params: paramsPromise }) {
                           </div>
                         )}
                         {hasFaq && (
-                          <div className="grid grid-cols-[auto_1fr_auto] bg-gray-50 border-b border-gray-200 px-6 py-4 gap-4">
+                          <div className="grid grid-cols-[auto_1fr_auto] bg-gray-50 border-b border-gray-200 px-6 py-4 gap-4 justify-content: center;">
                             <div className="w-12 h-6" />
-                            <h3 className="text-xs font-black uppercase tracking-[0.2em] text-black-400">PRODUCT NAME</h3>
-                            <h3 className="text-xs font-black uppercase tracking-[0.2em] text-black-400 text-right">PRICE</h3>
+                            <h3 className="text-sm font-black uppercase tracking-[0.2em] text-black-400">PRODUCT NAME</h3>
+                            <h3 className="text-sm font-black uppercase tracking-[0.2em] text-black-400 text-right">PRICE</h3>
                           </div>
                         )}
                         <div className={`divide-y divide-gray-100 ${!hasFaq ? "lg:grid lg:grid-cols-2 lg:divide-y-0" : ""}`}>
