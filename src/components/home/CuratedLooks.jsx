@@ -219,7 +219,7 @@ export default function CuratedLooks() {
         <div className="container-main">
             <div className="text-center mb-6 px-1 md:px-0">
               <h2 className="text-3xl md:text-4xl font-extrabold font-abhaya mb-2 text-black">Curated Looks For You</h2>
-              <p className="text-black text-base font-normal">Explore the jewelry pieces that defines the look</p>
+              <p className="text-black font-normal md:text-base text-sm leading-[140%] tracking-normal align-middle">Explore the jewelry pieces that defines the look</p>
             </div>
 
           <div className="relative">

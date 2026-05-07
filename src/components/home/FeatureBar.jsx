@@ -54,22 +54,22 @@ export default function FeatureBar() {
   ];
 
   return (
-    <div className="w-full my-7 bg-white">
+    <div className="w-full pt-6 md:pt-10 pb-5 bg-white">
       <div className="container-main">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-y-10 gap-x-4 items-start">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-y-6 gap-x-6 items-start">
           {features.map((item, index) => {
             const Icon = item.icon;
 
             return (
               <div
                 key={index}
-                className="flex flex-col md:flex-row items-center justify-center gap-3 md:gap-4 text-center md:text-left"
+                className="flex flex-row items-center justify-center gap-3 md:gap-4  text-left"
               >
                 <div className="shrink-0 text-zinc-700">
                   {Icon && <Icon />}
                 </div>
 
-                <span className="text-sm md:text-base font-medium text-zinc-800 leading-tight md:leading-snug max-w-[140px] md:max-w-none">
+                <span className="text-sm md:text-base font-semibold text-zinc-800 leading-tight md:leading-snug max-w-[140px] md:max-w-none">
                   {item.text}
                 </span>
               </div>

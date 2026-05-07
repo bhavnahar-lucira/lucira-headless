@@ -749,7 +749,7 @@ export default function SearchPage() {
                       setIsSortSheetOpen(false);
                     }}
                     className={`w-full text-left py-4 px-4 rounded-lg transition-colors flex justify-between items-center ${
-                      activeSort === opt.value ? "bg-[#FFF5F1] text-black font-bold" : "hover:bg-gray-50 text-gray-700"
+                      activeSort === opt.value ? "bg-[#FFF5F1] text-black font-bold" : "hover:bg-gray-50 text-gray-900"
                     }`}
                   >
                     {opt.label}

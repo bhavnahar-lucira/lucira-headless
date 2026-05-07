@@ -16,7 +16,7 @@ export default function CollectionSection ({ title, subtitle, tabs = [], childre
   };
 
   return (
-    <section className="w-full bg-white overflow-hidden mt-12 md:mt-15">
+    <section className="w-full bg-white overflow-hidden pt-8 md:pt-15">
       <div className="container-main">
         {(title || subtitle) && (
           <div className="mb-1">

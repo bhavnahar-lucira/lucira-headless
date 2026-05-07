@@ -204,7 +204,7 @@ export default function ExploreOtherRings() {
               className={`flex items-center gap-2.5 px-4 py-1.5 rounded-full border transition-all hover:cursor-pointer ${
                 activeShape === shape.id 
                 ? 'border-black bg-white shadow-[0_2px_8px_rgba(0,0,0,0.08)] ring-1 ring-black' 
-                : 'border-transparent bg-[#F9F9F9] hover:bg-gray-100 text-gray-700'
+                : 'border-transparent bg-[#F9F9F9] hover:bg-gray-100 text-gray-900'
               }`}
             >
               <span className={activeShape === shape.id ? 'text-black' : 'text-gray-500'}>

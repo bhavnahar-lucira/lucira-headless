@@ -757,7 +757,7 @@ img.marquee-img {
 }
 
 .Toastify__close-button:hover {
-  @apply !text-gray-700 !bg-black/5;
+  @apply !text-gray-900 !bg-black/5;
 }
 
 .Toastify__close-button>svg {

@@ -465,7 +465,7 @@ export default function MobileHeader() {
                     {(Array.isArray(activeItem.featured) ? activeItem.featured : activeItem.featured.items).map((f, i) => {
                       const fIcon = f.menuIcon || f.icon || f.megaMenuImage;
                       return (
-                        <Link key={i} href={f.href || "#"} onClick={() => setIsMenuOpen(false)} className="text-sm font-medium text-gray-700 flex items-center gap-3">
+                        <Link key={i} href={f.href || "#"} onClick={() => setIsMenuOpen(false)} className="text-sm font-medium text-gray-900 flex items-center gap-3">
                           {fIcon && (
                             <div className="w-8 h-8 relative flex items-center justify-center bg-gray-50 rounded-full overflow-hidden shrink-0">
                               <SafeImage 
@@ -493,7 +493,7 @@ export default function MobileHeader() {
                       {activeItem.featured.featuredIn.items.map((f, i) => {
                         const fIcon = f.menuIcon || f.icon || f.megaMenuImage;
                         return (
-                          <Link key={i} href={f.href || "#"} onClick={() => setIsMenuOpen(false)} className="text-sm font-medium text-gray-700 flex items-center gap-3">
+                          <Link key={i} href={f.href || "#"} onClick={() => setIsMenuOpen(false)} className="text-sm font-medium text-gray-900 flex items-center gap-3">
                             {fIcon && (
                               <div className="w-8 h-8 relative flex items-center justify-center bg-gray-50 rounded-full overflow-hidden shrink-0">
                                 <SafeImage 
@@ -621,10 +621,10 @@ export default function MobileHeader() {
 
         <div className="mt-4 space-y-6">
           <div className="bg-[#FAF6F3] mx-4 p-4 space-y-4 rounded-lg">
-            <Link href="/account/orders" onClick={() => setIsMenuOpen(false)} className="block text-[16px] tracking-wider border-b border-gray-200 pb-3 font-figtree font-medium text-base leading-none align-middle capitalize text-black">
+            <Link href="/account/orders" onClick={() => setIsMenuOpen(false)} className="block tracking-wider border-b border-gray-200 pb-3 font-figtree font-medium text-base leading-none align-middle capitalize text-black">
               Track Your Order
             </Link>
-            <Link href="/pages/contact-us" onClick={() => setIsMenuOpen(false)} className="block text-[16px] tracking-wider border-b border-gray-200 pb-3 font-figtree font-medium text-base leading-none align-middle capitalize text-black">
+            <Link href="/pages/contact-us" onClick={() => setIsMenuOpen(false)} className="block tracking-wider border-b border-gray-200 pb-3 font-figtree font-medium text-base leading-none align-middle capitalize text-black">
               Contact Us
             </Link>
             <Link href="/pages/faqs" onClick={() => setIsMenuOpen(false)} className="block text-[16px] tracking-wider font-figtree font-medium text-base leading-none align-middle capitalize text-black">

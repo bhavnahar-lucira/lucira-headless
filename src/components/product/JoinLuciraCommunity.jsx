@@ -88,7 +88,7 @@ export function JoinLuciraCommunity() {
           <div className="w-full space-y-6">
             <div className="text-left mb-6">
               <h2 className="text-3xl md:text-4xl font-extrabold font-abhaya mb-2 text-black">Join the Lucira Community Today</h2>
-              <p className="text-black text-base font-normal">Get early access to jewelry drops, care tips, and exclusive offers, straight to your inbox.</p>
+              <p className="text-black font-normal md:text-base text-sm leading-[140%] tracking-normal align-middle">Get early access to jewelry drops, care tips, and exclusive offers, straight to your inbox.</p>
             </div>
 
             <div className="space-y-4">

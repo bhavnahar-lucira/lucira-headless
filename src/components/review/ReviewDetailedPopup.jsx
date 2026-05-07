@@ -171,7 +171,7 @@ export default function ReviewDetailedPopup({ isOpen, onClose, reviews, activeIn
                 <Image src={review.productImage} alt={review.productTitle} fill className="object-cover group-hover:scale-110 transition-transform duration-500" />
               </div> */}
               <div className="min-w-0">
-                <span className="text-[10px] font-bold text-gray-700 uppercase tracking-widest block mb-1">Reviewed product</span>
+                <span className="text-[10px] font-bold text-gray-900 uppercase tracking-widest block mb-1">Reviewed product</span>
                 <h4 className="text-sm font-bold text-black truncate group-hover:text-primary transition-colors">
                   {review.productTitle}
                 </h4>

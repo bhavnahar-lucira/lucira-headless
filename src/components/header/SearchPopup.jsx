@@ -75,7 +75,7 @@ export default function SearchPopup({ onClose, searchQuery, searchResults, isSea
                         className="object-contain p-2 md:p-3 group-hover:scale-110 transition-transform duration-500"
                       />
                     </div>
-                    <p className="text-[10px] md:text-[12px] font-medium text-gray-700 text-center group-hover:text-primary transition-colors leading-tight">
+                    <p className="text-[10px] md:text-[12px] font-medium text-gray-900 text-center group-hover:text-primary transition-colors leading-tight">
                       {cat.title}
                     </p>
                   </Link>

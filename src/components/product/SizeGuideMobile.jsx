@@ -173,7 +173,7 @@ export function SizeGuideMobile({ children, nearestStore, availableStores = [], 
                       </thead>
                       <tbody className="divide-y divide-gray-50">
                         {sizeData.map((row, idx) => (
-                          <tr key={idx} className="text-sm text-gray-700 font-medium">
+                          <tr key={idx} className="text-sm text-gray-900 font-medium">
                             <td className="py-4 px-2">{convert(row.diaIn)}</td>
                             <td className="py-4 px-2">{convert(row.cirIn)}</td>
                             <td className="py-4 px-2 text-black font-bold">{row.ind}</td>

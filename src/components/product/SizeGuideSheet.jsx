@@ -153,7 +153,7 @@ export function SizeGuideSheet({ children }) {
                   </thead>
                   <tbody className="divide-y divide-gray-50">
                     {sizeData.map((row, idx) => (
-                      <tr key={idx} className="text-sm text-gray-700">
+                      <tr key={idx} className="text-sm text-gray-900">
                         <td className="py-4">{convert(row.diaIn)}</td>
                         <td className="py-4 pl-4 border-gray-100 border-l">{convert(row.cirIn)}</td>
                         <td className="py-4 pl-4 border-gray-100 border-l">{row.ind}</td>

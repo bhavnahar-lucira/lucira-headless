@@ -112,7 +112,7 @@ export default function Navbar({ hideTop }) {
                     "block py-4 tracking-normal transition-all duration-200 uppercase text-sm leading-none font-medium font-figtree",
                     isActive || isHovered
                       ? "text-primary"
-                      : "text-gray-700 hover:text-primary",
+                      : "text-gray-900 hover:text-primary",
                     isActive ? "font-semibold" : "font-medium"
                   )}
                 >
