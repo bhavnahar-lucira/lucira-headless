@@ -154,17 +154,26 @@ export default function VideoCallPage() {
   return (
     <div className="w-full">
       {/* HERO BANNER SECTION */}
-      <section className="relative w-full h-[535px] md:h-[605px] flex items-end justify-center mb-5 md:mb-20 bg-cover bg-center bg-no-repeat bg-[url('https://cdn.shopify.com/s/files/1/0739/8516/3482/files/Video-Call-Banner-Desktop_320cf8bb-6d9a-4e6a-9557-94ef49275b25.jpg?v=1751366655')]">
-        <div className="absolute inset-0 bg-black/20 z-10"></div>
+      <section className="relative w-full h-[535px] md:h-[605px] flex items-end md:items-center mb-5 md:mb-20 bg-cover bg-center bg-no-repeat bg-[url('https://cdn.shopify.com/s/files/1/0739/8516/3482/files/Video-Call-Banner-Desktop_320cf8bb-6d9a-4e6a-9557-94ef49275b25.jpg?v=1751366655')]">
+        <div className="absolute inset-0 bg-black/30 z-10"></div>
 
-        <div className="relative z-20 text-center text-white max-w-[800px] p-5 pb-2 md:pb-5 mb-2 md:mb-5">
-          <h2 className="font-abhaya text-lg md:text-[28px] font-medium leading-tight mb-3">
-            WIDE RANGE OF JEWELRY JUST A CALL AWAY 
-          </h2>
+        <div className="relative z-20 w-full max-w-[1320px] mx-auto px-5 md:px-10 pb-10 md:pb-0">
+          <div className="text-center md:text-left text-white max-w-[750px] flex flex-col items-center md:items-start mx-auto md:mx-0">
+            <h1 className="font-abhaya text-3xl md:text-[56px] font-bold leading-tight mb-4 tracking-wide uppercase">
+              WIDE RANGE OF JEWELRY JUST A CALL AWAY 
+            </h1>
 
-          <p className="font-figtree text-xs md:text-[18px] m-0">
-            Experience our grown diamond collection from the comfort of your home.
-          </p>
+            <p className="font-figtree text-sm md:text-[20px] mb-10 max-w-[650px] font-light">
+              Experience our grown diamond collection from the comfort of your home with our personalized video consultation.
+            </p>
+            
+            <button 
+              onClick={() => document.getElementById('video-call-form')?.scrollIntoView({ behavior: 'smooth' })}
+              className="bg-white text-[#1A1A1A] px-10 py-4 rounded-sm font-figtree font-bold text-xs md:text-sm hover:bg-[#F5F5F5] transition-all uppercase tracking-[0.2em] shadow-lg"
+            >
+              Schedule Your Call
+            </button>
+          </div>
         </div>
       </section>
 
@@ -208,7 +217,7 @@ export default function VideoCallPage() {
       </section>
 
       {/* VIDEO CALL SCHEDULER */}
-      <section className="w-full pt-10 md:pt-20 pb-6">
+      <section id="video-call-form" className="w-full pt-10 md:pt-20 pb-6">
         <div className="block md:hidden px-5 mb-8">
           <Image
             src="https://www.lucirajewelry.com/cdn/shop/files/Macbook_Pro_8a067db9-0dce-4e3a-b3db-d3d5166c024c.png?v=1750666235"
