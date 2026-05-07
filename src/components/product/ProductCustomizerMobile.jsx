@@ -80,7 +80,7 @@ export function ProductCustomizerMobile({
 
         <button 
           onClick={() => setIsOpen(true)}
-          className="w-full py-3 bg-accent rounded-sm text-white font-bold text-sm uppercase tracking-widest"
+          className="w-full py-3 bg-tertiary rounded-sm text-white font-bold text-sm uppercase tracking-widest"
         >
           CUSTOMIZE
         </button>
@@ -106,7 +106,7 @@ export function ProductCustomizerMobile({
                   <div className="space-y-4">
                     <h4 className="text-sm font-bold uppercase tracking-wider">
                       Select Gold Color & Karat:{" "}
-                      <span className="text-gray-400 normal-case font-medium ml-1">
+                      <span className="text-gray-600 normal-case font-medium ml-1">
                         {activeKarat} {activeColor}
                       </span>
                     </h4>
@@ -145,13 +145,14 @@ export function ProductCustomizerMobile({
                         <div className="flex justify-between items-center">
                           <h4 className="text-sm font-bold uppercase tracking-wider">
                             Select Ring Size:{" "}
-                            <span className="text-gray-400 normal-case font-medium ml-1">
+                            <span className="text-gray-600 normal-case font-medium ml-1">
                               {selectedSize} IND
                             </span>
                           </h4>
                         </div>
 
-                        <div className="grid grid-cols-5 gap-3">                          {availableSizes.map((sizeStr) => {
+                        <div className="grid grid-cols-5 gap-3"> 
+                          {availableSizes.map((sizeStr) => {
                             const inStock = isSizeInStock(sizeStr);
                             return (
                               <button
@@ -178,7 +179,7 @@ export function ProductCustomizerMobile({
                 <div className="pt-6 pb-2">
                    <button 
                     onClick={() => setIsOpen(false)}
-                    className="w-full py-4 bg-primary text-white rounded-full font-bold text-sm uppercase tracking-widest"
+                    className="w-full py-4 bg-primary text-white rounded-sm font-bold text-sm uppercase tracking-widest"
                   >
                     DONE
                   </button>

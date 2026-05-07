@@ -141,6 +141,30 @@ function useMounted() {
   return mounted;
 }
 
+const handleSafeScroll = (elementRef) => {
+  if (!elementRef.current) return;  
+  const isDesktop = window.innerWidth >= 768;  
+  const bodyRect = document.body.getBoundingClientRect().top;
+  const elementRect = elementRef.current.getBoundingClientRect().top;
+  const absoluteElementTop = elementRect - bodyRect;
+  const offset = isDesktop ? 80 : 20; 
+  const targetPosition = absoluteElementTop - offset;
+  
+  window.scrollTo({
+    top: targetPosition,
+    behavior: "smooth",
+  });
+  
+  if (isDesktop) {
+    setTimeout(() => {
+      window.scrollTo({
+        top: targetPosition,
+        behavior: "smooth",
+      });
+    }, 300);
+  }
+};
+
 // Force en-IN formatting to be consistent across environments
 const formatPrice = (num) => {
   if (num === null || num === undefined) return "0";
@@ -334,7 +358,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
     const rawMonthly = Math.floor(priceRupees / 10);
     const remainder = rawMonthly % 500;
     const monthly = rawMonthly - remainder;
-    
+
     // Use base URL with amount only as requested
     const schemeUrl = `https://schemes.lucirajewelry.com/?amount=${monthly}`;
 
@@ -502,7 +526,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
 
       const storeNameLower = store.name.toLowerCase();
       const storeCityLower = (store.city || "").toLowerCase();
-
+      
       return inStoreTags.some(tag => {
         const tagLower = String(tag).toLowerCase();
         if (tagLower.includes("gid://")) return false;
@@ -777,10 +801,10 @@ export default function ProductPageClient({ product, complementaryProducts = [],
           productName: product.title,
           productType: product.type || "",
           vendor: product.vendor || "Lucira Jewelry",
-          price: String(originalPrice.toFixed(2)),
+          offerPrice: String(originalPrice.toFixed(2)),
           productUrl: currentUrl,
           image: productImageUrl,
-          offerPrice: Number(sellingPrice),
+          price: Number(sellingPrice),
           category: "",
           subCategory: "",
           productPersona: ""
@@ -874,7 +898,6 @@ export default function ProductPageClient({ product, complementaryProducts = [],
       promo_id: activeVariant?.sku || product?.sku || "",
       promo_name: product.title,
       promo_position: promoPosition,
-      position: "-",
 
       // Product Info
       product_id: getNumericId(product.shopifyId || product.id),
@@ -888,8 +911,9 @@ export default function ProductPageClient({ product, complementaryProducts = [],
       product_image: getValidSrc(activeVariant?.image || product.featuredImage || (product.media && product.media[0]?.url)),
 
       // Pricing
-      price: (activeVariant?.price || product.price),
-      offer_price: (activeVariant?.price || product.price),
+      // price: Number(activeVariant?.compare_price || activeVariant?.compareAtPrice || product.compare_price || product.compareAtPrice || activeVariant?.price || product.price || 0),
+      price: Number(raw?.original_total || activeVariant?.compare_price || activeVariant?.price || 0),
+      offer_price: Number(activeVariant?.price || product.price || 0),
 
       // Price Breakup Values
       metal_label: (activeVariant?.metafields?.metal_purity || activeKarat) + ' ' + (activeVariant?.metafields?.metal_color || activeColor),
@@ -1127,12 +1151,12 @@ export default function ProductPageClient({ product, complementaryProducts = [],
               <button
                 key={font}
                 onClick={() => setEngravingFont(font)}
-                className={`px-4 py-3 rounded-xl border text-sm transition-all duration-300 ${engravingFont === font
+                className={`px-2 py-3 rounded-sm border text-lg transition-all duration-300 ${engravingFont === font
                   ? "border-black bg-zinc-900 text-white shadow-md scale-[1.02]"
                   : "border-gray-200 text-gray-600 hover:border-gray-400 bg-white"
                   }`}
               >
-                <span style={{ fontFamily: `var(--font-${font.toLowerCase()})` }} className="text-lg">Aa - {font}</span>
+                <span style={{ fontFamily: `var(--font-${font.toLowerCase()})` }} className="text-base">Aa - {font}</span>
               </button>
             ))}
           </div>
@@ -1154,21 +1178,21 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                 maxLength={8}
                 onChange={(e) => setEngraving(e.target.value)}
                 placeholder="Type your text here"
-                className="h-14 border-gray-300 pr-4 text-lg focus-visible:ring-black rounded-xl"
+                className="h-14 border-gray-300 pr-4 text-lg focus-visible:ring-2 rounded-sm"
                 style={{ fontFamily: `var(--font-${engravingFont.toLowerCase()})` }}
               />
             </div>
             <div className="flex gap-2 shrink-0">
               <button
                 onClick={() => insertSymbol("♥")}
-                className="w-12 h-12 flex items-center justify-center border-2 border-zinc-100 rounded-xl hover:border-black hover:bg-zinc-50 transition-all active:scale-95"
+                className="w-12 h-12 flex items-center justify-center border-2 border-zinc-100 rounded-sm hover:border-black hover:bg-zinc-50 transition-all active:scale-95"
                 title="Insert Heart"
               >
                 <span className="text-2xl text-black">♥</span>
               </button>
               <button
                 onClick={() => insertSymbol("∞")}
-                className="w-12 h-12 flex items-center justify-center border-2 border-zinc-100 rounded-xl hover:border-black hover:bg-zinc-50 transition-all active:scale-95"
+                className="w-12 h-12 flex items-center justify-center border-2 border-zinc-100 rounded-sm hover:border-black hover:bg-zinc-50 transition-all active:scale-95"
                 title="Insert Infinity"
               >
                 <span className="text-2xl text-black">∞</span>
@@ -1287,11 +1311,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                     {((product.reviews?.count || product.reviewStats?.count) > 0) && (
                       <div
                         className="flex items-center gap-1.5 cursor-pointer hover:opacity-80 transition-opacity"
-                        onClick={() =>
-                          reviewsRef.current?.scrollIntoView({
-                            behavior: "smooth",
-                          })
-                        }
+                        onClick={() => handleSafeScroll(reviewsRef)}
                       >
                         <Star
                           size={14}
@@ -1324,9 +1344,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                     )}
                   </div>
                   <button
-                    onClick={() =>
-                      productDetailsRef.current?.scrollIntoView({ behavior: "smooth" })
-                    }
+                    onClick={() => handleSafeScroll(productDetailsRef)}
                     className="text-xs sm:text-sm font-semibold underline underline-offset-4 decoration-gray-300 hover:cursor-pointer sm:ml-auto whitespace-nowrap">
                     See Savings Breakup
                   </button>
@@ -1372,35 +1390,20 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                   <div className="w-full">
                     <Swiper
                       modules={[Autoplay]}
-                      spaceBetween={8}
-                      // slidesPerView={slides.length > 1 ? 1.1 : 1}
+                      spaceBetween={16}
+                      slidesPerView={'auto'}
                       speed={1800}
+                      loopPreventsSliding
                       autoplay={{ delay: 3000, disableOnInteraction: false }}
                       loop={slides.length > 2}
-                      breakpoints={{
-                        0: {
-                          slidesPerView: slides.length > 1 ? 1 : 1,
-                          spaceBetween: 8,
-                        },
-                        768: {
-                          slidesPerView: slides.length > 1 ? 1.8 : 1,
-                          spaceBetween: 12,
-                        },
-                        1024: {
-                          slidesPerView: slides.length > 1 ? 1.1 : 1,
-                          spaceBetween: 16,
-                        },
-                        1280: {
-                          slidesPerView: slides.length > 1 ? 1.4 : 1,
-                          spaceBetween: 20,
-                        }
-                      }}
+                      // loopedSlides={slides.length} 
+                      className="w-full"
                     >
                       {slides.map((slide, idx) => (
-                        <SwiperSlide key={`promo-slide-${idx}`}>
-                          <div className="border border-dashed border-gray-400 rounded-lg px-3 py-3 flex items-center gap-2 bg-secondary/50 h-full w-fit">
+                        <SwiperSlide key={`promo-slide-${idx}`} style={{ width: 'auto', display: 'flex' }}>
+                          <div className="border border-dashed border-gray-400 rounded-lg px-3 py-3 flex items-center gap-2 bg-secondary/50 h-full w-fit whitespace-nowrap">
                             <span className="text-base shrink-0">{slide.icon}</span>
-                            <p className="text-sm font-semibold text-black whitespace-nowrap">
+                            <p className="text-sm font-semibold text-black whitespace-normal md:whitespace-nowrap">
                               {slide.text}
                             </p>
                           </div>
@@ -1604,7 +1607,6 @@ export default function ProductPageClient({ product, complementaryProducts = [],
 
                 <div className="flex gap-4 items-center mt-4 group cursor-pointer" onClick={() => {
                   setIsEngravingDrawerOpen(true);
-                  handlePromoClick('Add Engraving Clicked', null, {}, true);
                 }}>
                   <div className="relative flex-1">
                     <div className="h-12 bg-white border border-gray-300 rounded-md px-4 flex items-center text-gray-400 text-sm group-hover:border-primary transition-colors">
@@ -1642,7 +1644,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                           <div className="p-3 border-t border-gray-100">
                             <Button
                               onClick={handleSaveEngraving}
-                              className="w-full h-12 font-bold rounded-full uppercase tracking-wider disabled:opacity-50"
+                              className="w-full h-12 font-bold rounded-sm bg-tertiary uppercase tracking-wider disabled:opacity-50"
                               disabled={!engraving}
                             >
                               SAVE
@@ -1670,7 +1672,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                       <div className="p-6 border-t border-gray-100">
                         <Button
                           onClick={handleSaveEngraving}
-                          className="w-full h-12 font-bold rounded-full uppercase tracking-wider disabled:opacity-50"
+                          className="w-full h-12 font-bold rounded-sm bg-tertiary uppercase tracking-wider disabled:opacity-50"
                           disabled={!engraving}
                         >
                           SAVE
@@ -1692,7 +1694,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                         setSavedEngraving({ text: "", font: "" });
                         setEngraving("");
                       }}
-                      className="ml-2 p-1 hover:bg-primary/10 rounded-full transition-colors"
+                      className="ml-2 p-1 hover:bg-primary/10 rounded-sm transition-colors"
                     >
                       <X size={12} />
                     </button>
@@ -1803,23 +1805,23 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                   </a>
                 </Button>
                 {schemeData && (
-                  <div 
+                  <div
                     className="relative flex-1"
-                    onMouseEnter={() => { 
+                    onMouseEnter={() => {
                       if (schemeTimeoutRef.current) clearTimeout(schemeTimeoutRef.current);
-                      if(typeof window !== 'undefined' && window.innerWidth > 1023) setIsSchemeOpen(true) 
+                      if (typeof window !== 'undefined' && window.innerWidth > 1023) setIsSchemeOpen(true)
                     }}
-                    onMouseLeave={() => { 
-                      if(typeof window !== 'undefined' && window.innerWidth > 1023) {
+                    onMouseLeave={() => {
+                      if (typeof window !== 'undefined' && window.innerWidth > 1023) {
                         schemeTimeoutRef.current = setTimeout(() => {
                           setIsSchemeOpen(false);
                         }, 150);
                       }
                     }}
                   >
-                    <Button 
+                    <Button
                       type="button"
-                      variant="outline" 
+                      variant="outline"
                       onClick={(e) => {
                         e.preventDefault();
                         setIsSchemeOpen((prev) => !prev);
@@ -1831,16 +1833,16 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                           <Coins size={16} className={`sm:w-[18px] sm:h-[18px] ${isSchemeOpen ? 'text-white' : 'text-primary'} group-hover:text-white transition-all`} />
                         </div>
                       </div>
-                      
+
                       <span className="flex-1 text-center text-[12px] sm:text-[13px] lg:text-[14px] xl:text-[15px] uppercase tracking-tight leading-tight font-bold">
                         SAVE <span className="font-extrabold mx-0.5">₹{formatPrice(schemeData.saveAmount)}</span> WITH SCHEME
                       </span>
-                      
+
                       <div className="w-6 sm:w-8 flex justify-end shrink-0">
                         <ChevronRight size={16} className={`transition-transform duration-200 ${isSchemeOpen ? 'rotate-90' : ''}`} />
                       </div>
                     </Button>
-                    
+
                     {isSchemeOpen && (
                       <div className="absolute top-full right-0 w-[calc(100vw-32px)] sm:w-[350px] lg:w-full pt-2 z-[100] animate-in fade-in zoom-in-95 slide-in-from-top-2 duration-200 ease-out origin-top-right">
                         <div className="bg-white border border-primary/10 rounded-2xl overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.18)]">
@@ -1850,7 +1852,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                               <h4 className="text-[12px] sm:text-sm font-bold text-black uppercase tracking-[0.12em]">9 + 1 Scheme Breakdown</h4>
                               <BadgeCheck size={18} className="text-[#2DB36F]" />
                             </div>
-                            
+
                             <div className="space-y-3 sm:space-y-4">
                               <div className="flex justify-between items-center text-[12px] sm:text-[13px]">
                                 <span className="text-gray-500 font-medium">Product Price</span>
@@ -1871,7 +1873,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                                 <span className="text-gray-500 font-medium">10th Month We Pay</span>
                                 <span className="font-bold text-[#2DB36F]">₹{formatPrice(schemeData.monthly)}</span>
                               </div>
-                              
+
                               <div className="bg-[#FAFAFA] rounded-xl p-4 border border-gray-100 shadow-sm">
                                 <div className="flex justify-between items-center">
                                   <span className="text-sm font-bold text-gray-900">Total Redeemable</span>
@@ -1888,7 +1890,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                                 ENROLL NOW <ArrowRight size={16} className="ml-2" />
                               </a>
                             </Button>
-                            
+
                             <div className="flex items-center justify-center gap-2 pt-1">
                               <div className="w-1 h-1 bg-[#2DB36F] rounded-full animate-pulse"></div>
                               <p className="text-[9px] sm:text-[10px] text-gray-400 font-bold uppercase tracking-widest">
@@ -1947,7 +1949,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                   <Button
                     onClick={handlePincodeCheck}
                     disabled={checkingPincode}
-                    className="h-12 px-10 font-bold rounded-md absolute right-1 top-1/2 transform -translate-y-1/2 hover:cursor-pointer"
+                    className="h-12 px-10 font-bold rounded-md absolute right-1 top-1/2 transform -translate-y-1/2 bg-tertiary hover:cursor-pointer"
                   >
                     {checkingPincode ? <Loader2 className="animate-spin" size={18} /> : "CHECK"}
                   </Button>
@@ -1995,7 +1997,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                 )}
                 <Button
                   onClick={() => setIsStoreDrawerOpen(true)}
-                  className="w-full h-12 font-bold rounded-md mt-1 text-sm uppercase tracking-widest"
+                  className="w-full h-12 font-bold rounded-md mt-1 text-sm bg-tertiary uppercase tracking-widest"
                 >
                   {availableStoreCount > 0 ? "FIND IN STORE" : "FIND STORE"}
                 </Button>
@@ -2070,10 +2072,10 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                 onClick={() => pushToDataLayer({
                   event: 'promoClick',
                   promoClick: {
-                    promo_id: 'Try at Home',
-                    promo_name: 'Try at Home Button',
+                    promo_id: activeVariant?.sku || product.id,
+                    promo_name: product.title,
                     creative_name: 'Try at Home Section',
-                    location_id: 'TryAtHomeOverlay',
+                    location_id: 'PDP',
                   }
                 })}
               />
@@ -2098,10 +2100,10 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                       });
                     }}
                   >
-                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest group-hover:text-gray-600 transition-colors">
+                    <span className="text-[10px] font-bold text-gray-700 uppercase tracking-widest group-hover:text-gray-600 transition-colors">
                       SKU: {activeVariant.sku}
                     </span>
-                    <Copy size={12} className="text-gray-400 group-hover:text-gray-600 transition-colors" />
+                    <Copy size={12} className="text-gray-700 group-hover:text-gray-600 transition-colors" />
                   </div>
                 )}
               </div>
@@ -2288,7 +2290,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                 </div>
               )}
 
-              <p className="text-[11px] leading-relaxed text-gray-400 italic mt-2">
+              <p className="text-xs leading-relaxed text-gray-900 italic mt-3">
                 * Our products are handcrafted and personalised for your delight, hence a weight variance is expected.
               </p>
             </div>
@@ -2298,18 +2300,19 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                 priceBreakup={priceBreakup?.price_breakup}
                 onTabChange={(tab) => {
                   if (tab === 'price') {
-                    handlePromoClick('priceBreakup', 'Product Details Section');
+                    const totalSavingsAmount = priceBreakup?.raw_breakup?.total_savings || 0;
+                    handlePromoClick('priceBreakup', 'Product Details Section', { savings_amount: totalSavingsAmount });
                   } else if (tab === 'comparison') {
                     const savingsStr = priceBreakup?.price_breakup?.comparison?.savings || '₹0';
                     const savingsAmount = parseFloat(savingsStr.replace(/[^\d.]/g, '')) || 0;
-                    handlePromoClick('yourSavings', savingsStr, { savings_amount: savingsAmount });
+                    handlePromoClick('yourSavings', savingsAmount, { savings_amount: savingsAmount });
                   }
                 }}
               />
             </div>
 
             {priceBreakup?.price_breakup?.total_savings && priceBreakup?.price_breakup?.total_savings !== "₹0" && (
-              <div className="mt-4 flex justify-between items-center bg-success/8 border border-success rounded-xl p-5">
+              <div className="mt-4 flex justify-between items-center bg-success/8 border border-success rounded-md px-5 py-4">
                 <span className="text-base font-bold text-gray-900 uppercase tracking-tight">Save on this jewelry</span>
                 <span className="text-lg font-bold text-success">{priceBreakup.price_breakup.total_savings}</span>
               </div>
@@ -2350,7 +2353,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
           </div>
         </div>
       </div>
-      <LuxuryMarquee prop={["bg-primary", "text-white", "mt-10", "text-md", "font-semibold"]} />
+      <LuxuryMarquee prop={["bg-tertiary", "text-white", "mt-10", "text-md", "font-semibold"]} />
       <ProductStory description={product.description} />
       <Suspense fallback={<div className="h-20 bg-gray-100 animate-pulse"></div>}>
         <StyledByLucira />
@@ -2452,12 +2455,30 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                           </div>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-3 pt-2">
-                          <Button variant="outline" className="font-bold h-11 rounded-lg border-gray-200" asChild>
+                        <div className="flex flex-1 gap-3 pt-2">
+                          <a
+                            href={`https://wa.me/919172499912?text=${encodeURIComponent(
+                              `Hi, I would like to check the availability for ${getStoreDisplayName(store.name)} store.`
+                            )}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="h-11 aspect-square bg-white shadow-sm border-gray-200 rounded-sm flex items-center justify-center shrink-0"
+                          >
+                            <div className="relative w-7 h-7">
+                              <Image src="/images/icons/whatsapp.png" alt="WhatsApp" fill className="object-contain" />
+                            </div>
+                          </a>
+                          <Button variant="outline" className="flex-1 font-bold h-11 rounded-sm border-gray-200" asChild>
                             <a href={`tel:${store.phone || "+919172499912"}`}>CALL STORE</a>
                           </Button>
-                          <Button className="font-bold h-11 rounded-lg">
-                            DIRECTIONS
+                          <Button className="flex-1 font-bold h-11 rounded-sm bg-tertiary" asChild>
+                            <a
+                              href={`https://www.google.com/maps/dir/?api=1&destination=${store.latitude},${store.longitude}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              DIRECTIONS
+                            </a>
                           </Button>
                         </div>
                       </div>
@@ -2529,12 +2550,30 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-3 pt-2">
-                        <Button variant="outline" className="font-bold h-11 rounded-lg border-gray-200" asChild>
+                      <div className="flex flex-1 gap-3 pt-2">
+                        <a
+                            href={`https://wa.me/919172499912?text=${encodeURIComponent(
+                              `Hi, I would like to check the availability for ${getStoreDisplayName(store.name)} store.`
+                            )}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="h-11 aspect-square bg-white shadow-sm border-gray-200 rounded-sm flex items-center justify-center shrink-0"
+                          >
+                            <div className="relative w-7 h-7">
+                              <Image src="/images/icons/whatsapp.png" alt="WhatsApp" fill className="object-contain" />
+                            </div>
+                        </a>
+                        <Button variant="outline" className="flex-1 font-bold h-11 rounded-sm border-gray-200" asChild>
                           <a href={`tel:${store.phone || "+919172499912"}`}>CALL STORE</a>
                         </Button>
-                        <Button className="font-bold h-11 rounded-lg">
-                          DIRECTIONS
+                        <Button className="flex-1 font-bold h-11 rounded-sm bg-tertiary" asChild>
+                          <a
+                            href={`https://www.google.com/maps/dir/?api=1&destination=${store.latitude},${store.longitude}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            DIRECTIONS
+                          </a>
                         </Button>
                       </div>
                     </div>
@@ -2586,7 +2625,7 @@ function DiamondDetail({ img, shape, pcs, carat, quality }) {
 function ExploreCard({ title, description, action, img, url, onClick }) {
   return (
     <div className="bg-[#F9F9F9] border border-gray-100 rounded-lg p-3 md:p-4 flex items-start gap-3 md:gap-4">
-      <div className="w-20 h-20 sm:w-24 sm:h-24 md:w-24 md:h-16 shrink-0 rounded-md bg-gray-200 relative overflow-hidden shadow-sm">
+      <div className="w-20 sm:w-24 md:w-24 shrink-0 self-stretch rounded-sm bg-gray-200 relative overflow-hidden shadow-sm">
         {img && (<Image src={getValidSrc(img)} alt={title} fill className="object-cover" />)}
       </div>
       <div className="flex-1 min-w-0 flex flex-col gap-2">
