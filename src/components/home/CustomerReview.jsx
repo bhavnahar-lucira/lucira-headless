@@ -265,7 +265,7 @@ export default function CustomerReview({
         }
         @media (min-width: 768px) {
           .${paginationElClass} .swiper-pagination-bullet-active {
-            width: 46px;
+            width: 24px;
           }
         }
       `}</style>

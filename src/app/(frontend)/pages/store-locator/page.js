@@ -336,7 +336,7 @@ export default function StoreLocatorPage() {
             el: `.${paginationElClass}`,
             clickable: true,
             renderBullet: (index, className) => {
-              return `<span class="${className} w-2! h-2! rounded-full! bg-gray-700! transition-all duration-300 [&.swiper-pagination-bullet-active]:bg-primary! [&.swiper-pagination-bullet-active]:w-[46px]!"></span>`;
+              return `<span class="${className} w-2! h-2! rounded-full! bg-gray-700! transition-all duration-300 [&.swiper-pagination-bullet-active]:bg-primary! [&.swiper-pagination-bullet-active]:w-[24px]!"></span>`;
             },
           }}
           className={`w-full ${isMobile ? "h-auto" : "h-145"}`}

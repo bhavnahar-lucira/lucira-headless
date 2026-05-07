@@ -316,7 +316,7 @@ export default function CuratedLooks() {
           .curated-pagination .swiper-pagination-bullet { width: 8px; height: 8px; background: #D1D1D1; opacity: 1; border-radius: 4px; transition: all 0.3s ease; }
           .curated-pagination .swiper-pagination-bullet-active { width: 24px; background: #000; }
           @media (min-width: 768px) {
-            .curated-pagination .swiper-pagination-bullet-active { width: 46px; }
+            .curated-pagination .swiper-pagination-bullet-active { width: 24px; }
           }
         `}</style>
       </section>

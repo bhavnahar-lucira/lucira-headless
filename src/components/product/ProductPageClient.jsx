@@ -1828,7 +1828,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                     >
                       <div className="w-6 sm:w-8 flex justify-start shrink-0">
                         <div className={`p-1 rounded-full transition-colors duration-150 flex items-center justify-center ${isSchemeOpen ? 'bg-white/20' : 'bg-primary/10'}`}>
-                          <Coins size={16} className={`sm:w-[46px] sm:h-[18px] ${isSchemeOpen ? 'text-white' : 'text-primary'} group-hover:text-white transition-all`} />
+                          <Coins size={16} className={`sm:w-[24px] sm:h-[18px] ${isSchemeOpen ? 'text-white' : 'text-primary'} group-hover:text-white transition-all`} />
                         </div>
                       </div>
                       

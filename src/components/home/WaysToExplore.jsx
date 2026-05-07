@@ -223,7 +223,7 @@ export default function WaysToExplore() {
         }
         @media (min-width: 768px) {
           .explore-pagination .swiper-pagination-bullet-active {
-            width: 46px;
+            width: 24px;
           }
         }
       `}</style>
