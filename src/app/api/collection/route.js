@@ -270,10 +270,11 @@ export async function GET(req) {
           }
         `;
         
-        // Chunk IDs to avoid Shopify limit of 250
-        const CHUNK_SIZE = 250;
-        for (let i = 0; i < variantGids.length; i += CHUNK_SIZE) {
-          const chunk = variantGids.slice(i, i + CHUNK_SIZE);
+        // Ensure unique IDs and Chunk to avoid Shopify limit of 250
+        const uniqueGids = [...new Set(variantGids)];
+        const CHUNK_SIZE = 100;
+        for (let i = 0; i < uniqueGids.length; i += CHUNK_SIZE) {
+          const chunk = uniqueGids.slice(i, i + CHUNK_SIZE);
           const adminData = await shopifyAdminFetch(variantQuery, { ids: chunk });
           adminData?.nodes?.forEach(node => {
             if (node?.metafield?.value) {
