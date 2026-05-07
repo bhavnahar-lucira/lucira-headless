@@ -537,27 +537,70 @@
     @apply py-3.5 px-3 border border-[#ddd]
   }
   .btn-peek-animation {
-    @apply flex items-center overflow-hidden whitespace-nowrap transition-all duration-500 cursor-pointer ease-in-out;
-    max-width: 44px; 
-    animation: peek-container 4s ease-in-out forwards;
+    @apply flex items-center overflow-hidden whitespace-nowrap cursor-pointer relative;
+    max-width: 44px;
+    transition:
+    max-width 0.45s cubic-bezier(0.4, 0, 0.2, 1),
+    background-color 0.3s ease;
+    will-change: max-width;
   }
-  .btn-peek-animation .btn-text {
-    @apply opacity-0 ml-2 transition-opacity duration-300;
-    animation: peek-text 4s ease-in-out forwards;
+  .btn-peek-animation::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    animation: peek-pulse 4s ease-in-out forwards;
   }
   .btn-peek-animation:hover {
-    max-width: 200px !important
+    max-width: 220px;
+  }
+  .btn-peek-animation .btn-text {
+    @apply ml-2 whitespace-nowrap;
+
+    opacity: 0;
+    transform: translateX(-6px);
+
+    transition:
+      opacity 0.25s ease,
+      transform 0.35s ease;
   }
   .btn-peek-animation:hover .btn-text {
-    @apply opacity-100!;
+    opacity: 1;
+    transform: translateX(0);
+  }  
+  .btn-peek-animation.auto-peek {
+    animation: auto-expand 4s ease-in-out forwards;
   }
-  @keyframes peek-container {
-    0%, 10%, 50%, 60% { max-width: 200px; }
-    30%, 40%, 80%, 100% { max-width: 44px; }
+  .btn-peek-animation.auto-peek .btn-text {
+    animation: auto-text 4s ease-in-out forwards;
   }
-  @keyframes peek-text {
-    0%, 15%, 50%, 65% { opacity: 1; }
-    35%, 45%, 85%, 100% { opacity: 0; }
+  @keyframes auto-expand {
+    0%, 15% {
+      max-width: 220px;
+    }
+    25%, 100% {
+      max-width: 44px;
+    }
+  }
+  @keyframes auto-text {
+    0%, 15% {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    20%, 100% {
+      opacity: 0;
+      transform: translateX(-6px);
+    }
+  }
+  @keyframes peek-pulse {
+    0%, 100% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.02);
+    }
   }
 }
 

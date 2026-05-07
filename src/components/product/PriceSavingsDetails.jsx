@@ -11,23 +11,23 @@ export default function PriceSavingsDetails({ priceBreakup, onTabChange }) {
     <div className="mt-6">
       <h2 className="text-base font-semibold tracking-tight mb-4 uppercase tracking-wider">Price & Savings Details:</h2>
 
-      <div className="bg-gray-50 border border-gray-100 rounded-xl p-5">
+      <div className="bg-gray-50 border border-gray-100 rounded-sm p-5">
         <Tabs 
           defaultValue="price" 
           className="w-full"
           onValueChange={(value) => onTabChange?.(value)}
         >
-          <TabsList className={`grid ${priceBreakup.comparison ? 'grid-cols-2' : 'grid-cols-1'} bg-gray-100 p-1 rounded-lg mb-6 w-full h-12!`}>
+          <TabsList className={`grid ${priceBreakup.comparison ? 'grid-cols-2' : 'grid-cols-1'} bg-gray-100 p-1 rounded-sm mb-6 w-full h-12!`}>
             <TabsTrigger 
               value="price" 
-              className="flex items-center justify-center gap-2 text-[13px] font-bold data-[state=active]:bg-tertiary data-[state=active]:text-white rounded-md transition-all h-full hover:cursor-pointer uppercase tracking-tight"
+              className="flex items-center justify-center gap-2 text-[13px] font-bold data-[state=active]:bg-tertiary data-[state=active]:text-white rounded-sm transition-all h-full hover:cursor-pointer uppercase tracking-tight"
             >
               Price Breakup
             </TabsTrigger>
             {priceBreakup.comparison && (
               <TabsTrigger 
                 value="comparison" 
-                className="flex items-center justify-center gap-2 text-[13px] font-bold data-[state=active]:bg-tertiary data-[state=active]:text-white rounded-md transition-all h-full hover:cursor-pointer uppercase tracking-tight"
+                className="flex items-center justify-center gap-2 text-[13px] font-bold data-[state=active]:bg-tertiary data-[state=active]:text-white rounded-sm transition-all h-full hover:cursor-pointer uppercase tracking-tight"
               >
                 Comparison
               </TabsTrigger>

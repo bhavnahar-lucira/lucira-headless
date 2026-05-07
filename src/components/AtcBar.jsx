@@ -45,7 +45,7 @@ export default function AtcBar({
       >
         <div className="max-w-480 mx-auto flex items-center justify-between gap-4">
           <div className="flex items-center gap-4 flex-1 min-w-0">
-            <div className="relative w-12 h-12 rounded-md overflow-hidden bg-gray-50 shrink-0">
+            <div className="relative w-12 h-12 rounded-sm overflow-hidden bg-gray-50 shrink-0">
               <Image 
                 src={getValidSrc(activeVariant?.image || product?.featuredImage || product?.images?.[0])} 
                 alt={product?.title || "Product"} 
@@ -77,7 +77,7 @@ export default function AtcBar({
 
           <div className="flex items-center gap-3 shrink-0">
             <div className="hidden lg:flex items-center gap-2 mr-2">
-              <button className="h-14 px-6 border border-primary text-primary font-bold text-sm rounded-lg uppercase tracking-wider whitespace-nowrap hover:bg-[#A36E6E]/5 transition-colors">
+              <button className="h-14 px-6 border border-primary text-primary font-bold text-sm rounded-sm uppercase tracking-wider whitespace-nowrap hover:bg-[#A36E6E]/5 transition-colors">
                 YOU SAVE ₹{formatPrice(schemeSavings)} WITH SCHEME
               </button>
             </div>
@@ -85,7 +85,7 @@ export default function AtcBar({
             <Button 
               onClick={onAddToCart}
               disabled={addingToCart}
-              className="h-14 px-10 text-sm font-bold bg-primary hover:bg-accent text-white rounded-lg transition-colors uppercase tracking-wider min-w-40"
+              className="h-14 px-10 text-sm font-bold bg-primary hover:bg-accent text-white rounded-sm transition-colors uppercase tracking-wider min-w-40"
             >
               {addingToCart ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -93,12 +93,12 @@ export default function AtcBar({
             </Button>
 
             <div className="hidden xl:flex items-center gap-2">
-              <Button asChild className="h-14 w-14 border border-accent text-accent rounded-lg flex items-center justify-center bg-white hover:bg-[#FFF5F5] transition-colors">
+              <Button asChild className="h-14 w-14 border border-accent text-accent rounded-sm flex items-center justify-center bg-white hover:bg-[#FFF5F5] transition-colors">
                 <a href="https://wa.me/919004435760?text=Hi,%20I%20want%20to%20book%20home%20trial%20" target="_blank">
                   <Home size={20} />
                 </a>
               </Button>
-              <Button asChild className="h-14 w-14 border border-[#A193E8] text-[#A193E8] rounded-lg flex items-center justify-center bg-white hover:bg-[#F5F5FF] transition-colors">
+              <Button asChild className="h-14 w-14 border border-[#A193E8] text-[#A193E8] rounded-sm flex items-center justify-center bg-white hover:bg-[#F5F5FF] transition-colors">
                 <a href="https://wa.me/919004435760?text=Hi,%20I%20want%20to%20book%20an%20appointment%20" target="_blank">
                   <StoreIcon size={20} />
                 </a>
@@ -120,13 +120,13 @@ export default function AtcBar({
           <div className="hidden lg:grid lg:grid-cols-[1fr_340px] xl:grid-cols-[1fr_420px] 2xl:grid-cols-[1fr_530px] gap-10">
             <div className="hidden lg:block"></div> {/* Spacer for Left Column */}
             <div className="pointer-events-auto bg-white border border-gray-100 rounded-xl p-3 flex items-center gap-2 w-full">
-              <button className="h-14 flex-1 border border-primary text-primary font-bold text-sm rounded-lg flex items-center justify-center whitespace-nowrap px-2 hover:bg-accent/5 transition-colors uppercase">
+              <button className="h-14 flex-1 border border-primary text-primary font-bold text-sm rounded-sm flex items-center justify-center whitespace-nowrap px-2 hover:bg-accent/5 transition-colors uppercase">
                 9=10 SAVING
               </button>
               <button 
                 onClick={onAddToCart}
                 disabled={addingToCart}
-                className="h-14 flex-[1.5] bg-primary text-white font-bold text-[14px] rounded-lg flex items-center justify-center gap-2 disabled:opacity-70 hover:bg-[#8F5D5D] transition-colors"
+                className="h-14 flex-[1.5] bg-primary text-white font-bold text-[14px] rounded-sm flex items-center justify-center gap-2 disabled:opacity-70 hover:bg-[#8F5D5D] transition-colors"
               >
                 {addingToCart ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -144,7 +144,7 @@ export default function AtcBar({
               href="https://wa.me/919172499912" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="h-14 aspect-square bg-white shadow-md border border-zinc-100 rounded-xl flex items-center justify-center shrink-0"
+              className="h-14 aspect-square bg-white shadow-md border border-zinc-100 rounded-sm flex items-center justify-center shrink-0"
             >
               <div className="relative w-7 h-7">
                 <Image src="/images/icons/whatsapp.png" alt="WhatsApp" fill className="object-contain" />
@@ -152,7 +152,7 @@ export default function AtcBar({
             </a>
 
             {/* 9=10 Saving Button */}
-            <button className="h-14 flex-1 border border-primary text-primary font-bold text-[13px] rounded-xl flex items-center justify-center whitespace-nowrap px-2">
+            <button className="h-14 flex-1 border border-primary text-primary font-bold text-[13px] rounded-sm flex items-center justify-center whitespace-nowrap px-2">
               9=10 SAVING
             </button>
 
@@ -160,7 +160,7 @@ export default function AtcBar({
             <button 
               onClick={onAddToCart}
               disabled={addingToCart}
-              className="h-14 flex-[1.5] bg-primary text-white font-bold text-[13px] rounded-xl flex items-center justify-center gap-2 disabled:opacity-70"
+              className="h-14 flex-[1.5] bg-primary text-white font-bold text-[13px] rounded-sm flex items-center justify-center gap-2 disabled:opacity-70"
             >
               {addingToCart ? (
                 <Loader2 className="h-4 w-4 animate-spin" />

@@ -502,7 +502,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
 
       const storeNameLower = store.name.toLowerCase();
       const storeCityLower = (store.city || "").toLowerCase();
-
+      
       return inStoreTags.some(tag => {
         const tagLower = String(tag).toLowerCase();
         if (tagLower.includes("gid://")) return false;
@@ -1774,9 +1774,17 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                 </Button>
               </div>
               <div className="grid grid-cols-2 gap-4 mt-2">
-                <Button variant="outline" className="h-auto py-3 font-medium text-lg flex items-center justify-center gap-2 bg-gray-50 hover:cursor-pointer hover:bg-primary hover:text-white transition-all group">
+                <Button variant="outline" className="h-auto py-3 font-medium text-lg flex items-center justify-center gap-2 bg-gray-50 hover:cursor-pointer hover:bg-primary hover:text-white transition-all group" asChild>
+                   <a
+                      href={`https://wa.me/919172499912?text=${encodeURIComponent(
+                        `Hi, I would like to get the details of ${product.handle}.`
+                      )}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
                   <Image src="/images/icons/whatsapp.png" alt="Whatsapp icon" width={24} height={24} />
                   <span className="hidden lg:inline text-base uppercase">Whatsapp Us</span>
+                  </a>
                 </Button>
                 <Button variant="outline" className="h-auto py-3 font-medium text-lg flex items-center justify-center gap-2 bg-gray-50 hover:cursor-pointer group hover:bg-primary hover:text-white transition-all">
                   <Video size={30} className="text-black group-hover:text-white transition-all" />
@@ -2190,7 +2198,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
             </div>
 
             {priceBreakup?.price_breakup?.total_savings && priceBreakup?.price_breakup?.total_savings !== "₹0" && (
-              <div className="mt-4 flex justify-between items-center bg-success/8 border border-success rounded-xl p-5">
+              <div className="mt-4 flex justify-between items-center bg-success/8 border border-success rounded-md px-5 py-4">
                 <span className="text-base font-bold text-gray-900 uppercase tracking-tight">Save on this jewelry</span>
                 <span className="text-lg font-bold text-success">{priceBreakup.price_breakup.total_savings}</span>
               </div>
@@ -2333,12 +2341,30 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                           </div>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-3 pt-2">
-                          <Button variant="outline" className="font-bold h-11 rounded-lg border-gray-200" asChild>
+                        <div className="flex flex-1 gap-3 pt-2">
+                          <a
+                            href={`https://wa.me/919172499912?text=${encodeURIComponent(
+                              `Hi, I would like to check the availability for ${getStoreDisplayName(store.name)} store.`
+                            )}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="h-11 aspect-square bg-white shadow-sm border-gray-200 rounded-sm flex items-center justify-center shrink-0"
+                          >
+                            <div className="relative w-7 h-7">
+                              <Image src="/images/icons/whatsapp.png" alt="WhatsApp" fill className="object-contain" />
+                            </div>
+                          </a>
+                          <Button variant="outline" className="flex-1 font-bold h-11 rounded-sm border-gray-200" asChild>
                             <a href={`tel:${store.phone || "+919172499912"}`}>CALL STORE</a>
                           </Button>
-                          <Button className="font-bold h-11 rounded-lg">
-                            DIRECTIONS
+                          <Button className="flex-1 font-bold h-11 rounded-sm bg-tertiary" asChild>
+                            <a
+                              href={`https://www.google.com/maps/dir/?api=1&destination=${store.latitude},${store.longitude}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              DIRECTIONS
+                            </a>
                           </Button>
                         </div>
                       </div>
@@ -2410,12 +2436,30 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-3 pt-2">
-                        <Button variant="outline" className="font-bold h-11 rounded-lg border-gray-200" asChild>
+                      <div className="flex flex-1 gap-3 pt-2">
+                        <a
+                            href={`https://wa.me/919172499912?text=${encodeURIComponent(
+                              `Hi, I would like to check the availability for ${getStoreDisplayName(store.name)} store.`
+                            )}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="h-11 aspect-square bg-white shadow-sm border-gray-200 rounded-sm flex items-center justify-center shrink-0"
+                          >
+                            <div className="relative w-7 h-7">
+                              <Image src="/images/icons/whatsapp.png" alt="WhatsApp" fill className="object-contain" />
+                            </div>
+                        </a>
+                        <Button variant="outline" className="flex-1 font-bold h-11 rounded-sm border-gray-200" asChild>
                           <a href={`tel:${store.phone || "+919172499912"}`}>CALL STORE</a>
                         </Button>
-                        <Button className="font-bold h-11 rounded-lg">
-                          DIRECTIONS
+                        <Button className="flex-1 font-bold h-11 rounded-sm bg-tertiary" asChild>
+                          <a
+                            href={`https://www.google.com/maps/dir/?api=1&destination=${store.latitude},${store.longitude}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            DIRECTIONS
+                          </a>
                         </Button>
                       </div>
                     </div>
@@ -2467,7 +2511,7 @@ function DiamondDetail({ img, shape, pcs, carat, quality }) {
 function ExploreCard({ title, description, action, img, url, onClick }) {
   return (
     <div className="bg-[#F9F9F9] border border-gray-100 rounded-lg p-3 md:p-4 flex items-start gap-3 md:gap-4">
-      <div className="w-20 h-20 sm:w-24 sm:h-24 md:w-24 md:h-16 shrink-0 rounded-md bg-gray-200 relative overflow-hidden shadow-sm">
+      <div className="w-20 sm:w-24 md:w-24 shrink-0 self-stretch rounded-sm bg-gray-200 relative overflow-hidden shadow-sm">
         {img && (<Image src={getValidSrc(img)} alt={title} fill className="object-cover" />)}
       </div>
       <div className="flex-1 min-w-0 flex flex-col gap-2">
