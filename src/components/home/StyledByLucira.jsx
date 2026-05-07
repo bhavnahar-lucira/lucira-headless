@@ -35,7 +35,7 @@ export default function StyledByLucira() {
     <section className="w-full my-10 md:my-15 bg-white overflow-hidden">
       <div className="container-main">
         <div className="text-center mb-6">
-          <h2 className="text-3xl md:text-4xl font-extrabold font-abhaya mb-2 text-black">Styled By Lucira</h2>
+          <h2 className="text-2xl lg:text-4xl font-extrabold font-abhaya mb-1 text-black">Styled By Lucira</h2>
         </div>
 
         <div className="relative w-full group/slider">

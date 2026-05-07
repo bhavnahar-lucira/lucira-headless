@@ -260,8 +260,13 @@ export default function CustomerReview({
           transition: all 0.3s ease;
         }
         .${paginationElClass} .swiper-pagination-bullet-active {
-          width: 46px;
+          width: 24px;
           background: #000;
+        }
+        @media (min-width: 768px) {
+          .${paginationElClass} .swiper-pagination-bullet-active {
+            width: 46px;
+          }
         }
       `}</style>
     </section>

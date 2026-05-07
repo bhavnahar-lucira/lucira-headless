@@ -218,7 +218,7 @@ export default function CuratedLooks() {
       <section className="w-full mt-12 bg-[#FEF5F1] py-12 overflow-hidden">
         <div className="container-main">
             <div className="text-center mb-6 px-1 md:px-0">
-              <h2 className="text-3xl md:text-4xl font-extrabold font-abhaya mb-2 text-black">Curated Looks For You</h2>
+              <h2 className="text-2xl lg:text-4xl font-extrabold font-abhaya mb-1 text-black">Curated Looks For You</h2>
               <p className="text-black font-normal md:text-base text-sm leading-[140%] tracking-normal align-middle">Explore the jewelry pieces that defines the look</p>
             </div>
 
@@ -314,7 +314,10 @@ export default function CuratedLooks() {
 
         <style jsx global>{`
           .curated-pagination .swiper-pagination-bullet { width: 8px; height: 8px; background: #D1D1D1; opacity: 1; border-radius: 4px; transition: all 0.3s ease; }
-          .curated-pagination .swiper-pagination-bullet-active { width: 46px; background: #000; }
+          .curated-pagination .swiper-pagination-bullet-active { width: 24px; background: #000; }
+          @media (min-width: 768px) {
+            .curated-pagination .swiper-pagination-bullet-active { width: 46px; }
+          }
         `}</style>
       </section>
     );

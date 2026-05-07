@@ -88,7 +88,7 @@ export default function LoveStorySlider({
     <section className="w-full my-15 overflow-hidden">
       <div className="container-main">
         <div className="text-center mb-6">
-          <h2 className="text-3xl md:text-4xl font-extrabold font-abhaya mb-2 text-black">{title}</h2>
+          <h2 className="text-2xl lg:text-4xl font-extrabold font-abhaya mb-1 text-black">{title}</h2>
           <p className="text-black font-normal md:text-base text-sm leading-[140%] tracking-normal align-middle">{subtitle}</p>
         </div>
 
@@ -113,7 +113,7 @@ export default function LoveStorySlider({
               el: `.${paginationElClass}`,
               clickable: true,
               renderBullet: (index, className) => {
-                return `<span class="${className} m-0! mr-2! h-2! w-2! rounded-full! bg-[#cfcfcf]! transition-all duration-300 [&.swiper-pagination-bullet-active]:w-[46px]! [&.swiper-pagination-bullet-active]:rounded-full! [&.swiper-pagination-bullet-active]:bg-black!"></span>`;
+                return `<span class="${className} m-0! mr-2! h-2! w-2! rounded-full! bg-[#cfcfcf]! transition-all duration-300 [&.swiper-pagination-bullet-active]:w-[24px]! md:[&.swiper-pagination-bullet-active]:w-[46px]! [&.swiper-pagination-bullet-active]:rounded-full! [&.swiper-pagination-bullet-active]:bg-black!"></span>`;
               },
             }}
             breakpoints={{

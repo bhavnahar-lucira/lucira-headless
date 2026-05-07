@@ -43,7 +43,7 @@ export default function VideoPopup({ isOpen, onClose, videoData, initialIndex })
 
   if (isMobile) {
     return (
-      <div className="fixed inset-0 z-[500] bg-black flex flex-col outline-none overflow-hidden">
+      <div className="fixed inset-0 z-[10000] bg-black flex flex-col outline-none overflow-hidden">
           <Swiper
             direction="vertical"
             modules={[Pagination]}

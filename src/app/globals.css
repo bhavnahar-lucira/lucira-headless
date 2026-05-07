@@ -855,6 +855,12 @@ img.marquee-img {
 }
 
 .swiper-pagination-bullets-custom .swiper-pagination-bullet-active {
-  width: 46px !important;
+  width: 24px !important;
   opacity: 1 !important;
+}
+
+@media (min-width: 768px) {
+  .swiper-pagination-bullets-custom .swiper-pagination-bullet-active {
+    width: 24px !important;
+  }
 }
