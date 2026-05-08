@@ -1637,7 +1637,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                     onClose={() => setIsEngravingDrawerOpen(false)}
                     detents={[0.9]}
                   >
-                    <MobileSheet.Container className={`z-[9999] ${lobster.variable} ${yellowtail.variable} ${satisfy.variable} ${abeezee.variable}`}>
+                    <MobileSheet.Container className={`z-[499] ${lobster.variable} ${yellowtail.variable} ${satisfy.variable} ${abeezee.variable}`}>
                       <MobileSheet.Header />
                       <MobileSheet.Content>
                         <div className="flex flex-col h-full">
@@ -2430,7 +2430,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
           onClose={() => setIsStoreDrawerOpen(false)}
           detents={[0.9, 0.5]}
         >
-          <MobileSheet.Container className="z-[9999]">
+          <MobileSheet.Container className="z-[499]">
             <MobileSheet.Header />
             <MobileSheet.Content>
               <div className="h-[100dvh]">

@@ -192,7 +192,7 @@ export default function FloatingActionButton() {
     <div className={`fixed 
       ${isProductPage ? 'bottom-22 md:bottom-22' : isCollectionPage ? 'bottom-16 md:bottom-10' : 'bottom-10'} 
       ${isCollectionPage ? 'right-[20px] md:right-[30px]' : 'right-[30px]'} 
-      z-[9999] flex flex-col items-center`}>
+      z-[499] flex flex-col items-center`}>
       {/* Tooltip */}
       {!isFabOpen && !isZohoActive && tooltipShown && (
         <div className="absolute right-5 bottom-16 bg-white text-black text-xs py-1.5 px-3 rounded-md whitespace-nowrap shadow-md border border-[#b76f79] animate-fab-tooltip pointer-events-none z-[1]

@@ -151,7 +151,7 @@ export default function WriteReviewForm({ isOpen, onClose, productId, onSuccess,
   };
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 transition-all duration-300 overflow-y-auto">
+    <div className="fixed inset-0 z-[499] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 transition-all duration-300 overflow-y-auto">
       <motion.div 
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}

@@ -49,7 +49,7 @@ export function SizeGuideSheet({ children }) {
     <>
       <Dialog open={isVideoOpen} onOpenChange={setIsVideoOpen}>
         <DialogPortal>
-          <DialogOverlay className="z-[9999] bg-black/60 backdrop-blur-sm" />
+          <DialogOverlay className="z-[499] bg-black/60 backdrop-blur-sm" />
           <DialogContent 
             className="z-[500] sm:max-w-[800px] p-0 overflow-hidden border-none bg-black shadow-2xl"
           >

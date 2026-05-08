@@ -50,7 +50,7 @@ export default function ReviewDetailedPopup({ isOpen, onClose, reviews, activeIn
     
   const currentImage = getValidSrc(currentImageRaw);
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 md:p-10 transition-all duration-300">
+    <div className="fixed inset-0 z-[499] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 md:p-10 transition-all duration-300">
       
       {/* Navigation - Hidden on very small mobile */}
       <button 
