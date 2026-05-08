@@ -179,7 +179,7 @@ export const pushBeginCheckout = (checkoutData) => pushEventModel("begin_checkou
 export const pushAddShippingInfo = (shippingData) => pushEventModel("add_shipping_info", shippingData);
 export const pushAddPaymentInfo = (paymentData) => pushEventModel("add_payment_info", paymentData);
 
-export const pushPurchase = (purchaseData) => pushEcommerceEvent("purchase", purchaseData);
+export const pushPurchase = (purchaseData) => pushEventModel("purchase", purchaseData);
 export const pushPaymentFailure = (failureData) => pushEcommerceEvent("Payment failure", failureData);
 
 export const pushRemoveFromCart = (data) => {
