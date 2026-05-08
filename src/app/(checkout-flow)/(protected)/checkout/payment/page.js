@@ -755,40 +755,22 @@ export default function PaymentPage() {
               },
               shippingAddress: isPickup ? checkoutSelection.selectedStore : selectedAddress,
               billingAddress: selectedBillingAddress,
+              nectorPoints: nectorPoints, // Pass points for completion attributes
             });
 
-            if (nectorPoints) {
-              try {
-                const getNectorCustomerId = (gid) => {
-                  if (!gid) return "";
-                  const match = String(gid).match(/\d+$/);
-                  const numericId = match ? match[0] : gid;
-                  return `shopify-${numericId}`;
-                };
-
-                await fetch('/api/nector/checkout', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({
-                    customer_id: getNectorCustomerId(user?.id),
-                    country: "ind",
-                    action: "perform",
-                    amount: nectorPoints.fiat_value,
-                    reference_order_id: completion?.shopifyOrderName || response.razorpay_payment_id
-                  })
-                });
-              } catch (nectorError) {
-                console.error("Nector perform error:", nectorError);
-              }
-            }
-
-            dispatch(clearCart());
             toast.success(
               completion?.shopifyOrderName
                 ? `Order placed successfully: ${completion.shopifyOrderName}`
                 : "Order placed successfully"
             );
-            router.replace("/success");
+            
+            // Wait a moment for any background processes or toast to be visible
+            setTimeout(() => {
+              const successUrl = completion?.shopifyOrderName 
+                ? `/success?orderName=${encodeURIComponent(completion.shopifyOrderName)}`
+                : "/success";
+              router.replace(successUrl);
+            }, 500);
           } catch (completionError) {
             toast.error(completionError.message || "Payment succeeded but order creation failed");
           } finally {

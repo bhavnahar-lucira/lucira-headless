@@ -38,8 +38,8 @@ export async function GET(request) {
               { collectionHandles: "bestsellers" },
               {
                 $or: [
-                  { type: { $regex: new RegExp(categoryTerm, "i") } },
-                  { tags: { $regex: new RegExp(categoryTerm, "i") } }
+                  { type: { $regex: new RegExp(`\\b${categoryTerm}s?\\b`, "i") } },
+                  { tags: { $regex: new RegExp(`\\b${categoryTerm}s?\\b`, "i") } }
                 ]
               }
             ]
@@ -150,9 +150,7 @@ export async function GET(request) {
 
       const variantConfigs = {};
       if (variantGids.length > 0) {
-        const CHUNK_SIZE = 250;
-        for (let i = 0; i < variantGids.length; i += CHUNK_SIZE) {
-          const chunk = variantGids.slice(i, i + CHUNK_SIZE);
+        try {
           const variantQuery = `
             query getVariants($ids: [ID!]!) {
               nodes(ids: $ids) {
@@ -163,12 +161,21 @@ export async function GET(request) {
               }
             }
           `;
-          const adminData = await shopifyAdminFetch(variantQuery, { ids: chunk });
-          adminData?.nodes?.forEach(node => {
-            if (node?.metafield?.value) {
-              variantConfigs[node.id] = node.metafield.value;
-            }
-          });
+          
+          // Ensure unique IDs and Chunk to avoid Shopify limit of 250
+          const uniqueGids = [...new Set(variantGids)];
+          const CHUNK_SIZE = 100;
+          for (let i = 0; i < uniqueGids.length; i += CHUNK_SIZE) {
+            const chunk = uniqueGids.slice(i, i + CHUNK_SIZE);
+            const adminData = await shopifyAdminFetch(variantQuery, { ids: chunk });
+            adminData?.nodes?.forEach(node => {
+              if (node?.metafield?.value) {
+                variantConfigs[node.id] = node.metafield.value;
+              }
+            });
+          }
+        } catch (e) {
+          console.warn("⚠️ Bestsellers bulk variant metadata fetch failed:", e.message);
         }
       }
 

@@ -39,8 +39,8 @@ export async function POST(req) {
         );
 
       if (variantGids.length > 0) {
-        const shopifyQuery = `
-          query($ids: [ID!]!) {
+        const variantQuery = `
+          query getVariants($ids: [ID!]!) {
             nodes(ids: $ids) {
               ... on ProductVariant {
                 id
@@ -61,13 +61,30 @@ export async function POST(req) {
           }
         `;
 
-        const pricingData = await shopifyAdminFetch(shopifyQuery, { ids: variantGids });
+        // Chunk IDs to avoid Shopify limit of 250
+        const uniqueGids = [...new Set(variantGids)];
+        const CHUNK_SIZE = 100;
+        const variantNodes = [];
+        let metalRates = null;
+        let stonePricingDB = null;
 
-        if (pricingData?.shop?.metalPrices?.value && pricingData?.shop?.stonePricing?.value) {
-          const metalRates = JSON.parse(pricingData.shop.metalPrices.value);
-          const stonePricingDB = JSON.parse(pricingData.shop.stonePricing.value);
-          const variantNodes = pricingData.nodes || [];
+        for (let i = 0; i < uniqueGids.length; i += CHUNK_SIZE) {
+          const chunk = uniqueGids.slice(i, i + CHUNK_SIZE);
+          const pricingData = await shopifyAdminFetch(variantQuery, { ids: chunk });
+          
+          if (pricingData?.nodes) {
+            variantNodes.push(...pricingData.nodes);
+          }
+          
+          if (pricingData?.shop?.metalPrices?.value && !metalRates) {
+            metalRates = JSON.parse(pricingData.shop.metalPrices.value);
+          }
+          if (pricingData?.shop?.stonePricing?.value && !stonePricingDB) {
+            stonePricingDB = JSON.parse(pricingData.shop.stonePricing.value);
+          }
+        }
 
+        if (metalRates && stonePricingDB) {
           updatedItems = cart.items.map((item) => {
             const node = variantNodes.find(
               (variantNode) =>

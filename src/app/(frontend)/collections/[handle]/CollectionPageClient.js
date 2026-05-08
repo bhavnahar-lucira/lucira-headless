@@ -69,13 +69,13 @@ const FilterSidebarSkeleton = () => (
 export default function CollectionPage({ params: paramsPromise }) {
   const params = use(paramsPromise);
   const handle = params?.handle || "all";
-  
+
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  
+
   const initialPage = Math.max(1, parseInt(searchParams.get("page") || "1", 10));
-  const limit = 19; 
+  const limit = 19;
 
   const [expandedFilters, setExpandedFilters] = useState({ "In Store Available": true });
   const loadMoreRef = useRef(null);
@@ -101,10 +101,10 @@ export default function CollectionPage({ params: paramsPromise }) {
 
   const applyPriceFilter = useCallback(() => {
     const params = new URLSearchParams(searchParams.toString());
-    
+
     if (localPriceRange.min) params.set("filter.v.price.gte", localPriceRange.min);
     else params.delete("filter.v.price.gte");
-    
+
     if (localPriceRange.max) params.set("filter.v.price.lte", localPriceRange.max);
     else params.delete("filter.v.price.lte");
 
@@ -138,7 +138,7 @@ export default function CollectionPage({ params: paramsPromise }) {
     queryFn: async () => {
       const res = await fetch(`/api/products/filters?handle=${handle}&${filterParamsString}`);
       const data = await res.json();
-      
+
       const sortedData = {};
       Object.entries(data || {}).forEach(([groupKey, options]) => {
         if (groupKey === "Price") {
@@ -221,14 +221,14 @@ export default function CollectionPage({ params: paramsPromise }) {
     queryKey: ["products", handle, filterParamsString],
     queryFn: async ({ pageParam = 1 }) => {
       const p = new URLSearchParams(filterParamsString);
-      
+
       const isInitialFetch = pageParam === 1;
       const currentLimit = (isInitialFetch && initialPage > 1) ? initialPage * limit : limit;
       const currentPage = isInitialFetch ? 1 : pageParam;
 
       p.set("page", currentPage.toString());
       p.set("limit", currentLimit.toString());
-      
+
       const res = await fetch(`/api/products/search?handle=${handle}&${p.toString()}`);
       return res.json();
     },
@@ -373,7 +373,7 @@ export default function CollectionPage({ params: paramsPromise }) {
     data?.pages.forEach((pageData, pageIdx) => {
       if (!pageData || !pageData.products) return;
       const isFirstPage = pageIdx === 0;
-      
+
       pageData.products.forEach((prod, prodIdx) => {
         if (!prod) return;
         const posOnPage = prodIdx + 1;
@@ -432,7 +432,7 @@ export default function CollectionPage({ params: paramsPromise }) {
       if (!data.children) return jsonString;
 
       return data.children.map((node, i) => {
-        const renderChildren = (children) => 
+        const renderChildren = (children) =>
           children?.map((child, j) => {
             if (child.type === "text") {
               return <span key={j} className={child.bold ? "font-bold" : ""}>{child.value}</span>;
@@ -447,7 +447,7 @@ export default function CollectionPage({ params: paramsPromise }) {
           case "heading":
             const HeadingTag = `h${node.level || 2}`;
             return (
-              <HeadingTag key={i} className="text-xl md:text-2xl font-bold mt-8 mb-4 text-gray-900 uppercase tracking-wider">
+              <HeadingTag key={i} className="text-xl md:text-xl  mt-4 mb-4 text-gray-900 uppercase tracking-wider">
                 {renderChildren(node.children)}
               </HeadingTag>
             );
@@ -476,7 +476,7 @@ export default function CollectionPage({ params: paramsPromise }) {
     }
   };
 
-  const displayTitle = isMobile 
+  const displayTitle = isMobile
     ? (handle === "all" ? "All Products" : handle.split("-").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" "))
     : (collection.title || (handle === "all" ? "All Products" : handle.replace(/-/g, " ")));
 
@@ -508,8 +508,8 @@ export default function CollectionPage({ params: paramsPromise }) {
             </Breadcrumb>
           </div>
           <div className="w-full relative h-40">
-            <Image 
-              src="/images/collection/category-banner.jpg" 
+            <Image
+              src="/images/collection/category-banner.jpg"
               alt={displayTitle}
               fill
               className="object-cover"
@@ -543,8 +543,8 @@ export default function CollectionPage({ params: paramsPromise }) {
               </div>
             </div>
             <div className="flex-1 relative w-full h-57.5">
-              <Image 
-                src="/images/category-banner.jpg" 
+              <Image
+                src="/images/category-banner.jpg"
                 alt={displayTitle}
                 fill
                 className="object-cover"
@@ -565,8 +565,8 @@ export default function CollectionPage({ params: paramsPromise }) {
                 <div className={`space-y-3 px-4 ${filtersLoading ? "opacity-50 pointer-events-none" : ""}`}>
                   <div className="flex justify-between items-center border-b">
                     <h3 className="font-semibold mb-3 uppercase tracking-widest text-sm">Filters</h3>
-                    <button 
-                      onClick={clearAllFilters} 
+                    <button
+                      onClick={clearAllFilters}
                       className="text-[10px] font-bold uppercase text-zinc-400 hover:text-black mb-3"
                     >
                       Clear All
@@ -575,7 +575,7 @@ export default function CollectionPage({ params: paramsPromise }) {
 
                   {Object.entries(availableFilters || {}).map(([groupKey, options]) => {
                     const isExpanded = expandedFilters[groupKey] ?? false;
-                    
+
                     if (groupKey === "Price") {
                       return (
                         <div key={groupKey} className="border-b mb-0 border-gray-200">
@@ -586,9 +586,8 @@ export default function CollectionPage({ params: paramsPromise }) {
                             <h4 className="font-medium text-sm capitalize">{groupKey}</h4>
                             <ChevronUp
                               size={18}
-                              className={`transition-transform duration-300 ${
-                                isExpanded ? "rotate-0" : "rotate-180"
-                              }`}
+                              className={`transition-transform duration-300 ${isExpanded ? "rotate-0" : "rotate-180"
+                                }`}
                             />
                           </button>
                           {isExpanded && (
@@ -618,13 +617,13 @@ export default function CollectionPage({ params: paramsPromise }) {
                                 </div>
                               </div>
                               <div className="flex items-center gap-2 pt-2">
-                                <Button 
+                                <Button
                                   onClick={applyPriceFilter}
                                   className="flex-1 h-9 text-xs bg-primary hover:bg-primary/90 text-white rounded-md uppercase font-bold tracking-wider"
                                 >
                                   Apply
                                 </Button>
-                                <Button 
+                                <Button
                                   variant="outline"
                                   onClick={resetPriceFilter}
                                   className="h-9 text-xs border-gray-200 hover:bg-gray-50 rounded-md uppercase font-bold tracking-wider px-3"
@@ -639,19 +638,18 @@ export default function CollectionPage({ params: paramsPromise }) {
                     }
 
                     return (
-                      <div key={groupKey} className="border-b mb-0 border-gray-200">                     
-                          <button
-                            onClick={() => toggleFilterExpand(groupKey)}
-                            className="w-full flex items-center justify-between py-5 hover:opacity-70 transition-opacity"
-                          >
-                            <h4 className="font-medium text-sm capitalize">{groupKey}</h4>
-                            <ChevronUp
-                              size={18}
-                              className={`transition-transform duration-300 ${
-                                isExpanded ? "rotate-0" : "rotate-180"
+                      <div key={groupKey} className="border-b mb-0 border-gray-200">
+                        <button
+                          onClick={() => toggleFilterExpand(groupKey)}
+                          className="w-full flex items-center justify-between py-5 hover:opacity-70 transition-opacity"
+                        >
+                          <h4 className="font-medium text-sm capitalize">{groupKey}</h4>
+                          <ChevronUp
+                            size={18}
+                            className={`transition-transform duration-300 ${isExpanded ? "rotate-0" : "rotate-180"
                               }`}
-                            />
-                          </button>
+                          />
+                        </button>
 
                         {isExpanded && (
                           <div className="space-y-4 my-2 pb-5">
@@ -715,9 +713,9 @@ export default function CollectionPage({ params: paramsPromise }) {
               <div className="flex items-center gap-4">
                 <div className="flex items-center gap-2">
                   <span className="text-sm text-gray-600">Sort:</span>
-                  <select 
-                    value={activeSort} 
-                    onChange={(e) => handleSort(e.target.value)} 
+                  <select
+                    value={activeSort}
+                    onChange={(e) => handleSort(e.target.value)}
                     className="text-sm border rounded-md px-3 py-2 bg-white"
                   >
                     {SORT_OPTIONS.map((opt) => (
@@ -764,7 +762,7 @@ export default function CollectionPage({ params: paramsPromise }) {
                 </Fragment>
               ))}
               {(activeFilterCount > 0) && (
-                <button 
+                <button
                   onClick={clearAllFilters}
                   className="text-sm text-gray-400 hover:text-black font-medium ml-2"
                 >
@@ -807,7 +805,7 @@ export default function CollectionPage({ params: paramsPromise }) {
 
         const faqSection = dbCollection.metafields?.["custom.faq_section"];
         const isFaqSectionValid = faqSection && !faqSection.includes("gid://shopify/Metaobject");
-        
+
         let questions = [];
         let answers = [];
         try {
@@ -817,7 +815,7 @@ export default function CollectionPage({ params: paramsPromise }) {
           else questions = (rawQ || "").split("•").filter(Boolean);
           if (rawA?.startsWith("[")) answers = JSON.parse(rawA);
           else answers = (rawA || "").split("•").filter(Boolean);
-        } catch (e) {}
+        } catch (e) { }
 
         const hasFaq = questions.length > 0 || isFaqSectionValid;
         const hasBestsellers = dbCollection?.bestsellerProducts && dbCollection.bestsellerProducts.length > 0;
@@ -827,14 +825,14 @@ export default function CollectionPage({ params: paramsPromise }) {
         if (!hasFaq && !hasBestsellers && !hasSeo) return null;
 
         return (
-          <div className="seo-content container-main py-12 md:py-20 border-t border-gray-100">
+          <div className="seo-content container-main py-10 md:py-16 border-t border-gray-100">
             <div className="w-full px-2 lg:px-6">
               <div className="flex flex-col lg:flex-row gap-12 lg:gap-20">
                 {/* Bestseller Products (SEO Links) */}
                 {hasBestsellers && (
                   <div className={`${hasFaq ? "lg:w-1/2" : "w-full"} order-1`}>
                     <div className="plp-seo-links-section">
-                      <h2 className="text-lg lg:text-2xl font-bold mb-5 text-left text-gray-900 uppercase tracking-widest">
+                      <h2 className="text-lg lg:text-xl font-semibold mb-5 text-left text-gray-900 uppercase tracking-wider">
                         Bestsellers
                       </h2>
                       <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm bg-white">
@@ -842,21 +840,21 @@ export default function CollectionPage({ params: paramsPromise }) {
                           <div className="grid lg:grid-cols-2 bg-gray-50 border-b border-gray-200 divide-x divide-gray-200 hidden lg:grid">
                             <div className="grid grid-cols-[auto_1fr_auto] px-6 py-4 gap-4">
                               <div className="w-12 h-6" />
-                              <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">PRODUCT NAME</h3>
-                              <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 text-right">PRICE</h3>
+                              <h3 className="text-[0.625rem] font-bold uppercase tracking-widest text-zinc-400">PRODUCT NAME</h3>
+                              <h3 className="text-[0.625rem] font-bold uppercase tracking-widest text-zinc-400 text-right">PRICE</h3>
                             </div>
                             <div className="grid grid-cols-[auto_1fr_auto] px-6 py-4 gap-4">
                               <div className="w-12 h-6" />
-                              <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">PRODUCT NAME</h3>
-                              <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 text-right">PRICE</h3>
+                              <h3 className="text-[0.625rem] font-bold uppercase tracking-widest text-zinc-400">PRODUCT NAME</h3>
+                              <h3 className="text-[0.625rem] font-bold uppercase tracking-widest text-zinc-400 text-right">PRICE</h3>
                             </div>
                           </div>
                         )}
                         {hasFaq && (
-                          <div className="grid grid-cols-[auto_1fr_auto] bg-gray-50 border-b border-gray-200 px-6 py-4 gap-4">
+                          <div className="grid grid-cols-[auto_1fr_auto] bg-gray-50 border-b border-gray-200 px-6 py-4 gap-4 justify-content: center;">
                             <div className="w-12 h-6" />
-                            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">PRODUCT NAME</h3>
-                            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 text-right">PRICE</h3>
+                            <h3 className="text-sm font-black uppercase tracking-[0.2em] text-black-400">PRODUCT NAME</h3>
+                            <h3 className="text-sm font-black uppercase tracking-[0.2em] text-black-400 text-right">PRICE</h3>
                           </div>
                         )}
                         <div className={`divide-y divide-gray-100 ${!hasFaq ? "lg:grid lg:grid-cols-2 lg:divide-y-0" : ""}`}>
@@ -871,10 +869,10 @@ export default function CollectionPage({ params: paramsPromise }) {
                                   </div>
                                 )}
                               </div>
-                              <Link href={`/products/${item.handle}`} className="text-sm font-bold text-gray-900 hover:text-primary transition-colors truncate pr-4">
+                              <Link href={`/products/${item.handle}`} className="text-sm  text-gray-900 hover:text-primary transition-colors truncate pr-4">
                                 {item.title}
                               </Link>
-                              <span className="text-sm font-black text-gray-900 text-right">
+                              <span className="text-sm  text-black-800 text-right">
                                 ₹{new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(item.price)}
                               </span>
                             </div>
@@ -891,7 +889,9 @@ export default function CollectionPage({ params: paramsPromise }) {
                 {/* FAQ Section */}
                 {hasFaq && (
                   <div className={`${hasBestsellers ? "lg:w-1/2" : "w-full"} order-2 mb-16`}>
-                    <h2 className="text-lg lg:text-2xl font-bold mb-5 text-left text-gray-900 uppercase tracking-widest">
+                    <h2 className="
+                    text-lg lg:text-xl font-semibold mb-5 text-left text-gray-900 uppercase tracking-wider
+                    ">
                       FAQ
                     </h2>
                     <div className="w-full">
@@ -924,7 +924,7 @@ export default function CollectionPage({ params: paramsPromise }) {
 
               {/* SEO Section */}
               {hasSeo && (
-                <div className="prose prose-sm md:prose-base max-w-none mt-8 border-t border-gray-100 pt-12">
+                <div className="prose prose-sm md:prose-base max-w-none mt-8 border-t border-gray-100 pt-8">
                   <div className="text-gray-600 leading-loose">
                     {renderShopifyRichText(seoContent)}
                   </div>
@@ -937,12 +937,12 @@ export default function CollectionPage({ params: paramsPromise }) {
 
       {/* Sticky Mobile Filter Bar & Sheets */}
       {isMobile && (
-        <div className="fixed bottom-0 left-0 right-0 z-10 bg-primary text-white flex justify-around items-center py-4 border-t border-white/10 px-4 gap-2">          
+        <div className="fixed bottom-0 left-0 right-0 z-10 bg-primary text-white flex justify-around items-center py-4 border-t border-white/10 px-4 gap-2">
           <button onClick={() => setIsSortSheetOpen(true)} className="flex-1 flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-wider border-r border-white/20">
             <ArrowUpDown size={16} /> Sort
           </button>
           <button onClick={() => setIsFilterSheetOpen(true)} className="flex-1 flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-wider">
-            <SlidersHorizontal size={16} /> Filter 
+            <SlidersHorizontal size={16} /> Filter
             {activeFilterCount > 0 && (
               <span className="bg-[#FF69B4] text-white text-[10px] min-w-4 h-4 rounded-full flex items-center justify-center px-1">
                 {activeFilterCount}
@@ -1043,7 +1043,7 @@ export default function CollectionPage({ params: paramsPromise }) {
                           return (
                             <div key={option.value} className="flex items-center justify-between py-1 cursor-pointer group" onClick={() => toggleFilter(option.urlKey, option.value)}>
                               <div className="flex items-center gap-3">
-                                {isSelected ? <div className="w-4 h-4 bg-[#5a413f] rounded flex items-center justify-center"><svg width="10" height="8" viewBox="0 0 10 8" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 4L4 7L9 1" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg></div> : <div className="w-4 h-4 border border-gray-300 rounded group-hover:border-[#5a413f]" />}
+                                {isSelected ? <div className="w-4 h-4 bg-[#5a413f] rounded flex items-center justify-center"><svg width="10" height="8" viewBox="0 0 10 8" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 4L4 7L9 1" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg></div> : <div className="w-4 h-4 border border-gray-300 rounded group-hover:border-[#5a413f]" />}
                                 <span className={`text-[13px] ${isSelected ? "text-black font-semibold" : "text-gray-600"}`}>{option.label}</span>
                               </div>
                               <span className="text-[11px] text-gray-400">({option.count})</span>

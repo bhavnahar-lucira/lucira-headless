@@ -14,7 +14,7 @@ export default function WearThisWith({ products = [] }) {
 
   return (
     <div className="pt-4 border-t border-gray-100 overflow-hidden">
-      <h2 className="text-base font-semibold text-black mb-4 uppercase tracking-widest font-abhaya">Wear This With:</h2>      
+      <h2 className="text-lg font-semibold text-black mb-4 capitalize tracking-wide font-abhaya">Wear This With:</h2>      
       <div className="relative">
         <Swiper
           modules={[Navigation]}
@@ -38,7 +38,7 @@ export default function WearThisWith({ products = [] }) {
         >
           {products.map((product, idx) => (
             <SwiperSlide key={product.id || product.shopifyId}>
-               <ProductCard product={product} index={idx + 1} />
+               <ProductCard product={product} index={idx + 1} singleStarRating={true} />
             </SwiperSlide>
           ))}
         </Swiper>

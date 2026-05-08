@@ -29,7 +29,7 @@ export default function BlogCard({ article, blogHandle }) {
       href={href}
       className="group block overflow-hidden rounded-sm border border-[#ddd6d2] bg-white h-full"
     >
-      <div className="relative aspect-[1/1.02] w-full overflow-hidden bg-zinc-50">
+      <div className="relative aspect-[313/362] w-full overflow-hidden bg-zinc-50">
         {article.image?.url ? (
           <LazyImage
             src={article.image.url}

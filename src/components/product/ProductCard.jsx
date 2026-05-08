@@ -179,7 +179,7 @@ function getPrioritizedVariant(product, collectionHandle) {
   return variants[0];
 }
 
-const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle, index }) => {
+const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle, index, singleStarRating = false }) => {
   const isMobile = useMediaQuery("(max-width: 1023px)");
   const baseColors = getUniqueBaseColors(product.colors || product.variants?.map((v) => v.color) || []);
 
@@ -672,7 +672,7 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle,
                   return (
                     <div className="flex items-center gap-1.5">
                       <div className="flex items-center gap-0.5 text-amber-400">
-                        {isMobile ? (
+                        {singleStarRating || isMobile ? (
                           <Star size={12} fill="currentColor" />
                         ) : (
                           [...Array(5)].map((_, i) => (

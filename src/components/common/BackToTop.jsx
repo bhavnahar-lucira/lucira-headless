@@ -1,35 +1,55 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ChevronUp } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 
 export default function BackToTop() {
-  const [isVisible, setIsVisible] = useState(false);
   const pathname = usePathname();
 
-  // Define routes where the button should be visible
+  const [visible, setVisible] = useState(false);
+  const [scrollDirection, setScrollDirection] = useState("up");
+
+  const lastScrollY = useRef(0);
+
+  // Allowed pages
   const allowedRoutes = [
-    /^\/$/, // Homepage
-    /^\/collections\/[^/]+$/, // Collection pages
-    /^\/products\/[^/]+$/, // Product pages
-    /^\/search$/, // Search results page
+    /^\/$/,
+    /^\/collections\/[^/]+$/,
+    /^\/products\/[^/]+$/,
+    /^\/search$/,
   ];
 
-  const shouldShowOnPage = allowedRoutes.some((route) => route.test(pathname));
+  const shouldShowOnPage = allowedRoutes.some((route) =>
+    route.test(pathname)
+  );
 
   useEffect(() => {
-    const toggleVisibility = () => {
-      if (window.scrollY > 300) {
-        setIsVisible(true);
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      
+      if (currentScrollY > lastScrollY.current) {
+        setScrollDirection("down");
       } else {
-        setIsVisible(false);
+        setScrollDirection("up");
       }
+      
+      if (currentScrollY > 500) {
+        setVisible(true);
+      } else {
+        setVisible(false);
+      }
+
+      lastScrollY.current = currentScrollY;
     };
 
-    window.addEventListener("scroll", toggleVisibility);
-    return () => window.removeEventListener("scroll", toggleVisibility);
+    window.addEventListener("scroll", handleScroll, {
+      passive: true,
+    });
+
+    return () =>
+      window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const scrollToTop = () => {
@@ -41,20 +61,27 @@ export default function BackToTop() {
 
   if (!shouldShowOnPage) return null;
 
-  const isCollectionPage = pathname.startsWith('/collections');
-
   return (
     <button
       onClick={scrollToTop}
-      className={cn(
-        "fixed top-1/2 right-[30px] -translate-y-1/2 z-[100] p-3 rounded-full bg-black text-white shadow-xl transition-all duration-300 w-[50px] h-[50px] hover:scale-110 active:scale-95 group",
-        isVisible ? "translate-x-0 opacity-100" : "translate-x-10 opacity-0 pointer-events-none"
-      )}
       aria-label="Back to top"
+      className={cn(
+        "fixed bottom-80 right-5 md:right-7.5 z-100",
+        "h-12.5 w-12.5 rounded-full",
+        "bg-black text-white",
+        "shadow-[0_8px_30px_rgba(0,0,0,0.12)]",
+        "backdrop-blur-md",
+        "flex items-center justify-center",
+        "transition-all duration-300 ease-out",
+        "hover:scale-105 active:scale-95",
+        visible && scrollDirection === "up"
+          ? "translate-y-0 opacity-100"
+          : "translate-y-5 opacity-0 pointer-events-none"
+      )}
     >
-      <ChevronUp 
-        size={24} 
-        className="group-hover:-translate-y-1 transition-transform duration-300" 
+      <ChevronUp
+        size={18}
+        className="transition-transform duration-300 group-hover:-translate-y-0.5"
       />
     </button>
   );
