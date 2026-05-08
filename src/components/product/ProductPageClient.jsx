@@ -760,7 +760,14 @@ export default function ProductPageClient({ product, complementaryProducts = [],
         engravingText: savedEngraving.text,
         engravingFont: savedEngraving.font,
         giftText: giftText,
-        shippingDate: "13/04/2026",
+        shippingDate: (() => {
+          const date = new Date();
+          date.setDate(date.getDate() + 10);
+          const d = String(date.getDate()).padStart(2, "0");
+          const m = String(date.getMonth() + 1).padStart(2, "0");
+          const y = date.getFullYear();
+          return `${d}/${m}/${y}`;
+        })(),
         goldPricePerGram: raw?.metal?.rate_per_gram || 0,
         goldWeight: raw?.metal?.weight || parseFloat(fallbackWeight),
         goldPrice: raw?.metal?.cost || 0,

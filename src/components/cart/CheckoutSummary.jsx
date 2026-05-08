@@ -102,13 +102,16 @@ export default function CheckoutSummary({
 
       const result = await response.json();
       
-      const points = result.data || result;
-      const meta = result.meta || { code: 200 };
+      const points = result?.data || result;
+      const meta = result?.meta || {};
+      const statusCode = meta.code || result?.status || 200;
 
-      if (meta.code === 200 || points.points_balance !== undefined) {
+      // Nector sometimes returns success directly or nested in data
+      if (statusCode === 200 || points?.points_balance !== undefined || points?.available_points !== undefined) {
         setPointsData(points);
-      } else {
-        console.error("Nector API Error:", result);
+      } else if (statusCode !== 422 && Object.keys(result || {}).length > 0) {
+        // Only log if it's NOT a 422 (No discount available) and not an empty object
+        console.error("Nector API Error Details:", result);
       }
     } catch (error) {
       console.error("Error fetching points:", error);
@@ -135,6 +138,7 @@ export default function CheckoutSummary({
 
     const promotion = pointsData.promotions[0];
     dispatch(applyPoints({
+      id: promotion.id || `nector_${Date.now()}`,
       coin_value: promotion.coin_value,
       fiat_value: promotion.fiat_value,
       points_label: pointsData.points_label || "Lucira Coins"
