@@ -236,7 +236,7 @@ export function LoginForm({ onSuccess, initialMobile = "", initialStep = "login"
       {step === "login" && (
         <>
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700">Phone Number <span className="text-red-500">*</span></label>
+            <label className="text-sm font-medium text-gray-900">Phone Number <span className="text-red-500">*</span></label>
             <div className="flex items-center border border-gray-200 rounded-md h-11 px-3 bg-white focus-within:border-black transition-all">
               <span className="text-sm text-gray-500 mr-2 border-r border-gray-200 pr-2">+91</span>
               <input
@@ -276,7 +276,7 @@ export function LoginForm({ onSuccess, initialMobile = "", initialStep = "login"
       {step === "otp-login" && (
         <>
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700">Enter OTP <span className="text-red-500">*</span></label>
+            <label className="text-sm font-medium text-gray-900">Enter OTP <span className="text-red-500">*</span></label>
             <Input
               ref={otpRef}
               placeholder="Enter 4-digit OTP"

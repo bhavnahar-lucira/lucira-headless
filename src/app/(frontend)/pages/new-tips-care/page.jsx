@@ -218,7 +218,7 @@ export default function JewelryCareTipsPage() {
                         <h2 className="text-xl md:text-3xl font-medium uppercase tracking-wide text-gray-900">
                         How to Store Your Jewelry the Right Way
                         </h2>
-                        <p className="mt-3 text-sm md:text-base text-gray-700 max-w-2xl mx-auto">
+                        <p className="mt-3 text-sm md:text-base text-gray-900 max-w-2xl mx-auto">
                         Protect your jewelry from climate, tangles, and tarnish by storing
                         them the right way.
                         </p>
@@ -238,7 +238,7 @@ export default function JewelryCareTipsPage() {
                                     <h3 className="text-sm md:text-lg font-medium uppercase tracking-wide text-gray-900">
                                         {item.title}
                                     </h3>
-                                    <p className="mt-1 text-xs md:text-sm text-gray-700 leading-relaxed">
+                                    <p className="mt-1 text-xs md:text-sm text-gray-900 leading-relaxed">
                                         {item.description}
                                     </p>
                                 </div>
@@ -251,7 +251,7 @@ export default function JewelryCareTipsPage() {
                         <h2 className="text-xl md:text-3xl font-medium uppercase tracking-wide text-gray-900">
                         What Are the Biggest Jewelry Care Mistakes to Avoid?
                         </h2>
-                        <p className="mt-3 text-sm md:text-base text-gray-700">
+                        <p className="mt-3 text-sm md:text-base text-gray-900">
                         It’s not the wear that weakens your jewelry, it’s how you care for it.
                         </p>
                     </div>

@@ -207,7 +207,7 @@ export default function StoreLocatorSection() {
       <section className="w-full bg-[#FEF5F1] py-6.5 mt-10 overflow-hidden">
         <div className="container-main">
           <div className="text-center mb-2 px-1 md:px-0">
-            <h2 className="text-3xl md:text-4xl font-extrabold font-abhaya mb-2 text-black">Visit Lucira Store Near You</h2>
+            <h2 className="text-2xl lg:text-4xl font-extrabold font-abhaya mb-1 text-black">Visit Lucira Store Near You</h2>
           </div>
 
           <div className="mb-8 flex justify-center">

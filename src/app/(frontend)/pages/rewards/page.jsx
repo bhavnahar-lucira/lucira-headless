@@ -251,7 +251,7 @@ export default function RewardsPage() {
                                 <h3 className="mt-4 mb-2 uppercase font-medium text-md">
                                     {item.title}
                                 </h3>
-                                <p className="text-sm text-gray-700">
+                                <p className="text-sm text-gray-900">
                                     {item.description}
                                 </p>
                             </div>

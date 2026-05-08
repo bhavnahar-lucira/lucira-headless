@@ -17,7 +17,7 @@ export default function QualityBar() {
           {ITEMS.map((item, index) => (
             <div key={index} className="flex items-center gap-2">
               <Plus size={16} className="text-[#b67665]" />
-              <span className="text-sm uppercase font-bold tracking-widest text-gray-700">
+              <span className="text-sm uppercase font-bold tracking-widest text-gray-900">
                 {item}
               </span>
             </div>

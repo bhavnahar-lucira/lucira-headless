@@ -232,7 +232,7 @@ const TravelDiamond = ({ sourceRef, targetRef, image }) => {
   }, [smoothProgress, sourceRef, targetRef]);
 
   return (
-    <div ref={containerRef} className="absolute inset-0 pointer-events-none z-[9999]" style={{ height: '100%' }}>
+    <div ref={containerRef} className="absolute inset-0 pointer-events-none z-[499]" style={{ height: '100%' }}>
       <motion.img
         src={image}
         style={{

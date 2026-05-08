@@ -32,10 +32,10 @@ export default function CategorySlider() {
     <section className="w-full pt-16 pb-2 bg-white overflow-hidden">
       <div className="max-w-480 mx-auto px-5 md:px-17 min-[1440px]:px-17">
         <div className="text-center mb-6">
-          <h2 className="text-3xl lg:text-4xl font-extrabold font-abhaya mb-2 text-black">
+          <h2 className="text-2xl lg:text-4xl font-extrabold font-abhaya mb-1 text-black">
             Explore Our Range
           </h2>
-          <p className="text-black text-base font-normal">
+          <p className="text-black font-normal md:text-base text-sm leading-[1.4] tracking-normal align-middle">
             Find diamond jewelry pieces that match your style.
           </p>
         </div>
@@ -53,7 +53,7 @@ export default function CategorySlider() {
               el: `.${paginationElClass}`,
               clickable: true,
               renderBullet: (index, className) => {
-                return `<span class="${className} w-6! h-1! rounded-full! bg-gray-300! transition-all duration-300 [&.swiper-pagination-bullet-active]:bg-black! [&.swiper-pagination-bullet-active]:w-10!"></span>`;
+                return `<span class="${className} w-2! h-2! rounded-full! bg-gray-300! transition-all duration-300 [&.swiper-pagination-bullet-active]:bg-black! [&.swiper-pagination-bullet-active]:w-6! md:[&.swiper-pagination-bullet-active]:w-6!"></span>`;
               },
             }}
             breakpoints={{

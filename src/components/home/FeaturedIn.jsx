@@ -60,8 +60,8 @@ export default function FeaturedIn() {
   return (
     <section className="featured-in-section bg-white overflow-hidden py-8 md:py-12">
       <div className="text-center mb-10 px-4">
-        <h2 className="text-3xl md:text-4xl font-extrabold font-abhaya mb-2 text-black">Featured In</h2>
-        <p className="text-zinc-600 text-base font-normal">Trusted by leading brands and media</p>
+        <h2 className="text-2xl lg:text-4xl font-extrabold font-abhaya mb-1 text-black">Featured In</h2>
+        <p className="text-black font-normal md:text-base text-sm leading-[1.4] tracking-normal align-middle">Trusted by leading brands and media</p>
       </div>
 
       <div className="relative w-full overflow-hidden py-4">

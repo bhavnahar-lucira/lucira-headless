@@ -524,7 +524,7 @@ export default function CollectionPage({ params: paramsPromise }) {
               <h1 className="text-3xl md:text-4xl font-serif font-bold mb-4 capitalize">
                 {displayTitle}
               </h1>
-              <p className="text-gray-700 text-sm md:text-base mb-8 max-w-xl">
+              <p className="text-gray-900 text-sm md:text-base mb-8 max-w-xl">
                 {collection.description || "Find the perfect piece for your special moment."}
               </p>
               <div className="flex flex-wrap gap-6 text-xs md:text-sm font-medium">
@@ -965,7 +965,7 @@ export default function CollectionPage({ params: paramsPromise }) {
               <div className="p-4 space-y-2 overflow-y-auto pb-10">
                 {SORT_OPTIONS.map((opt) => (
                   <button key={opt.value} onClick={() => { handleSort(opt.value); setIsSortSheetOpen(false); }}
-                    className={`w-full text-left py-4 px-4 rounded-lg transition-colors flex justify-between items-center ${activeSort === opt.value ? "bg-[#FFF5F1] text-black font-bold" : "hover:bg-gray-50 text-gray-700"}`}>
+                    className={`w-full text-left py-4 px-4 rounded-lg transition-colors flex justify-between items-center ${activeSort === opt.value ? "bg-[#FFF5F1] text-black font-bold" : "hover:bg-gray-50 text-gray-900"}`}>
                     {opt.label}
                     {activeSort === opt.value && <div className="w-2 h-2 rounded-full bg-[#5a413f]" />}
                   </button>

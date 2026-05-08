@@ -31,7 +31,7 @@ export default function ValuePropsBar() {
               <div className="w-6 h-6 relative grayscale opacity-70">
                 <LazyImage src={prop.icon} alt={prop.text} fill className="object-contain" />
               </div>
-              <span className="text-xs uppercase font-medium tracking-wider text-gray-700">
+              <span className="text-xs uppercase font-medium tracking-wider text-gray-900">
                 {prop.text}
               </span>
             </div>

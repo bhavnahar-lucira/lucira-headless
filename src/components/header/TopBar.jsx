@@ -34,8 +34,8 @@ export default function TopBar() {
   if (!hasLoaded || !settingsVisible || announcements.length === 0) return null;
 
   return (
-    <div className="bg-[#5a413f] text-white group relative h-10 overflow-hidden">
-      <button className="topbar-prev absolute left-4 z-20 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer top-1/2 -translate-y-1/2 flex items-center justify-center">
+    <div className="bg-[#000000] text-white group relative h-10 overflow-hidden">
+      <button className="topbar-prev absolute left-4 z-20 transition-opacity cursor-pointer top-1/2 -translate-y-1/2 flex items-center justify-center">
         <ChevronLeft size={16} />
       </button>
 
@@ -71,7 +71,7 @@ export default function TopBar() {
         ))}
       </Swiper>
 
-      <button className="topbar-next absolute right-4 z-20 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer top-1/2 -translate-y-1/2 flex items-center justify-center">
+      <button className="topbar-next absolute right-4 z-20 transition-opacity cursor-pointer top-1/2 -translate-y-1/2 flex items-center justify-center">
         <ChevronRight size={16} />
       </button>
     </div>

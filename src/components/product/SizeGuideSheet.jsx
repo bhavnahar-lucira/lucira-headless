@@ -49,9 +49,9 @@ export function SizeGuideSheet({ children }) {
     <>
       <Dialog open={isVideoOpen} onOpenChange={setIsVideoOpen}>
         <DialogPortal>
-          <DialogOverlay className="z-[9999] bg-black/60 backdrop-blur-sm" />
+          <DialogOverlay className="z-[499] bg-black/60 backdrop-blur-sm" />
           <DialogContent 
-            className="z-[10000] sm:max-w-[800px] p-0 overflow-hidden border-none bg-black shadow-2xl"
+            className="z-[500] sm:max-w-[800px] p-0 overflow-hidden border-none bg-black shadow-2xl"
           >
             <DialogHeader className="sr-only">
               <DialogTitle>Ring Measurement Tutorial</DialogTitle>
@@ -153,7 +153,7 @@ export function SizeGuideSheet({ children }) {
                   </thead>
                   <tbody className="divide-y divide-gray-50">
                     {sizeData.map((row, idx) => (
-                      <tr key={idx} className="text-sm text-gray-700">
+                      <tr key={idx} className="text-sm text-gray-900">
                         <td className="py-4">{convert(row.diaIn)}</td>
                         <td className="py-4 pl-4 border-gray-100 border-l">{convert(row.cirIn)}</td>
                         <td className="py-4 pl-4 border-gray-100 border-l">{row.ind}</td>

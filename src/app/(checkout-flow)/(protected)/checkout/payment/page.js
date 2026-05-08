@@ -601,6 +601,7 @@ export default function PaymentPage() {
 
           return {
             item_id: getNumericId(item.productId || item.shopifyId || item.id),
+            variant_id: getNumericId(item.variantId),
             item_name: item.title,
             price: Number(item.price || 0),
             item_brand: "Lucira Jewelry",
@@ -635,6 +636,7 @@ export default function PaymentPage() {
 
           return {
             item_id: getNumericId(item.productId || item.shopifyId || item.id),
+            variant_id: getNumericId(item.variantId),
             item_name: item.title,
             item_variant: item.variantTitle || "",
             item_brand: "Lucira Jewelry",
@@ -726,6 +728,7 @@ export default function PaymentPage() {
 
                 return {
                   item_id: getNumericId(item.productId || item.shopifyId || item.id),
+                  variant_id: getNumericId(item.variantId),
                   item_name: item.title,
                   price: Number(item.price || 0),
                   item_brand: "Lucira Jewelry",

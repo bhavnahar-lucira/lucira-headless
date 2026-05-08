@@ -46,7 +46,7 @@ export function FindLuciraStore({
     <section className="w-full py-10 bg-gray-50 mt-10">
       <div className="max-w-[1440px] mx-auto px-4 sm:px-6 md:px-17">
         <div className="w-full text-center mb-8 md:mb-12">
-          <h2 className="text-3xl lg:text-4xl font-extrabold font-abhaya mb-2 text-black">
+          <h2 className="text-2xl lg:text-4xl font-extrabold font-abhaya mb-1 text-black">
             Find in Lucira Store Near You
           </h2>
 
@@ -68,7 +68,7 @@ export function FindLuciraStore({
             </Button>
           </div>
 
-          <div className="flex items-center justify-center gap-2 text-xs sm:text-sm text-gray-700">
+          <div className="flex items-center justify-center gap-2 text-xs sm:text-sm text-gray-900">
             <Clock size={16} />
             <span>{deliveryInfo.message || "Enter pincode to check delivery"}</span>
           </div>
@@ -87,8 +87,8 @@ export function FindLuciraStore({
               pagination={{
                 clickable: true,
                 el: ".store-pagination",
-                bulletClass: "swiper-pagination-bullet !w-1.5 !h-1.5 md:!w-2 md:!h-2 !bg-gray-300 !opacity-100",
-                bulletActiveClass: "swiper-pagination-bullet-active !w-6 md:!w-8 !rounded-full !bg-black",
+                bulletClass: "swiper-pagination-bullet !w-2 !h-2 !bg-gray-300 !opacity-100",
+                bulletActiveClass: "swiper-pagination-bullet-active !w-6 md:!w-6 !h-2 !rounded-full !bg-black",
               }}
               className="w-full"
             >
