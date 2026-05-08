@@ -113,7 +113,7 @@ export default function LoveStorySlider({
               el: `.${paginationElClass}`,
               clickable: true,
               renderBullet: (index, className) => {
-                return `<span class="${className} m-0! mr-2! h-2! w-2! rounded-full! bg-[#cfcfcf]! transition-all duration-300 [&.swiper-pagination-bullet-active]:w-[24px]! md:[&.swiper-pagination-bullet-active]:w-[24px]! [&.swiper-pagination-bullet-active]:rounded-full! [&.swiper-pagination-bullet-active]:bg-black!"></span>`;
+                return `<span class="${className} m-0! mr-2! h-2! w-2! rounded-full! bg-[#cfcfcf]! transition-all duration-300 [&.swiper-pagination-bullet-active]:w-6! md:[&.swiper-pagination-bullet-active]:w-6! [&.swiper-pagination-bullet-active]:rounded-full! [&.swiper-pagination-bullet-active]:bg-black!"></span>`;
               },
             }}
             breakpoints={{
