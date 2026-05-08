@@ -99,12 +99,13 @@ export default function Footer() {
                   <ul className="space-y-3 font-figtree text-[13px]">
                     <li><Link href="/pages/diamond-education">Diamond Education</Link></li>
                     <li><Link href="/pages/metal-education">Metal Education</Link></li>
+                    <li><Link href="/pages/gemstone-education-page">Gemstone Education</Link></li>
                     <li><Link href="/pages/size-guide-1">Size Guide</Link></li>
                     <li><Link href="/pages/how-to-wear-2">How To Wear</Link></li>
                     <li><Link href="/pages/new-tips-care">Jewelry Care Tips</Link></li>
+                    <li><Link href="/pages/jewelry-gift-guide">Jewelry Gift Guide</Link></li>
                     <li><Link href="/pages/lgd-mine-page">LGD vs Mined</Link></li>
                     <li><Link href="/pages/ring-shank">Ring Shank</Link></li>
-                    <li><Link href="/pages/product-passport">Product Passport</Link></li>
                     <li><Link href="/pages/diamond-shapes">Diamond Shapes</Link></li>
                   </ul>
                 </AccordionContent>
@@ -133,7 +134,7 @@ export default function Footer() {
                 <AccordionContent className="pb-6">
                   <ul className="grid grid-cols-2 gap-y-3 gap-x-4 font-figtree text-[13px]">
                     <li><Link href="/pages/faqs">FAQ's</Link></li>
-                    <li><Link href="/pages/reviews">Reviews</Link></li>
+                    <li><Link href="/reviews">Reviews</Link></li>
                     <li><Link href="/pages/15-days-return">15-Days Return</Link></li>
                     <li><Link href="/pages/cancel-refund">Cancel & Refund</Link></li>
                     <li><Link href="/pages/shipping-policy-1">Shipping Policy</Link></li>
@@ -245,12 +246,13 @@ export default function Footer() {
               <ul className="space-y-2.5 text-sm text-white font-figtree">
                 <li><Link href="/pages/diamond-education">Diamond Education</Link></li>
                 <li><Link href="/pages/metal-education">Metal Education</Link></li>
+                <li><Link href="/pages/gemstone-education-page">Gemstone Education</Link></li>
                 <li><Link href="/pages/size-guide-1">Size Guide</Link></li>
                 <li><Link href="/pages/how-to-wear-2">How To Wear</Link></li>
                 <li><Link href="/pages/new-tips-care">Jewelry Care Tips</Link></li>
+                <li><Link href="/pages/jewelry-gift-guide">Jewelry Gift Guide</Link></li>
                 <li><Link href="/pages/lgd-mine-page">LGD vs Mined</Link></li>
                 <li><Link href="/pages/ring-shank">Ring Shank</Link></li>
-                <li><Link href="/pages/product-passport">Product Passport</Link></li>
                 <li><Link href="/pages/diamond-shapes">Diamond Shapes</Link></li>
               </ul>
             </div>
@@ -278,7 +280,7 @@ export default function Footer() {
               <ul className="space-y-2.5 text-sm text-white font-figtree">
                 <li><Link href="/pages/contact-us">Contact Us</Link></li>
                 <li><Link href="/pages/faqs">FAQ's</Link></li>
-                <li><Link href="/pages/reviews">Reviews</Link></li>
+                <li><Link href="/reviews">Reviews</Link></li>
                 <li><Link href="/pages/15-days-return">15-Days Return</Link></li>
                 <li><Link href="/pages/cancel-refund">Cancel & Refund</Link></li>
                 <li><Link href="/pages/lifetime-exchange-buyback-policy">Lifetime Exchange & Buyback</Link></li>
