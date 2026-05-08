@@ -87,3 +87,25 @@ export function getCookie(name) {
     throw error;
     }
     }
+
+export function getValidSrc(src, fallback = "/images/product/1.jpg") {
+  if (typeof src === 'string' && src.trim() !== '') return src;
+  if (src && typeof src === 'object' && src.url) return src.url;
+  return fallback;
+}
+
+export function getEstimatedDispatchDate(isInStock, leadTime = 12) {
+  const today = new Date();
+  const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+  if (isInStock) {
+    const dispatchDate = new Date(today);
+    dispatchDate.setDate(today.getDate() + 2);
+    return `Estimated free dispatch by ${months[dispatchDate.getMonth()]} ${dispatchDate.getDate()}, ${dispatchDate.getFullYear()}`;
+  } else {
+    const totalDays = (parseInt(leadTime) || 12) + 3;
+    const dispatchDate = new Date(today);
+    dispatchDate.setDate(today.getDate() + totalDays);
+    return `Estimated free dispatch by ${months[dispatchDate.getMonth()]} ${dispatchDate.getDate()}, ${dispatchDate.getFullYear()}`;
+  }
+}

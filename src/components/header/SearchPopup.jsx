@@ -52,13 +52,13 @@ export default function SearchPopup({ onClose, searchQuery, searchResults, isSea
       transition={{ type: "spring", damping: 25, stiffness: 200 }}
       className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-screen max-w-225 bg-white rounded-lg shadow-2xl z-999 border border-gray-100 overflow-hidden pointer-events-auto max-h-[70vh] md:max-h-none flex flex-col"
     >
-      <div className="p-5 md:p-8 overflow-y-auto custom-scrollbar">
+      <div className="p-5 md:p-8 overflow-y-auto custom-scrollbar scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-white hover:scrollbar-thumb-gray-400">
         <div className="animate-in fade-in duration-300">
           <div className="grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-8 md:gap-10">
             
             {/* Left Column: Categories (Always visible or primary focus) */}
             <div className="md:pr-10 lg:border-r border-gray-100">
-              <h3 className="text-[13px] md:text-[15px] font-semibold mb-4 md:mb-6 text-[#1A1A1A] uppercase tracking-wider">Categories</h3>
+              <h3 className="text-xs md:text-sm font-semibold mb-4 md:mb-6 text-[#1A1A1A] uppercase tracking-wider">Categories</h3>
               <div className="grid grid-cols-3 gap-3 md:gap-5">
                 {MOCK_CATEGORIES.map((cat, i) => (
                   <Link 
@@ -67,7 +67,7 @@ export default function SearchPopup({ onClose, searchQuery, searchResults, isSea
                     onClick={onClose}
                     className="group"
                   >
-                    <div className="aspect-[4/3] relative bg-[#F9F9F9] rounded-sm overflow-hidden mb-1.5 md:mb-2.5">
+                    <div className="aspect-4/3 relative bg-[#F9F9F9] rounded-sm overflow-hidden mb-1.5 md:mb-2.5">
                       <Image 
                         src={cat.image} 
                         alt={cat.title} 
@@ -75,7 +75,7 @@ export default function SearchPopup({ onClose, searchQuery, searchResults, isSea
                         className="object-contain p-2 md:p-3 group-hover:scale-110 transition-transform duration-500"
                       />
                     </div>
-                    <p className="text-[10px] md:text-[12px] font-medium text-gray-700 text-center group-hover:text-primary transition-colors leading-tight">
+                    <p className="text-xs font-medium text-gray-700 text-center group-hover:text-primary transition-colors leading-tight">
                       {cat.title}
                     </p>
                   </Link>
@@ -87,7 +87,7 @@ export default function SearchPopup({ onClose, searchQuery, searchResults, isSea
                   <Link 
                     href={`/search?q=${encodeURIComponent(searchQuery)}`}
                     onClick={onClose}
-                    className="text-primary font-bold text-[12px] md:text-[13px] underline underline-offset-4 decoration-primary/30 hover:decoration-primary transition-all uppercase tracking-widest"
+                    className="text-primary font-bold text-xs md:text-sm underline underline-offset-4 decoration-primary/30 hover:decoration-primary transition-all uppercase tracking-widest"
                   >
                     View All Results for "{searchQuery}"
                   </Link>
@@ -97,12 +97,12 @@ export default function SearchPopup({ onClose, searchQuery, searchResults, isSea
 
             {/* Right Column: Products (Shows when typing) */}
             <div>
-              <h3 className="text-[13px] md:text-[15px] font-semibold mb-4 md:mb-6 text-[#1A1A1A] uppercase tracking-wider">Products</h3>
+              <h3 className="text-sm md:text-base font-semibold mb-4 md:mb-6 text-[#1A1A1A] uppercase tracking-wider">Products</h3>
               
               {searchQuery.length === 0 ? (
-                 <div className="flex flex-col items-center justify-center h-[150px] md:h-[200px] text-gray-400">
+                 <div className="flex flex-col items-center justify-center h-37.5 md:h-50 text-gray-400">
                     <Search strokeWidth={1} className="mb-3 opacity-20 w-7 h-7 md:w-8 md:h-8" />
-                    <p className="text-[12px] md:text-[13px]">Type to see product results</p>
+                    <p className="text-xs md:text-sm">Type to see product results</p>
                  </div>
               ) : isSearching ? (
                 <div className="space-y-4 md:space-y-5">
@@ -134,17 +134,17 @@ export default function SearchPopup({ onClose, searchQuery, searchResults, isSea
                         />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h4 className="text-[12px] md:text-[13px] font-medium text-gray-800 truncate group-hover:text-primary transition-colors">
+                        <h4 className="text-xs md:text-sm font-medium text-gray-800 truncate group-hover:text-primary transition-colors">
                           <HighlightMatch text={product.title} query={searchQuery} />
                         </h4>
-                        <p className="text-[11px] md:text-[12px] font-bold text-gray-900 mt-0.5">₹{product.price.toLocaleString('en-IN')}</p>
+                        <p className="text-xs font-bold text-gray-900 mt-0.5">{product.price.toLocaleString('en-IN')}</p>
                       </div>
                     </Link>
                   ))}
                 </div>
               ) : (
                 <div className="py-8 md:py-10 text-center">
-                  <p className="text-gray-400 text-[12px] md:text-[13px] italic">No matching products found</p>
+                  <p className="text-gray-400 text-xs md:text-sm italic">No matching products found</p>
                 </div>
               )}
             </div>
@@ -152,22 +152,7 @@ export default function SearchPopup({ onClose, searchQuery, searchResults, isSea
           </div>
         </div>
       </div>
-
-      <style jsx global>{`
-        .custom-scrollbar::-webkit-scrollbar {
-          width: 4px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-          background: #fff;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: #ccc;
-          border-radius: 10px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: #aaa;
-        }
-      `}</style>
     </motion.div>
   );
 }
+
