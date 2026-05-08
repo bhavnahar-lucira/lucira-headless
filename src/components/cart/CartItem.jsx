@@ -29,15 +29,16 @@ export default function CartItem({ item, onAuthRequired }) {
   const [updating, setUpdating] = useState(false);
   const [movingToWishlist, setMovingToWishlist] = useState(false);
 
-  const wishlistIds = useMemo(
-    () => wishlistItems.map((i) => i.productId),
+  const wishlistKeys = useMemo(
+    () => wishlistItems.map((i) => `${i.productId}-${i.variantId || ""}`),
     [wishlistItems]
   );
 
   if (!item) return null;
 
   const productId = item.id || item.productId || item.handle;
-  const isWishlisted = productId ? wishlistIds.includes(productId) : false;
+  const currentKey = `${productId}-${item.variantId || ""}`;
+  const isWishlisted = productId ? wishlistKeys.includes(currentKey) : false;
 
   const variantOptions = Array.isArray(item.variantOptions) ? item.variantOptions : [];
   const currentVariant =
@@ -114,6 +115,11 @@ export default function CartItem({ item, onAuthRequired }) {
       if (!isWishlisted) {
         const payload = {
           productId: productId,
+          variantId: item.variantId || "",
+          variantTitle: item.variantTitle || "",
+          size: item.size || "",
+          color: item.color || "",
+          karat: item.karat || "",
           productHandle: item.handle || "",
           title: item.title,
           sku: item.sku || "",

@@ -88,10 +88,14 @@ export const addWishlistApi = (payload) =>
     method: "POST",
     body: JSON.stringify(payload),
   });
-export const removeWishlistApi = (productId) =>
-  apiFetch(`/api/wishlist?productId=${encodeURIComponent(productId)}`, {
+export const removeWishlistApi = (productId, variantId = "") => {
+  const q = new URLSearchParams();
+  q.set("productId", productId);
+  if (variantId) q.set("variantId", variantId);
+  return apiFetch(`/api/wishlist?${q.toString()}`, {
     method: "DELETE",
   });
+};
 
 export const fetchCheckoutAddressSelection = () =>
   apiFetch("/api/checkout/address-selection");

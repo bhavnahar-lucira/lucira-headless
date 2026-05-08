@@ -37,8 +37,9 @@ import "swiper/css";
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { calculateDistance } from "@/utils/distance";
+import { getEstimatedDispatchDate } from "@/lib/utils";
 import {
   Drawer,
   DrawerClose,
@@ -250,6 +251,8 @@ const serviceSlider = [
 
 export default function ProductPageClient({ product, complementaryProducts = [], matchingProducts = [] }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const variantIdFromUrl = searchParams.get("variant");
   const collectionContext = useSelector((state) => state.user.collectionContext);
   const dispatch = useDispatch();
 
@@ -321,8 +324,14 @@ export default function ProductPageClient({ product, complementaryProducts = [],
   }, [product.shopifyId]);
 
 
-  // Initialize with priority for 9KT only if it's exclusively/primarily in the 9KT collection
+  // Initialize with priority for URL variant, then 9KT only if it's exclusively/primarily in the 9KT collection
   const initialVariant = (() => {
+    // 1. Check URL variant first
+    if (variantIdFromUrl) {
+      const urlVariant = product.variants?.find(v => String(v.id) === String(variantIdFromUrl) || String(v.shopifyId) === String(variantIdFromUrl));
+      if (urlVariant) return urlVariant;
+    }
+
     const handles = product.collectionHandles || [];
     // Only apply 9KT priority if it's in 9kt-collection and NOT in other thematic collections
     // AND the user context is specifically from the 9kt-collection
@@ -337,6 +346,15 @@ export default function ProductPageClient({ product, complementaryProducts = [],
     }
     return product.variants?.find(v => v.inStock) || (product.variants && product.variants.length > 0 ? product.variants[0] : null);
   })();
+
+  // Robust variant lookup helper
+  const findMatchingVariant = useCallback((metal, karat, size) => {
+    return product.variants?.find(v => {
+      const vColor = String(v.color || "").toLowerCase().trim();
+      const targetColor = `${karat} ${metal}`.toLowerCase().trim();
+      return vColor === targetColor && String(v.size) === String(size);
+    });
+  }, [product.variants]);
 
   const initialSelection = getVariantSelection(initialVariant);
   const initialColor = initialSelection.color;
@@ -400,24 +418,8 @@ export default function ProductPageClient({ product, complementaryProducts = [],
   const calculateDispatchDate = useCallback(() => {
     // 1. Check if product is in stock or made to order
     const isInStock = activeVariant?.inStock === true || activeVariant?.inStock === "true";
-
-    const today = new Date();
-    const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-
-    if (isInStock) {
-      // Estimated free dispatch by 48hrs
-      const dispatchDate = new Date(today);
-      dispatchDate.setDate(today.getDate() + 2);
-      return `Estimated free dispatch by ${months[dispatchDate.getMonth()]} ${dispatchDate.getDate()}, ${dispatchDate.getFullYear()}`;
-    } else {
-      // Made to order - use lead_time from metafields (default to 7 if missing)
-      const leadTimeValue = parseInt(product.productMetafields?.lead_time) || 12;
-      const totalDays = leadTimeValue + 3; // Lead time + 3 days buffer
-
-      const dispatchDate = new Date(today);
-      dispatchDate.setDate(today.getDate() + totalDays);
-      return `Estimated free dispatch by ${months[dispatchDate.getMonth()]} ${dispatchDate.getDate()}, ${dispatchDate.getFullYear()}`;
-    }
+    const leadTime = product.productMetafields?.lead_time;
+    return getEstimatedDispatchDate(isInStock, leadTime);
   }, [activeVariant, product.productMetafields]);
 
   const handlePincodeCheck = useCallback(async (val) => {
@@ -591,7 +593,9 @@ export default function ProductPageClient({ product, complementaryProducts = [],
   const slugify = (text) => text?.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '') || "";
 
   const productId = product.shopifyId || product.id || product.handle;
-  const isWishlisted = productId ? wishlistItems.some((item) => item.productId === productId) : false;
+  const activeVariantId = activeVariant?.id || activeVariant?.shopifyId || "";
+  const currentWishlistKey = `${productId}-${activeVariantId}`;
+  const isWishlisted = productId ? wishlistItems.some((item) => `${item.productId}-${item.variantId || ""}` === currentWishlistKey) : false;
   const recentlyViewedState = useSelector(selectRecentlyViewed);
 
   const handleSaveEngraving = () => {
@@ -780,6 +784,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
         hasSimilar: Boolean(product.handle),
         reviews: product.reviews || null,
         comparePrice: activeVariant?.compare_price || product.compare_price || "",
+        estDelivery: calculateDispatchDate(),
       };
 
       await dispatch(addToCart({ userId: user?.id, product: productData })).unwrap();
@@ -843,15 +848,20 @@ export default function ProductPageClient({ product, complementaryProducts = [],
 
       if (isWishlisted) {
         if (user?.id) {
-          await dispatch(removeWishlistItem(productId)).unwrap();
+          await dispatch(removeWishlistItem({ productId, variantId: activeVariantId })).unwrap();
         } else {
-          dispatch(removeGuestWishlistItem(productId));
+          dispatch(removeGuestWishlistItem({ productId, variantId: activeVariantId }));
         }
         pushRemoveFromWishlist(commonTrackingData);
         toast.success("Removed from wishlist");
       } else {
         const payload = {
           productId,
+          variantId: activeVariantId,
+          variantTitle: activeVariant?.title || "",
+          size: selectedSize || "",
+          color: activeColor || "",
+          karat: activeKarat || "",
           productHandle: product.handle || "",
           title: product.title,
           image: thumbnailImage,
@@ -958,67 +968,11 @@ export default function ProductPageClient({ product, complementaryProducts = [],
     pushPromoClick(promoData);
   }, [product, activeVariant, activeColor, activeKarat, priceBreakup]);
 
-  // Scroll to top on mount/refresh
-  useEffect(() => {
-    if ('scrollRestoration' in window.history) {
-      window.history.scrollRestoration = 'manual';
-    }
-    window.scrollTo(0, 0);
-    return () => {
-      if ('scrollRestoration' in window.history) {
-        window.history.scrollRestoration = 'auto';
-      }
-    };
-  }, []);
-
   // Update active variant when selection changes
   useEffect(() => {
-    const variant = product.variants?.find(v =>
-      v.color === `${activeKarat} ${activeColor}` && v.size === selectedSize
-    );
+    const variant = findMatchingVariant(activeColor, activeKarat, selectedSize);
     if (variant) setActiveVariant(variant);
-  }, [activeColor, activeKarat, selectedSize, product.variants]);
-
-  //gtm
-  // Product View GTM Trigger, runs when variant changes or page loads
-  useEffect(() => {
-    if (activeVariant || product) {
-      // Helper to extract numeric ID from Shopify GID
-      const getNumericId = (gid) => {
-        if (!gid) return 0;
-        if (typeof gid === 'number') return gid;
-        const match = String(gid).match(/\d+$/);
-        return match ? Number(match[0]) : 0;
-      };
-
-      const productImageUrl = getValidSrc(activeVariant?.image || product.images?.[0]);
-      const currentUrl = typeof window !== 'undefined' ? window.location.origin + `/products/${product.handle}` : "";
-
-      // Correctly identify the Selling Price and the Original/Regular Price
-      const sellingPrice = Number(activeVariant?.price || product.price || 0);
-      const originalPrice = Number(activeVariant?.compare_price || activeVariant?.compareAtPrice || product.compare_price || product.compareAtPrice || sellingPrice);
-
-      pushProductView({
-        productId: getNumericId(product.shopifyId || product.id),
-        sku: activeVariant?.sku || "",
-        variantId: getNumericId(activeVariant?.id || activeVariant?.shopifyId),
-        vendorCode: product.vendor || "Lucira Jewelry",
-        productName: product.title,
-        productType: product.type || "",
-        category: product.type || "",
-        //subCategory: "0",
-        productUrl: currentUrl,
-        productUrlw: `/products/${product.handle}`,
-        thumbnailImage: productImageUrl,
-        image: productImageUrl,
-        price: sellingPrice,
-        offerPrice: originalPrice,
-        //productPersona: null
-      });
-    }
-  }, [activeVariant, product]);
-
-
+  }, [activeColor, activeKarat, selectedSize, findMatchingVariant]);
 
   // Fetch variant pricing when active variant changes
   useEffect(() => {
@@ -1027,13 +981,12 @@ export default function ProductPageClient({ product, complementaryProducts = [],
     fetch(`/api/variant-pricing?variantId=${activeVariant.id}&productId=${product.shopifyId}`)
       .then((res) => res.json())
       .then((data) => {
-        // Store full response data
         setPriceBreakup(data);
       })
       .catch((err) => {
         console.error("Pricing fetch failed", err);
       });
-  }, [activeVariant]);
+  }, [activeVariant, product.shopifyId]);
 
   // Toast notification on price update
   useEffect(() => {
@@ -1050,6 +1003,53 @@ export default function ProductPageClient({ product, complementaryProducts = [],
       });
     }
   }, [activeVariant]);
+
+  // Product View GTM Trigger
+  useEffect(() => {
+    if (activeVariant || product) {
+      const getNumericId = (gid) => {
+        if (!gid) return 0;
+        if (typeof gid === 'number') return gid;
+        const match = String(gid).match(/\d+$/);
+        return match ? Number(match[0]) : 0;
+      };
+
+      const productImageUrl = getValidSrc(activeVariant?.image || product.images?.[0]);
+      const currentUrl = typeof window !== 'undefined' ? window.location.origin + `/products/${product.handle}` : "";
+
+      const sellingPrice = Number(activeVariant?.price || product.price || 0);
+      const originalPrice = Number(activeVariant?.compare_price || activeVariant?.compareAtPrice || product.compare_price || product.compareAtPrice || sellingPrice);
+
+      pushProductView({
+        productId: getNumericId(product.shopifyId || product.id),
+        sku: activeVariant?.sku || "",
+        variantId: getNumericId(activeVariant?.id || activeVariant?.shopifyId),
+        vendorCode: product.vendor || "Lucira Jewelry",
+        productName: product.title,
+        productType: product.type || "",
+        category: product.type || "",
+        productUrl: currentUrl,
+        productUrlw: `/products/${product.handle}`,
+        thumbnailImage: productImageUrl,
+        image: productImageUrl,
+        price: sellingPrice,
+        offerPrice: originalPrice,
+      });
+    }
+  }, [activeVariant, product]);
+
+  // Scroll to top on mount/refresh
+  useEffect(() => {
+    if ('scrollRestoration' in window.history) {
+      window.history.scrollRestoration = 'manual';
+    }
+    window.scrollTo(0, 0);
+    return () => {
+      if ('scrollRestoration' in window.history) {
+        window.history.scrollRestoration = 'auto';
+      }
+    };
+  }, []);
 
   const fetchSimilar = async () => {
     if (similarProducts.length > 0) {
@@ -1078,10 +1078,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
     setActiveColor(metal);
     setActiveKarat(karat);
 
-    // Find matching variant for new metal/karat with current size
-    const variant = product.variants?.find(v =>
-      v.color === `${karat} ${metal}` && v.size === selectedSize
-    );
+    const variant = findMatchingVariant(metal, karat, selectedSize);
     if (variant) setActiveVariant(variant);
   };
 
@@ -1091,21 +1088,26 @@ export default function ProductPageClient({ product, complementaryProducts = [],
     shouldToastVariantChange.current = true;
     setSelectedSize(size);
 
-    // Find matching variant for current metal/karat with new size
-    const variant = product.variants?.find(v =>
-      v.color === `${activeKarat} ${activeColor}` && v.size === size
-    );
+    const variant = findMatchingVariant(activeColor, activeKarat, size);
     if (variant) setActiveVariant(variant);
   };
 
   // Helper to check if a specific color/karat combo is in stock (for any size)
   const isColorInStock = (metal, karat) => {
-    return product.variants?.some(v => v.color === `${karat} ${metal}` && v.inStock);
+    return product.variants?.some(v => {
+      const vColor = String(v.color || "").toLowerCase().trim();
+      const targetColor = `${karat} ${metal}`.toLowerCase().trim();
+      return vColor === targetColor && v.inStock;
+    });
   };
 
   // Helper to check if a specific size is in stock (for current color/karat)
   const isSizeInStock = (size) => {
-    return product.variants?.some(v => v.color === `${activeKarat} ${activeColor}` && v.size === size && v.inStock);
+    return product.variants?.some(v => {
+      const vColor = String(v.color || "").toLowerCase().trim();
+      const targetColor = `${activeKarat} ${activeColor}`.toLowerCase().trim();
+      return vColor === targetColor && String(v.size) === String(size) && v.inStock;
+    });
   };
 
   // Extract unique sizes from variants and sort them numerically
@@ -1563,7 +1565,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                         </Dialog>
                       )}
 
-                      <div className="grid grid-cols-7 gap-4">
+                      <div className={product.type === "Bracelets" ? 'grid grid-cols-[repeat(auto-fit,minmax(100px,1fr))] gap-4' : "grid grid-cols-7 gap-4"}>
                         {availableSizes.map(sizeStr => {
                           const inStock = isSizeInStock(sizeStr);
                           return (
@@ -1587,12 +1589,12 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                   {activeVariant?.inStock ? (
                     <div className="bg-[#ECF7F2] border border-[#B3E1CD] text-black rounded-lg px-4 py-3 flex items-center gap-1 xl:flex-nowrap lg:flex-wrap">
                       <span className="w-2.5 h-2.5 bg-[#189351] rounded-full"></span>
-                      This combination is <span className="font-semibold xl:basis-auto lg:basis-full">in-stock & ready to ship in 24 hrs</span>
+                      <span className="font-semibold xl:basis-auto lg:basis-full">This combination is in-stock. {calculateDispatchDate()}</span>
                     </div>
                   ) : (
                     <div className="bg-amber-50 border border-amber-200 text-black rounded-lg px-4 py-3 flex items-center gap-1 xl:flex-nowrap lg:flex-wrap">
                       <span className="w-2.5 h-2.5 bg-amber-500 rounded-full"></span>
-                      This combination will be <span className="font-semibold xl:basis-auto lg:basis-full">made to order (dispatched in 10-15 days)</span>
+                      <span className="font-semibold xl:basis-auto lg:basis-full">This combination will be made to order. {calculateDispatchDate()}</span>
                     </div>
                   )}
                 </div>

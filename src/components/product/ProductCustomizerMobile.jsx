@@ -151,7 +151,7 @@ export function ProductCustomizerMobile({
                           </h4>
                         </div>
 
-                        <div className="grid grid-cols-5 gap-3"> 
+                        <div className={product.type === "Bracelets" ? "grid grid-cols-[repeat(auto-fit,minmax(100px,1fr))] gap-3" : "grid grid-cols-5 gap-3"}> 
                           {availableSizes.map((sizeStr) => {
                             const inStock = isSizeInStock(sizeStr);
                             return (

@@ -61,6 +61,11 @@ export async function POST(req) {
     const body = await req.json();
     const {
       productId,
+      variantId,
+      variantTitle,
+      size,
+      color,
+      karat,
       productHandle,
       title,
       image,
@@ -78,6 +83,11 @@ export async function POST(req) {
     const item = {
       customerId,
       productId,
+      variantId: variantId || "",
+      variantTitle: variantTitle || "",
+      size: size || "",
+      color: color || "",
+      karat: karat || "",
       productHandle: productHandle || "",
       title,
       image: typeof image === "string" ? image : image?.url || "",
@@ -94,7 +104,7 @@ export async function POST(req) {
     const wishlistCollection = db.collection("wishlist");
 
     await wishlistCollection.updateOne(
-      { customerId, productId },
+      { customerId, productId, variantId: variantId || "" },
       {
         $set: item,
         $setOnInsert: { createdAt: new Date() },
@@ -121,6 +131,8 @@ export async function DELETE(req) {
     }
 
     const productId = req.nextUrl.searchParams.get("productId");
+    const variantId = req.nextUrl.searchParams.get("variantId") || "";
+
     if (!productId) {
       return NextResponse.json({ error: "productId is required" }, { status: 400 });
     }
@@ -128,9 +140,18 @@ export async function DELETE(req) {
     const client = await clientPromise;
     const db = client.db();
     const wishlistCollection = db.collection("wishlist");
-    await wishlistCollection.deleteOne({ customerId, productId });
+    
+    if (variantId) {
+      await wishlistCollection.deleteOne({ customerId, productId, variantId });
+    } else {
+      // If no variantId provided, delete based on productId (caution: might delete multiple if they exist)
+      // For safety, let's just delete the one with empty variantId if it exists, 
+      // or all of them if that's the intended behavior.
+      // The user wants them distinct, so we should probably always pass variantId.
+      await wishlistCollection.deleteMany({ customerId, productId });
+    }
 
-    return NextResponse.json({ success: true, productId });
+    return NextResponse.json({ success: true, productId, variantId });
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
