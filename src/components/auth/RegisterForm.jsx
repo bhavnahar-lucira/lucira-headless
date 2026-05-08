@@ -9,7 +9,7 @@ import {
   registerCustomer,
 } from "@/lib/api";
 import { login, setAvatar } from "@/redux/features/user/userSlice";
-import { pushSignup, pushLogin } from "@/lib/gtm";
+import { pushSignup } from "@/lib/gtm";
 import { mergeGuestWishlist } from "@/redux/features/wishlist/wishlistSlice";
 import { mergeCart } from "@/redux/features/cart/cartSlice";
 
@@ -89,15 +89,8 @@ export function RegisterForm({ initialMobile = "" }) {
     const user = data.user || data.customer;
     const userId = user?.id;
 
-    // Track Signup and Login in GTM
+    // Track Signup in GTM
     pushSignup({
-      id: userId,
-      mobile: mobile,
-      email: email,
-      name: `${firstName} ${lastName}`.trim()
-    });
-
-    pushLogin({
       id: userId,
       mobile: mobile,
       email: email,

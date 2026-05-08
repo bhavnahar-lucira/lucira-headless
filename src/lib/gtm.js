@@ -139,8 +139,8 @@ export const getStandardCartItem = (item, idx = 0) => {
     product_type: category,
     category: "Lucira Jewelry",
     sub_category: item.variantTitle || category,
-    price: Number(item.comparePrice || item.price || 0),
-    offer_price: Number(item.price || 0),
+    price: Number(item.price || 0),
+    offer_price: Number(item.comparePrice || item.price || 0),
     quantity: item.quantity,
     thumbnail_image: item.image,
     index_position: idx + 1

@@ -305,8 +305,8 @@ export default function CollectionPage({ params: paramsPromise }) {
             item_sku: prod.variants?.[0]?.sku || "",
             category: handle || "",
             item_url: `${currentOrigin}/products/${prod.handle}`,
-            price: originalPrice,
-            offer_price: sellingPrice,
+            price: sellingPrice,
+            offer_price: originalPrice,
             index: trackedImpressions.current.size - newProducts.length + idx + 1
           };
         });

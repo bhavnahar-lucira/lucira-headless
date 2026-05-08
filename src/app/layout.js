@@ -37,7 +37,7 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   const isProd = process.env.NODE_ENV === "production";
-  // const isProd = true;
+  //const isProd = true;
   return (
     <html lang="en">
       <head>
