@@ -713,7 +713,7 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle,
                 onClick={handleProductClick}
               >
 
-                <h3 className="text-sm font-figtree font-semibold hover:underline underline-offset-4 decoration-1 leading-snug hover:text-gray-700 transition-colors line-clamp-1 min-h-5">
+                <h3 className="text-sm font-figtree font-semibold hover:underline underline-offset-4 decoration-1 leading-snug hover:text-gray-900 transition-colors line-clamp-1 min-h-5">
                   {product.title}
                 </h3>
               </Link>

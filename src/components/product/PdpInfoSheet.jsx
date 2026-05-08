@@ -211,7 +211,7 @@ const PdpInfoSheet = ({ type, isOpen, onOpenChange }) => {
         onClose={() => onOpenChange(false)}
         detent="content"
       >
-        <MobileSheet.Container className="z-[9999]">
+        <MobileSheet.Container className="z-[499]">
           <MobileSheet.Header />
           <MobileSheet.Content>
             <div className="flex flex-col pb-6">

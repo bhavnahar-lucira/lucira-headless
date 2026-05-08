@@ -13,12 +13,12 @@ const OCCASIONS = [
 
 export default function ShopByOccasion() {
   return (
-    <section className="w-full my-10 md:my-15 bg-white">
+    <section className="w-full my-8 md:my-12 bg-white">
       <div className="container-main">
 
         <div className="text-center mb-6 px-1 md:px-0">
-          <h2 className="text-3xl md:text-4xl font-extrabold font-abhaya mb-2 text-black">Shop By Occasion</h2>
-          <p className="text-black text-base md:text-base font-normal">Jewelry for life's most meaningful moments</p>
+          <h2 className="text-2xl lg:text-4xl font-extrabold font-abhaya mb-1 text-black">Shop By Occasion</h2>
+          <p className="text-black font-normal md:text-base text-sm leading-[1.4] tracking-normal align-middle">Jewelry for life's most meaningful moments</p>
         </div>
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">

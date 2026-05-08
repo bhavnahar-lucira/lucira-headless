@@ -63,9 +63,9 @@ export default function WaysToExplore() {
   };
 
   const SectionHeader = () => (
-    <div className="text-left lg:text-center mb-8 px-4">
-      <h2 className="text-3xl md:text-4xl font-extrabold font-abhaya mb-2 text-black">More Ways To Explore</h2>
-      <p className="text-zinc-600 text-base font-normal">Experience Lucira your way, online or at our showrooms.</p>
+    <div className="text-left lg:text-center mb-8 px-0">
+      <h2 className="text-2xl lg:text-4xl font-extrabold font-abhaya mb-1 text-black">More Ways To Explore</h2>
+      <p className="text-black font-normal md:text-base text-sm leading-[1.4] tracking-normal align-middle">Experience Lucira your way, online or at our showrooms.</p>
     </div>
   );
 
@@ -106,7 +106,7 @@ export default function WaysToExplore() {
                       </div>
                       <div className="flex flex-col items-start gap-3 grow">
                         <h3 className="text-xl font-bold text-black">{way.title}</h3>
-                        <p className="text-black text-base font-normal mb-4">
+                        <p className="text-black font-normal md:text-base text-sm leading-[1.4] tracking-normal align-middle mb-4">
                           {way.desc}
                         </p>
                         <div className="mt-auto w-full">
@@ -218,8 +218,13 @@ export default function WaysToExplore() {
           transition: all 0.3s ease;
         }
         .explore-pagination .swiper-pagination-bullet-active {
-          width: 32px;
+          width: 24px;
           background: #000;
+        }
+        @media (min-width: 768px) {
+          .explore-pagination .swiper-pagination-bullet-active {
+            width: 24px;
+          }
         }
       `}</style>
     </section>

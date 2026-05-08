@@ -33,7 +33,7 @@ export default function DiamondEducation() {
   };
 
   return (
-    <div className="container mx-auto font-figtree text-gray-700">
+    <div className="container mx-auto font-figtree text-gray-900">
 
       {/* HERO */}
     <section className="flex flex-col lg:flex-row items-center gap-8 px-4 md:px-16 py-10 md:py-16">

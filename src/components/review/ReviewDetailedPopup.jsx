@@ -50,18 +50,18 @@ export default function ReviewDetailedPopup({ isOpen, onClose, reviews, activeIn
     
   const currentImage = getValidSrc(currentImageRaw);
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 md:p-10 transition-all duration-300">
+    <div className="fixed inset-0 z-[499] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 md:p-10 transition-all duration-300">
       
       {/* Navigation - Hidden on very small mobile */}
       <button 
         onClick={handlePrev}
-        className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 z-[10000] text-white hover:text-gray-300 transition-colors cursor-pointer outline-none bg-black/20 hover:bg-black/40 rounded-full p-2"
+        className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 z-[500] text-white hover:text-gray-300 transition-colors cursor-pointer outline-none bg-black/20 hover:bg-black/40 rounded-full p-2"
       >
         <ChevronLeft size={48} strokeWidth={1} />
       </button>
       <button 
         onClick={handleNext}
-        className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 z-[10000] text-white hover:text-gray-300 transition-colors cursor-pointer outline-none bg-black/20 hover:bg-black/40 rounded-full p-2"
+        className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 z-[500] text-white hover:text-gray-300 transition-colors cursor-pointer outline-none bg-black/20 hover:bg-black/40 rounded-full p-2"
       >
         <ChevronRight size={48} strokeWidth={1} />
       </button>
@@ -171,7 +171,7 @@ export default function ReviewDetailedPopup({ isOpen, onClose, reviews, activeIn
                 <Image src={review.productImage} alt={review.productTitle} fill className="object-cover group-hover:scale-110 transition-transform duration-500" />
               </div> */}
               <div className="min-w-0">
-                <span className="text-[10px] font-bold text-gray-700 uppercase tracking-widest block mb-1">Reviewed product</span>
+                <span className="text-[10px] font-bold text-gray-900 uppercase tracking-widest block mb-1">Reviewed product</span>
                 <h4 className="text-sm font-bold text-black truncate group-hover:text-primary transition-colors">
                   {review.productTitle}
                 </h4>

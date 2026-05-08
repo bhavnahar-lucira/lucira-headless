@@ -41,8 +41,8 @@ export function ProductSlider({ title, subtitle, products = [], preservePriceOnC
             }}
             breakpoints={{
               640: { slidesPerView: 2, spaceBetween: 24 },
-              1024: { slidesPerView: 3, spaceBetween: 30 },
-              1280: { slidesPerView: 4, spaceBetween: 30 },
+              1024: { slidesPerView: 3, spaceBetween: 16 },
+              1280: { slidesPerView: 4, spaceBetween: 16 },
             }}
             className="w-full"
           >

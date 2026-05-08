@@ -80,7 +80,7 @@ export default function PriceSection() {
           {/* ================= YOUR SAVINGS ================= */}
           <div className="w-1/2">
             <div className="bg-gray-100 rounded-2xl p-6 space-y-3 text-[12px]">
-              <div className="grid grid-cols-3 font-medium text-gray-700">
+              <div className="grid grid-cols-3 font-medium text-gray-900">
                 <div>Diamond Comparison</div>
                 <div>Lucira Grown</div>
                 <div>Mined</div>

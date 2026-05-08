@@ -10,17 +10,17 @@ export default function CareersPage() {
         </div>
 
         <div className="card bg-white shadow-sm border border-gray-200 rounded p-6 mb-6">
-          <div className="card-text mb-4 text-gray-700">
+          <div className="card-text mb-4 text-gray-900">
             Are you all about fashion, e-commerce, and marketing? Do diamonds and exquisite gemstones steal your heart? If the answer’s a ‘Yes!’ then Lucira's just the place for you!
           </div>
-          <div className="card-text text-gray-700">
+          <div className="card-text text-gray-900">
             At <a href="https://www.lucirajewelry.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Lucira Jewelry</a>, we’re dedicated to making our customers look stunning (it’s our name after all!) while redefining the jewelry game! If you think you've got what it takes to consistently outperform yourself and set new standards, then we’d love to hear from you!
           </div>
         </div>
 
         <div className="card bg-white shadow-sm border border-gray-200 rounded p-6 mb-6">
           <div className="font-abhaya card-title text-xl font-medium mb-4">How to apply?</div>
-          <div className="card-text text-gray-700">
+          <div className="card-text text-gray-900">
             <ul className="list-disc pl-5 space-y-2">
               <li>
                 You can browse our job openings, find the ones that fit your expertise, and fill in the registration forms.
@@ -34,7 +34,7 @@ export default function CareersPage() {
 
         <div className="card bg-white shadow-sm border border-gray-200 rounded p-6 mb-6">
           <div className="font-abhaya card-title text-xl font-medium mb-4">But why us?</div>
-          <div className="card-text text-gray-700">
+          <div className="card-text text-gray-900">
             <ul className="list-disc pl-5 space-y-2">
               <li>
                 <strong>The Golden Standard:</strong> At Lucira Jewelry, we take excellence very seriously. We continuously raise the bar and redefine benchmarks - here, excellence is non-negotiable.

@@ -90,7 +90,7 @@ export default function Navbar({ hideTop }) {
         </motion.div>
 
         {/* Navigation Menu */}
-        <ul className="flex items-center gap-6 xl:gap-8 2xl:gap-8 lg:text-xs xl:text-sm uppercase transition-all duration-300 mx-0">
+        <ul className="flex items-center lg:text-xs xl:text-sm uppercase transition-all duration-300 gap-12 mx-auto">
           {MEGA_MENU.map((menu, index) => {
             const isActive =
               pathname === menu.href ||
@@ -112,7 +112,7 @@ export default function Navbar({ hideTop }) {
                     "block py-4 tracking-normal transition-all duration-200 uppercase text-sm leading-none font-medium font-figtree",
                     isActive || isHovered
                       ? "text-primary"
-                      : "text-gray-700 hover:text-primary",
+                      : "text-gray-900 hover:text-primary",
                     isActive ? "font-semibold" : "font-medium"
                   )}
                 >

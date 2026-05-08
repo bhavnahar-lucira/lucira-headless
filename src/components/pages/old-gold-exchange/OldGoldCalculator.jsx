@@ -251,7 +251,7 @@ export default function OldGoldCalculator({ config }) {
                     <tr key={karat.value} className="hover:bg-gray-50 transition-colors">
                       <td className="p-4 text-center font-bold text-[#b76f79]">{karat.label}</td>
                       {WEIGHTS.map(w => (
-                        <td key={w} className="p-4 text-center text-gray-700">
+                        <td key={w} className="p-4 text-center text-gray-900">
                           {loading ? "..." : formatCurrency(gRate * w)}
                         </td>
                       ))}

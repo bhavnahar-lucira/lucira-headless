@@ -224,7 +224,7 @@ export default function MainHeader() {
 
   return (
     <div className="bg-white relative">
-      <div className="container-main grid grid-cols-[1fr_2fr_1fr] items-center py-4">
+      <div className="container-main grid grid-cols-[1fr_2fr_1fr] items-center py-4 border-b border-[#f2f2f2]">
 
         {/* Logo */}
         <Link href="/" className="flex items-center">
@@ -233,6 +233,7 @@ export default function MainHeader() {
             alt="Lucira Jewelry"
             width={100}
             height={40}
+            className="w-[85px] h-[30px] lg:w-[100px] lg:h-[40px]"
             priority
           />
         </Link>

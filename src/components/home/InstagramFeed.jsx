@@ -92,8 +92,8 @@ export default function InstagramFeed() {
     <section className="w-full my-15 bg-white overflow-hidden">
       <div className="container-main text-center animate-in fade-in slide-in-from-bottom-4 duration-1000">
         <div className="text-center mb-6">
-          <h2 className="text-3xl md:text-4xl font-extrabold font-abhaya mb-2 text-black">Follow Our Journey</h2>
-          <p className="text-black text-base font-normal">
+          <h2 className="text-2xl lg:text-4xl font-extrabold font-abhaya mb-1 text-black">Follow Our Journey</h2>
+          <p className="text-black font-normal md:text-base text-sm leading-[1.4] tracking-normal align-middle">
             Tag us{" "}
             <Link
               href="https://www.instagram.com/lucirajewelry"

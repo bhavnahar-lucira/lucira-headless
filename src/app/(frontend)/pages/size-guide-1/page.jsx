@@ -295,11 +295,11 @@ export default function SizeGuidePage() {
                 <h2 className="text-lg sm:text-xl font-medium border-l-4 border-[#b48c54] pl-3 mb-4">
                 Bracelet Size Guide
                 </h2>
-                <p className="text-sm sm:text-base text-gray-700 leading-relaxed mb-4">
+                <p className="text-sm sm:text-base text-gray-900 leading-relaxed mb-4">
                 A well-fitted bracelet enhances both comfort and elegance. Here's how
                 to measure your wrist accurately:
                 </p>
-                <div className="space-y-3 text-sm sm:text-base text-gray-700">
+                <div className="space-y-3 text-sm sm:text-base text-gray-900">
                     <p><strong>Step 1:</strong> Measure Your Wrist</p>
                     <ul className="list-disc pl-5 space-y-1">
                         <li>

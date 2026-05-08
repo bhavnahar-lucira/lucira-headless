@@ -94,7 +94,7 @@ export default function HowToWearPage() {
             </h1>
             <div className="w-full mb-10">
                 <h2 className="text-lg md:text-xl font-medium mb-3">Bracelet Styling Guide</h2>
-                <p className="text-sm md:text-base font-light leading-relaxed text-justify text-gray-700">
+                <p className="text-sm md:text-base font-light leading-relaxed text-justify text-gray-900">
                     Bracelets are versatile pieces of jewelry that elevate your elegance. It's a statement of personality. May it be a party you are hosting, a regular office day, or an international trip, a bracelet is a must-have.
                 </p>
             </div>
@@ -115,7 +115,7 @@ export default function HowToWearPage() {
                                             />
                                         </div>
                                     </div>
-                                    <p className="flex-1 text-sm md:text-base text-gray-700 leading-relaxed text-justify">
+                                    <p className="flex-1 text-sm md:text-base text-gray-900 leading-relaxed text-justify">
                                         {item.text}
                                     </p>
                                 </div>
@@ -131,7 +131,7 @@ export default function HowToWearPage() {
                         </h2>
 
                         <div className="flex flex-col md:flex-row gap-8 items-center">
-                            <div className="flex-1 space-y-3 text-sm md:text-base text-gray-700">
+                            <div className="flex-1 space-y-3 text-sm md:text-base text-gray-900">
                                 {sec.text.map((t, i) => (
                                     <p key={i}>{t}</p>
                                 ))}
@@ -149,7 +149,7 @@ export default function HowToWearPage() {
                     <h2 className="text-lg md:text-xl font-medium mb-4">
                     The Ultimate Guide to Wearing Necklaces: Styles and Styling
                     </h2>
-                    <p className="text-sm md:text-base text-gray-700">
+                    <p className="text-sm md:text-base text-gray-900">
                     There's something undeniably powerful about necklaces to enhance your outfit, frame your face and make you feel elegant without much effort. While 'how to wear a necklace' sounds like the easiest task, styling them according to your outfits can make all the difference.
                     </p>
                 </div>
@@ -172,7 +172,7 @@ export default function HowToWearPage() {
                                     />
                                 </div>
                             </div>
-                            <div className="flex-1 text-sm md:text-base text-gray-700 space-y-2">
+                            <div className="flex-1 text-sm md:text-base text-gray-900 space-y-2">
                                 {item.text.map((t, i) => (
                                     <p key={i}>{t}</p>
                                 ))}
@@ -181,7 +181,7 @@ export default function HowToWearPage() {
                     </div>
                 ))}
                 
-                <p className="text-center text-sm md:text-base text-gray-700">
+                <p className="text-center text-sm md:text-base text-gray-900">
                     Keep experimenting with the styles, every necklace can make you stand out if styled well. It can bring the 'wow' factor to an outfit. Discover your style and wear your diamond accessories with confidence because there's nothing more beautiful than a woman who knows that she's shining!
                 </p>
             </section>
