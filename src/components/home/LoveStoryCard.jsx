@@ -89,7 +89,7 @@ export default function LoveStorySlider({
       <div className="container-main">
         <div className="text-center mb-6">
           <h2 className="text-2xl lg:text-4xl font-extrabold font-abhaya mb-1 text-black">{title}</h2>
-          <p className="text-black font-normal md:text-base text-sm leading-[140%] tracking-normal align-middle">{subtitle}</p>
+          <p className="text-black font-normal md:text-base text-sm leading-[1.4] tracking-normal align-middle">{subtitle}</p>
         </div>
 
         <div className="relative">

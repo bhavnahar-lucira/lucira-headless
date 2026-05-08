@@ -21,7 +21,7 @@ export default function DiamondShapes() {
           <h2 className="text-2xl lg:text-4xl font-extrabold font-abhaya mb-1 text-black">
             Explore Our Diamond Cuts
           </h2>
-          <p className="text-black font-normal md:text-base text-sm leading-[140%] tracking-normal align-middle">
+          <p className="text-black font-normal md:text-base text-sm leading-[1.4] tracking-normal align-middle">
             Where Geometry Elevates Style
           </p>
         </div>

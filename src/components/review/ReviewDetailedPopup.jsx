@@ -55,13 +55,13 @@ export default function ReviewDetailedPopup({ isOpen, onClose, reviews, activeIn
       {/* Navigation - Hidden on very small mobile */}
       <button 
         onClick={handlePrev}
-        className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 z-[10000] text-white hover:text-gray-300 transition-colors cursor-pointer outline-none bg-black/20 hover:bg-black/40 rounded-full p-2"
+        className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 z-[500] text-white hover:text-gray-300 transition-colors cursor-pointer outline-none bg-black/20 hover:bg-black/40 rounded-full p-2"
       >
         <ChevronLeft size={48} strokeWidth={1} />
       </button>
       <button 
         onClick={handleNext}
-        className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 z-[10000] text-white hover:text-gray-300 transition-colors cursor-pointer outline-none bg-black/20 hover:bg-black/40 rounded-full p-2"
+        className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 z-[500] text-white hover:text-gray-300 transition-colors cursor-pointer outline-none bg-black/20 hover:bg-black/40 rounded-full p-2"
       >
         <ChevronRight size={48} strokeWidth={1} />
       </button>

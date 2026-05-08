@@ -18,7 +18,7 @@ export default function ShopByOccasion() {
 
         <div className="text-center mb-6 px-1 md:px-0">
           <h2 className="text-2xl lg:text-4xl font-extrabold font-abhaya mb-1 text-black">Shop By Occasion</h2>
-          <p className="text-black font-normal md:text-base text-sm leading-[140%] tracking-normal align-middle">Jewelry for life's most meaningful moments</p>
+          <p className="text-black font-normal md:text-base text-sm leading-[1.4] tracking-normal align-middle">Jewelry for life's most meaningful moments</p>
         </div>
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">

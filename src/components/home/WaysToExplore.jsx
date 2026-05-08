@@ -65,7 +65,7 @@ export default function WaysToExplore() {
   const SectionHeader = () => (
     <div className="text-left lg:text-center mb-8 px-0">
       <h2 className="text-2xl lg:text-4xl font-extrabold font-abhaya mb-1 text-black">More Ways To Explore</h2>
-      <p className="text-black font-normal md:text-base text-sm leading-[140%] tracking-normal align-middle">Experience Lucira your way, online or at our showrooms.</p>
+      <p className="text-black font-normal md:text-base text-sm leading-[1.4] tracking-normal align-middle">Experience Lucira your way, online or at our showrooms.</p>
     </div>
   );
 
@@ -106,7 +106,7 @@ export default function WaysToExplore() {
                       </div>
                       <div className="flex flex-col items-start gap-3 grow">
                         <h3 className="text-xl font-bold text-black">{way.title}</h3>
-                        <p className="text-black font-normal md:text-base text-sm leading-[140%] tracking-normal align-middle mb-4">
+                        <p className="text-black font-normal md:text-base text-sm leading-[1.4] tracking-normal align-middle mb-4">
                           {way.desc}
                         </p>
                         <div className="mt-auto w-full">

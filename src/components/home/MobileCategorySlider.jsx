@@ -42,7 +42,7 @@ export default function MobileCategorySlider() {
                     className="object-cover block"
                   />
                 </div>
-                <p className="text-[10px] sm:text-xs uppercase text-black mt-2 font-semibold text-xs leading-[140%] tracking-normal align-middle">
+                <p className="text-[10px] sm:text-xs uppercase text-black mt-2 font-semibold text-xs leading-[1.4] tracking-normal align-middle">
                   {collection.name}
                 </p>
               </Link>
