@@ -151,20 +151,28 @@ export function OtpSpinAuth({
     }
   };
 
-  const loginSuccess = async (data, skipRedirect = false) => {
+  const loginSuccess = async (data, isSignup = false, skipRedirect = false) => {
     const target = redirectTargetRef.current || localStorage.getItem("auth_redirect_path") || pathname || "/";
     localStorage.removeItem("auth_redirect_path"); // Clean up
     
     const user = data.user || data.customer;
     const userId = user?.id;
 
-    // Track login in GTM
-    pushLogin({
-      id: userId,
-      mobile: mobile,
-      email: user?.email,
-      name: user?.first_name ? `${user.first_name} ${user.last_name || ""}`.trim() : "User"
-    });
+    if (isSignup) {
+      pushSignup({
+        id: userId,
+        mobile: mobile,
+        email: user?.email,
+        name: user?.first_name ? `${user.first_name} ${user.last_name || ""}`.trim() : "User"
+      });
+    } else {
+      pushLogin({
+        id: userId,
+        mobile: mobile,
+        email: user?.email,
+        name: user?.first_name ? `${user.first_name} ${user.last_name || ""}`.trim() : "User"
+      });
+    }
     
     dispatch(
       login({

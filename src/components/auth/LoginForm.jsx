@@ -101,16 +101,18 @@ export function LoginForm({ onSuccess, initialMobile = "", initialStep = "login"
     }
   }, [step]);
 
-  const loginSuccess = async (data) => {
+  const loginSuccess = async (data, isSignup = false) => {
     const user = data.user || data.customer;
     const userId = user?.id;
     
-    pushLogin({
-      id: userId,
-      mobile: mobile,
-      email: user?.email,
-      name: user?.first_name ? `${user.first_name} ${user.last_name || ""}`.trim() : "User"
-    });
+    if (!isSignup) {
+      pushLogin({
+        id: userId,
+        mobile: mobile,
+        email: user?.email,
+        name: user?.first_name ? `${user.first_name} ${user.last_name || ""}`.trim() : "User"
+      });
+    }
 
     dispatch(
       login({
@@ -220,7 +222,7 @@ export function LoginForm({ onSuccess, initialMobile = "", initialStep = "login"
           name: `${firstName} ${lastName}`.trim()
         });
 
-        loginSuccess(data);
+        loginSuccess(data, true);
       }
     } catch (err) {
       toast.error(err.message || "Register failed");

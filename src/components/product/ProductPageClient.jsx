@@ -888,8 +888,8 @@ export default function ProductPageClient({ product, complementaryProducts = [],
 
       // Pricing
       // price: Number(activeVariant?.compare_price || activeVariant?.compareAtPrice || product.compare_price || product.compareAtPrice || activeVariant?.price || product.price || 0),
-      price: Number(raw?.original_total || activeVariant?.compare_price || activeVariant?.price || 0),
-      offer_price: Number(activeVariant?.price || product.price || 0),
+      price: Number(activeVariant?.price || product.price || 0),
+      offer_price: Number(raw?.original_total || activeVariant?.compare_price || activeVariant?.price || 0),
 
       // Price Breakup Values
       metal_label: (activeVariant?.metafields?.metal_purity || activeKarat) + ' ' + (activeVariant?.metafields?.metal_color || activeColor),
@@ -980,8 +980,8 @@ export default function ProductPageClient({ product, complementaryProducts = [],
         productUrlw: `/products/${product.handle}`,
         thumbnailImage: productImageUrl,
         image: productImageUrl,
-        price: originalPrice,
-        offerPrice: sellingPrice,
+        price: sellingPrice,
+        offerPrice: originalPrice,
         //productPersona: null
       });
     }

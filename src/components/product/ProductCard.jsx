@@ -359,8 +359,8 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle,
       productUrl: `${currentOrigin}/products/${product.handle}`,
       thumbnailImage: galleryImages?.[0]?.url || product.image?.url || "",
       purity: currentVariant?.metafields?.metal_purity || "",
-      price: String(Number(displayComparePrice || displayPrice || 0)),
-      offerPrice: String(Number(displayPrice || 0)),
+      price: String(Number(displayPrice || 0)),
+      offerPrice: String(Number(displayComparePrice || displayPrice || 0)),
     };
 
     if (index !== undefined && index !== null && index !== "") {
