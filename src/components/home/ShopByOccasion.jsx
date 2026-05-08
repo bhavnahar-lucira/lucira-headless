@@ -13,7 +13,7 @@ const OCCASIONS = [
 
 export default function ShopByOccasion() {
   return (
-    <section className="w-full my-0 md:my-0 bg-white">
+    <section className="w-full my-8 md:my-12 bg-white">
       <div className="container-main">
 
         <div className="text-center mb-6 px-1 md:px-0">

@@ -144,7 +144,7 @@ export default function CustomerReview({
   if (reviews.length === 0) return null;
 
   return (
-    <section className="w-full my-0 md:my-0 bg-white overflow-hidden">
+    <section className="w-full my-8 md:my-12 bg-white overflow-hidden">
       <div className="container-main">
         <div className={`mb-8 ${isMobile ? "text-left" : "text-center md:text-left"}`}>
           <h2 className="text-2xl lg:text-4xl font-extrabold font-abhaya mb-1 text-black">
