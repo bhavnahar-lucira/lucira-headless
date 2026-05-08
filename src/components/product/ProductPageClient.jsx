@@ -2117,13 +2117,8 @@ export default function ProductPageClient({ product, complementaryProducts = [],
 
               <div className="grid grid-cols-2 md:grid-cols-2 gap-4 [&>*:last-child:nth-child(odd)]:col-span-2">
                 {/* Metal Card */}
-<<<<<<< HEAD
                 <div className="bg-[#F9F9F9] rounded-2xl p-5 space-y-4">
                   <div className="flex items-center gap-2 font-bold text-sm uppercase text-gray-900">
-=======
-                <div className="bg-[#F9F9F9] rounded-2xl p-4 space-y-4">
-                  <div className="flex items-center gap-2 font-bold text-sm uppercase text-gray-700">
->>>>>>> 366384b81334ecc6259ebca8f11215187c595264
                     <Image src="/images/icons/metal.svg" alt="Metal" width={18} height={18} />
                     Metal <Info size={14} className="text-gray-400 cursor-pointer ml-auto" onClick={() => setActiveInfoSheet("metal")} />
                   </div>
@@ -2150,13 +2145,8 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                 </div>
 
                 {/* Dimensions Card */}
-<<<<<<< HEAD
                 <div className="bg-[#F9F9F9] rounded-2xl p-5 space-y-4">
                   <div className="flex items-center gap-2 font-bold text-sm uppercase text-gray-900">
-=======
-                <div className="bg-[#F9F9F9] rounded-2xl p-4 space-y-4">
-                  <div className="flex items-center gap-2 font-bold text-sm uppercase text-gray-700">
->>>>>>> 366384b81334ecc6259ebca8f11215187c595264
                     <Image src="/images/icons/dimension.svg" alt="Dimensions" width={18} height={18} />
                     Dimension <Info size={14} className="text-gray-400 cursor-pointer ml-auto" onClick={() => setActiveInfoSheet("dimension")} />
                   </div>
@@ -2184,13 +2174,8 @@ export default function ProductPageClient({ product, complementaryProducts = [],
 
                 {/* Single Diamond Card */}
                 {!isGoldCoin && activeVariant?.metafields?.diamonds && activeVariant.metafields.diamonds.length === 1 && (
-<<<<<<< HEAD
                   <div className="bg-[#F9F9F9] rounded-2xl p-5 space-y-4">
                     <div className="flex items-center gap-2 font-bold text-sm uppercase text-gray-900">
-=======
-                  <div className="bg-[#F9F9F9] rounded-2xl p-4 space-y-4">
-                    <div className="flex items-center gap-2 font-bold text-sm uppercase text-gray-700">
->>>>>>> 366384b81334ecc6259ebca8f11215187c595264
                       <Image src="/images/icons/diamond.svg" alt="Diamond" width={18} height={18} />
                       Diamond <Info size={14} className="text-gray-400 cursor-pointer ml-auto" onClick={() => setActiveInfoSheet("diamond")} />
                     </div>
@@ -2221,15 +2206,9 @@ export default function ProductPageClient({ product, complementaryProducts = [],
 
                 {/* Single Gemstone Card */}
                 {activeVariant?.metafields?.gemstones && activeVariant.metafields.gemstones.length === 1 && (
-<<<<<<< HEAD
                   <div className="bg-[#F9F9F9] rounded-2xl p-5 space-y-4">
                     <div className="flex items-center gap-2 font-bold text-sm uppercase text-gray-900">
-                      <Image src="/images/icons/diamond.svg" alt="Gemstone" width={18} height={18} className="grayscale opacity-70" />
-=======
-                  <div className="bg-[#F9F9F9] rounded-2xl p-4 space-y-4">
-                    <div className="flex items-center gap-2 font-bold text-sm uppercase text-gray-700">
                       <Image src="/images/icons/gemstone.svg" alt="Gemstone" width={18} height={18} className="grayscale opacity-70" />
->>>>>>> 366384b81334ecc6259ebca8f11215187c595264
                       Gemstone <Info size={14} className="text-gray-400 cursor-pointer ml-auto" onClick={() => setActiveInfoSheet("gemstone")} />
                     </div>
                     <div className="space-y-2.5">
