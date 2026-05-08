@@ -161,7 +161,14 @@ export default function WishlistPage() {
         gst: selectedVariant.price_breakup?.gst?.amount || 0,
         finalPrice: selectedVariant.price_breakup?.total || selectedVariant.price,
         diamondTotalPcs: selectedVariant.price_breakup?.diamond?.pcs || 0,
-        shippingDate: "13/04/2026", // Mock or dynamic if available
+         shippingDate: (() => {
+           const date = new Date();
+           date.setDate(date.getDate() + 10);
+           const d = String(date.getDate()).padStart(2, "0");
+           const m = String(date.getMonth() + 1).padStart(2, "0");
+           const y = date.getFullYear();
+           return `${d}/${m}/${y}`;
+         })(), // Mock or dynamic if available
 
         hasVideo: Boolean(product.media?.some((m) => m.type === "VIDEO" || m.type === "EXTERNAL_VIDEO")),
         hasSimilar: Boolean(product.handle),

@@ -16,6 +16,23 @@ function normalizeVariantId(variantId = "") {
     : `gid://shopify/ProductVariant/${value}`;
 }
 
+function buildMailingAddress(address = null) {
+  if (!address) return null;
+
+  return {
+    firstName: address.firstName || "",
+    lastName: address.lastName || "",
+    company: address.company || "",
+    address1: address.address1 || "",
+    address2: address.address2 || "",
+    city: address.city || "",
+    province: address.province || "",
+    zip: String(address.zip || ""),
+    country: address.country || "",
+    phone: address.phone || "",
+  };
+}
+
 export async function POST(req) {
   try {
     const body = await req.json();
@@ -51,21 +68,38 @@ export async function POST(req) {
     const nectorValue = Number(nectorPoints?.fiat_value || 0);
 
     const subtotalBeforeDiscount = cart.items.reduce((acc, item) => acc + (Number(item.price || 0) * Number(item.quantity || 1)), 0);
+    const finalTotal = Math.max(0, subtotalBeforeDiscount - nectorValue);
 
     // Prepare line items
     const lineItems = cart.items.map(item => {
       const price = Number(item.price || 0);
+      // For free gifts, we want to show the original value as a strikethrough in Shopify
+      // We look for originalPrice or comparePrice
+      const originalValue = Number(item.originalPrice || item.comparePrice || 0);
+      const unitPrice = (price === 0 && originalValue > 0) ? originalValue : price;
+
       const lineItem = {
         variantId: normalizeVariantId(item.variantId),
         quantity: Number(item.quantity || 1),
-        originalUnitPrice: price,
+        originalUnitPrice: unitPrice,
         customAttributes: [
           { key: "_Gold Weight", value: String(item.goldWeight || "") },
+          { key: "_Gold Price", value: String(item.goldPrice || "") },
+          { key: "_Gold Price Per Gram", value: String(item.goldPricePerGram || "") },
+          { key: "_Making Charges", value: String(item.makingCharges || "") },
           { key: "_Diamond Charges", value: String(item.diamondCharges || "") },
-          { key: "Variant Title", value: String(item.variantTitle || "") },
-          { key: "Engraving Text", value: String(item.engravingText || "") },
-          { key: "Engraving Font", value: String(item.engravingFont || "") }
-        ].filter(attr => attr.value !== "")
+          { key: "_Diamond Total Pcs", value: String(item.diamondTotalPcs || "") },
+          { key: "_GST", value: String(item.gst || "") },
+          { key: "_Final Price", value: String(item.finalPrice || item.price || "") },
+          { key: "_Shipping Date", value: String(item.shippingDate || "") },
+          { key: "Variant Title", value: price === 0 ? "Free Gift" : String(item.variantTitle || "") },
+          { key: "Color", value: String(item.color || "") },
+          { key: "Karat", value: String(item.karat || "") },
+          { key: "Size", value: String(item.size || "") },
+          { key: "EngravingText", value: String(item.engravingText || item.engraving || "") },
+          { key: "EngravingFont", value: String(item.engravingFont || "") },
+          { key: "GiftText", value: String(item.giftText || "") },
+        ].filter(attr => attr.value !== "" && attr.value !== "0" && attr.value !== "undefined")
       };
 
       if (price === 0) {
@@ -78,15 +112,24 @@ export async function POST(req) {
       return lineItem;
     });
 
-    // Apply Nector Discount to the first paid line item (separate label)
+    // Apply Nector Discount to the highest priced paid line item
     if (nectorValue > 0) {
-      const firstPaidItem = lineItems.find(item => item.originalUnitPrice > 0);
-      if (firstPaidItem) {
-        firstPaidItem.appliedDiscount = {
-          title: "Nector Discount",
-          value: nectorValue,
-          valueType: "FIXED_AMOUNT"
-        };
+      // Sort a copy of lineItems by price descending to find the best candidate
+      const sortedItems = [...lineItems]
+        .filter(item => item.originalUnitPrice > 0 && !item.appliedDiscount)
+        .sort((a, b) => b.originalUnitPrice - a.originalUnitPrice);
+
+      if (sortedItems.length > 0) {
+        const bestItem = sortedItems[0];
+        // Find the original reference in lineItems to apply the discount
+        const targetItem = lineItems.find(item => item === bestItem);
+        if (targetItem) {
+          targetItem.appliedDiscount = {
+            title: nectorPoints?.id || "Nector Discount",
+            value: nectorValue,
+            valueType: "FIXED_AMOUNT"
+          };
+        }
       }
     }
 
@@ -106,11 +149,23 @@ export async function POST(req) {
     }
 
     // STEP 1: Create Shopify Draft Order
+    const customAttributes = [];
+    const tags = ["Razorpay"];
+    if (nectorPoints?.coin_value) {
+      customAttributes.push({ key: "NECTOR_USED_AMOUNT", value: String(nectorPoints.coin_value) });
+      customAttributes.push({ key: "nector_points_used", value: String(nectorPoints.coin_value) });
+      tags.push("nector_redeem");
+    }
+
     const draftOrderInput = {
       lineItems,
       appliedDiscount: finalDiscount,
       useCustomerDefaultAddress: false,
-      taxExempt: true
+      taxExempt: true,
+      shippingAddress: buildMailingAddress(shippingAddress),
+      billingAddress: buildMailingAddress(billingAddress || shippingAddress),
+      customAttributes: customAttributes.length > 0 ? customAttributes : undefined,
+      tags: tags
     };
 
     // If we have a real discount code, Shopify Draft Orders usually require 
