@@ -84,7 +84,7 @@ const SEARCH_DATA = [
   {
     title: "Earrings",
     links: [
-      { label: "Lab Grown Diamond Earrings", href: "/collections/all-earrings" },
+      { label: "Lab Grown Diamond Earrings", href: "/collections/earrings" },
       { label: "Lab Grown Diamond Stud Earrings", href: "/collections/stud-earrings" },
       { label: "Diamond Studs For Men", href: "/collections/mens-stud" },
       { label: "Diamond Earrings For Men", href: "/collections/earrings-for-men" },
@@ -96,9 +96,9 @@ const SEARCH_DATA = [
     title: "Necklaces & Bracelets",
     links: [
       { label: "Diamond Tennis Bracelet", href: "/collections/diamond-tennis-bracelets" },
-      { label: "Lab Grown Diamond Necklace", href: "/collections/all-necklaces" },
+      { label: "Lab Grown Diamond Necklace", href: "/collections/necklaces" },
       { label: "Pendants For Women", href: "/collections/pendant-necklaces" },
-      { label: "Diamond Bracelet", href: "/collections/all-bracelets" },
+      { label: "Diamond Bracelet", href: "/collections/bracelets" },
       { label: "Mens Diamond Tennis Bracelet", href: "/collections/mens-bracelets" },
       { label: "Diamond Bracelet For Women", href: "/collections/diamond-bracelet-for-women" },
       { label: "Lab Grown Solitaire Bracelet", href: "/collections/solitaires-bracelets" },

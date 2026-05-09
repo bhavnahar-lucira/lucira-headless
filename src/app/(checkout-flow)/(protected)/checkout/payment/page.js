@@ -16,7 +16,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { ChevronLeft, Trash2, Plus, Loader2, X } from "lucide-react";
+import { ChevronLeft, Trash2, Plus, Loader2, X, Check } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import Link from "next/link";
@@ -279,6 +279,33 @@ export default function PaymentPage() {
     };
   }, [dispatch]);
 
+  useEffect(() => {
+    const checkDelivery = async () => {
+      if (typeof window === "undefined") return;
+      
+      const selectionStr = localStorage.getItem("checkout_selection");
+      if (!selectionStr) {
+        router.push("/checkout/shipping");
+        return;
+      }
+      
+      const selection = JSON.parse(selectionStr);
+      if (selection.deliveryMethod === "ship" && selection.selectedAddress?.zip) {
+        try {
+          const res = await fetch(`/api/pincodes/check?pincode=${selection.selectedAddress.zip.trim()}`);
+          const data = await res.json();
+          if (!data.deliverable) {
+            toast.error("We are not delivering to this pincode. Redirecting to shipping...");
+            router.push("/checkout/shipping");
+          }
+        } catch (err) {
+          console.error("Payment page pincode check error:", err);
+        }
+      }
+    };
+    checkDelivery();
+  }, [router]);
+
   const finalAmount = useMemo(() => {
     const insuranceItem = (items || []).find(item => item.variantId === INSURANCE_VARIANT_ID);
     const insuranceValue = insuranceItem ? (insuranceItem.price * (insuranceItem.quantity || 1)) : 0;
@@ -478,7 +505,9 @@ export default function PaymentPage() {
         persistBillingSelection({ billingAddressMode: "same" });
         await saveCheckoutAddressSelection({ billingAddressMode: "same" });
       }
-      toast.success("Address removed");
+      toast.error("Address removed", {
+        icon: <Check className="w-4 h-4" />
+      });
     } catch (error) {
       toast.error(error.message || "Unable to remove address");
     }

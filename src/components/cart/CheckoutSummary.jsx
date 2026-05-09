@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Phone, MessageSquare, Truck, MessageCircle, Coins, Loader2 } from "lucide-react";
+import { Phone, MessageSquare, Truck, MessageCircle, Coins, Loader2, Check } from "lucide-react";
 import { useCart } from "@/hooks/useCart";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -133,7 +133,9 @@ export default function CheckoutSummary({
 
     if (appliedCoupon) {
       removeCoupon();
-      toast.info("Coupon has been removed as loyalty points are applied.");
+      toast.error("Coupon has been removed as loyalty points are applied.", {
+        icon: <Check className="w-4 h-4" />
+      });
     }
 
     const promotion = pointsData.promotions[0];
@@ -148,7 +150,9 @@ export default function CheckoutSummary({
 
   const handleRemovePoints = () => {
     dispatch(removePoints());
-    toast.info("Points discount removed");
+    toast.error("Points discount removed", {
+      icon: <Check className="w-4 h-4" />
+    });
   };
 
   const displayItems = (items || []).filter(
@@ -171,7 +175,7 @@ export default function CheckoutSummary({
               return (
                 <div key={index} className="space-y-3">
                   <div className="flex gap-4">
-                    <div className="w-20 h-20 bg-zinc-50 rounded-md border border-zinc-100 p-1 flex-shrink-0 block">
+                    <div className="w-20 h-20 bg-zinc-50 rounded-md border border-zinc-100 p-1 shrink-0 block">
                       <Image 
                         src={item.image || "/images/product/1.jpg"} 
                         alt={item.title} 
@@ -246,6 +250,12 @@ export default function CheckoutSummary({
               <span className="font-bold">₹{insuranceValue.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
             </div>
           )}
+          {nectorPoints && (
+            <div className="flex lg:hidden justify-between text-sm text-[#189351]">
+              <span className="font-bold uppercase tracking-wider">Redeemed {nectorPoints.coin_value} coins</span>
+              <span className="font-bold">- ₹ {nectorPoints.fiat_value.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
+            </div>
+          )}
           <div className="flex justify-between text-sm text-[#189351]">
             <span>Shipping (Standard)</span>
             <span className="font-bold">Free</span>
@@ -280,12 +290,17 @@ export default function CheckoutSummary({
             }
             if (nectorPoints) {
               return (
-                <div className="flex items-center justify-between bg-white/50 p-2 rounded-lg border border-[#B4936B]/20">
-                  <div className="text-xs">
-                    <span className="font-bold text-[#189351]">Applied: -₹{nectorPoints.fiat_value}</span>
-                    <p className="text-zinc-500 tracking-tight">Redeemed {nectorPoints.coin_value} coins</p>
+                <div className="flex items-center justify-between bg-white/80 p-3 rounded-lg border border-[#B4936B]/20 shadow-sm">
+                  <div className="space-y-0.5">
+                    <span className="text-sm font-bold text-[#189351]">Applied: -₹{nectorPoints.fiat_value.toLocaleString('en-IN')}</span>
+                    <p className="text-[11px] text-zinc-500 font-medium">Redeemed {nectorPoints.coin_value} coins</p>
                   </div>
-                  <button onClick={handleRemovePoints} className="text-[10px] font-bold text-red-500 hover:underline uppercase">Remove</button>
+                  <button 
+                    onClick={handleRemovePoints} 
+                    className="text-[11px] font-bold text-red-600 hover:text-red-700 uppercase tracking-wider transition-colors"
+                  >
+                    REMOVE
+                  </button>
                 </div>
               );
             }

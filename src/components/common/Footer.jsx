@@ -75,16 +75,17 @@ export default function Footer() {
                 <AccordionContent className="pb-6">
                   <ul className="grid grid-cols-2 gap-y-3 gap-x-4 font-figtree text-[13px]">
                     <li><Link href="/collections/bestsellers">Best Sellers</Link></li>
+                    <li><Link href="/collections/rings">Rings</Link></li>
                     <li><Link href="/collections/engagement-rings">Engagement Rings</Link></li>
-                    <li><Link href="#">Wedding Rings</Link></li>
+                    <li><Link href="/collections/wedding-rings">Wedding Rings</Link></li>
                     <li><Link href="/collections/earrings">Earrings</Link></li>
-                    <li><Link href="/collections/all-bracelets">Bracelets</Link></li>
-                    <li><Link href="/collections/solitaires-necklaces">Necklaces</Link></li>
-                    <li><Link href="/collections/all-nosepins">Nosepins</Link></li>
+                    <li><Link href="/collections/bracelets">Bracelets</Link></li>
+                    <li><Link href="/collections/necklaces">Necklaces</Link></li>
+                    <li><Link href="/collections/nosepins">Nosepins</Link></li>
                     <li><Link href="/collections/mens-ring">Men's Rings</Link></li>
                     <li><Link href="/collections/mens-stud">Men's Studs</Link></li>
                     <li><Link href="/collections/mens-bracelets">Men's Bracelets</Link></li>
-                    <li><Link href="/collections/akshaya-tritiya-gold-diamond-jewellery">Collections</Link></li>
+                    <li><Link href="/collections/hexa">Collections</Link></li>
                     <li><Link href="/collections/all">Gifting</Link></li>
                   </ul>
                 </AccordionContent>
@@ -120,8 +121,14 @@ export default function Footer() {
                   <ul className="space-y-3 font-figtree text-[13px]">
                     <li><Link href="/pages/about-our-company">About Our Company</Link></li>
                     <li><Link href="/pages/purpose-and-value">Purpose & Value</Link></li>
-                    <li><Link href="/pages/craftmanship">Craftsmanship</Link></li>
+                    <li><Link href="/blogs/stories">Blogs</Link></li>
                     <li><Link href="/pages/rewards">Rewards</Link></li>
+                    <li><Link href="/pages/featured-in">Featured In</Link></li>
+                    <li><Link href="/pages/sitemap">Sitemap</Link></li>
+                    <li><Link href="/pages/craftmanship">Craftsmanship</Link></li>
+                    <li><Link href="/pages/mordern-slavery-policy">Modern Slavery Policy</Link></li>
+                    <li><Link href="/pages/supplier-code-of-conduct">Supplier Code of Conduct</Link></li>
+                    <li><Link href="/pages/accessibility-statement">Accessibility Statement</Link></li>
                   </ul>
                 </AccordionContent>
               </AccordionItem>
@@ -133,12 +140,17 @@ export default function Footer() {
                 </AccordionTrigger>
                 <AccordionContent className="pb-6">
                   <ul className="grid grid-cols-2 gap-y-3 gap-x-4 font-figtree text-[13px]">
+                    <li><Link href="/pages/contact-us">Contact Us</Link></li>
                     <li><Link href="/pages/faqs">FAQ's</Link></li>
                     <li><Link href="/reviews">Reviews</Link></li>
                     <li><Link href="/pages/15-days-return">15-Days Return</Link></li>
                     <li><Link href="/pages/cancel-refund">Cancel & Refund</Link></li>
+                    <li><Link href="/pages/lifetime-exchange-buyback-policy">Lifetime Exchange & Buyback</Link></li>
+                    <li><Link href="/pages/old-gold-exchange">Old Gold Exchange</Link></li>
                     <li><Link href="/pages/shipping-policy-1">Shipping Policy</Link></li>
                     <li><Link href="/pages/privacy-policy">Privacy Policy</Link></li>
+                    <li><Link href="/pages/exclusive-promotions-page">Offers T&C</Link></li>
+                    <li><Link href="/pages/terms-condition">Terms & Conditions</Link></li>
                   </ul>
                 </AccordionContent>
               </AccordionItem>
@@ -152,6 +164,7 @@ export default function Footer() {
                   <ul className="space-y-3 font-figtree text-[13px]">
                     <li><Link href="/pages/careers">Careers</Link></li>
                     <li><Link href="/pages/franchise-page">Franchise</Link></li>
+                    <li><Link href="/pages/customized-jewelry">Bespoke</Link></li>
                     <li><Link href="/pages/store-packaging">Packaging</Link></li>
                   </ul>
                 </AccordionContent>
@@ -224,16 +237,17 @@ export default function Footer() {
               <h4 className="mb-4 text-lg font-extrabold font-abhaya">Shop All</h4>
               <ul className="space-y-2.5 text-sm text-white font-figtree">
                 <li><Link href="/collections/bestsellers">Best Sellers</Link></li>
+                <li><Link href="/collections/rings">Rings</Link></li>
                 <li><Link href="/collections/engagement-rings">Engagement Rings</Link></li>
-                <li><Link href="#">Wedding Rings</Link></li>
+                <li><Link href="/collections/wedding-rings">Wedding Rings</Link></li>
                 <li><Link href="/collections/earrings">Earrings</Link></li>
-                <li><Link href="/collections/all-bracelets">Bracelets</Link></li>
-                <li><Link href="/collections/solitaires-necklaces">Necklaces</Link></li>
-                <li><Link href="/collections/all-nosepins">Nosepins</Link></li>
+                <li><Link href="/collections/bracelets">Bracelets</Link></li>
+                <li><Link href="/collections/necklaces">Necklaces</Link></li>
+                <li><Link href="/collections/nosepins">Nosepins</Link></li>
                 <li><Link href="/collections/mens-ring">Men's Rings</Link></li>
                 <li><Link href="/collections/mens-stud">Men's Studs</Link></li>
                 <li><Link href="/collections/mens-bracelets">Men's Bracelets</Link></li>
-                <li><Link href="/collections/akshaya-tritiya-gold-diamond-jewellery">Collections</Link></li>
+                <li><Link href="/collections/hexa">Collections</Link></li>
                 <li><Link href="/collections/all">Gifting</Link></li>
               </ul>
             </div>
@@ -316,7 +330,7 @@ export default function Footer() {
                   <li><Link href="/pages/careers">Careers</Link></li>
                   <li><Link href="/pages/franchise-page">Franchise</Link></li>
                   <li><Link href="/pages/customized-jewelry">Bespoke</Link></li>
-                  <li><Link href="store-packaging">Packaging</Link></li>
+                  <li><Link href="/pages/store-packaging">Packaging</Link></li>
                 </ul>
               </div>
             </div>

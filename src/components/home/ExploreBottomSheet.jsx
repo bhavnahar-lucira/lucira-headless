@@ -137,7 +137,7 @@ export default function ExploreBottomSheet({ activeType, onClose }) {
         <Sheet.Header />
         <Sheet.Content className="px-6 pb-12 overflow-y-auto no-scrollbar">
           <div className="flex flex-col h-full">
-            <div className="flex justify-between items-start mb-6">
+            <div className="flex justify-between items-start mb-6 gap-2">
               <div className="flex-1 pr-8">
                 <h2 className="text-2xl font-black font-abhaya text-zinc-900 mb-2 leading-tight">
                   {content.title}

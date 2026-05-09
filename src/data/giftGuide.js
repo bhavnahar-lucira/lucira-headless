@@ -107,9 +107,9 @@ export const giftGuideData = {
         "heading": "Elegant Classic",
         "description": "Her style transcends trends. She gravitates toward timeless silhouettes and enduring beauty. Jewelry that feels graceful, balanced, and forever relevant suits her sensibility.",
         "button_text": "View Collection",
-        "button_link": "shopify://collections/all-earrings",
+        "button_link": "shopify://collections/earrings",
         "image": "shopify://shop_images/Elegant-Classic.jpg",
-        "collection": "all-earrings",
+        "collection": "earrings",
         "products_limit": 4,
         "show_view_all": true
       }
@@ -135,9 +135,9 @@ export const giftGuideData = {
         "heading": "Thoughtful Homemaker",
         "description": "Warm, nurturing, and quietly strong. She values comfort and versatility without compromising on elegance. Jewelry that blends ease with beauty becomes part of her everyday life.",
         "button_text": "View Collection",
-        "button_link": "shopify://collections/all-necklaces",
+        "button_link": "shopify://collections/necklaces",
         "image": "shopify://shop_images/Thoughtful-Homemaker.jpg",
-        "collection": "all-necklaces",
+        "collection": "necklaces",
         "products_limit": 4,
         "show_view_all": true
       }

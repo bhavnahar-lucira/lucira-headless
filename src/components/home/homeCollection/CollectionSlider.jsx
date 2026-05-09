@@ -66,7 +66,7 @@ export default function CollectionSlider ({ products = [], loading = false, coll
           }}
           pagination={{
             el: `.${paginationElClass}`,
-            clickable: true,
+            type: 'progressbar',
           }}
           navigation={{
             nextEl: `.${nextElClass}`,
@@ -77,7 +77,7 @@ export default function CollectionSlider ({ products = [], loading = false, coll
             1024: { slidesPerView: 3, spaceBetween: 16 },
             1280: { slidesPerView: 4, spaceBetween: 16, freeMode: false },
           }}
-          className="w-full overflow-visible!"
+          className="w-full overflow-visible! collection-swiper"
         >
           {displayProducts.map((product, idx) => (
             <SwiperSlide key={product.id}>
@@ -90,11 +90,12 @@ export default function CollectionSlider ({ products = [], loading = false, coll
           ))}
         </Swiper>
 
-        {/* Navigation & Progress Controls (Updated for design) */}
-        <div className="flex justify-between items-center mt-8 md:mt-6 px-1">
-          {/* Custom Dots Pagination */}
-          <div className={`${paginationElClass} swiper-pagination-bullets-custom`} />
-          
+        {/* Navigation & Progress Controls (Updated for tracker design) */}
+        <div className="flex justify-between items-center mt-8 md:mt-10 px-1">
+          {/* Custom Tracker Pagination */}
+          <div className="flex-grow max-w-[120px] md:max-w-[200px] relative">
+            <div className={`${paginationElClass} swiper-pagination-tracker`} />
+          </div>
           
           <div className="flex items-center gap-3">
             <button className={`${prevElClass} w-10 h-10 md:w-12 md:h-12 rounded-full border border-zinc-200 flex items-center justify-center hover:bg-black transition-all text-zinc-400 hover:border-black hover:text-white`}>
@@ -106,6 +107,34 @@ export default function CollectionSlider ({ products = [], loading = false, coll
           </div>
         </div>
       </div>  
+      <style jsx global>{`
+        .collection-swiper .swiper-pagination-progressbar {
+          background: rgba(0,0,0,0.05) !important;
+          height: 2px !important;
+          position: relative !important;
+          width: 100% !important;
+          border-radius: 2px !important;
+          overflow: hidden !important;
+        }
+        
+        .collection-swiper .swiper-pagination-progressbar-fill {
+          background: #5B4740 !important;
+          height: 2px !important;
+          border-radius: 2px !important;
+        }
+
+        .swiper-pagination-tracker {
+            position: relative !important;
+            width: 100% !important;
+            height: 2px !important;
+            background: #E5E7EB !important;
+            border-radius: 1px !important;
+        }
+
+        .swiper-pagination-tracker .swiper-pagination-progressbar-fill {
+            background: #5B4740 !important;
+        }
+      `}</style>
     </>
   );
 }

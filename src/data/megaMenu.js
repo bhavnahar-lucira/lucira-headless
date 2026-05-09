@@ -96,7 +96,7 @@ export const MEGA_MENU = [
         label: "RINGS",
         type: "mega",
         layout: "5-col-featured",
-        href: "/collections/all-rings",
+        href: "/collections/rings",
         featured: [
             { label: "Best Selling", href: "#" },
             { label: "New Arrival", href: "#" },
@@ -115,7 +115,7 @@ export const MEGA_MENU = [
                     { label: "Eternity", href: "/collections/eternity-rings" },
                     { label: "Stackable", href: "/collections/stackable-rings" },
                     { label: "Couple Bands", href: "/collections/couple-bands" },
-                    { label: "Shop All Styles", href: "/collections/all-rings" }
+                    { label: "Shop All Styles", href: "/collections/rings" }
                 ]
             },
 
@@ -132,7 +132,7 @@ export const MEGA_MENU = [
                     { label: "Princess", href: "/collections/princess-rings" },
                     { label: "Heart", href: "/collections/heart-rings" },
                     { label: "Special Cuts", href: "/collections/special-cuts-rings" },
-                    { label: "Shop All Shapes", href: "/collections/all-rings" }
+                    { label: "Shop All Shapes", href: "/collections/rings" }
                 ]
             },
 
@@ -171,7 +171,7 @@ export const MEGA_MENU = [
         label: "EARRINGS",
         type: "mega",
         layout: "5-col-featured",
-        href: "/collections/all-earrings",
+        href: "/collections/earrings",
         featured: [
             { label: "Best Selling", href: "#" },
             { label: "New Arrival", href: "#" },
@@ -257,7 +257,7 @@ export const MEGA_MENU = [
                     { label: "Cuff Bracelets", href: "/collections/cuff-bracelets" },
                     { label: "Tennis Bracelets", href: "/collections/diamond-tennis-bracelets" },
                     { label: "Men's Bracelets", href: "/collections/mens-bracelets" },
-                    { label: "Shop All Bracelets", href: "/collections/all-bracelets" }
+                    { label: "Shop All Bracelets", href: "/collections/bracelets" }
                 ]
             },
 
@@ -269,7 +269,7 @@ export const MEGA_MENU = [
                     { label: "Pendant Necklaces", href: "/collections/pendant-necklaces" },
                     { label: "Tennis Necklaces", href: "/collections/tennis-necklaces" },
                     { label: "Gold Chains", href: "/collections/gold-chains" },
-                    { label: "Shop All Necklaces", href: "/collections/all-necklaces" }
+                    { label: "Shop All Necklaces", href: "/collections/necklaces" }
                 ]
             },
 
@@ -277,10 +277,10 @@ export const MEGA_MENU = [
                 title: "Nosepin",
                 type: "icon",
                 items: [
-                    { label: "Stud Nosepins", href: "/collections/all-nosepins" },
-                    { label: "Ring Nosepins", href: "/collections/all-nosepins" },
-                    { label: "Hook Nosepins", href: "/collections/all-nosepins" },
-                    { label: "Shop All Nosepins", href: "/collections/all-nosepins" }
+                    { label: "Stud Nosepins", href: "/collections/nosepins" },
+                    { label: "Ring Nosepins", href: "/collections/nosepins" },
+                    { label: "Hook Nosepins", href: "/collections/nosepins" },
+                    { label: "Shop All Nosepins", href: "/collections/nosepins" }
                 ]
             },
 

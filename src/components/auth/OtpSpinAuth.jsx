@@ -48,7 +48,9 @@ export function OtpSpinAuth({
   onStepChange,
   forceShowWheel = false,
   overrideHeading = "",
-  overrideSubtext = ""
+  overrideSubtext = "",
+  showCloseButton = true,
+  isPopup = false
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -410,7 +412,7 @@ export function OtpSpinAuth({
       ${showWheel 
         ? "md:flex-row md:items-stretch md:w-[800px] md:max-w-[800px] md:min-h-[500px]" 
         : "md:flex-row md:items-stretch md:w-[800px] md:max-w-[800px] md:h-[500px]"}
-      ${!showWheel ? "md:shadow-[0_0_10px_rgba(0,0,0,0.3)] md:max-w-[400px] md:rounded-sm" : "md:shadow-[0_0_10px_rgba(0,0,0,0.3)] md:rounded-sm"}
+      ${(isPopup || !showWheel) ? "md:shadow-[0_0_10px_rgba(0,0,0,0.3)] md:rounded-sm" : "md:rounded-sm"}
       max-md:shadow-none max-md:rounded-none max-md:max-w-full
       ${isMobileView ? "animate-[slideInBottom_0.45s_cubic-bezier(0.25,0.46,0.45,0.94)_forwards]" : ""}`}
       style={{
@@ -424,21 +426,23 @@ export function OtpSpinAuth({
         }
       `}</style>
       
-      <button 
-        className="absolute top-5 right-5 z-20 p-1 rounded-full text-black cursor-pointer border-none flex items-center justify-center bg-white/50 backdrop-blur-sm" 
-        onClick={onClose || onSuccess}
-        aria-label="Close"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-      </button>
+      {showCloseButton && (
+        <button 
+          className="absolute top-5 right-5 z-20 p-1 rounded-full text-black cursor-pointer border-none flex items-center justify-center bg-white/50 backdrop-blur-sm" 
+          onClick={onClose || onSuccess}
+          aria-label="Close"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      )}
 
       {/* Background/Side Image Container */}
       {showWheel ? (
         <div 
-          className="flex flex-col items-center justify-center relative w-full h-[220px] md:h-full md:w-[60%] overflow-hidden bg-center bg-cover bg-no-repeat"
+          className={`flex flex-col items-center justify-center relative w-full h-[220px] md:h-auto overflow-hidden bg-center bg-cover bg-no-repeat md:w-[50%] md:self-stretch`}
           style={{ backgroundImage: 'url("https://cdn.shopify.com/s/files/1/0739/8516/3482/files/BG_1_1.png?v=1770198650")' }}
         >
-          <div className="relative w-[90%] h-[290px] md:w-[380px] md:h-[380px] max-md:absolute max-md:top-[-75px]">
+          <div className={`relative w-[90%] h-[290px] md:w-[350px] md:h-[350px] max-md:absolute max-md:top-[-75px]`}>
             <motion.img
               src="https://cdn.shopify.com/s/files/1/0739/8516/3482/files/Below_Banner_Trust_Icon_Strip_1_1.png?v=1770784760"
               alt="Spin the Wheel"
@@ -449,14 +453,14 @@ export function OtpSpinAuth({
             <img
               src="https://cdn.shopify.com/s/files/1/0739/8516/3482/files/Spin_The_Wheel_Spinner_1.png?v=1769229971"
               alt="Spin CTA"
-              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 pointer-events-none w-full max-w-[440px] h-auto"
+              className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 pointer-events-none h-auto w-[115%] max-w-none`}
             />
           </div>
         </div>
       ) : (
         (step === "login" || step === "otp" || step === "success") && (
           <div 
-            className="w-full h-[175px] md:h-full md:w-[55%] bg-center bg-cover bg-no-repeat"
+            className={`w-full h-[175px] md:h-auto bg-center bg-cover bg-no-repeat md:w-[50%] md:self-stretch`}
             style={{ 
               backgroundImage: isMobileView 
                 ? 'url("https://www.lucirajewelry.com/cdn/shop/files/Jan-Popup-Mobile_jpg.jpg?v=1770010490")' 
@@ -466,11 +470,11 @@ export function OtpSpinAuth({
         )
       )}
 
-      <div className={`flex flex-col w-full p-5 md:p-8 md:justify-center ${!showWheel ? "md:w-[50%]" : "md:w-[50%]"}`}>
+      <div className={`flex flex-col w-full p-5 md:p-8 md:justify-center md:w-[50%] md:self-stretch`}>
         {!(isMobileView && step === "register") && (
           <div className="text-center mb-4">
             <img
-              src="https://www.lucirajewelry.com/cdn/shop/files/LJ_Logo_Pink.svg"
+              src="/images/logo.svg"
               width="120"
               height="49"
               alt="lucira jewelry logo"
@@ -509,7 +513,7 @@ export function OtpSpinAuth({
               </label>
             </div>
             <button 
-              className="text-white h-[45px] w-full font-normal text-sm md:text-base cursor-pointer transition-opacity uppercase tracking-[0.3px] border-none mt-3 bg-[#b55670] rounded-lg disabled:opacity-50" 
+              className="text-white h-[45px] w-full font-normal text-sm md:text-base cursor-pointer transition-opacity uppercase tracking-[0.3px] border-none mt-3 bg-[#5a413f] rounded-lg disabled:opacity-50" 
               onClick={handleSendOtp} 
               disabled={loading}
             >
@@ -549,7 +553,7 @@ export function OtpSpinAuth({
               ))}
             </div>
             <button 
-              className="text-white h-[45px] w-full font-normal text-sm md:text-base cursor-pointer transition-opacity uppercase tracking-[0.3px] border-none mt-3 bg-[#b55670] rounded-lg disabled:opacity-50" 
+              className="text-white h-[45px] w-full font-normal text-sm md:text-base cursor-pointer transition-opacity uppercase tracking-[0.3px] border-none mt-3 bg-[#5a413f] rounded-lg disabled:opacity-50" 
               onClick={() => handleVerifyOtp()} 
               disabled={loading}
             >
@@ -634,7 +638,7 @@ export function OtpSpinAuth({
               </div>
 
               <button
-                className="text-white h-[45px] w-full font-normal text-sm md:text-base cursor-pointer transition-opacity uppercase tracking-[0.3px] border-none mt-0 bg-[#b55670] rounded-lg disabled:opacity-50"
+                className="text-white h-[45px] w-full font-normal text-sm md:text-base cursor-pointer transition-opacity uppercase tracking-[0.3px] border-none mt-0 bg-[#5a413f] rounded-lg disabled:opacity-50"
                 onClick={handleSpinAndRegister}
                 disabled={isSpinning || loading}
               >
@@ -658,7 +662,7 @@ export function OtpSpinAuth({
               </button>
             </div>
             <button 
-              className="text-white h-[45px] w-full font-normal text-sm md:text-base cursor-pointer transition-opacity uppercase tracking-[0.3px] border-none mt-4 bg-[#b55670] rounded-lg" 
+              className="text-white h-[45px] w-full font-normal text-sm md:text-base cursor-pointer transition-opacity uppercase tracking-[0.3px] border-none mt-4 bg-[#5a413f] rounded-lg" 
               onClick={() => {
                 const target = redirectTargetRef.current || localStorage.getItem("auth_redirect_path") || pathname || "/";
                 localStorage.removeItem("auth_redirect_path");

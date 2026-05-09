@@ -268,56 +268,63 @@ export default function Navbar({ hideTop }) {
 
                             <ul className={cn(
                               "text-[13px] font-medium text-zinc-500",
-                              isGridCol ? "grid grid-cols-2 gap-x-8 gap-y-0" : "space-y-4"
+                              isGridCol ? "grid grid-cols-2 gap-x-8 gap-y-4" : "space-y-5"
                             )}>
-                              {col.items.map((item, j) => (
-                                <li key={j} className={cn(
-                                  "hover:text-black transition-colors",
-                                  (col.type === "metal" || item.menuIcon || item.megaMenuImage || (col.type === "icon" && item.icon)) && 
-                                  !col.title?.toLowerCase().includes("material") && 
-                                  !col.title?.toLowerCase().includes("metal")
-                                    ? "lg:mb-0"
-                                    : ""
-                                )}>
-                                  <Link
-                                    href={item.href || "#"}
-                                    onClick={closeMenu}
-                                    className="flex items-center gap-3 group"
-                                  >
-                                    {/* ✅ METAL SWATCH */}
-                                    {col.type === "metal" ? (
-                                      <span
-                                        className={`w-6 h-6 rounded-full border border-zinc-200 ${
-                                          item.label.toLowerCase().includes("yellow")
-                                            ? "bg-[linear-gradient(147.45deg,_#C59922_17.98%,_#EAD59E_48.14%,_#C59922_83.84%)]"
-                                            : item.label.toLowerCase().includes("rose")
-                                            ? "bg-[linear-gradient(154.36deg,_#F2B5B5_10.36%,_#F8DBDB_68.09%)]"
-                                            : item.label.toLowerCase().includes("platinum")
-                                            ? "bg-[linear-gradient(154.03deg,_#DFDFDF_27.25%,_#F3F3F3_85.19%)]"
-                                            : item.label.toLowerCase().includes("white")
-                                            ? "bg-[linear-gradient(143.06deg,_#DFDFDF_29.61%,_#F3F3F3_48.83%,_#DFDFDF_66.43%)]"
-                                            : "bg-[#ddd]"
-                                        }`}
-                                      />
-                                    ) : item.menuIcon || item.megaMenuImage || (col.type === "icon" && item.icon) ? (
-                                      <div className={cn(
-                                        "relative shrink-0 flex items-center justify-center rounded-full overflow-hidden transition-all",
-                                        isByShape ? "h-12 w-12" : "h-16 w-16"
-                                      )}>
-                                        <Image
-                                          src={item.menuIcon || item.megaMenuImage || item.icon}
-                                          alt={item.label}
-                                          fill
-                                          priority={j < 6}
-                                          className="object-contain p-1 transition-opacity duration-300"
+                              {col.items.map((item, j) => {
+                                const isArticle = item.href?.includes("/blogs/") || item.href?.includes("/pages/");
+                                return (
+                                  <li key={j} className={cn(
+                                    "hover:text-black transition-colors",
+                                    !isArticle && (col.type === "metal" || item.menuIcon || item.megaMenuImage || (col.type === "icon" && item.icon)) && 
+                                    !col.title?.toLowerCase().includes("material") && 
+                                    !col.title?.toLowerCase().includes("metal")
+                                      ? "lg:mb-0"
+                                      : ""
+                                  )}>
+                                    <Link
+                                      href={item.href || "#"}
+                                      onClick={closeMenu}
+                                      className={cn(
+                                        "flex items-center gap-3 group",
+                                        isArticle && "py-0.5"
+                                      )}
+                                    >
+                                      {/* ✅ METAL SWATCH */}
+                                      {col.type === "metal" ? (
+                                        <span
+                                          className={`w-6 h-6 rounded-full border border-zinc-200 ${
+                                            item.label.toLowerCase().includes("yellow")
+                                              ? "bg-[linear-gradient(147.45deg,_#C59922_17.98%,_#EAD59E_48.14%,_#C59922_83.84%)]"
+                                              : item.label.toLowerCase().includes("rose")
+                                              ? "bg-[linear-gradient(154.36deg,_#F2B5B5_10.36%,_#F8DBDB_68.09%)]"
+                                              : item.label.toLowerCase().includes("platinum")
+                                              ? "bg-[linear-gradient(154.03deg,_#DFDFDF_27.25%,_#F3F3F3_85.19%)]"
+                                              : item.label.toLowerCase().includes("white")
+                                              ? "bg-[linear-gradient(143.06deg,_#DFDFDF_29.61%,_#F3F3F3_48.83%,_#DFDFDF_66.43%)]"
+                                              : "bg-[#ddd]"
+                                          }`}
                                         />
-                                      </div>
-                                    ) : null}
+                                      ) : (!isArticle && (item.menuIcon || item.megaMenuImage || (col.type === "icon" && item.icon))) ? (
+                                        <div className={cn(
+                                          "relative shrink-0 flex items-center justify-center overflow-hidden transition-all",
+                                          isByShape ? "h-12 w-12" : "h-16 w-16",
+                                          "rounded-full"
+                                        )}>
+                                          <Image
+                                            src={item.menuIcon || item.megaMenuImage || item.icon}
+                                            alt={item.label}
+                                            fill
+                                            priority={j < 6}
+                                            className="object-contain p-1 transition-opacity duration-300"
+                                          />
+                                        </div>
+                                      ) : null}
 
-                                    <span className="text-base font-medium text-zinc-900 group-hover:text-primary transition-colors">{item.label}</span>
-                                  </Link>
-                                </li>
-                              ))}
+                                      <span className="text-base font-medium text-zinc-900 group-hover:text-primary transition-colors">{item.label}</span>
+                                    </Link>
+                                  </li>
+                                );
+                              })}
                             </ul>
                           </div>
                         );

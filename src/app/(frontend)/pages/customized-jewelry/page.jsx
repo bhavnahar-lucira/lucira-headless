@@ -14,7 +14,7 @@ export default function BespokePage() {
         },
         {
             img: "https://www.lucirajewelry.com/cdn/shop/files/Images-4_600x.jpg",
-            href: "/collections/all-necklaces"
+            href: "/collections/necklaces"
         },
         {
             img: "https://www.lucirajewelry.com/cdn/shop/files/Images-3_600x.jpg",

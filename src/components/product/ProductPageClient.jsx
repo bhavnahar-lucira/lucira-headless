@@ -853,7 +853,9 @@ export default function ProductPageClient({ product, complementaryProducts = [],
           dispatch(removeGuestWishlistItem({ productId, variantId: activeVariantId }));
         }
         pushRemoveFromWishlist(commonTrackingData);
-        toast.success("Removed from wishlist");
+        toast.error("Removed from wishlist", {
+          icon: <Check className="w-4 h-4" />
+        });
       } else {
         const payload = {
           productId,

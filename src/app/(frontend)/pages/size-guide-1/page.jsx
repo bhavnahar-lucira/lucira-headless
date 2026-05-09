@@ -266,7 +266,7 @@ export default function SizeGuidePage() {
                         </div>
                         <div className="flex justify-center mt-6">
                             <Link
-                            href="https://lucirajewelry.com/collections/all-rings"
+                            href="https://lucirajewelry.com/collections/rings"
                             className="uppercase bg-[#a68380] text-white px-6 py-2 rounded-full text-[clamp(.9rem,3vw,1.2rem)] shadow hover:bg-[#95736f] transition hover:-translate-y-1"
                             >
                             Discover Our Ring Collection
@@ -348,7 +348,7 @@ export default function SizeGuidePage() {
                     </div>
                     <div className="flex justify-center mt-6">
                         <Link
-                        href="https://lucirajewelry.com/collections/all-bracelets"
+                        href="https://lucirajewelry.com/collections/bracelets"
                         className="bg-[#a68380] hover:bg-[#95736f] text-white text-xs sm:text-sm px-5 py-2 rounded-full uppercase tracking-wide transition-all duration-300 shadow-sm hover:shadow-md"
                         >
                         Discover Our Bracelet Collection
@@ -492,7 +492,7 @@ export default function SizeGuidePage() {
                     </ol>
                     <div className="flex justify-center">
                         <Link
-                            href="https://lucirajewelry.com/collections/all-necklaces"
+                            href="https://lucirajewelry.com/collections/necklaces"
                             className="bg-[#a68380] hover:bg-[#95736f] text-white text-sm md:text-base px-6 py-2 rounded-full transition-all duration-300 shadow"
                         >
                             Explore Our Necklace Collection

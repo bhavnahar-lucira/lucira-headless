@@ -8,15 +8,15 @@ import LazyImage from "../common/LazyImage";
 const CATEGORIES = [
   { label: "Rings", slug: "rings" },
   { label: "Earrings", slug: "earrings" },
-  { label: "Bracelet", slug: "bracelet" },
+  { label: "Bracelet", slug: "bracelets" },
   { label: "Necklaces", slug: "necklaces" },
   { label: "Mangalsutra", slug: "mangalsutra" }
 ];
 
-const CATEGORIES_WITHOUT_SHAPES = ["bracelet", "necklaces", "mangalsutra"];
+const CATEGORIES_WITHOUT_SHAPES = ["bracelets", "necklaces", "mangalsutra"];
 
 const CATEGORY_FILTERS = {
-  rings: {
+  "rings": {
     shapes: [
       { id: "oval", label: "OVAL", img: "/images/shapes/oval.png", href: "/collections/oval-rings" },
       { id: "round", label: "ROUND", img: "/images/shapes/round.png", href: "/collections/round-rings" },
@@ -37,7 +37,7 @@ const CATEGORY_FILTERS = {
       { id: "mens", label: "men's", img: "/images/styles/mens.png", href: "/collections/mens-ring" },
     ],
   },
-  earrings: {
+  "earrings": {
     shapes: [
       { id: "Round", label: "Round", img: "/images/shapes/round.png", href: "/collections/earrings-round" },
       { id: "emerald", label: "EMERALD", img: "/images/shapes/emerald.png", href: "/collections/earrings-emerald" },
@@ -59,20 +59,20 @@ const CATEGORY_FILTERS = {
       { id: "mens", label: "men's", img: "/images/styles/mens.png", href: "/collections/mens-stud" },
     ],
   },
-  bracelet: {
+  "bracelets": {
     styles: [
       { id: "tennis", label: "Tennis", img: "/images/styles/solitaire.png", href: "/collections/tennis-bracelets" },
       { id: "cuff", label: "Cuffs", img: "/images/styles/hoops.png", href: "/collections/cuff-bracelets" },
       { id: "chain", label: "Chain", img: "/images/styles/stackable.png", href: "/collections/chain-bracelets" },
     ]
   },
-  necklaces: {
+  "necklaces": {
     styles: [
       { id: "pendants", label: "Pendants", img: "/images/styles/solitaire.png", href: "/collections/pendants" },
       { id: "chokers", label: "Chokers", img: "/images/styles/dangles.png", href: "/collections/chokers" },
     ]
   },
-  mangalsutra: {
+  "mangalsutra": {
     styles: [
       { id: "modern", label: "Modern", img: "/images/styles/Casual.png", href: "/collections/modern-mangalsutra" },
       { id: "traditional", label: "Traditional", img: "/images/styles/gemstone.png", href: "/collections/traditional-mangalsutra" },

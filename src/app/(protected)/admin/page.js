@@ -120,8 +120,8 @@ export default function CustomerDashboard() {
               href={stat.link}
               className="bg-white rounded-3xl p-4 border border-zinc-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group"
             >
-              <div className="flex justify-between items-start mb-6">
-                <div className={`size-8 md:size-12 rounded-2xl bg-gradient-to-br ${stat.color} ${stat.shadow} flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform`}>
+              <div className="flex justify-between items-start mb-6 gap-2">
+                <div className={`size-6 md:size-12 rounded-2xl bg-gradient-to-br ${stat.color} ${stat.shadow} flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform`}>
                   <Icon className="size-4 md:size-[22px]" strokeWidth={2.5} />
                 </div>
                 <div className="text-right">
