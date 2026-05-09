@@ -16,7 +16,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { ChevronLeft, Trash2, Plus, Loader2, X } from "lucide-react";
+import { ChevronLeft, Trash2, Plus, Loader2, X, Check } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import Link from "next/link";
@@ -478,7 +478,9 @@ export default function PaymentPage() {
         persistBillingSelection({ billingAddressMode: "same" });
         await saveCheckoutAddressSelection({ billingAddressMode: "same" });
       }
-      toast.success("Address removed");
+      toast.error("Address removed", {
+        icon: <Check className="w-4 h-4" />
+      });
     } catch (error) {
       toast.error(error.message || "Unable to remove address");
     }

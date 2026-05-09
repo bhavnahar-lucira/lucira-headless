@@ -759,6 +759,8 @@ img.marquee-img {
   font-family: 'Figtree', var(--font-figtree), sans-serif !important;
 }
 
+
+
 /* Slide-up animation */
 @keyframes luciraSlideUp {
   from { opacity: 0; transform: translateY(20px) scale(0.96); }
@@ -908,5 +910,11 @@ img.marquee-img {
 @media (min-width: 768px) {
   .swiper-pagination-bullets-custom .swiper-pagination-bullet-active {
     width: 24px !important;
+  }
+}
+
+@media (max-width: 1024px) {
+  .Toastify__toast {
+    margin-bottom: calc(var(--spacing) * 10.5) !important;
   }
 }

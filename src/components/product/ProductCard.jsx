@@ -9,7 +9,7 @@ import "swiper/css/navigation";
 import "swiper/css/pagination";
 import { Navigation, Pagination } from "swiper/modules";
 import { motion, AnimatePresence } from "framer-motion";
-import { Star, ChevronLeft, ChevronRight, ArrowRight, Copy, X, Loader2, Play, ShieldCheck, Heart } from "lucide-react";
+import { Star, ChevronLeft, ChevronRight, ArrowRight, Copy, X, Loader2, Play, ShieldCheck, Heart, Check } from "lucide-react";
 import { toast } from "react-toastify";
 import { useSelector, useDispatch } from "react-redux";
 import {
@@ -473,7 +473,9 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle,
                         dispatch(removeGuestWishlistItem(productId));
                       }
                       pushRemoveFromWishlist(commonTrackingData);
-                      toast.success("Removed from wishlist");
+                      toast.error("Removed from wishlist", {
+                        icon: <Check className="w-4 h-4" />
+                      });
                     } else {
                       const payload = {
                         productId,

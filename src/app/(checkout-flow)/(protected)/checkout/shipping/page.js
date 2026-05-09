@@ -20,6 +20,7 @@ import {
   Clock,
   Search,
   X,
+  Check,
 } from "lucide-react";
 import CheckoutSummary from "@/components/cart/CheckoutSummary";
 import { Button } from "@/components/ui/button";
@@ -615,7 +616,9 @@ export default function ShippingPage() {
   const handleDeleteAddress = async (addressId) => {
     try {
       applyAddressPayload(await deleteCustomerAddress(addressId));
-      toast.success("Address removed");
+      toast.error("Address removed", {
+        icon: <Check className="w-4 h-4" />
+      });
     } catch (error) {
       toast.error(error.message || "Unable to remove address");
     }
