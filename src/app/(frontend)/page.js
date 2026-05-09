@@ -29,6 +29,12 @@ import GemstoneSection from "@/components/home/homeCollection/GemstoneSection";
 import ExploreCollectionSection from "@/components/home/homeCollection/ExploreCollectionSection";
 import MobileCategorySlider from "@/components/home/MobileCategorySlider";
 
+export const metadata = {
+  alternates: {
+    canonical: "/",
+  },
+};
+
 export default function Home() {
   return (
     <div className="w-full">

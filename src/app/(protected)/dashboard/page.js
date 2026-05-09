@@ -3,13 +3,13 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import ProductTable from "./ProductTable";
-import { RefreshCw, LayoutDashboard, Store, MessageSquare, Menu, Search } from "lucide-react";
+import { RefreshCw, LayoutDashboard, Store, MessageSquare, Menu, Search, Map } from "lucide-react";
 
 import SyncStatusMonitor from "@/components/dashboard/SyncStatusMonitor";
 
 export default function Dashboard() {
   const [syncing, setSyncing] = useState(false);
-  const [syncType, setSyncType] = useState(""); // "products", "reviews", or "menu"
+  const [syncType, setSyncType] = useState(""); // "products", "reviews", "menu", or "sitemap"
   const [status, setStatus] = useState("");
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState(null);
@@ -23,10 +23,12 @@ export default function Dashboard() {
 
   const [products, setProducts] = useState([]);
   const [menus, setMenus] = useState([]);
+  const [sitemap, setSitemap] = useState(null);
   const [selectedMenu, setSelectedMenu] = useState(null);
   const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0, totalPages: 0 });
   const [loadingProducts, setLoadingProducts] = useState(true);
   const [loadingMenus, setLoadingMenus] = useState(true);
+  const [loadingSitemap, setLoadingSitemap] = useState(true);
   const [productQuery, setProductQuery] = useState("");
 
   // Fetch count of products available on Shopify
@@ -54,6 +56,22 @@ export default function Dashboard() {
     }
   };
 
+  // Fetch sitemap from our MongoDB
+  const fetchSitemap = async () => {
+    setLoadingSitemap(true);
+    try {
+      const res = await fetch("/api/sync-sitemap");
+      const data = await res.json();
+      if (data.success) {
+        setSitemap(data.sitemap);
+      }
+    } catch (e) {
+      console.error("Failed to fetch sitemap", e);
+    } finally {
+      setLoadingSitemap(false);
+    }
+  };
+
   // Fetch products from our MongoDB
   const fetchLocalProducts = useCallback(async (page = 1, q = "") => {
     setLoadingProducts(true);
@@ -72,6 +90,7 @@ export default function Dashboard() {
   useEffect(() => {
     fetchShopifyCount();
     fetchMenus();
+    fetchSitemap();
   }, []);
 
   useEffect(() => {
@@ -93,12 +112,31 @@ export default function Dashboard() {
         const response = await fetch("/api/sync-menu", { method: "POST" });
         const data = await response.json();
         if (data.success) {
-          setStatus(data.message);
+          setStatus(data.message || "Menu sync completed successfully");
           setProgress(100);
           fetchMenus(); // Refresh menus list
           setTimeout(() => setSyncing(false), 2000);
         } else {
           throw new Error(data.error || "Failed to sync menu");
+        }
+      } catch (err) {
+        setError(err.message);
+        setSyncing(false);
+      }
+      return;
+    }
+
+    if (type === "sitemap") {
+      try {
+        const response = await fetch("/api/sync-sitemap", { method: "POST" });
+        const data = await response.json();
+        if (data.success) {
+          setStatus("Sitemap sync completed successfully");
+          setProgress(100);
+          fetchSitemap(); // Refresh sitemap
+          setTimeout(() => setSyncing(false), 2000);
+        } else {
+          throw new Error(data.error || "Failed to sync sitemap");
         }
       } catch (err) {
         setError(err.message);
@@ -203,6 +241,15 @@ export default function Dashboard() {
           </div>
           
           <div className="flex flex-wrap items-center gap-4">
+            <button 
+              onClick={() => startSync("sitemap")} 
+              disabled={syncing}
+              className={`flex items-center gap-2 bg-white dark:bg-zinc-900 px-6 py-2 rounded-xl border border-zinc-200 dark:border-zinc-800 shadow-sm font-bold text-sm uppercase tracking-widest hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors ${syncing ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
+              <Map size={18} className="text-zinc-400" />
+              Sync Sitemap
+            </button>
+
             <button 
               onClick={() => startSync("menu")} 
               disabled={syncing}
@@ -335,6 +382,71 @@ export default function Dashboard() {
                     </div>
                   </div>
                 ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Sitemap Section */}
+        <div className="bg-white dark:bg-zinc-950 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm overflow-hidden">
+          <div className="p-6 border-b border-zinc-100 dark:border-zinc-800 flex items-center justify-between">
+            <h2 className="text-xl font-bold">Synced Sitemap</h2>
+            {loadingSitemap && <span className="text-xs text-zinc-500 animate-pulse">Loading sitemap...</span>}
+          </div>
+          
+          <div className="p-6">
+            {!sitemap && !loadingSitemap ? (
+              <p className="text-zinc-500 text-center py-10">No sitemap synced yet. Click "Sync Sitemap" to start.</p>
+            ) : sitemap && (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="bg-zinc-50 dark:bg-zinc-900/50 p-5 rounded-xl border border-zinc-200 dark:border-zinc-800 space-y-2">
+                  <h3 className="text-xs font-bold uppercase tracking-widest text-zinc-400">Collections</h3>
+                  <p className="text-2xl font-bold">{sitemap.collections?.length || 0}</p>
+                </div>
+                <div className="bg-zinc-50 dark:bg-zinc-900/50 p-5 rounded-xl border border-zinc-200 dark:border-zinc-800 space-y-2">
+                  <h3 className="text-xs font-bold uppercase tracking-widest text-zinc-400">Pages</h3>
+                  <p className="text-2xl font-bold">{sitemap.pages?.length || 0}</p>
+                </div>
+                <div className="bg-zinc-50 dark:bg-zinc-900/50 p-5 rounded-xl border border-zinc-200 dark:border-zinc-800 space-y-2">
+                  <h3 className="text-xs font-bold uppercase tracking-widest text-zinc-400">Articles</h3>
+                  <p className="text-2xl font-bold">{sitemap.articles?.length || 0}</p>
+                </div>
+                <div className="bg-zinc-50 dark:bg-zinc-900/50 p-5 rounded-xl border border-zinc-200 dark:border-zinc-800 space-y-2">
+                  <h3 className="text-xs font-bold uppercase tracking-widest text-zinc-400">Products</h3>
+                  <p className="text-2xl font-bold">{sitemap.products?.length || 0}</p>
+                </div>
+                <div className="bg-zinc-50 dark:bg-zinc-900/50 p-5 rounded-xl border border-zinc-200 dark:border-zinc-800 space-y-2">
+                  <h3 className="text-xs font-bold uppercase tracking-widest text-zinc-400">XML URLs</h3>
+                  <p className="text-2xl font-bold">{sitemap.xmlUrls?.length || 0}</p>
+                </div>
+              </div>
+            )}
+
+            {sitemap && sitemap.xmlSitemaps?.length > 0 && (
+              <div className="mt-8 space-y-4">
+                <h3 className="text-sm font-bold uppercase tracking-widest text-zinc-400">Shopify XML Sub-sitemaps</h3>
+                <div className="grid grid-cols-1 gap-2">
+                  {sitemap.xmlSitemaps.map((url, idx) => (
+                    <div key={idx} className="flex items-center justify-between p-3 bg-zinc-50 dark:bg-zinc-900/50 rounded-lg border border-zinc-200 dark:border-zinc-800 text-xs">
+                      <span className="truncate mr-4 text-zinc-600 dark:text-zinc-400">{url}</span>
+                      <a 
+                        href={url} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-black dark:text-white font-bold hover:underline whitespace-nowrap"
+                      >
+                        View XML
+                      </a>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {sitemap && (
+              <div className="mt-6 pt-4 border-t border-zinc-100 dark:border-zinc-800 text-[10px] text-zinc-400 uppercase tracking-widest flex justify-between">
+                <span>Last Synced</span>
+                <span>{new Date(sitemap.updatedAt).toLocaleString()}</span>
               </div>
             )}
           </div>

@@ -7,6 +7,25 @@ import GoldRatePage from "@/components/pages/gold-rate/GoldRatePage";
 import SilverRatePage from "@/components/pages/silver-rate/SilverRatePage";
 import PlatinumRatePage from "@/components/pages/platinum-rate/PlatinumRatePage";
 
+export async function generateMetadata({ params }) {
+  const { handle } = await params;
+  let page = await getPageByHandle(handle);
+
+  if (!page) {
+    page = await getPageByHandleStorefront(handle);
+  }
+
+  if (!page) return {};
+
+  return {
+    title: page.title || "Lucira Jewelry",
+    description: page.bodySummary || page.body?.replace(/<[^>]*>?/gm, "").slice(0, 160),
+    alternates: {
+      canonical: `/pages/${handle}`,
+    },
+  };
+}
+
 export default async function Page({ params }) {
   const { handle } = await params;
 

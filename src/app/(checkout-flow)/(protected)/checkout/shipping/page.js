@@ -1116,20 +1116,14 @@ export default function ShippingPage() {
               View Summary
             </button>
           </div>
-          <Button 
-            disabled={isContinueDisabled}
-            onClick={() => {
-              if (isContinueDisabled) {
-                toast.error("Please select a valid shipping address");
-                return;
-              }
-              handleContinueToPayment();
-              router.push("/checkout/payment");
-            }}
-            className="grow bg-primary hover:bg-accent text-white font-bold h-12 uppercase tracking-widest rounded-lg text-sm"
-          >
-            CONTINUE TO PAYMENT
-          </Button>
+          <Link href="/checkout/payment" className={`grow ${isContinueDisabled ? "pointer-events-none opacity-50" : ""}`} onClick={handleContinueToPayment}>
+             <Button 
+              disabled={isContinueDisabled}
+              className="w-full bg-primary hover:bg-accent text-white font-bold h-12 uppercase tracking-widest rounded-lg text-sm"
+            >
+              Continue to payment
+            </Button>
+          </Link>
         </div>
       </div>
 

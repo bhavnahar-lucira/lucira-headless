@@ -37,6 +37,9 @@ export async function generateMetadata({ params }) {
       description: collection.seo?.description || collection.description?.slice(0, 160),
       images: collection.image ? [collection.image.url] : [],
     },
+    alternates: {
+      canonical: `/collections/${handle}`,
+    },
   };
 }
 
