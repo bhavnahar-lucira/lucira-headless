@@ -416,6 +416,7 @@ export default function MobileHeader() {
                       }
 
                       const iconPath = item.menuIcon || item.megaMenuImage || item.icon;
+                      const isBlogOrPage = item.href?.includes("/blogs/") || item.href?.includes("/pages/");
                       return (
                         <Link 
                           key={i} 
@@ -423,11 +424,17 @@ export default function MobileHeader() {
                           onClick={() => setIsMenuOpen(false)}
                           className="flex flex-col items-center gap-2"
                         >
-                          <div className="w-20 h-20 relative flex items-center justify-center overflow-hidden">
+                          <div className={cn(
+                            "relative flex items-center justify-center overflow-hidden",
+                            isBlogOrPage ? "w-20 h-20 rounded-lg" : "w-20 h-20"
+                          )}>
                             <SafeImage 
                               src={iconPath} 
                               alt={item.label} 
-                              className="w-16 h-16 object-contain"
+                              className={cn(
+                                "w-full h-full",
+                                isBlogOrPage ? "object-cover" : "object-contain"
+                              )}
                             />
                           </div>
                           <span className="text-[13px] font-figtree text-center font-normal leading-tight">{item.label}</span>
@@ -464,14 +471,21 @@ export default function MobileHeader() {
                   <div className="flex flex-col space-y-3 pt-2">
                     {(Array.isArray(activeItem.featured) ? activeItem.featured : activeItem.featured.items).map((f, i) => {
                       const fIcon = f.menuIcon || f.icon || f.megaMenuImage;
+                      const isBlogOrPage = f.href?.includes("/blogs/") || f.href?.includes("/pages/");
                       return (
                         <Link key={i} href={f.href || "#"} onClick={() => setIsMenuOpen(false)} className="text-sm font-medium text-gray-900 flex items-center gap-3">
                           {fIcon && (
-                            <div className="w-8 h-8 relative flex items-center justify-center bg-gray-50 rounded-full overflow-hidden shrink-0">
+                            <div className={cn(
+                              "relative flex items-center justify-center bg-gray-50 overflow-hidden shrink-0",
+                              isBlogOrPage ? "w-10 h-10 rounded-lg" : "w-8 h-8 rounded-full"
+                            )}>
                               <SafeImage 
                                 src={fIcon} 
                                 alt={f.label} 
-                                className="w-6 h-6 object-contain"
+                                className={cn(
+                                  "w-full h-full",
+                                  isBlogOrPage ? "object-cover" : "object-contain p-1"
+                                )}
                               />
                             </div>
                           )}
@@ -621,9 +635,19 @@ export default function MobileHeader() {
 
         <div className="mt-4 space-y-6">
           <div className="bg-[#FAF6F3] mx-4 p-4 space-y-4 rounded-lg">
-            <Link href="/admin/orders" onClick={() => setIsMenuOpen(false)} className="block tracking-wider border-b border-gray-200 pb-3 font-figtree font-medium text-sm leading-none align-middle capitalize text-black">
+            <button 
+              onClick={() => {
+                setIsMenuOpen(false);
+                if (!user) {
+                  handleAuthTrigger();
+                } else {
+                  router.push("/admin/orders");
+                }
+              }} 
+              className="w-full text-left block tracking-wider border-b border-gray-200 pb-3 font-figtree font-medium text-sm leading-none align-middle capitalize text-black"
+            >
               Track Your Order
-            </Link>
+            </button>
             <Link href="/pages/contact-us" onClick={() => setIsMenuOpen(false)} className="block tracking-wider border-b border-gray-200 pb-3 font-figtree font-medium text-sm leading-none align-middle capitalize text-black">
               Contact Us
             </Link>

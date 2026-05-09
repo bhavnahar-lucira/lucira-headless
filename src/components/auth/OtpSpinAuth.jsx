@@ -114,7 +114,7 @@ export function OtpSpinAuth({
 
   // WebOTP API listener
   useEffect(() => {
-    if ("OTPCredential" in window && (step === "otp")) {
+    if (typeof window !== "undefined" && "OTPCredential" in window && (step === "otp")) {
       const ac = new AbortController();
       navigator.credentials
         .get({
@@ -126,7 +126,10 @@ export function OtpSpinAuth({
             handleAutoFillOtp(otpData.code);
           }
         })
-        .catch((err) => console.log("WebOTP Error:", err));
+        .catch((err) => {
+          if (err.name !== "AbortError") console.log("WebOTP Error:", err);
+        });
+
       return () => ac.abort();
     }
   }, [step]);
@@ -136,7 +139,11 @@ export function OtpSpinAuth({
     if (step === "login") {
       setTimeout(() => mobileRef.current?.focus(), 100);
     } else if (step === "otp") {
-      setTimeout(() => otpRefs[0]?.current?.focus(), 100);
+      setTimeout(() => {
+        if (otpRefs[0].current) {
+          otpRefs[0].current.focus();
+        }
+      }, 100);
     } else if (step === "register") {
       setTimeout(() => firstNameRef.current?.focus(), 100);
     }
@@ -147,7 +154,7 @@ export function OtpSpinAuth({
     if (cleanCode.length === 4) {
       const newOtp = cleanCode.split("");
       setOtp(newOtp);
-      handleVerifyOtp(cleanCode);
+      setTimeout(() => handleVerifyOtp(cleanCode), 100);
     }
   };
 
@@ -268,30 +275,30 @@ export function OtpSpinAuth({
   };
 
   const handleOtpChange = (index, value) => {
+    const cleanValue = value.replace(/\D/g, "");
+
     // Handle paste or autofill of the entire 4-digit code
-    if (value.length === 4 && /^\d+$/.test(value)) {
-      const newOtp = value.split("");
+    if (cleanValue.length >= 4) {
+      const code = cleanValue.slice(0, 4);
+      const newOtp = code.split("");
       setOtp(newOtp);
-      setTimeout(() => handleVerifyOtp(value), 50);
+      setTimeout(() => handleVerifyOtp(code), 50);
       return;
     }
 
-    if (!/^\d*$/.test(value)) return;
     const newOtp = [...otp];
-    newOtp[index] = value.slice(-1);
+    newOtp[index] = cleanValue.slice(-1);
     setOtp(newOtp);
 
-    if (value && index < 3) {
+    if (cleanValue && index < 3) {
       otpRefs[index + 1].current.focus();
     }
     
     // Auto-verify if 4 digits are entered manually
-    if (index === 3 && value) {
-      const finalOtp = [...newOtp];
-      finalOtp[3] = value.slice(-1);
-      if (finalOtp.every(d => d !== "")) {
+    if (index === 3 && cleanValue) {
+      if (newOtp.every(d => d !== "")) {
         setTimeout(() => {
-           const otpVal = finalOtp.join("");
+           const otpVal = newOtp.join("");
            if (otpVal.length === 4) {
              handleVerifyOtp(otpVal); 
            }
@@ -537,10 +544,11 @@ export function OtpSpinAuth({
                 <input
                   key={i}
                   ref={otpRefs[i]}
+                  name={i === 0 ? "otp" : `otp-${i}`}
                   type="tel"
                   inputMode="numeric"
                   autoComplete={i === 0 ? "one-time-code" : "off"}
-                  maxLength="1"
+                  maxLength={i === 0 ? 4 : 1}
                   className="w-[20%] h-[50px] text-center text-base md:text-lg border rounded-md border-[#ddd] focus:border-black outline-none font-extrabold"
                   value={digit}
                   onChange={(e) => handleOtpChange(i, e.target.value)}
