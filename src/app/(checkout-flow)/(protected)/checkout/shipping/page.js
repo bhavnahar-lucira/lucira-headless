@@ -1070,7 +1070,7 @@ export default function ShippingPage() {
               View Order Summary
             </button>
           </div>
-          <Link href="/checkout/payment" className="grow" onClick={handleContinueToPayment}>
+          <Link href="/checkout/payment" className={`grow ${isContinueDisabled ? "pointer-events-none opacity-50" : ""}`} onClick={handleContinueToPayment}>
              <Button 
               disabled={isContinueDisabled}
               className="w-full bg-primary hover:bg-accent text-white font-bold h-12 uppercase tracking-widest rounded-lg text-sm"

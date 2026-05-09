@@ -1241,7 +1241,12 @@ export default function PaymentPage() {
                     <ChevronLeft size={16} />
                     Return to shipping
                   </Link>
-                  <Button type="button" onClick={handlePayNow} disabled={paymentLoading || !totalAmount} className="px-14 h-14 bg-primary hover:bg-primary/90 text-white font-bold rounded-lg transition-all text-lg uppercase tracking-widest disabled:cursor-not-allowed disabled:opacity-60">
+                  <Button 
+                    type="button" 
+                    onClick={handlePayNow} 
+                    disabled={paymentLoading || !totalAmount || !selectedBillingAddress || (!isPickup && !selectedAddress)} 
+                    className="px-14 h-14 bg-primary hover:bg-primary/90 text-white font-bold rounded-lg transition-all text-lg uppercase tracking-widest disabled:cursor-not-allowed disabled:opacity-60"
+                  >
                     {paymentLoading ? "Processing..." : "Pay now"}
                   </Button>
                 </div>
@@ -1277,8 +1282,8 @@ export default function PaymentPage() {
           </div>
           <Button 
             onClick={handlePayNow}
-            disabled={paymentLoading || !finalAmount}
-            className="grow bg-primary hover:bg-accent text-white font-bold h-12 uppercase tracking-widest rounded-lg text-sm"
+            disabled={paymentLoading || !finalAmount || !selectedBillingAddress || (!isPickup && !selectedAddress)}
+            className="grow bg-primary hover:bg-accent text-white font-bold h-12 uppercase tracking-widest rounded-lg text-sm disabled:cursor-not-allowed disabled:opacity-60"
           >
             {paymentLoading ? "Processing..." : "Pay Now"}
           </Button>

@@ -16,6 +16,9 @@ export async function generateMetadata({ params }) {
       description: product.seo?.description || product.description?.replace(/<[^>]*>?/gm, '').slice(0, 160),
       images: [product.image],
     },
+    alternates: {
+      canonical: `/products/${handle}`,
+    },
   };
 }
 

@@ -11,6 +11,9 @@ export async function generateMetadata({ params }) {
   return {
     title: blog?.title || "Blogs | Lucira",
     description: blog?.metafields?.custom?.subtitle || "Explore stories of elegance and craftsmanship.",
+    alternates: {
+      canonical: `/blogs/${blogHandle}`,
+    },
   };
 }
 

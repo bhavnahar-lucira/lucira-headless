@@ -81,6 +81,9 @@ export async function generateMetadata({ params }) {
       description: article.seo?.description || article.excerpt || stripHtml(article.excerptHtml),
       images: article.image?.url ? [article.image.url] : [],
     },
+    alternates: {
+      canonical: `/blogs/${blogHandle}/${articleHandle}`,
+    },
   };
 }
 
