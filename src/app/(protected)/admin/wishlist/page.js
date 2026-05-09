@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Heart, ShoppingCart, Trash2, Star, ChevronRight, Video, Play, Copy, X, Loader2, ShieldCheck, Eye, ArrowRight, MapPin, Phone, Package, Coins } from "lucide-react";
+import { Heart, ShoppingCart, Trash2, Star, ChevronRight, Video, Play, Copy, X, Loader2, ShieldCheck, Eye, ArrowRight, MapPin, Phone, Package, Coins, Check } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { toast } from "react-toastify";
@@ -79,7 +79,7 @@ export default function WishlistPage() {
     }
   };
 
-  const handleRemove = async (productId, variantId = "") => {
+  const handleRemove = async (productId, variantId = "", silent = false) => {
     const key = variantId ? `${productId}-${variantId}` : productId;
     setRemovingId(key);
     try {
@@ -100,7 +100,12 @@ export default function WishlistPage() {
       }));
       
       dispatch(removeWishlistItem({ productId, variantId }));
-      toast.success("Removed from wishlist");
+      
+      if (!silent) {
+        toast.error("Removed from wishlist", {
+          icon: <Check className="w-4 h-4" />
+        });
+      }
     } catch (err) {
       console.error("Remove wishlist item failed", err);
       toast.error(err.message || "Unable to remove item");
@@ -188,10 +193,12 @@ export default function WishlistPage() {
 
       await dispatch(addToCart({ userId: user?.id, product: cartProduct })).unwrap();
       
-      // 4. Remove from wishlist after moving
-      await handleRemove(item.productId, item.variantId);
+      // 4. Remove from wishlist after moving (silent)
+      await handleRemove(item.productId, item.variantId, true);
       
-      toast.success("Moved to cart!");
+      toast.error("Moved to cart!", {
+        icon: <Check className="w-4 h-4" />
+      });
       dispatch(openCart());
     } catch (err) {
       console.error("Move to cart failed", err);

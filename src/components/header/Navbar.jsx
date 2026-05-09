@@ -301,15 +301,19 @@ export default function Navbar({ hideTop }) {
                                       />
                                     ) : item.menuIcon || item.megaMenuImage || (col.type === "icon" && item.icon) ? (
                                       <div className={cn(
-                                        "relative shrink-0 flex items-center justify-center rounded-full overflow-hidden transition-all",
-                                        isByShape ? "h-12 w-12" : "h-16 w-16"
+                                        "relative shrink-0 flex items-center justify-center overflow-hidden transition-all",
+                                        isByShape ? "h-12 w-12" : "h-16 w-16",
+                                        (item.href?.includes("/blogs/") || item.href?.includes("/pages/")) ? "rounded-lg" : "rounded-full"
                                       )}>
                                         <Image
                                           src={item.menuIcon || item.megaMenuImage || item.icon}
                                           alt={item.label}
                                           fill
                                           priority={j < 6}
-                                          className="object-contain p-1 transition-opacity duration-300"
+                                          className={cn(
+                                            "transition-opacity duration-300",
+                                            (item.href?.includes("/blogs/") || item.href?.includes("/pages/")) ? "object-cover" : "object-contain p-1"
+                                          )}
                                         />
                                       </div>
                                     ) : null}

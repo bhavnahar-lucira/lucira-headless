@@ -11,14 +11,14 @@ import "swiper/css";
 import "swiper/css/pagination";
 
 const CATEGORIES = [
-  { name: "Rings", image: "/images/range/Rings.jpg", href: "/collections/all-rings" },
-  { name: "Earrings", image: "/images/range/Earrings.jpg", href: "/collections/all-earrings" },
-  { name: "Bracelets", image: "/images/range/Bracelets.jpg", href: "/collections/all-bracelets" },
-  { name: "Necklaces", image: "/images/range/Necklaces.jpg", href: "/collections/all-necklaces" },
-  { name: "Nosepins", image: "/images/range/Nosepin.jpg", href: "/collections/all-nosepins" },
-  { name: "Mangalsutra", image: "/images/range/Mangalsutra.jpg", href: "/collections/all-mangalsutra" },
-  { name: "Men's Ring", image: "/images/range/MensRing.jpg", href: "/collections/all-mens-ring" },
-  { name: "Men's Stud", image: "/images/range/MensStud.jpg", href: "/collections/all-mens-stud" },
+  { name: "Rings", image: "/images/range/Rings.jpg", href: "/collections/rings" },
+  { name: "Earrings", image: "/images/range/Earrings.jpg", href: "/collections/earrings" },
+  { name: "Bracelets", image: "/images/range/Bracelets.jpg", href: "/collections/bracelets" },
+  { name: "Necklaces", image: "/images/range/Necklaces.jpg", href: "/collections/necklaces" },
+  { name: "Nosepins", image: "/images/range/Nosepin.jpg", href: "/collections/nosepins" },
+  { name: "Mangalsutra", image: "/images/range/Mangalsutra.jpg", href: "/collections/mangalsutra" },
+  { name: "Men's Ring", image: "/images/range/MensRing.jpg", href: "/collections/mens-ring" },
+  { name: "Men's Stud", image: "/images/range/MensStud.jpg", href: "/collections/mens-stud" },
 ];
 
 export default function ExploreRange() {

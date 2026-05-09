@@ -94,7 +94,9 @@ export default function CartSummary({ onPlaceOrder }) {
 
           if (!res.ok) {
             dispatch(removeCoupon());
-            toast.warn("Coupon removed: items in cart are no longer eligible.");
+            toast.error("Coupon removed: items in cart are no longer eligible.", {
+              icon: <Check className="w-4 h-4" />
+            });
           }
         } catch (err) {
           console.error("Auto-validation failed:", err);
@@ -152,7 +154,9 @@ export default function CartSummary({ onPlaceOrder }) {
 
   const handleRemoveCoupon = () => {
     dispatch(removeCoupon());
-    toast.info("Coupon removed");
+    toast.error("Coupon removed", {
+      icon: <Check className="w-4 h-4" />
+    });
   };
 
   return (

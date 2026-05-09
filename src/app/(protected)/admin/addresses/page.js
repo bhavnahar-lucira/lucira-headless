@@ -8,6 +8,7 @@ import {
   Trash2,
   Loader2,
   CheckCircle2,
+  Check,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -152,7 +153,9 @@ export default function SavedAddressesPage() {
     if (!confirm("Are you sure you want to remove this address?")) return;
     try {
       await deleteCustomerAddress(id);
-      toast.success("Address removed successfully");
+      toast.error("Address removed successfully", {
+        icon: <Check className="w-4 h-4" />
+      });
       loadAddresses();
     } catch (error) {
       toast.error(error.message || "Failed to remove address");

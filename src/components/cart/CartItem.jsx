@@ -19,7 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import { Trash2, Heart, Loader2, X, ChevronDown, Store, ChevronRight } from "lucide-react";
+import { Trash2, Heart, Loader2, X, ChevronDown, Store, ChevronRight, Check } from "lucide-react";
 
 export default function CartItem({ item, onAuthRequired }) {
   const dispatch = useDispatch();
@@ -93,7 +93,9 @@ export default function CartItem({ item, onAuthRequired }) {
       });
 
       await dispatch(removeFromCart({ userId: user?.id, variantId: item.variantId })).unwrap();
-      toast.success("Removed from cart");
+      toast.error("Removed from cart", {
+        icon: <Check className="w-4 h-4" />
+      });
     } catch (err) {
       console.error("Remove failed:", err);
       toast.error("Failed to remove item");
@@ -166,7 +168,9 @@ export default function CartItem({ item, onAuthRequired }) {
       pushAddToWishlist(commonTrackingData);
 
       await dispatch(removeFromCart({ userId: user?.id, variantId: item.variantId })).unwrap();
-      toast.success("Moved to wishlist");
+      toast.error("Moved to wishlist", {
+        icon: <Check className="w-4 h-4" />
+      });
     } catch (err) {
       console.error("Move to wishlist failed:", err);
       toast.error(err.message || "Failed to move to wishlist");

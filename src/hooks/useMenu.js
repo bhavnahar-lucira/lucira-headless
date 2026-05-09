@@ -53,7 +53,7 @@ function transformMenu(shopifyMenu) {
       type: menuType,
       layout: layout,
       mobileBanner: getFileUrl(getMetafield(metafields, "custom", "mobile_menu_banner_image")),
-      menuIcon: getFileUrl(getMetafield(metafields, "custom", "menu_links_image_icon")),
+      menuIcon: getFileUrl(getMetafield(metafields, "custom", "menu_links_image_icon")) || resource.image?.url || resource.featuredImage?.url,
     };
 
     if (menuType === "mega") {
@@ -80,7 +80,7 @@ function transformMenu(shopifyMenu) {
                             href: f.url.replace(/https:\/\/[^/]+/, ""),
                             icon: getFileUrl(getMetafield(fMeta, "custom", "icon")),
                             megaMenuImage: getFileUrl(getMetafield(fMeta, "custom", "mega_menu_image")),
-                            menuIcon: getFileUrl(getMetafield(fMeta, "custom", "menu_links_image_icon")),
+                            menuIcon: getFileUrl(getMetafield(fMeta, "custom", "menu_links_image_icon")) || fResource.image?.url || fResource.featuredImage?.url,
                         };
                     });
                 }
@@ -96,7 +96,7 @@ function transformMenu(shopifyMenu) {
                               href: f.url.replace(/https:\/\/[^/]+/, ""),
                               icon: getFileUrl(getMetafield(fMeta, "custom", "icon")),
                               megaMenuImage: getFileUrl(getMetafield(fMeta, "custom", "mega_menu_image")),
-                              menuIcon: getFileUrl(getMetafield(fMeta, "custom", "menu_links_image_icon")),
+                              menuIcon: getFileUrl(getMetafield(fMeta, "custom", "menu_links_image_icon")) || fResource.image?.url || fResource.featuredImage?.url,
                           };
                       })
                   };
@@ -152,9 +152,8 @@ function transformMenu(shopifyMenu) {
                                 href: sub.url.replace(/https:\/\/[^/]+/, ""),
                                 icon: getFileUrl(getMetafield(subMeta, "custom", "icon")),
                                 megaMenuImage: getFileUrl(getMetafield(subMeta, "custom", "mega_menu_image")),
-                                menuIcon: getFileUrl(getMetafield(subMeta, "custom", "menu_links_image_icon")),
-                            };
-                        });
+                                menuIcon: getFileUrl(getMetafield(subMeta, "custom", "menu_links_image_icon")) || subResource.image?.url || subResource.featuredImage?.url,
+                                };                        });
                 })();
 
                 const explicitType = getMetafield(childMetafields, "custom", "column_type")?.value;
@@ -194,7 +193,7 @@ function transformMenu(shopifyMenu) {
             return {
                 title: sub.title,
                 description: getMetafield(subMeta, "custom", "menu_subtitle")?.value || `${subResource.productsCount?.count || 0} Products`,
-                image: getFileUrl(gridImageMeta) || subResource.image?.url,
+                image: getFileUrl(gridImageMeta) || subResource.image?.url || subResource.featuredImage?.url,
                 href: sub.url.replace(/https:\/\/[^/]+/, "")
             };
         });

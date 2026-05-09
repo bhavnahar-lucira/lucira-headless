@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Phone, MessageSquare, Truck, MessageCircle, Coins, Loader2 } from "lucide-react";
+import { Phone, MessageSquare, Truck, MessageCircle, Coins, Loader2, Check } from "lucide-react";
 import { useCart } from "@/hooks/useCart";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -133,7 +133,9 @@ export default function CheckoutSummary({
 
     if (appliedCoupon) {
       removeCoupon();
-      toast.info("Coupon has been removed as loyalty points are applied.");
+      toast.error("Coupon has been removed as loyalty points are applied.", {
+        icon: <Check className="w-4 h-4" />
+      });
     }
 
     const promotion = pointsData.promotions[0];
@@ -148,7 +150,9 @@ export default function CheckoutSummary({
 
   const handleRemovePoints = () => {
     dispatch(removePoints());
-    toast.info("Points discount removed");
+    toast.error("Points discount removed", {
+      icon: <Check className="w-4 h-4" />
+    });
   };
 
   const displayItems = (items || []).filter(

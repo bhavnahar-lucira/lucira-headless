@@ -128,6 +128,39 @@ export async function POST() {
                   }
                 }
               }
+              ... on Article {
+                id
+                handle
+                image { url }
+                metafields(first: 25) {
+                  nodes {
+                    namespace
+                    key
+                    value
+                    type
+                    reference {
+                      ... on MediaImage { image { url } }
+                      ... on GenericFile { url }
+                    }
+                  }
+                }
+              }
+              ... on Blog {
+                id
+                handle
+                metafields(first: 25) {
+                  nodes {
+                    namespace
+                    key
+                    value
+                    type
+                    reference {
+                      ... on MediaImage { image { url } }
+                      ... on GenericFile { url }
+                    }
+                  }
+                }
+              }
             }
           }
         `;
