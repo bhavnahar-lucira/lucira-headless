@@ -1521,7 +1521,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                   {availableSizes.length > 0 && availableSizes[0] !== null && availableSizes[0] !== undefined && (
                     <>
                       <div className="flex justify-between items-center text-sm">
-                        <span className="font-semibold text-base">Select Ring Size: <span className="font-medium ml-1">{selectedSize} IND</span></span>
+                        <span className="font-semibold text-base">Select {product.type.replace(/s$/, "")} Size: <span className="font-medium ml-1">{selectedSize} IND</span></span>
                         {String(product.type || "").toLowerCase().includes("ring") && (
                           <SizeGuideSheet>
                             <button
@@ -2473,10 +2473,10 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                             )}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="h-11 aspect-square bg-white shadow-sm border-gray-200 rounded-sm flex items-center justify-center shrink-0"
+                            className="h-11 aspect-square bg-[#29a319] shadow-sm border-gray-200 rounded-sm flex items-center justify-center shrink-0"
                           >
                             <div className="relative w-7 h-7">
-                              <Image src="/images/icons/whatsapp.png" alt="WhatsApp" fill className="object-contain" />
+                              <Image src="/images/icons/whatsapp_white.png" alt="WhatsApp" fill className="object-contain" />
                             </div>
                           </a>
                           <Button variant="outline" className="flex-1 font-bold h-11 rounded-sm border-gray-200" asChild>
@@ -2568,10 +2568,10 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                             )}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="h-11 aspect-square bg-white shadow-sm border-gray-200 rounded-sm flex items-center justify-center shrink-0"
+                            className="h-11 aspect-square bg-[#29a319] shadow-sm border-gray-200 rounded-sm flex items-center justify-center shrink-0"
                           >
                             <div className="relative w-7 h-7">
-                              <Image src="/images/icons/whatsapp.png" alt="WhatsApp" fill className="object-contain" />
+                              <Image src="/images/icons/whatsapp_white.png" alt="WhatsApp" fill className="object-contain" />
                             </div>
                         </a>
                         <Button variant="outline" className="flex-1 font-bold h-11 rounded-sm border-gray-200" asChild>
