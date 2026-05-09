@@ -22,7 +22,9 @@ const userSlice = createSlice({
       state.isAuthModalOpen = false;
     },
     setPincode: (state, action) => {
-      state.pincode = action.payload;
+      state.pincode = String(action.payload || "")
+        .replace(/\D/g, "")
+        .slice(0, 6);
     },
     setCollectionContext: (state, action) => {
       state.collectionContext = action.payload;
@@ -79,3 +81,4 @@ export default userSlice.reducer;
 export const selectUser = (state) => state.user.user;
 export const selectIsAuthenticated = (state) => state.user.isAuthenticated;
 export const selectIsAuthModalOpen = (state) => state.user.isAuthModalOpen;
+export const selectPincode = (state) => state.user.pincode;

@@ -62,7 +62,7 @@ import { SizeGuideSheet } from "@/components/product/SizeGuideSheet";
 import { ProductCustomizerMobile } from "@/components/product/ProductCustomizerMobile";
 import { useDispatch, useSelector } from "react-redux";
 import { addToCart } from "@/redux/features/cart/cartSlice";
-import { selectUser, setPincode as setGlobalPincode } from "@/redux/features/user/userSlice";
+import { selectUser, setPincode as setGlobalPincode, selectPincode } from "@/redux/features/user/userSlice";
 import {
   addWishlistItem,
   removeWishlistItem,
@@ -393,7 +393,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
   const schemeData = activeVariant?.price > 20000 ? calculateScheme(activeVariant.price) : null;
 
   // Pincode & Dispatch Logic
-  const globalPincode = useSelector((state) => state.user.pincode);
+  const globalPincode = useSelector(selectPincode);
   const [pincode, setPincode] = useState(globalPincode || "");
   const [checkingPincode, setCheckingPincode] = useState(false);
   const [deliveryInfo, setDeliveryInfo] = useState({
@@ -401,6 +401,29 @@ export default function ProductPageClient({ product, complementaryProducts = [],
     message: "",
     coords: null
   });
+
+useEffect(() => {
+  if (
+    globalPincode &&
+    !pincode
+  ) {
+    setPincode(globalPincode);
+  }
+}, [globalPincode]);
+
+useEffect(() => {
+  const savedPincode = String(
+    getCookieValue(USER_PINCODE_COOKIE) || ""
+  )
+    .replace(/\D/g, "")
+    .slice(0, 6);
+
+  if (savedPincode) {
+    setPincode(savedPincode);
+
+    dispatch(setGlobalPincode(savedPincode));
+  }
+}, [dispatch]);
 
   useEffect(() => {
     const fetchStores = async () => {
@@ -425,7 +448,10 @@ export default function ProductPageClient({ product, complementaryProducts = [],
   const handlePincodeCheck = useCallback(async (val) => {
     // If val is a string (like from useEffect), use it. 
     // Otherwise (from button click/event), use the current 'pincode' state.
-    const pincodeToCheck = (typeof val === 'string' ? val : pincode).trim();
+    // const pincodeToCheck = (typeof val === 'string' ? val : pincode).trim();
+      const pincodeToCheck = String(
+      typeof val === "string" ? val : pincode
+    ).trim();
 
     if (pincodeToCheck.length !== 6) {
       if (pincodeToCheck) toast.error("Please enter a valid 6-digit pincode");
@@ -449,6 +475,14 @@ export default function ProductPageClient({ product, complementaryProducts = [],
           coords: data.data?.latitude && data.data?.longitude ? { lat: data.data.latitude, lng: data.data.longitude } : null
         });
         // Store in global Redux for persistence
+        document.cookie = `${USER_PINCODE_COOKIE}=${pincodeToCheck}; path=/; max-age=31536000; SameSite=Lax`;
+        window.dispatchEvent(
+          new CustomEvent("lucira:user-pincode", {
+            detail: {
+              pincode: pincodeToCheck,
+            },
+          })
+        );
         dispatch(setGlobalPincode(pincodeToCheck));
       } else {
         setDeliveryInfo({
@@ -477,23 +511,35 @@ export default function ProductPageClient({ product, complementaryProducts = [],
   }, []);
 
   useEffect(() => {
-    const applyPincode = (value) => {
-      const cookiePincode = String(value || "").match(/\b\d{6}\b/)?.[0] || "";
-      if (!cookiePincode || cookiePincode === pincode) return;
+  const applyPincode = (value) => {
+    const cookiePincode = String(value || "")
+      .replace(/\D/g, "")
+      .slice(0, 6);
 
-      setPincode(cookiePincode);
+    if (cookiePincode === pincode) return;
+
+    setPincode(cookiePincode);
+
+    if (cookiePincode.length === 6) {
       handlePincodeCheck(cookiePincode);
-    };
+    }
+  };
 
-    applyPincode(getCookieValue(USER_PINCODE_COOKIE));
+  const handleUserPincode = (event) => {
+    applyPincode(event.detail?.pincode);
+  };
 
-    const handleUserPincode = (event) => {
-      applyPincode(event.detail?.pincode);
-    };
+  window.addEventListener(
+    "lucira:user-pincode",
+    handleUserPincode
+  );
 
-    window.addEventListener("lucira:user-pincode", handleUserPincode);
-    return () => window.removeEventListener("lucira:user-pincode", handleUserPincode);
-  }, [handlePincodeCheck, pincode]);
+  return () =>
+    window.removeEventListener(
+      "lucira:user-pincode",
+      handleUserPincode
+    );
+}, [handlePincodeCheck, pincode]);
 
   // Update dispatch message when variant changes (size/color)
   useEffect(() => {
@@ -1953,12 +1999,18 @@ export default function ProductPageClient({ product, complementaryProducts = [],
                   <Input
                     placeholder="Enter Pincode"
                     value={pincode}
-                    onChange={(e) => setPincode(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && handlePincodeCheck()}
+                    onChange={(e) => {const value = e.target.value.replace(/\D/g, "").slice(0, 6);
+                      setPincode(value);
+                      dispatch(setGlobalPincode(value));
+                    }}
+                    onKeyDown={(e) => e.key === 'Enter' && handlePincodeCheck(pincode)}
+                    maxLength={6}
+                    inputMode="numeric"
+                    pattern="[0-9]*"
                     className="h-14 bg-white border-gray-200 rounded-md text-sm font-medium pr-40"
                   />
                   <Button
-                    onClick={handlePincodeCheck}
+                    onClick={() => handlePincodeCheck(pincode)}
                     disabled={checkingPincode}
                     className="h-12 px-10 font-bold rounded-md absolute right-1 top-1/2 transform -translate-y-1/2 bg-tertiary hover:cursor-pointer"
                   >
