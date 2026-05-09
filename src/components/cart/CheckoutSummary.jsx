@@ -192,11 +192,18 @@ export default function CheckoutSummary({
                     </div>
                   </div>
                   {!isInsurance && (
-                    <div className="bg-zinc-50 p-2 rounded-md flex items-center gap-2">
-                      <Truck size={14} className="text-black" />
-                      <span className="text-[10px] font-medium text-black">Est. Delivery by {item.estDelivery || "8-10 Days"}</span>
-                    </div>
+                   <div className="bg-zinc-50 p-2 rounded-md flex items-center gap-2">
+                     <Truck size={14} className="text-black" />
+                     <span className="text-[10px] font-medium text-black">
+                       {item.estDelivery 
+                         ? (item.estDelivery.includes("dispatch by") 
+                             ? item.estDelivery.replace("dispatch by", "delivery by") 
+                             : `Est. Delivery by ${item.estDelivery}`)
+                         : "Est. Delivery by 8-10 Days"}
+                     </span>
+                   </div>
                   )}
+
                   {index < displayItems.length - 1 && <div className="border-b border-zinc-50 pt-2" />}
                 </div>
               );

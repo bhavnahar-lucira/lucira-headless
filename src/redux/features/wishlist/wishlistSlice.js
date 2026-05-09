@@ -34,10 +34,12 @@ export const addWishlistItem = createAsyncThunk(
 
 export const removeWishlistItem = createAsyncThunk(
   "wishlist/removeWishlistItem",
-  async (productId, { dispatch }) => {
+  async (payload, { dispatch }) => {
+    const productId = typeof payload === 'string' ? payload : payload.productId;
+    const variantId = typeof payload === 'string' ? "" : payload.variantId;
     try {
-      await removeWishlistApi(productId);
-      return productId;
+      await removeWishlistApi(productId, variantId);
+      return payload;
     } catch (err) {
       if (err.message === "Customer not found" || err.message === "Unauthorized") {
         dispatch(logout());
@@ -59,8 +61,8 @@ export const mergeGuestWishlist = createAsyncThunk(
       return remoteItems;
     }
 
-    const remoteProductIds = new Set(remoteItems.map((item) => item.productId));
-    const itemsToAdd = guestItems.filter((item) => !remoteProductIds.has(item.productId));
+    const remoteUniqueKeys = new Set(remoteItems.map((item) => `${item.productId}-${item.variantId || ""}`));
+    const itemsToAdd = guestItems.filter((item) => !remoteUniqueKeys.has(`${item.productId}-${item.variantId || ""}`));
 
     await Promise.all(
       itemsToAdd.map((item) => addWishlistApi(item))
@@ -89,15 +91,26 @@ const wishlistSlice = createSlice({
     },
     addGuestWishlistItem: (state, action) => {
       const item = action.payload;
-      const existsInGuest = state.guestItems.some((i) => i.productId === item.productId);
-      const existsInItems = state.items.some((i) => i.productId === item.productId);
+      const key = `${item.productId}-${item.variantId || ""}`;
+      const existsInGuest = state.guestItems.some((i) => `${i.productId}-${i.variantId || ""}` === key);
+      const existsInItems = state.items.some((i) => `${i.productId}-${i.variantId || ""}` === key);
       if (!existsInGuest) state.guestItems.unshift(item);
       if (!existsInItems) state.items.unshift(item);
     },
     removeGuestWishlistItem: (state, action) => {
-      const productId = action.payload;
-      state.guestItems = state.guestItems.filter((item) => item.productId !== productId);
-      state.items = state.items.filter((item) => item.productId !== productId);
+      const payload = action.payload;
+      const productId = typeof payload === 'string' ? payload : payload.productId;
+      const variantId = typeof payload === 'string' ? "" : payload.variantId;
+      
+      const filterFn = (item) => {
+        if (variantId) {
+          return !(item.productId === productId && item.variantId === variantId);
+        }
+        return item.productId !== productId;
+      };
+
+      state.guestItems = state.guestItems.filter(filterFn);
+      state.items = state.items.filter(filterFn);
     },
     restoreGuestWishlist: (state) => {
       state.items = state.guestItems;
@@ -127,8 +140,11 @@ const wishlistSlice = createSlice({
       .addCase(addWishlistItem.fulfilled, (state, action) => {
         state.loading = false;
         const item = action.payload;
-        if (item && !state.items.find((i) => i.productId === item.productId)) {
-          state.items.unshift(item);
+        if (item) {
+          const key = `${item.productId}-${item.variantId || ""}`;
+          if (!state.items.find((i) => `${i.productId}-${i.variantId || ""}` === key)) {
+            state.items.unshift(item);
+          }
         }
       })
       .addCase(addWishlistItem.rejected, (state, action) => {
@@ -140,7 +156,16 @@ const wishlistSlice = createSlice({
       })
       .addCase(removeWishlistItem.fulfilled, (state, action) => {
         state.loading = false;
-        state.items = state.items.filter((item) => item.productId !== action.payload);
+        const payload = action.payload;
+        const productId = typeof payload === 'string' ? payload : payload.productId;
+        const variantId = typeof payload === 'string' ? "" : payload.variantId;
+        
+        state.items = state.items.filter((item) => {
+          if (variantId) {
+            return !(item.productId === productId && item.variantId === variantId);
+          }
+          return item.productId !== productId;
+        });
       })
       .addCase(removeWishlistItem.rejected, (state, action) => {
         state.loading = false;

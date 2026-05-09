@@ -2,79 +2,63 @@
 
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Heart, ShoppingCart, Trash2, Star, ChevronRight, Video, Play, Copy, X, Loader2, ShieldCheck, Eye, ArrowRight } from "lucide-react";
-import Link from "next/link";
+import { Heart, ShoppingCart, Trash2, Star, ChevronRight, Video, Play, Copy, X, Loader2, ShieldCheck, Eye, ArrowRight, MapPin, Phone, Package, Coins } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { toast } from "react-toastify";
-import { removeWishlistItem } from "@/redux/features/wishlist/wishlistSlice";
-import { addToCart, openCart } from "@/redux/features/cart/cartSlice";
-import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
+import { getValidSrc } from "@/lib/utils";
+import { formatPrice } from "@/utils/formatPrice";
+import { 
+  Drawer, 
+  DrawerClose, 
+  DrawerContent, 
+  DrawerHeader, 
+  DrawerTitle, 
+  DrawerTrigger 
 } from "@/components/ui/drawer";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-
-// Helper to ensure image src is a valid string URL
-const getValidSrc = (src, fallback = "/images/product/1.jpg") => {
-  if (typeof src === 'string' && src.trim() !== '') return src;
-  if (src && typeof src === 'object' && src.url) return src.url;
-  return fallback;
-};
-
-const formatPrice = (num) => {
-  if (num === null || num === undefined) return "0";
-  return new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(num);
-};
+import { Button } from "@/components/ui/button";
+import { fetchWishlist, removeWishlistItem } from "@/redux/features/wishlist/wishlistSlice";
+import { addToCart, openCart } from "@/redux/features/cart/cartSlice";
+import { getEstimatedDispatchDate } from "@/lib/utils";
 
 export default function WishlistPage() {
   const dispatch = useDispatch();
-  const user = useSelector((state) => state.user.user);
+  const { user } = useSelector((state) => state.user);
+  const { items: reduxWishlist, loading } = useSelector((state) => state.wishlist);
   const [wishlistItems, setWishlistItems] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [removingId, setRemovingId] = useState(null);
   const [movingToCartId, setMovingToCartId] = useState(null);
-  
-  // Similar products state
   const [showSimilar, setShowSimilar] = useState(false);
   const [similarProducts, setSimilarProducts] = useState([]);
   const [loadingSimilar, setLoadingSimilar] = useState(false);
   const [activeSimilarHandle, setActiveSimilarHandle] = useState(null);
-
-  // Video popup state
+  
+  // Video Popup State
   const [showVideoPopup, setShowVideoPopup] = useState(false);
   const [activeVideoMedia, setActiveVideoMedia] = useState(null);
   const [loadingVideo, setLoadingVideo] = useState(false);
 
   const loadWishlist = async () => {
-    setLoading(true);
     try {
-      const res = await fetch("/api/wishlist");
-      if (!res.ok) throw new Error("Failed to load wishlist");
-      const data = await res.json();
-      setWishlistItems(data.items || []);
+      const res = await dispatch(fetchWishlist()).unwrap();
+      setWishlistItems(res);
     } catch (err) {
       console.error("Failed to load wishlist", err);
-      toast.error(err.message || "Unable to load wishlist");
-    } finally {
-      setLoading(false);
     }
   };
 
   const handleVideoClick = async (item) => {
-    setLoadingVideo(true);
     setShowVideoPopup(true);
-    setActiveVideoMedia(null); // Reset
-    
+    setLoadingVideo(true);
     try {
+      // 1. Fetch full product details to find variants
       const res = await fetch(`/api/products/details?handle=${item.productHandle}`);
       if (!res.ok) throw new Error("Failed to fetch product details");
       const { product } = await res.json();
@@ -95,15 +79,27 @@ export default function WishlistPage() {
     }
   };
 
-  const handleRemove = async (productId) => {
-    setRemovingId(productId);
+  const handleRemove = async (productId, variantId = "") => {
+    const key = variantId ? `${productId}-${variantId}` : productId;
+    setRemovingId(key);
     try {
-      const res = await fetch(`/api/wishlist?productId=${encodeURIComponent(productId)}`, {
+      const q = new URLSearchParams();
+      q.set("productId", productId);
+      if (variantId) q.set("variantId", variantId);
+
+      const res = await fetch(`/api/wishlist?${q.toString()}`, {
         method: "DELETE",
       });
       if (!res.ok) throw new Error("Failed to remove item");
-      setWishlistItems((items) => items.filter((item) => item.productId !== productId));
-      dispatch(removeWishlistItem(productId));
+      
+      setWishlistItems((items) => items.filter((item) => {
+        if (variantId) {
+          return !(item.productId === productId && item.variantId === variantId);
+        }
+        return item.productId !== productId;
+      }));
+      
+      dispatch(removeWishlistItem({ productId, variantId }));
       toast.success("Removed from wishlist");
     } catch (err) {
       console.error("Remove wishlist item failed", err);
@@ -114,7 +110,8 @@ export default function WishlistPage() {
   };
 
   const handleMoveToCart = async (item) => {
-    setMovingToCartId(item.productId);
+    const itemKey = item.variantId ? `${item.productId}-${item.variantId}` : item.productId;
+    setMovingToCartId(itemKey);
     try {
       // 1. Fetch full product details to find variants
       const res = await fetch(`/api/products/details?handle=${item.productHandle}`);
@@ -125,8 +122,13 @@ export default function WishlistPage() {
         throw new Error("Product variants not found");
       }
 
-      // 2. Logic: In-store available first, then first in-stock, then default
-      let selectedVariant = product.variants.find(v => v.metafields?.in_store_available === "true" || v.metafields?.in_store_available === true);
+      // 2. Prioritize the saved variant from wishlist
+      let selectedVariant = product.variants.find(v => (v.id === item.variantId || v.shopifyId === item.variantId));
+      
+      if (!selectedVariant) {
+        // Fallback: In-store available first, then first in-stock, then default
+        selectedVariant = product.variants.find(v => v.metafields?.in_store_available === "true" || v.metafields?.in_store_available === true);
+      }
       
       if (!selectedVariant) {
         selectedVariant = product.variants.find(v => v.inStock);
@@ -149,7 +151,7 @@ export default function WishlistPage() {
         variantTitle: selectedVariant.title,
         color: selectedVariant.color || product.color,
         karat: selectedVariant.karat || selectedVariant.purity || product.karat || product.purity || "",
-        size: selectedVariant.size,
+        size: String(selectedVariant.size || ""),
         inStock: Boolean(selectedVariant.inStock),
         
         // Technical pricing fields required for CartSummary and GTM
@@ -174,19 +176,20 @@ export default function WishlistPage() {
         hasSimilar: Boolean(product.handle),
         reviews: product.reviews || null,
         comparePrice: selectedVariant?.compare_price || product.compare_price || "",
-        variantOptions: product.variants.map(v => ({
+        estDelivery: getEstimatedDispatchDate(Boolean(selectedVariant.inStock), product.productMetafields?.lead_time),
+        variantOptions: Array.from(new Map(product.variants.map(v => [v.size, {
           variantId: v.id || v.shopifyId,
           size: v.size,
           price: v.price,
           inStock: v.inStock,
           variantTitle: v.title
-        }))
+        }])).values())
       };
 
       await dispatch(addToCart({ userId: user?.id, product: cartProduct })).unwrap();
       
-      // 4. Optionally remove from wishlist after moving
-      await handleRemove(item.productId);
+      // 4. Remove from wishlist after moving
+      await handleRemove(item.productId, item.variantId);
       
       toast.success("Moved to cart!");
       dispatch(openCart());
@@ -222,6 +225,8 @@ export default function WishlistPage() {
     loadWishlist();
   }, []);
 
+  const recentlyViewedState = {}; // Placeholder if needed
+
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -242,16 +247,17 @@ export default function WishlistPage() {
         {loading ? (
           <div className="col-span-full py-20 text-center text-zinc-500">Loading your wishlist...</div>
         ) : wishlistItems.length > 0 ? (
-          wishlistItems.map((item) => {
+          wishlistItems.map((item, index) => {
             const priceNum = Number(item.price);
             const comparePriceNum = Number(item.comparePrice);
             const discount = comparePriceNum && priceNum ? Math.round(((comparePriceNum - priceNum) / comparePriceNum) * 100) : 0;
+            const itemKey = item.variantId ? `${item.productId}-${item.variantId}` : (item.productId || index);
             
             return (
-              <div key={item.productId || item.id} className="group space-y-4">
+              <div key={itemKey} className="group space-y-4">
                 {/* Product Image and Icons Container */}
                 <div className="relative aspect-square w-full bg-[#fafafa] overflow-hidden rounded-2xl border border-zinc-100 transition-all duration-300 group-hover:shadow-md">
-                  <Link href={`/products/${item.productHandle || item.productId}`} className="block w-full h-full mix-blend-multiply relative">
+                  <Link href={`/products/${item.productHandle || item.productId}${item.variantId ? `?variant=${item.variantId}` : ""}`} className="block w-full h-full mix-blend-multiply relative">
                     {item.image ? (
                       <Image
                         src={getValidSrc(item.image)}
@@ -290,29 +296,37 @@ export default function WishlistPage() {
                   {/* Delete Button */}
                   <button
                     type="button"
-                    onClick={() => handleRemove(item.productId)}
-                    disabled={removingId === item.productId}
+                    onClick={() => handleRemove(item.productId, item.variantId)}
+                    disabled={removingId === itemKey}
                     className="absolute top-4 right-4 z-10 w-9 h-9 flex items-center justify-center rounded-full bg-white/90 backdrop-blur-sm border border-zinc-200 text-rose-500 shadow-sm hover:bg-rose-500 hover:text-white transition-all duration-300"
                   >
-                    {removingId === item.productId ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />}
+                    {removingId === itemKey ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />}
                   </button>
                 </div>
 
                 {/* Product Info */}
                 <div className="flex flex-col gap-3 px-1">
-                  <Link href={`/products/${item.productHandle || item.productId}`}>
+                  <Link href={`/products/${item.productHandle || item.productId}${item.variantId ? `?variant=${item.variantId}` : ""}`}>
                     <h3 className="font-figtree text-base md:text-lg font-bold hover:underline underline-offset-4 decoration-1 leading-snug hover:text-primary transition-colors truncate">
                       {item.title}
                     </h3>
                   </Link>
 
-                  {/* Rating Section ... rest of code */}
+                  {/* Variant Details */}
+                  {(item.size || item.karat || item.color) && (
+                    <div className="flex flex-wrap gap-2 text-[10px] uppercase font-bold text-zinc-400 tracking-wider">
+                      {item.karat && <span>{item.karat}</span>}
+                      {item.color && <span>{item.color}</span>}
+                      {item.size && <span>Size: {item.size}</span>}
+                    </div>
+                  )}
+
                   {item.reviews?.count > 0 && (
                     <div className="flex items-center gap-1.5">
                       <div className="flex items-center gap-0.5 text-amber-400">
                         {[...Array(5)].map((_, i) => (
                           <Star
-                            key={`star-${item.productId}-${i}`}
+                            key={`star-${itemKey}-${i}`}
                             size={12}
                             fill={i < Math.floor(item.reviews.average) ? "currentColor" : "none"}
                             className={i < Math.floor(item.reviews.average) ? "" : "text-zinc-200"}
@@ -346,10 +360,10 @@ export default function WishlistPage() {
                   <div className="flex gap-2 pt-2">
                     <button
                       onClick={() => handleMoveToCart(item)}
-                      disabled={movingToCartId === item.productId}
+                      disabled={movingToCartId === itemKey}
                       className="flex-1 flex items-center justify-center gap-2 bg-primary text-white text-[11px] font-bold uppercase tracking-wider py-3 rounded-xl hover:opacity-90 transition-all shadow-md shadow-primary/10 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      {movingToCartId === item.productId ? (
+                      {movingToCartId === itemKey ? (
                         <>
                           <Loader2 size={14} className="animate-spin" />
                           <span>Moving...</span>
@@ -362,7 +376,7 @@ export default function WishlistPage() {
                       )}
                     </button>
                     <Link
-                      href={`/products/${item.productHandle || item.productId}`}
+                      href={`/products/${item.productHandle || item.productId}${item.variantId ? `?variant=${item.variantId}` : ""}`}
                       className="flex-1 flex items-center justify-center gap-2 bg-zinc-100 text-zinc-900 text-[11px] font-bold uppercase tracking-wider py-3 rounded-xl hover:bg-zinc-200 transition-colors"
                     >
                       <Eye size={14} />
