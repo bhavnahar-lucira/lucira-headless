@@ -94,6 +94,7 @@ export function AuthDialog({
           forceShowWheel={forceShowWheel}
           overrideHeading={overrideHeading}
           overrideSubtext={overrideSubtext}
+          isPopup={true}
         />
       </DialogContent>
     </Dialog>

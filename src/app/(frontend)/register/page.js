@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useRouter } from "next/navigation";
-import { RegisterForm } from "@/components/auth/RegisterForm";
+import { OtpSpinAuth } from "@/components/auth/OtpSpinAuth";
 
 export default function RegisterPage() {
   const { user } = useSelector((state) => state.user);
@@ -18,8 +18,14 @@ export default function RegisterPage() {
   if (user) return null;
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center bg-gray-50 px-4 py-12">
-      <RegisterForm />
+    <div className="min-h-[90vh] flex items-center justify-center bg-[#FDFBF9] px-4 py-12">
+      <div className="w-full max-w-[800px]">
+        <OtpSpinAuth 
+          initialStep="register" 
+          onSuccess={() => router.push("/admin")}
+          showCloseButton={false}
+        />
+      </div>
     </div>
   );
 }
