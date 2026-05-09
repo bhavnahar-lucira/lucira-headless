@@ -41,7 +41,7 @@ import {
   updateCustomerAddress,
 } from "@/lib/api";
 import { useCart } from "@/hooks/useCart";
-import { pushAddShippingInfo } from "@/lib/gtm";
+import { pushAddShippingInfo, pushBeginCheckout } from "@/lib/gtm";
 import { MobileBottomSheet } from "@/components/common/MobileBottomSheet";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 
@@ -258,6 +258,54 @@ export default function ShippingPage() {
   const searchParams = useSearchParams();
   const [deliveryMethod, setDeliveryMethod] = useState(searchParams.get("method") || "ship");
   const summaryRef = useRef(null);
+  const hasFiredBeginCheckout = useRef(false);
+
+  useEffect(() => {
+    if (cartItems && cartItems.length > 0 && !hasFiredBeginCheckout.current) {
+      const getNumericId = (gid) => {
+        if (!gid) return 0;
+        if (typeof gid === 'number') return gid;
+        const match = String(gid).match(/\d+$/);
+        return match ? Number(match[0]) : 0;
+      };
+
+      const checkoutData = {
+        payment_type: "Pay Via UPI / COD",
+        send_to: "G-K6H0NZ4YJ8",
+        value: Number(totalAmount),
+        currency: "INR",
+        items: cartItems.map((item, idx) => {
+          const lowerTitle = (item.title || "").toLowerCase();
+          let category = item.type || item.productType || "";
+          if (!category) {
+            if (lowerTitle.includes("ring")) category = "Rings";
+            else if (lowerTitle.includes("earring") || lowerTitle.includes("bali")) category = "Earrings";
+            else if (lowerTitle.includes("pendant")) category = "Pendants";
+            else if (lowerTitle.includes("bracelet")) category = "Bracelets";
+            else if (item.variantId === GOLDCOIN_VARIANT_ID) category = "Gold Coin";
+            else if (item.variantId === INSURANCE_VARIANT_ID) category = "Insurance";
+          }
+          return {
+            item_id: getNumericId(item.productId || item.shopifyId || item.id),
+            shopify_product_id: item.sku || "",
+            variant_id: String(getNumericId(item.variantId)),
+            item_name: item.title,
+            item_variant: item.variantTitle || `${item.karat || ""} ${item.color || ""}`.trim(),
+            item_brand: "Lucira Jewelry",
+            item_category: "",
+            price: Number(item.price || 0),
+            quantity: item.quantity,
+            category: category,
+            index: idx
+          };
+        }),
+        coupon: (typeof appliedCoupon === 'object' ? appliedCoupon?.code : appliedCoupon) || "NA"
+      };
+
+      pushBeginCheckout(checkoutData);
+      hasFiredBeginCheckout.current = true;
+    }
+  }, [cartItems, totalAmount, appliedCoupon]);
 
   const finalAmount = useMemo(() => {
     const insuranceItem = (cartItems || []).find(item => item.variantId === INSURANCE_VARIANT_ID);
