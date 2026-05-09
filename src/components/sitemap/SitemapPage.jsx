@@ -2,49 +2,7 @@
 // Usage: add `if (handle === "sitemap") return <SitemapPage />;` in your pages/[handle]/page.js
 
 import Link from "next/link";
-import { shopifyStorefrontFetch } from "@/lib/shopify";
-import {
-  GET_COLLECTIONS_QUERY,
-  GET_PAGES_QUERY,
-  GET_ARTICLES_QUERY,
-  GET_ALL_PRODUCTS_QUERY,
-} from "@/lib/graphqlQueries";
-
-// ─── Helper for Pagination ───────────────────────────────────────────────────
-
-async function fetchAll(query, fieldName, variables = { first: 250 }) {
-  let allItems = [];
-  let hasNextPage = true;
-  let cursor = null;
-
-  try {
-    while (hasNextPage) {
-      const data = await shopifyStorefrontFetch(query, { ...variables, after: cursor });
-      
-      let connection;
-      if (fieldName === "articles" && data.blog) {
-        connection = data.blog.articles;
-      } else {
-        connection = data[fieldName];
-      }
-      
-      if (!connection) break;
-
-      const nodes = connection.edges.map(edge => edge.node);
-      allItems = [...allItems, ...nodes];
-      
-      hasNextPage = connection.pageInfo?.hasNextPage || false;
-      cursor = connection.edges[connection.edges.length - 1]?.cursor;
-      
-      // Safety break to prevent infinite loops
-      if (allItems.length > 5000) break; 
-    }
-  } catch (error) {
-    console.error(`Error fetching ${fieldName}:`, error);
-  }
-
-  return allItems;
-}
+import clientPromise from "@/lib/mongodb";
 
 // ─── Hardcoded/Manual Sections (kept from original) ─────────────────────────
 
@@ -708,26 +666,32 @@ function SitemapSection({ section, url, columns }) {
 // ─── Main export ─────────────────────────────────────────────────────────────
 
 export default async function SitemapPage() {
-  // Fetch dynamic data
-  const [collections, pages, articles, products] = await Promise.all([
-    fetchAll(GET_COLLECTIONS_QUERY, "collections"),
-    fetchAll(GET_PAGES_QUERY, "pages"),
-    fetchAll(GET_ARTICLES_QUERY, "articles", { first: 250, blogHandle: "stories" }),
-    fetchAll(GET_ALL_PRODUCTS_QUERY, "products"),
-  ]);
+  const client = await clientPromise;
+  const db = client.db();
+  const sitemapData = await db.collection("sitemaps").findOne({ type: "main" });
+
+  if (!sitemapData) {
+    return (
+      <div className="w-full bg-white min-h-screen flex items-center justify-center">
+        <p className="text-zinc-500">Sitemap data not found. Please sync it from the dashboard.</p>
+      </div>
+    );
+  }
+
+  const { collections = [], pages = [], articles = [], products = [] } = sitemapData;
 
   // Transform data into sections
-  const splitIntoColumns = (items, perColumn = 15) => {
+  const splitIntoColumns = (items, type, perColumn = 15) => {
     const columns = [];
     for (let i = 0; i < items.length; i += perColumn) {
       columns.push({
-        title: "", // Removed "PART X" titles
+        title: "",
         links: items.slice(i, i + perColumn).map(item => ({
           label: item.title,
           href: item.handle.startsWith("/") ? item.handle : 
-                (item.__typename === "Collection" ? `/collections/${item.handle}` :
-                 item.__typename === "Page" ? `/pages/${item.handle}` :
-                 item.__typename === "Article" ? `/blogs/stories/${item.handle}` :
+                (type === "Collection" ? `/collections/${item.handle}` :
+                 type === "Page" ? `/pages/${item.handle}` :
+                 type === "Article" ? `/blogs/stories/${item.handle}` :
                  `/products/${item.handle}`)
         }))
       });
@@ -735,27 +699,26 @@ export default async function SitemapPage() {
     return columns;
   };
 
-  // Special handling for labels if needed
   const dynamicSections = [
     {
       section: "COLLECTIONS",
       url: "/collections",
-      columns: splitIntoColumns(collections.map(c => ({ ...c, __typename: "Collection" })), 20)
+      columns: splitIntoColumns(collections, "Collection", 20)
     },
     {
       section: "PAGES",
       url: null,
-      columns: splitIntoColumns(pages.map(p => ({ ...p, __typename: "Page" })), 25)
+      columns: splitIntoColumns(pages, "Page", 25)
     },
     {
       section: "STORIES",
       url: "/blogs/stories",
-      columns: splitIntoColumns(articles.map(a => ({ ...a, __typename: "Article" })), 15)
+      columns: splitIntoColumns(articles, "Article", 15)
     },
     {
       section: "PRODUCTS",
       url: "/collections/all",
-      columns: splitIntoColumns(products.map(p => ({ ...p, __typename: "Product" })), 30)
+      columns: splitIntoColumns(products, "Product", 30)
     }
   ];
 
