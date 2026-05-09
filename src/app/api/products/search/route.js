@@ -39,12 +39,11 @@ export async function GET(request) {
     // 1. Collection filtering
     if (handle && handle !== "all") {
       const isRealCollection = await shopifyCollections.findOne({ handle });
-      const categoryHandles = ["rings", "earrings", "bracelets", "necklaces", "nosepins", "mangalsutras", "mangalsutra", "pendants", "mens-ring", "mens-stud", "mens-bracelets"];
 
-      if (isRealCollection || (!handle.startsWith("all-") && !categoryHandles.includes(handle.toLowerCase()))) {
+      if (isRealCollection || !handle.startsWith("all-")) {
         filter.collectionHandles = handle;
       } else {
-        // Handle "all-rings", "all-earrings", etc., OR just "rings", "earrings" if not real collections
+        // Handle "all-rings", "all-earrings", etc.
         const typeKeyword = handle.replace("all-", "").replace(/-/g, " ");
         // singularize (very basic: rings -> ring, earrings -> earring)
         const singularType = typeKeyword.replace(/s$/, "");
