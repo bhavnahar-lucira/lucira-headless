@@ -49,7 +49,8 @@ export function OtpSpinAuth({
   forceShowWheel = false,
   overrideHeading = "",
   overrideSubtext = "",
-  showCloseButton = true
+  showCloseButton = true,
+  isPopup = false
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -411,7 +412,7 @@ export function OtpSpinAuth({
       ${showWheel 
         ? "md:flex-row md:items-stretch md:w-[800px] md:max-w-[800px] md:min-h-[500px]" 
         : "md:flex-row md:items-stretch md:w-[800px] md:max-w-[800px] md:h-[500px]"}
-      ${!showWheel ? "md:shadow-[0_0_10px_rgba(0,0,0,0.3)] md:max-w-[400px] md:rounded-sm" : "md:shadow-[0_0_10px_rgba(0,0,0,0.3)] md:rounded-sm"}
+      ${(isPopup || !showWheel) ? "md:shadow-[0_0_10px_rgba(0,0,0,0.3)] md:rounded-sm" : "md:rounded-sm"}
       max-md:shadow-none max-md:rounded-none max-md:max-w-full
       ${isMobileView ? "animate-[slideInBottom_0.45s_cubic-bezier(0.25,0.46,0.45,0.94)_forwards]" : ""}`}
       style={{
@@ -438,10 +439,10 @@ export function OtpSpinAuth({
       {/* Background/Side Image Container */}
       {showWheel ? (
         <div 
-          className="flex flex-col items-center justify-center relative w-full h-[220px] md:h-auto md:flex-1 md:self-stretch overflow-hidden bg-center bg-cover bg-no-repeat"
+          className={`flex flex-col items-center justify-center relative w-full h-[220px] md:h-auto overflow-hidden bg-center bg-cover bg-no-repeat md:w-[50%] md:self-stretch`}
           style={{ backgroundImage: 'url("https://cdn.shopify.com/s/files/1/0739/8516/3482/files/BG_1_1.png?v=1770198650")' }}
         >
-          <div className="relative w-[90%] h-[290px] md:w-[350px] md:h-[350px] max-md:absolute max-md:top-[-75px]">
+          <div className={`relative w-[90%] h-[290px] md:w-[350px] md:h-[350px] max-md:absolute max-md:top-[-75px]`}>
             <motion.img
               src="https://cdn.shopify.com/s/files/1/0739/8516/3482/files/Below_Banner_Trust_Icon_Strip_1_1.png?v=1770784760"
               alt="Spin the Wheel"
@@ -452,14 +453,14 @@ export function OtpSpinAuth({
             <img
               src="https://cdn.shopify.com/s/files/1/0739/8516/3482/files/Spin_The_Wheel_Spinner_1.png?v=1769229971"
               alt="Spin CTA"
-              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 pointer-events-none w-[115%] max-w-none h-auto"
+              className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 pointer-events-none h-auto w-[115%] max-w-none`}
             />
           </div>
         </div>
       ) : (
         (step === "login" || step === "otp" || step === "success") && (
           <div 
-            className="w-full h-[175px] md:h-auto md:flex-1 md:self-stretch bg-center bg-cover bg-no-repeat"
+            className={`w-full h-[175px] md:h-auto bg-center bg-cover bg-no-repeat md:w-[50%] md:self-stretch`}
             style={{ 
               backgroundImage: isMobileView 
                 ? 'url("https://www.lucirajewelry.com/cdn/shop/files/Jan-Popup-Mobile_jpg.jpg?v=1770010490")' 
@@ -469,7 +470,7 @@ export function OtpSpinAuth({
         )
       )}
 
-      <div className={`flex flex-col w-full p-5 md:p-8 md:justify-center md:flex-1 md:self-stretch`}>
+      <div className={`flex flex-col w-full p-5 md:p-8 md:justify-center md:w-[50%] md:self-stretch`}>
         {!(isMobileView && step === "register") && (
           <div className="text-center mb-4">
             <img
