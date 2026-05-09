@@ -882,30 +882,7 @@ img.marquee-img {
   }
 }
 
-/* Swiper Pagination Custom Dots */
-.swiper-pagination-bullets-custom {
-  display: flex !important;
-  align-items: center !important;
-  gap: 6px !important;
-  width: auto !important;
-  position: static !important;
-}
 
-.swiper-pagination-bullets-custom .swiper-pagination-bullet {
-  background: #5B4740 !important;
-  transition: all 0.3s ease !important;
-  width: 8px !important;
-  height: 8px !important;
-  opacity: 0.2 !important;
-  border-radius: 54.75px !important;
-  margin: 0 !important;
-  cursor: pointer !important;
-}
-
-.swiper-pagination-bullets-custom .swiper-pagination-bullet-active {
-  width: 24px !important;
-  opacity: 1 !important;
-}
 
 @media (min-width: 768px) {
   .swiper-pagination-bullets-custom .swiper-pagination-bullet-active {
