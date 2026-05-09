@@ -8,7 +8,7 @@ import CartSummary from "@/components/cart/CartSummary";
 import { Button } from "@/components/ui/button";
 import { ShoppingBag, ArrowRight, MapPin } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { pushViewCart, pushBeginCheckout } from "@/lib/gtm";
+import { pushViewCart } from "@/lib/gtm";
 import { useAuth } from "@/hooks/useAuth";
 
 const INSURANCE_VARIANT_ID = "gid://shopify/ProductVariant/47709366026458";
@@ -33,48 +33,6 @@ export default function CartPage() {
   );
 
   const handlePlaceOrder = () => {
-    const getNumericId = (gid) => {
-      if (!gid) return 0;
-      if (typeof gid === 'number') return gid;
-      const match = String(gid).match(/\d+$/);
-      return match ? Number(match[0]) : 0;
-    };
-
-    const checkoutData = {
-      payment_type: "Pay Via UPI / COD",
-      send_to: "G-K6H0NZ4YJ8",
-      value: Number(totalAmount),
-      currency: "INR",
-      items: items.map((item, idx) => {
-        const lowerTitle = (item.title || "").toLowerCase();
-        let category = item.type || item.productType || "";
-        if (!category) {
-          if (lowerTitle.includes("ring")) category = "Rings";
-          else if (lowerTitle.includes("earring") || lowerTitle.includes("bali")) category = "Earrings";
-          else if (lowerTitle.includes("pendant")) category = "Pendants";
-          else if (lowerTitle.includes("bracelet")) category = "Bracelets";
-          else if (item.variantId === GOLDCOIN_VARIANT_ID) category = "Gold Coin";
-          else if (item.variantId === INSURANCE_VARIANT_ID) category = "Insurance";
-        }
-        return {
-          item_id: getNumericId(item.productId || item.shopifyId || item.id),
-          shopify_product_id: item.sku || "",
-          variant_id: String(getNumericId(item.variantId)),
-          item_name: item.title,
-          item_variant: item.variantTitle || `${item.karat || ""} ${item.color || ""}`.trim(),
-          item_brand: "Lucira Jewelry",
-          item_category: "",
-          price: Number(item.price || 0),
-          quantity: item.quantity,
-          category: category,
-          index: idx
-        };
-      }),
-      coupon: appliedCoupon?.code || "NA"
-    };
-
-    pushBeginCheckout(checkoutData);
-
     if (isAuthenticated) {
       router.push("/checkout/shipping");
     } else {
