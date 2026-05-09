@@ -15,7 +15,7 @@ export async function GET(req) {
     const db = client.db("next_local_db");
     const productsCollection = db.collection("products");
 
-    const { filter, fallbackFilter, strategy } = await resolveSearchMatch(productsCollection, {}, query);
+    const { filter, fallbackFilter, strategy, matchedCollections } = await resolveSearchMatch(db, {}, query);
 
     const projection = {
       title: 1,
@@ -54,6 +54,20 @@ export async function GET(req) {
         url: `/products/${p.handle}`,
       };
     });
+
+    // If collections were matched via synonyms, prepend them to results
+    if (matchedCollections && matchedCollections.length > 0) {
+      const formattedCollections = matchedCollections.map(mc => ({
+        id: mc.id || mc._id.toString(),
+        title: mc.title,
+        handle: mc.handle,
+        image: mc.image?.url || null,
+        price: "Collection",
+        url: `/collections/${mc.handle}`,
+        isCollection: true
+      }));
+      results.unshift(...formattedCollections);
+    }
 
     return NextResponse.json({ results });
   } catch (error) {

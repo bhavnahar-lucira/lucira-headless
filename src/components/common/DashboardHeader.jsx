@@ -15,6 +15,7 @@ export default function DashboardHeader() {
         <nav className="hidden md:flex items-center gap-5 text-sm font-medium text-zinc-400 absolute left-1/2 -translate-x-1/2 overflow-x-auto scrollbar-none max-w-[calc(100%-280px)]">
           <Link href="/dashboard" className="hover:text-white transition-colors whitespace-nowrap">Overview</Link>
           <Link href="/dashboard/collections" className="hover:text-white transition-colors whitespace-nowrap">Collections</Link>
+          <Link href="/dashboard/search-terms" className="hover:text-white transition-colors whitespace-nowrap">Search Terms</Link>
           <Link href="/dashboard/variants" className="hover:text-white transition-colors whitespace-nowrap">Variants</Link>
           <Link href="/dashboard/pages" className="hover:text-white transition-colors whitespace-nowrap">Pages</Link>
           <Link href="/dashboard/blogs" className="hover:text-white transition-colors whitespace-nowrap">Blogs</Link>
