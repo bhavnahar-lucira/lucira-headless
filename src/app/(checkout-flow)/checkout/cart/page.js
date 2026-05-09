@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useSelector } from "react-redux";
 import Link from "next/link";
 import CartItem from "@/components/cart/CartItem";
@@ -19,6 +19,24 @@ export default function CartPage() {
   const { items, totalQuantity, totalAmount, appliedCoupon } = useSelector((state) => state.cart);  
   const { isAuthenticated, openLogin } = useAuth();
   const summaryRef = useRef(null);
+
+  const finalAmount = useMemo(() => {
+    const insuranceItem = (items || []).find(item => item.variantId === INSURANCE_VARIANT_ID);
+    const insuranceValue = insuranceItem ? (insuranceItem.price * (insuranceItem.quantity || 1)) : 0;
+    const subtotalValue = (totalAmount || 0) - insuranceValue;
+
+    const couponDetails = typeof appliedCoupon === 'object' ? appliedCoupon : { code: appliedCoupon, value: 0, valueType: "FIXED_AMOUNT" };
+    let couponDiscountAmount = 0;
+    if (appliedCoupon) {
+      if (couponDetails.valueType === "FIXED_AMOUNT") {
+        couponDiscountAmount = couponDetails.value;
+      } else if (couponDetails.valueType === "PERCENTAGE") {
+        couponDiscountAmount = (subtotalValue * couponDetails.value) / 100;
+      }
+    }
+
+    return subtotalValue + insuranceValue - couponDiscountAmount;
+  }, [items, totalAmount, appliedCoupon]);
 
   const scrollToSummary = () => {
     if (summaryRef.current) {
@@ -153,7 +171,7 @@ export default function CartPage() {
       <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-zinc-100 p-4 shadow-[0_-4px_15px_rgba(0,0,0,0.08)] z-[60]">
         <div className="flex items-center justify-between gap-4">
           <div className="flex flex-col">
-            <span className="text-lg font-bold text-zinc-900 leading-none">₹ {totalAmount.toLocaleString('en-IN')}</span>
+            <span className="text-lg font-bold text-zinc-900 leading-none">₹ {finalAmount.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
             <button 
               onClick={scrollToSummary}
               className="text-[11px] font-bold text-accent uppercase tracking-tight mt-1 text-left"

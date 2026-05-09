@@ -279,6 +279,33 @@ export default function PaymentPage() {
     };
   }, [dispatch]);
 
+  useEffect(() => {
+    const checkDelivery = async () => {
+      if (typeof window === "undefined") return;
+      
+      const selectionStr = localStorage.getItem("checkout_selection");
+      if (!selectionStr) {
+        router.push("/checkout/shipping");
+        return;
+      }
+      
+      const selection = JSON.parse(selectionStr);
+      if (selection.deliveryMethod === "ship" && selection.selectedAddress?.zip) {
+        try {
+          const res = await fetch(`/api/pincodes/check?pincode=${selection.selectedAddress.zip.trim()}`);
+          const data = await res.json();
+          if (!data.deliverable) {
+            toast.error("We are not delivering to this pincode. Redirecting to shipping...");
+            router.push("/checkout/shipping");
+          }
+        } catch (err) {
+          console.error("Payment page pincode check error:", err);
+        }
+      }
+    };
+    checkDelivery();
+  }, [router]);
+
   const finalAmount = useMemo(() => {
     const insuranceItem = (items || []).find(item => item.variantId === INSURANCE_VARIANT_ID);
     const insuranceValue = insuranceItem ? (insuranceItem.price * (insuranceItem.quantity || 1)) : 0;

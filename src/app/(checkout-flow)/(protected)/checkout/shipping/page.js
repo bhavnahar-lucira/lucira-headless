@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "react-toastify";
 import {
   ChevronLeft,
@@ -61,60 +61,7 @@ const emptyAddressForm = {
   gstin: "",
 };
 
-const STORES = [
-  {
-    id: "chembur",
-    name: "Chembur Lucira Store",
-    code: "CS1",
-    address: "Central Avenue Road Chembur Gaothan Chembur, Shop number.3,487 vilageralding",
-    city: "Mumbai",
-    state: "MH",
-    zip: "400071",
-    lat: 19.0522,
-    lng: 72.8995,
-    readyTime: "Usually ready in 24 hours",
-    image: "/images/store/store.jpg",
-  },
-  {
-    id: "malad",
-    name: "Divinecarat Lifestyles Pvt Ltd",
-    code: "DC1",
-    address: "Agarwal B2B Commercial Centre Kanchpada Malad West, 305, Third floor",
-    city: "Mumbai",
-    state: "MH",
-    zip: "400064",
-    lat: 19.186,
-    lng: 72.848,
-    readyTime: "Usually ready in 24 hours",
-    image: "/images/store/store.jpg",
-  },
-  {
-    id: "borivali",
-    name: "Borivali Lucira Store",
-    code: "BO1",
-    address: "Sky City Mall Khande Rao Dongari Borivali",
-    city: "Mumbai",
-    state: "MH",
-    zip: "400092",
-    lat: 19.231,
-    lng: 72.8521,
-    readyTime: "Usually ready in 2-4 days",
-    image: "/images/store/store.jpg",
-  },
-  {
-    id: "pune",
-    name: "Pune Lucira Store",
-    code: "CS3",
-    address: "Shop no. 3,4, Balgandharv Chowk, Sai Square, 5 & 6, JM Road, Pune",
-    city: "Pune",
-    state: "MH",
-    zip: "411005",
-    lat: 18.5196,
-    lng: 73.8447,
-    readyTime: "Usually ready in 24 hours",
-    image: "/images/store/store.jpg",
-  },
-];
+const STORES = [];
 
 const PINCODE_COORDS = {
   "400071": { lat: 19.0522, lng: 72.8995 },
@@ -304,11 +251,41 @@ const SummarySkeleton = () => (
 );
 
 export default function ShippingPage() {
+  const router = useRouter();
   const isDesktop = useMediaQuery("(min-width: 1024px)");
   const { items: cartItems, totalAmount, appliedCoupon } = useCart();
   const searchParams = useSearchParams();
   const [deliveryMethod, setDeliveryMethod] = useState(searchParams.get("method") || "ship");
   const summaryRef = useRef(null);
+
+  const [dbStores, setDbStores] = useState([]);
+
+  useEffect(() => {
+    const fetchStores = async () => {
+      try {
+        const res = await fetch("/api/stores");
+        const data = await res.json();
+        if (data.stores) {
+          const mappedStores = data.stores.map(s => ({
+            id: s.shopifyId,
+            name: s.name,
+            code: s.name,
+            address: s.address1 + (s.address2 ? `, ${s.address2}` : ""),
+            city: s.city,
+            state: s.provinceCode || s.province,
+            zip: s.zip,
+            lat: s.latitude,
+            lng: s.longitude,
+            readyTime: "Usually ready in 24 hours",
+          }));
+          setDbStores(mappedStores);
+        }
+      } catch (err) {
+        console.error("Failed to fetch stores:", err);
+      }
+    };
+    fetchStores();
+  }, []);
 
   const scrollToSummary = () => {
     if (summaryRef.current) {
@@ -374,23 +351,22 @@ export default function ShippingPage() {
     }
     
     if (!center) {
-      const priority = ["borivali", "chembur", "malad", "pune"];
-      return [...STORES].sort((a, b) => priority.indexOf(a.id) - priority.indexOf(b.id));
+      return [...dbStores];
     }
 
-    return [...STORES]
+    return [...dbStores]
       .map((store) => ({
         ...store,
         distance: calculateDistance(center.lat, center.lng, store.lat, store.lng),
       }))
       .sort((a, b) => (a.distance || 0) - (b.distance || 0));
-  }, [selectedAddress, searchCoords]);
+  }, [selectedAddress, searchCoords, dbStores]);
 
   const storeAvailability = useMemo(() => {
     return sortedStores.reduce((acc, store) => {
       acc[store.id] = cartItems.map((item, index) => ({
         ...item,
-        isAvailable: store.id === sortedStores[0]?.id || (index + store.name.length) % 3 !== 0,
+        isAvailable: true,
       }));
       return acc;
     }, {});
@@ -407,13 +383,13 @@ export default function ShippingPage() {
       const selection = {
         deliveryMethod,
         selectedStoreId,
-        selectedStore: STORES.find(s => s.id === selectedStoreId) || null,
+        selectedStore: dbStores.find(s => s.id === selectedStoreId) || null,
         selectedAddress: selectedAddress,
         customerEmail: customer?.email || "techamitjha@gmail.com"
       };
       window.localStorage.setItem("checkout_selection", JSON.stringify(selection));
     }
-  }, [deliveryMethod, selectedStoreId, selectedAddress, customer]);
+  }, [deliveryMethod, selectedStoreId, selectedAddress, customer, dbStores]);
 
   const handleStoreSearch = () => {
     const query = storeSearchQuery.trim();
@@ -432,7 +408,7 @@ export default function ShippingPage() {
 
     if (coords) {
       setSearchCoords(coords);
-      const nearest = [...STORES]
+      const nearest = [...dbStores]
         .map((store) => ({
           ...store,
           distance: calculateDistance(coords.lat, coords.lng, store.lat, store.lng),
@@ -460,7 +436,7 @@ export default function ShippingPage() {
           lng: position.coords.longitude,
         };
         setSearchCoords(coords);
-        const nearest = [...STORES]
+        const nearest = [...dbStores]
           .map((store) => ({
             ...store,
             distance: calculateDistance(coords.lat, coords.lng, store.lat, store.lng),
@@ -487,6 +463,42 @@ export default function ShippingPage() {
     setSelectedStoreId(tempSelectedStoreId);
     setShowStoreDialog(false);
   };
+
+  const [isDeliverable, setIsDeliverable] = useState(true);
+  const [checkingPincode, setCheckingPincode] = useState(false);
+
+  const checkPincodeDeliverability = async (pincode) => {
+    if (!pincode) return false;
+    try {
+      const res = await fetch(`/api/pincodes/check?pincode=${pincode.trim()}`);
+      const data = await res.json();
+      return data.success && data.deliverable;
+    } catch (err) {
+      console.error("Pincode check failed:", err);
+      return false;
+    }
+  };
+
+  useEffect(() => {
+    let isMounted = true;
+    const checkSelected = async () => {
+      if (deliveryMethod === "ship" && selectedAddress?.zip) {
+        setCheckingPincode(true);
+        const deliverable = await checkPincodeDeliverability(selectedAddress.zip);
+        if (isMounted) {
+          setIsDeliverable(deliverable);
+          setCheckingPincode(false);
+        }
+      } else {
+        if (isMounted) {
+          setIsDeliverable(true);
+          setCheckingPincode(false);
+        }
+      }
+    };
+    checkSelected();
+    return () => { isMounted = false; };
+  }, [selectedAddress?.zip, deliveryMethod]);
 
   const applyAddressPayload = (payload) => {
     setAddresses(payload.addresses || []);
@@ -533,6 +545,11 @@ export default function ShippingPage() {
     if (!addressForm.city.trim()) return "City is required";
     if (!addressForm.province.trim()) return "State is required";
     if (!addressForm.zip.trim()) return "PIN code is required";
+    
+    if (!/^\d{6}$/.test(addressForm.zip.trim())) {
+      return "Please enter a valid 6-digit PIN code";
+    }
+
     if (!addressForm.country.trim()) return "Country is required";
     if (addressForm.gstin.trim() && addressForm.gstin.trim().length !== 15) {
       return "GSTIN must be 15 characters";
@@ -564,6 +581,11 @@ export default function ShippingPage() {
       if (useDialog) setDialogSaving(true);
       else setInlineSaving(true);
 
+      const deliverable = await checkPincodeDeliverability(addressForm.zip.trim());
+      if (!deliverable) {
+        return toast.error("We are not delivering product on this address");
+      }
+
       applyAddressPayload(
         await createCustomerAddress({
           address: addressForm,
@@ -586,6 +608,12 @@ export default function ShippingPage() {
 
     try {
       setDialogSaving(true);
+
+      const deliverable = await checkPincodeDeliverability(addressForm.zip.trim());
+      if (!deliverable) {
+        return toast.error("We are not delivering product on this address");
+      }
+
       applyAddressPayload(
         await updateCustomerAddress({
           addressId: editingAddressId,
@@ -603,6 +631,13 @@ export default function ShippingPage() {
   };
 
   const handleSelectAddress = async (addressId) => {
+    const addressToSelect = addresses.find(a => a.id === addressId);
+    if (addressToSelect?.isDefault) {
+      toast.info("This address is already default");
+      setSelectedAddressId(addressId);
+      return;
+    }
+
     setSelectedAddressId(addressId);
     try {
       applyAddressPayload(await selectDefaultCustomerAddress(addressId));
@@ -613,6 +648,10 @@ export default function ShippingPage() {
   };
 
   const handleDeleteAddress = async (addressId) => {
+    const addressToDelete = addresses.find(a => a.id === addressId);
+    if (addressToDelete?.isDefault) {
+      return toast.error("You cannot delete default address");
+    }
     try {
       applyAddressPayload(await deleteCustomerAddress(addressId));
       toast.success("Address removed");
@@ -621,7 +660,7 @@ export default function ShippingPage() {
     }
   };
 
-  const selectedStore = STORES.find(s => s.id === selectedStoreId) || sortedStores[0];
+  const selectedStore = dbStores.find(s => s.id === selectedStoreId) || sortedStores[0];
 
   const handleContinueToPayment = () => {
     const getNumericId = (gid) => {
@@ -683,26 +722,6 @@ export default function ShippingPage() {
   const StorePickupContent = () => (
     <div className="p-6 space-y-6">
       <div className="space-y-4">
-        <div className="flex gap-2">
-          <div className="flex items-center gap-2 px-3 py-2 border border-zinc-200 rounded-lg bg-zinc-50 min-w-[80px] shrink-0">
-            <span className="text-lg">🇮🇳</span>
-            <ChevronRight size={14} className="rotate-90 text-zinc-400" />
-          </div>
-          <div className="relative flex-grow">
-            <Input 
-              placeholder="PIN code or address" 
-              value={storeSearchQuery}
-              onChange={(e) => setStoreSearchQuery(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleStoreSearch()}
-              className="h-11 pl-4 pr-10 border-zinc-200 focus-visible:ring-primary/20" 
-            />
-            <Search size={18} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400" />
-          </div>
-          <Button onClick={handleStoreSearch} variant="secondary" className="h-11 px-4 bg-zinc-100 hover:bg-zinc-200 text-zinc-600">
-            <Search size={18} />
-          </Button>
-        </div>
-
         <button onClick={handleUseMyLocation} className="flex items-center gap-2 text-sm font-medium text-zinc-700 hover:underline">
           <Navigation size={16} />
           Use my location
@@ -731,7 +750,7 @@ export default function ShippingPage() {
                   {isSelected && <div className="size-2 rounded-full bg-white" />}
                 </div>
                 
-                <div className="flex-grow space-y-2">
+                <div className="grow space-y-2">
                   <div className="flex justify-between items-start">
                     <h3 className="font-bold text-zinc-900">{store.code || store.name}</h3>
                     <span className="font-bold text-zinc-900 text-sm">FREE</span>
@@ -784,18 +803,19 @@ export default function ShippingPage() {
                       {[address.firstName, address.lastName].filter(Boolean).join(" ") || "Saved address"}
                     </h3>
                     {address.isDefault && (
-                      <span className="rounded-full bg-zinc-900 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-white">
+                      <span className="rounded-full bg-zinc-900 px-2.5 py-1 text-xs font-bold uppercase tracking-wide text-white">
                         Default
                       </span>
                     )}
                   </div>
                   <button
                     type="button"
+                    disabled={address.isDefault}
                     onClick={async (e) => {
                       e.stopPropagation();
                       await handleDeleteAddress(address.id);
                     }}
-                    className="rounded-full border border-zinc-200 p-2 text-zinc-600 transition hover:border-red-200 hover:text-red-600"
+                    className={`rounded-full border border-zinc-200 p-2 text-zinc-600 transition ${address.isDefault ? "opacity-50 cursor-not-allowed" : "hover:border-red-200 hover:text-red-600"}`}
                   >
                     <Trash2 className="size-4" />
                   </button>
@@ -816,7 +836,9 @@ export default function ShippingPage() {
 
   const isLoading = loadingAddresses;
 
-  const isContinueDisabled = deliveryMethod === "ship" ? !selectedAddress : !selectedStoreId;
+  const isContinueDisabled = deliveryMethod === "ship" 
+    ? (!selectedAddress || !isDeliverable || checkingPincode) 
+    : !selectedStoreId;
 
   if (isLoading) {
     return (
@@ -837,9 +859,9 @@ export default function ShippingPage() {
 
   return (
     <div className="bg-white min-h-screen overflow-x-hidden">
-      <div className="max-w-7xl w-full mx-auto relative z-10 px-4">
+      <div className="max-w-7xl w-full mx-auto relative z-10">
         <div className="flex flex-col lg:flex-row min-h-[calc(100vh-80px)]">
-          <div className="grow lg:basis-[60%] lg:shrink-0 py-10 px-4 lg:pr-12 space-y-10 bg-white">
+          <div className="grow lg:basis-[60%] lg:shrink-0 lg:py-10 px-4 lg:pr-12 space-y-10 bg-white">
             <div className="space-y-4">
               <h2 className="text-2xl font-bold text-zinc-900 font-abhaya">Delivery method</h2>
               <div className="flex p-1 bg-zinc-100 rounded-lg w-full max-w-md">
@@ -927,10 +949,10 @@ export default function ShippingPage() {
                                     }} className="rounded-full bg-white shadow border border-zinc-100 p-2 text-zinc-600 transition hover:border-zinc-300 hover:text-zinc-900">
                                       <Pencil className="size-4" />
                                     </button>
-                                    <button type="button" onClick={(e) => {
+                                    <button type="button" disabled={address.isDefault} onClick={(e) => {
                                       e.stopPropagation();
                                       handleDeleteAddress(address.id);
-                                    }} className="rounded-full bg-white shadow border border-zinc-100 p-2 text-zinc-600 transition hover:border-red-200 hover:text-red-600">
+                                    }} className={`rounded-full bg-white shadow border border-zinc-100 p-2 text-zinc-600 transition ${address.isDefault ? "opacity-50 cursor-not-allowed" : "hover:border-red-200 hover:text-red-600"}`}>
                                       <Trash2 className="size-4" />
                                     </button>
                                   </div>
@@ -941,6 +963,13 @@ export default function ShippingPage() {
                         );
                       })}
                     </div>
+
+                    {!isDeliverable && selectedAddress && !checkingPincode && (
+                      <div className="mt-4 p-4 rounded-lg bg-red-50 border border-red-100 flex items-center gap-3 text-red-600 animate-in fade-in slide-in-from-top-2 duration-300">
+                        <XCircle className="size-5 shrink-0" />
+                        <p className="text-sm font-bold uppercase tracking-tight">We are not delivering product on this address</p>
+                      </div>
+                    )}
 
                     {extraAddressCount > 0 && (
                       <div className="flex justify-end -mt-1">
@@ -977,15 +1006,24 @@ export default function ShippingPage() {
                 )}
 
                 <div className="hidden lg:flex flex-col md:flex-row items-center justify-between gap-6 pt-4">
-                  <Link href="/checkout/cart" className="flex items-center gap-2 text-sm font-bold text-accent hover:underline">
-                    <ChevronLeft size={16} />
+                  <Link href="/checkout/cart" className="flex items-center gap-1.5 text-sm font-semibold text-accent hover:opacity-80 transition-opacity">
+                    <ChevronLeft className="size-4" />
                     Return to cart
                   </Link>
-                  <Link href="/checkout/payment" className={`w-full md:w-auto ${deliveryMethod === "ship" && !selectedAddress ? "pointer-events-none opacity-50" : ""}`} onClick={handleContinueToPayment}>
-                    <Button disabled={deliveryMethod === "ship" && !selectedAddress} className="w-full md:px-10 h-14 bg-primary hover:bg-primary/90 text-white font-bold rounded-lg transition-all text-base uppercase tracking-widest">
-                      Continue to payment
-                    </Button>
-                  </Link>
+                  <Button 
+                    disabled={isContinueDisabled}
+                    onClick={() => {
+                      if (isContinueDisabled) {
+                        toast.error("Please select a valid shipping address");
+                        return;
+                      }
+                      handleContinueToPayment();
+                      router.push("/checkout/payment");
+                    }} 
+                    className="w-full md:w-70 h-13.5 bg-primary hover:bg-primary/90 text-white font-bold rounded-xl transition-all text-[15px] uppercase tracking-wider"
+                  >
+                    CONTINUE TO PAYMENT
+                  </Button>
                 </div>
               </div>
             ) : (
@@ -1010,7 +1048,7 @@ export default function ShippingPage() {
                         <span className="font-bold text-zinc-900 text-sm">FREE</span>
                       </div>
                       <div className="space-y-3">
-                        <p className="text-sm text-zinc-500 leading-relaxed max-w-[400px]">
+                        <p className="text-sm text-zinc-500 leading-relaxed max-w-100">
                           {selectedStore.address}, {selectedStore.city} {selectedStore.state}
                         </p>
                         <div className="flex items-center gap-2 text-zinc-500 text-sm">
@@ -1033,15 +1071,20 @@ export default function ShippingPage() {
                 </div>
 
                 <div className="hidden lg:flex flex-col md:flex-row items-center justify-between gap-6 pt-4">
-                  <Link href="/checkout/cart" className="flex items-center gap-2 text-sm font-bold text-accent hover:underline">
-                    <ChevronLeft size={16} />
+                  <Link href="/checkout/cart" className="flex items-center gap-1.5 text-sm font-semibold text-accent hover:opacity-80 transition-opacity">
+                    <ChevronLeft className="size-4" />
                     Return to cart
                   </Link>
-                  <Link href="/checkout/payment" className={`w-full md:w-auto ${!selectedStoreId ? "pointer-events-none opacity-50" : ""}`} onClick={handleContinueToPayment}>
-                    <Button disabled={!selectedStoreId} className="w-full md:px-10 h-14 bg-primary hover:bg-primary/90 text-white font-bold rounded-lg transition-all text-base uppercase tracking-widest">
-                      Continue to payment
-                    </Button>
-                  </Link>
+                  <Button 
+                    disabled={!selectedStoreId} 
+                    onClick={() => {
+                      handleContinueToPayment();
+                      router.push("/checkout/payment");
+                    }}
+                    className="w-full md:w-70 h-13.5 bg-primary hover:bg-primary/90 text-white font-bold rounded-xl transition-all text-[15px] uppercase tracking-wider"
+                  >
+                    CONTINUE TO PAYMENT
+                  </Button>
                 </div>
               </div>
             )}
@@ -1049,35 +1092,41 @@ export default function ShippingPage() {
 
           <div className="w-full lg:basis-[40%] lg:shrink-0 relative">
             <div className="hidden lg:block absolute inset-y-0 left-0 w-screen bg-[#FAFAFA] border-l border-zinc-100 z-0" />
-            <div className="relative z-10 py-10 px-4 lg:pl-12 bg-[#FAFAFA] lg:bg-transparent min-h-full" ref={summaryRef}>
-              <div className="lg:sticky lg:top-0">
-                <CheckoutSummary />
+              <div className="relative z-10 py-10 px-4 lg:pl-12 mb-10 lg:bg-transparent min-h-full bg-[#FAFAFA]" ref={summaryRef}>
+                <div className="lg:sticky lg:top-0">
+                  <CheckoutSummary />
+                </div>
               </div>
             </div>
           </div>
-        </div>
       </div>
 
       {/* Mobile Sticky Footer */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-zinc-100 p-4 shadow-[0_-4px_15px_rgba(0,0,0,0.08)] z-[60]">
-        <div className="flex items-center justify-between gap-4">
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-zinc-100 p-4 shadow-[0_-4px_15px_rgba(0,0,0,0.08)] z-60">
+        <div className="flex items-center justify-between gap-6">
           <div className="flex flex-col">
             <span className="text-lg font-bold text-zinc-900 leading-none">₹ {totalAmount.toLocaleString('en-IN')}</span>
             <button 
               onClick={scrollToSummary}
               className="text-[11px] font-bold text-accent uppercase tracking-tight mt-1 text-left"
             >
-              View Order Summary
+              View Summary
             </button>
           </div>
-          <Link href="/checkout/payment" className="grow" onClick={handleContinueToPayment}>
-             <Button 
-              disabled={isContinueDisabled}
-              className="w-full bg-primary hover:bg-accent text-white font-bold h-12 uppercase tracking-widest rounded-lg text-sm"
-            >
-              Continue to payment
-            </Button>
-          </Link>
+          <Button 
+            disabled={isContinueDisabled}
+            onClick={() => {
+              if (isContinueDisabled) {
+                toast.error("Please select a valid shipping address");
+                return;
+              }
+              handleContinueToPayment();
+              router.push("/checkout/payment");
+            }}
+            className="grow bg-primary hover:bg-accent text-white font-bold h-12 uppercase tracking-widest rounded-lg text-sm"
+          >
+            CONTINUE TO PAYMENT
+          </Button>
         </div>
       </div>
 
