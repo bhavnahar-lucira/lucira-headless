@@ -19,6 +19,7 @@ import LuciraLogo from "./LuciraLogo";
 import { AnimatePresence, motion } from "framer-motion";
 import { Sheet as MobileSheet } from "react-modal-sheet";
 import { useAuth } from "@/hooks/useAuth";
+import { cn } from "@/lib/utils";
 
 const CATEGORY_IMAGES = {
   "BEST SELLERS": "/images/menu/engagement-ring.jpg",

@@ -247,14 +247,16 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle,
     const tags = Array.isArray(product.tags) ? product.tags : [];
     const lowerTags = tags.map(t => String(t).toLowerCase());
 
+    const bestsellerMeta = String(product.productMetafields?.bestsellers || "").toLowerCase();
+
     // Priority order: Fast Shipping > Best Seller > New Arrival > Trending
     if (lowerTags.some(t => t.includes("fast shipping") || t.includes("fastshipping"))) labels.push("Fast Shipping");
-    if (lowerTags.some(t => t.includes("best seller"))) labels.push("Best Seller");
+    if (lowerTags.some(t => t.includes("best seller") || t.includes("bestseller")) || bestsellerMeta === "bestseller") labels.push("Best Seller");
     if (lowerTags.some(t => t.includes("new arrival") || t === "new")) labels.push("New Arrival");
     if (lowerTags.some(t => t.includes("trending"))) labels.push("Trending");
 
     return [...new Set(labels)].slice(0, 2);
-  }, [product.label, product.tags]);
+  }, [product.label, product.tags, product.productMetafields?.bestsellers]);
 
   const [currentLabelIndex, setCurrentLabelIndex] = useState(0);
 
