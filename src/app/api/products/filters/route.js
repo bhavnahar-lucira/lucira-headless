@@ -42,7 +42,7 @@ export async function GET(req) {
         }
       }
 
-      const { filter } = await resolveSearchMatch(productsCollection, match, searchParams.get("q") || "");
+      const { filter } = await resolveSearchMatch(db, match, searchParams.get("q") || "");
       return filter;
     };
 

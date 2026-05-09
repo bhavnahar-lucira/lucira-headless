@@ -183,7 +183,7 @@ export async function GET(request) {
       if (maxPrice) filter.price.$lte = Number(maxPrice);
     }
 
-    const { filter: resolvedFilter, fallbackFilter, strategy } = await resolveSearchMatch(productsCollection, filter, query || "");
+    const { filter: resolvedFilter, fallbackFilter, strategy } = await resolveSearchMatch(db, filter, query || "");
 
     let finalSort = sortConfig;
     const projection = {
