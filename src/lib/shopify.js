@@ -34,14 +34,14 @@ export async function shopifyStorefrontFetch(query, variables = {}) {
   }
 }
 
-export async function shopifyAdminFetch(query, variables = {}) {
+export async function shopifyAdminFetch(query, variables = {}, apiVersion = "2024-10") {
   const adminToken = process.env.ADMIN_TOKEN || process.env.SHOPIFY_ADMIN_TOKEN;
   if (!adminToken) {
     throw new Error("ADMIN_TOKEN or SHOPIFY_ADMIN_TOKEN not configured");
   }
 
   const res = await fetch(
-    `https://${SHOP_DOMAIN}/admin/api/2024-10/graphql.json`,
+    `https://${SHOP_DOMAIN}/admin/api/${apiVersion}/graphql.json`,
     {
       method: "POST",
       headers: {
@@ -68,13 +68,15 @@ export async function shopifyAdminFetch(query, variables = {}) {
   return data.data;
 }
 
-export async function shopifyAdminRestFetch(endpoint, params = {}) {
+export async function shopifyAdminRestFetch(endpoint, params = {}, options = {}) {
   const adminToken = process.env.ADMIN_TOKEN || process.env.SHOPIFY_ADMIN_TOKEN;
   if (!adminToken) {
     throw new Error("ADMIN_TOKEN or SHOPIFY_ADMIN_TOKEN not configured");
   }
 
-  const url = new URL(`https://${SHOP_DOMAIN}/admin/api/2026-01/${endpoint}`);
+  const method = options.method || "GET";
+  const apiVersion = options.apiVersion || "2026-01";
+  const url = new URL(`https://${SHOP_DOMAIN}/admin/api/${apiVersion}/${endpoint}`);
   Object.entries(params).forEach(([key, value]) => {
     if (value !== undefined && value !== null) {
       url.searchParams.set(key, String(value));
@@ -82,11 +84,12 @@ export async function shopifyAdminRestFetch(endpoint, params = {}) {
   });
 
   const res = await fetch(url.toString(), {
-    method: "GET",
+    method,
     headers: {
       "Content-Type": "application/json",
       "X-Shopify-Access-Token": adminToken,
     },
+    body: options.body ? JSON.stringify(options.body) : undefined,
   });
 
   const data = await res.json();

@@ -237,13 +237,6 @@ export default function PaymentPage() {
   const isDesktop = useMediaQuery("(min-width: 1024px)");
   const router = useRouter();
   const dispatch = useDispatch();
-  const paymentGateways = [
-    {
-      id: "razorpay",
-      name: "Razorpay Secure (UPI, Cards, Int'l Cards, Wallets)",
-      description: "You'll be redirected to Razorpay Secure to complete your purchase.",
-    },
-  ];
 
   const [addressDialogOpen, setAddressDialogOpen] = useState(false);
   const [billingDialogOpen, setBillingDialogOpen] = useState(false);
@@ -324,6 +317,49 @@ export default function PaymentPage() {
     const pointsDiscountAmount = nectorPoints?.fiat_value || 0;
     return subtotalValue + insuranceValue - couponDiscountAmount - pointsDiscountAmount;
   }, [items, totalAmount, appliedCoupon, nectorPoints]);
+
+  const partialCodDetails = useMemo(() => {
+    const total = Math.max(0, Number(finalAmount || 0));
+    const isEligible = total > 0 && total < 50000;
+    const codAmount = isEligible ? Math.min(total * 0.8, 30000) : 0;
+    const prepaidAmount = isEligible ? Math.max(total - codAmount, total * 0.2) : 0;
+
+    return {
+      isEligible,
+      prepaidAmount: Math.round(prepaidAmount),
+      codAmount: Math.round(codAmount),
+    };
+  }, [finalAmount]);
+
+  const paymentGateways = useMemo(() => {
+    const gateways = [
+      {
+        id: "razorpay",
+        name: "Razorpay Secure (UPI, Cards, Int'l Cards, Wallets)",
+        amount: finalAmount,
+      },
+    ];
+
+    if (partialCodDetails.isEligible) {
+      gateways.push({
+        id: "partial_cod",
+        name: "Partial COD",
+        amount: partialCodDetails.prepaidAmount,
+      });
+    }
+
+    return gateways;
+  }, [finalAmount, partialCodDetails]);
+
+  const selectedPayableAmount = selectedPaymentGateway === "partial_cod"
+    ? partialCodDetails.prepaidAmount
+    : finalAmount;
+
+  useEffect(() => {
+    if (selectedPaymentGateway === "partial_cod" && !partialCodDetails.isEligible) {
+      setSelectedPaymentGateway("razorpay");
+    }
+  }, [partialCodDetails.isEligible, selectedPaymentGateway]);
 
   useEffect(() => {
     if (customer) {
@@ -562,8 +598,8 @@ export default function PaymentPage() {
   };
 
   const handlePayNow = async () => {
-    if (selectedPaymentGateway !== "razorpay") {
-      toast.info("Razorpay checkout is available right now. Please choose Razorpay to continue.");
+    if (selectedPaymentGateway === "partial_cod" && !partialCodDetails.isEligible) {
+      toast.info("Partial COD is available only below ₹50,000 cart value.");
       return;
     }
 
@@ -605,6 +641,19 @@ export default function PaymentPage() {
 
       const pointsDiscountAmount = nectorPoints?.fiat_value || 0;
       const grandTotalValue = subtotalValue + insuranceValue - couponDiscountAmount - pointsDiscountAmount;
+      const paymentMethodDetails = selectedPaymentGateway === "partial_cod"
+        ? {
+            type: "partial_cod",
+            prepaidAmount: partialCodDetails.prepaidAmount,
+            codAmount: partialCodDetails.codAmount,
+            grandTotal: grandTotalValue,
+          }
+        : {
+            type: "razorpay",
+            prepaidAmount: grandTotalValue,
+            codAmount: 0,
+            grandTotal: grandTotalValue,
+          };
       const loyaltyPoints = appliedCoupon?.loyaltyPoints || ""; 
 
       const purchaseDataForLater = {
@@ -645,8 +694,8 @@ export default function PaymentPage() {
       window.localStorage.setItem("gtm_purchase_data", JSON.stringify(purchaseDataForLater));
 
       pushAddPaymentInfo({
-        payment_type: selectedPaymentGateway === "razorpay" ? "Razorpay" : "PhonePe",
-        value: grandTotalValue,
+        payment_type: selectedPaymentGateway === "partial_cod" ? "Partial COD" : "Razorpay",
+        value: paymentMethodDetails.prepaidAmount,
         currency: "INR",
         coupon: couponDetails?.code || "NA",
         loyalty_points: loyaltyPoints,
@@ -700,6 +749,7 @@ export default function PaymentPage() {
         billingAddress: selectedBillingAddress,
         appliedCoupon: appliedCoupon,
         nectorPoints: nectorPoints,
+        paymentMethod: paymentMethodDetails,
       });
 
       const razorpay = new window.Razorpay({
@@ -733,11 +783,14 @@ export default function PaymentPage() {
             }
 
             const grandTotalValue = subtotalValue + insuranceValue - couponDiscountAmount;
+            const purchaseValue = selectedPaymentGateway === "partial_cod"
+              ? partialCodDetails.prepaidAmount
+              : grandTotalValue;
 
             const purchaseData = {
               currency: "INR",
-              value: grandTotalValue,
-              tax: Number((grandTotalValue * 0.03).toFixed(2)),
+              value: purchaseValue,
+              tax: Number((purchaseValue * 0.03).toFixed(2)),
               shipping: 0,
               affiliation: "Lucira Jewelry",
               transaction_id: response.razorpay_payment_id,
@@ -787,7 +840,9 @@ export default function PaymentPage() {
               },
               shippingAddress: isPickup ? checkoutSelection.selectedStore : selectedAddress,
               billingAddress: selectedBillingAddress,
+              appliedCoupon: appliedCoupon,
               nectorPoints: nectorPoints, // Pass points for completion attributes
+              paymentMethod: order.paymentMethod || paymentMethodDetails,
             });
 
             toast.success(
@@ -1015,32 +1070,45 @@ export default function PaymentPage() {
                   </div>
                   <RadioGroup value={selectedPaymentGateway} onValueChange={setSelectedPaymentGateway} className="grid gap-0 border border-zinc-200 rounded-lg overflow-hidden bg-white">
                     {paymentGateways.map((gateway, index) => (
-                      <div key={gateway.id} className={`flex flex-col ${index === 0 ? "border-b border-zinc-100" : ""}`}>
-                        <div className={`p-5 flex flex-col md:flex-row gap-4 md:gap-0 items-center justify-between transition-all cursor-pointer ${index === 0 ? "bg-accent/15" : ""}`}>
+                      <div key={gateway.id} className={`flex flex-col ${index < paymentGateways.length - 1 ? "border-b border-zinc-100" : ""}`}>
+                        <div
+                          role="button"
+                          tabIndex={0}
+                          onClick={() => setSelectedPaymentGateway(gateway.id)}
+                          onKeyDown={(event) => {
+                            if (event.key === "Enter" || event.key === " ") {
+                              event.preventDefault();
+                              setSelectedPaymentGateway(gateway.id);
+                            }
+                          }}
+                          className={`p-5 flex ${gateway.id === "partial_cod" ? "flex-row gap-3" : "flex-col md:flex-row gap-4 md:gap-0"} items-center justify-between transition-all cursor-pointer ${selectedPaymentGateway === gateway.id ? "bg-accent/15" : "bg-white"}`}
+                        >
                           <div className="flex items-center gap-3">
                             <RadioGroupItem value={gateway.id} id={`m-${gateway.id}`} className="text-[#005BD3] border-zinc-300" />
                             <Label htmlFor={`m-${gateway.id}`} className="font-medium text-zinc-900 cursor-pointer">{gateway.name}</Label>
                           </div>
-                          <div className="flex items-center gap-2">
-                            <div className="flex gap-1 items-center bg-white px-2 py-1 rounded border border-zinc-100">
-                              <Image src="/images/icons/upi.svg" className="h-3 w-auto opacity-70" alt="UPI" width={36} height={12} unoptimized />
-                            </div>
-                            <div className="flex gap-1 items-center bg-white px-2 py-1 rounded border border-zinc-100">
-                              <Image src="/images/icons/visa.svg" className="h-2 w-auto opacity-70" alt="VISA" width={36} height={8} unoptimized />
-                            </div>
-                            <div className="flex gap-1 items-center bg-white px-2 py-1 rounded border border-zinc-100">
-                              <Image src="/images/icons/mastercard.svg" className="h-3 w-auto opacity-70" alt="MASTERCARD" width={36} height={12} unoptimized />
-                            </div>
-                            <span className="text-[10px] text-zinc-400 font-bold">+{index === 0 ? "18" : "4"}</span>
+                          <div className={`flex items-center gap-3 ${gateway.id === "partial_cod" ? "shrink-0" : ""}`}>
+                            <span className="text-sm font-bold text-zinc-900">₹{Number(gateway.amount || 0).toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
+                            {gateway.id === "razorpay" ? (
+                              <div className="flex items-center gap-2">
+                                <div className="flex gap-1 items-center bg-white px-2 py-1 rounded border border-zinc-100">
+                                  <Image src="/images/icons/upi.svg" className="h-3 w-auto opacity-70" alt="UPI" width={36} height={12} unoptimized />
+                                </div>
+                                <div className="flex gap-1 items-center bg-white px-2 py-1 rounded border border-zinc-100">
+                                  <Image src="/images/icons/visa.svg" className="h-2 w-auto opacity-70" alt="VISA" width={36} height={8} unoptimized />
+                                </div>
+                                <div className="flex gap-1 items-center bg-white px-2 py-1 rounded border border-zinc-100">
+                                  <Image src="/images/icons/mastercard.svg" className="h-3 w-auto opacity-70" alt="MASTERCARD" width={36} height={12} unoptimized />
+                                </div>
+                                <span className="text-[10px] text-zinc-400 font-bold">+18</span>
+                              </div>
+                            ) : (
+                              <span className="text-xs font-medium text-zinc-500">
+                                COD ₹{partialCodDetails.codAmount.toLocaleString('en-IN', { maximumFractionDigits: 0 })}
+                              </span>
+                            )}
                           </div>
                         </div>
-                        {gateway.description && (
-                          <div className="px-10 md:px-14 pb-5 pt-0 bg-accent/15 text-center">
-                            <div className="p-4 bg-zinc-50/50 rounded-lg text-sm text-zinc-600 border border-zinc-100">
-                              {gateway.description}
-                            </div>
-                          </div>
-                        )}
                       </div>
                     ))}
                   </RadioGroup>
@@ -1234,32 +1302,45 @@ export default function PaymentPage() {
                   </div>
                   <RadioGroup value={selectedPaymentGateway} onValueChange={setSelectedPaymentGateway} className="grid gap-0 border border-zinc-200 rounded-lg overflow-hidden bg-white">
                     {paymentGateways.map((gateway, index) => (
-                      <div key={gateway.id} className={`flex flex-col ${index === 0 ? "border-b border-zinc-100" : ""}`}>
-                        <div className={`p-5 flex flex-col md:flex-row gap-4 md:gap-0 items-center justify-between transition-all cursor-pointer ${index === 0 ? "bg-accent/15" : ""}`}>
+                      <div key={gateway.id} className={`flex flex-col ${index < paymentGateways.length - 1 ? "border-b border-zinc-100" : ""}`}>
+                        <div
+                          role="button"
+                          tabIndex={0}
+                          onClick={() => setSelectedPaymentGateway(gateway.id)}
+                          onKeyDown={(event) => {
+                            if (event.key === "Enter" || event.key === " ") {
+                              event.preventDefault();
+                              setSelectedPaymentGateway(gateway.id);
+                            }
+                          }}
+                          className={`p-5 flex ${gateway.id === "partial_cod" ? "flex-row gap-3" : "flex-col md:flex-row gap-4 md:gap-0"} items-center justify-between transition-all cursor-pointer ${selectedPaymentGateway === gateway.id ? "bg-accent/15" : "bg-white"}`}
+                        >
                           <div className="flex items-center gap-3">
                             <RadioGroupItem value={gateway.id} id={gateway.id} className="text-[#005BD3] border-zinc-300" />
                             <Label htmlFor={gateway.id} className="font-medium text-zinc-900 cursor-pointer">{gateway.name}</Label>
                           </div>
-                          <div className="flex items-center gap-2">
-                            <div className="flex gap-1 items-center bg-white px-2 py-1 rounded border border-zinc-100">
-                              <Image src="/images/icons/upi.svg" className="h-3 w-auto opacity-70" alt="UPI" width={36} height={12} unoptimized />
-                            </div>
-                            <div className="flex gap-1 items-center bg-white px-2 py-1 rounded border border-zinc-100">
-                              <Image src="/images/icons/visa.svg" className="h-2 w-auto opacity-70" alt="VISA" width={36} height={8} unoptimized />
-                            </div>
-                            <div className="flex gap-1 items-center bg-white px-2 py-1 rounded border border-zinc-100">
-                              <Image src="/images/icons/mastercard.svg" className="h-3 w-auto opacity-70" alt="MASTERCARD" width={36} height={12} unoptimized />
-                            </div>
-                            <span className="text-[10px] text-zinc-400 font-bold">+{index === 0 ? "18" : "4"}</span>
+                          <div className={`flex items-center gap-3 ${gateway.id === "partial_cod" ? "shrink-0" : ""}`}>
+                            <span className="text-sm font-bold text-zinc-900">₹{Number(gateway.amount || 0).toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
+                            {gateway.id === "razorpay" ? (
+                              <div className="flex items-center gap-2">
+                                <div className="flex gap-1 items-center bg-white px-2 py-1 rounded border border-zinc-100">
+                                  <Image src="/images/icons/upi.svg" className="h-3 w-auto opacity-70" alt="UPI" width={36} height={12} unoptimized />
+                                </div>
+                                <div className="flex gap-1 items-center bg-white px-2 py-1 rounded border border-zinc-100">
+                                  <Image src="/images/icons/visa.svg" className="h-2 w-auto opacity-70" alt="VISA" width={36} height={8} unoptimized />
+                                </div>
+                                <div className="flex gap-1 items-center bg-white px-2 py-1 rounded border border-zinc-100">
+                                  <Image src="/images/icons/mastercard.svg" className="h-3 w-auto opacity-70" alt="MASTERCARD" width={36} height={12} unoptimized />
+                                </div>
+                                <span className="text-[10px] text-zinc-400 font-bold">+18</span>
+                              </div>
+                            ) : (
+                              <span className="text-xs font-medium text-zinc-500">
+                                COD ₹{partialCodDetails.codAmount.toLocaleString('en-IN', { maximumFractionDigits: 0 })}
+                              </span>
+                            )}
                           </div>
                         </div>
-                        {gateway.description && (
-                          <div className="px-10 md:px-14 pb-5 pt-0 bg-accent/15 text-center">
-                            <div className="p-4 bg-zinc-50/50 rounded-lg text-sm text-zinc-600 border border-zinc-100">
-                              {gateway.description}
-                            </div>
-                          </div>
-                        )}
                       </div>
                     ))}
                   </RadioGroup>
@@ -1276,7 +1357,9 @@ export default function PaymentPage() {
                     disabled={paymentLoading || !totalAmount || !selectedBillingAddress || (!isPickup && !selectedAddress)} 
                     className="px-14 h-14 bg-primary hover:bg-primary/90 text-white font-bold rounded-lg transition-all text-lg uppercase tracking-widest disabled:cursor-not-allowed disabled:opacity-60"
                   >
-                    {paymentLoading ? "Processing..." : "Pay now"}
+                    {paymentLoading
+                      ? "Processing..."
+                      : `Pay now ₹${selectedPayableAmount.toLocaleString('en-IN', { maximumFractionDigits: 0 })}`}
                   </Button>
                 </div>
               </div>
@@ -1301,7 +1384,7 @@ export default function PaymentPage() {
       <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-zinc-100 p-4 shadow-[0_-4px_15px_rgba(0,0,0,0.08)] z-[60]">
         <div className="flex items-center justify-between gap-4">
           <div className="flex flex-col">
-            <span className="text-lg font-bold text-zinc-900 leading-none">₹ {finalAmount.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
+            <span className="text-lg font-bold text-zinc-900 leading-none">₹ {selectedPayableAmount.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
             <button 
               onClick={scrollToSummary}
               className="text-[11px] font-bold text-accent uppercase tracking-tight mt-1 text-left"
