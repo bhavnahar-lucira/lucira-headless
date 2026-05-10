@@ -132,6 +132,33 @@ const getInitials = (name = "") =>
     .substring(0, 2)
     .toUpperCase();
 
+const HighlightMatch = ({ text, query }) => {
+  if (!query) return <span className="text-[#1A1A1A]">{text}</span>;
+  const parts = text.split(new RegExp(`(${query})`, "gi"));
+  return (
+    <span className="text-[#1A1A1A]">
+      {parts.map((part, i) =>
+        part.toLowerCase() === query.toLowerCase() ? (
+          <strong key={i} className="font-semibold text-black">
+            {part}
+          </strong>
+        ) : (
+          part
+        )
+      )}
+    </span>
+  );
+};
+
+const MOCK_CATEGORIES = [
+  { title: "Solitaire Rings", image: "/images/shapes/round.png", href: "/collections/solitaire-rings" },
+  { title: "Solitaire Earrings", image: "/images/styles/dangles.png", href: "/collections/solitaire-earrings" },
+  { title: "Solitaire Pendant", image: "/images/menu/earring.jpg", href: "/collections/solitaire-pendants" },
+  { title: "Solitaire Bracelets", image: "/images/menu/wedding-ring.jpg", href: "/collections/solitaire-bracelets" },
+  { title: "Solitaire Nosering", image: "/images/menu/more-jewellery.jpg", href: "/collections/solitaire-noserings" },
+  { title: "Solitaire Mangalsutra", image: "/images/menu/engagement-ring.jpg", href: "/collections/solitaire-mangalsutras" },
+];
+
 export default function MobileHeader() {
   const router = useRouter();
   const pathname = usePathname();
@@ -205,6 +232,17 @@ export default function MobileHeader() {
   };
 
   const renderSearchContent = () => {
+    const productsOnly = searchResults.filter(item => !item.isCollection);
+    const matchedCollections = searchResults
+      .filter(item => item.isCollection)
+      .sort((a, b) => {
+        const aExact = a.title.toLowerCase() === searchQuery.toLowerCase();
+        const bExact = b.title.toLowerCase() === searchQuery.toLowerCase();
+        if (aExact && !bExact) return -1;
+        if (!aExact && bExact) return 1;
+        return 0;
+      });
+
     return (
       <div className="flex flex-col h-full bg-white px-4">
         <div className="flex items-center gap-3 py-4 border-b border-gray-100 sticky top-0 bg-white z-10">
@@ -236,33 +274,80 @@ export default function MobileHeader() {
           </div>
         </div>
 
-        <div className="flex-grow overflow-y-auto py-4 pb-20 custom-scrollbar">
+        <div className="grow overflow-y-auto py-4 pb-20 custom-scrollbar">
           {searchQuery.length > 0 ? (
-            <div className="space-y-6">
+            <div className="space-y-8">
               {isSearching ? (
-                <div className="flex justify-center py-10">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                </div>
-              ) : searchResults.length > 0 ? (
                 <div className="space-y-4">
-                  <div className="grid grid-cols-1 gap-4">
-                    {searchResults.slice(0, 8).map((item) => (
-                      <div 
-                        key={item.id} 
-                        onClick={() => handleResultClick(item.url)}
-                        className="flex items-center gap-4 p-2 rounded-lg active:bg-gray-50 border border-gray-50"
-                      >
-                        <div className="w-16 h-16 relative bg-gray-50 rounded-md overflow-hidden shrink-0 border border-gray-100">
-                          <Image src={item.image || "/images/product/1.jpg"} alt={item.title} fill className="object-contain p-1 mix-blend-multiply" />
-                        </div>
-                        <div className="flex-grow min-w-0">
-                          <h4 className="text-sm font-medium text-gray-900 truncate">{item.title}</h4>
-                          <p className="text-xs text-gray-500 font-bold mt-1">₹{item.price?.toLocaleString()}</p>
-                        </div>
-                        <ChevronRight size={16} className="text-gray-300" />
+                  {[1, 2, 3, 4].map(i => (
+                    <div key={i} className="flex gap-4 animate-pulse px-2">
+                      <div className="w-14 h-14 bg-gray-100 rounded-lg" />
+                      <div className="flex-1 space-y-2 py-1">
+                        <div className="h-3 bg-gray-100 rounded w-3/4" />
+                        <div className="h-2.5 bg-gray-100 rounded w-1/4" />
                       </div>
-                    ))}
-                  </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (matchedCollections.length > 0 || productsOnly.length > 0) ? (
+                <>
+                  {/* Collections Section */}
+                  {matchedCollections.length > 0 && (
+                    <div className="space-y-4">
+                      <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest px-1">Collections</h3>
+                      <div className="space-y-2">
+                        {matchedCollections.slice(0, 6).map((col) => (
+                          <div 
+                            key={col.id} 
+                            onClick={() => handleResultClick(col.url)}
+                            className="group block p-3 bg-zinc-50 rounded-lg border border-zinc-100 active:bg-white transition-all duration-300"
+                          >
+                            <div className="flex-1 min-w-0">
+                              <h4 className="text-sm font-bold text-gray-900">
+                                <HighlightMatch text={col.title} query={searchQuery} />
+                              </h4>
+                              <p className="text-[10px] text-zinc-400 uppercase font-bold tracking-widest mt-1">
+                                Collection
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Products Section */}
+                  {productsOnly.length > 0 && (
+                    <div className="space-y-4">
+                      <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest px-1">Products</h3>
+                      <div className="grid grid-cols-1 gap-4">
+                        {productsOnly.slice(0, 6).map((item) => (
+                          <div 
+                            key={item.id} 
+                            onClick={() => handleResultClick(item.url)}
+                            className="flex items-center gap-4 p-2 rounded-lg active:bg-gray-50 border border-gray-50"
+                          >
+                            <div className="w-16 h-16 relative bg-gray-50 rounded-md overflow-hidden shrink-0 border border-gray-100">
+                              <Image 
+                                src={item.image || "/images/product/1.jpg"} 
+                                alt={item.title} 
+                                fill 
+                                className="object-contain p-1 mix-blend-multiply" 
+                              />
+                            </div>
+                            <div className="grow min-w-0">
+                              <h4 className="text-sm font-medium text-gray-900 truncate">
+                                <HighlightMatch text={item.title} query={searchQuery} />
+                              </h4>
+                              <p className="text-xs text-gray-500 font-bold mt-1">{item.price}</p>
+                            </div>
+                            <ChevronRight size={16} className="text-gray-300" />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   <div className="pt-4 border-t border-gray-100">
                     <button 
                       onClick={() => handleResultClick(`/search?q=${encodeURIComponent(searchQuery.trim())}`)}
@@ -271,7 +356,7 @@ export default function MobileHeader() {
                       View All Results for "{searchQuery}"
                     </button>
                   </div>
-                </div>
+                </>
               ) : searchQuery.length > 1 && (
                 <div className="text-center py-20">
                   <p className="text-gray-500">No results found for "{searchQuery}"</p>
@@ -280,25 +365,27 @@ export default function MobileHeader() {
             </div>
           ) : (
             <div className="space-y-6">
-              <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest px-1">Popular Categories</h3>
-              <div className="grid grid-cols-2 gap-3">
-                {MEGA_MENU.slice(0, 8).map((item, index) => {
-                  const label = item.label || item.title;
-                  const image = item.mobileBanner || CATEGORY_IMAGES[label] || "/images/menu/engagement-ring.jpg";
-                  return (
-                    <button
-                      key={index}
-                      onClick={() => handleResultClick(item.href || "#")}
-                      className="relative aspect-[16/9] overflow-hidden rounded-xl group border border-gray-100 bg-zinc-100"
-                    >
-                      <Image src={image} alt={label} fill priority={index < 4} className="object-cover transition-opacity duration-300" />
-                      <div className="absolute inset-0 bg-black/20 group-active:bg-black/40 transition-colors" />
-                      <span className="absolute inset-0 flex items-center justify-center text-white text-[13px] font-bold tracking-wider px-2 text-center">
-                        {label}
-                      </span>
-                    </button>
-                  );
-                })}
+              <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest px-1">Categories</h3>
+              <div className="grid grid-cols-3 gap-3">
+                {MOCK_CATEGORIES.map((cat, i) => (
+                  <div 
+                    key={i} 
+                    onClick={() => handleResultClick(cat.href)}
+                    className="group flex flex-col items-center"
+                  >
+                    <div className="aspect-square w-full relative bg-[#F9F9F9] rounded-lg overflow-hidden mb-2 border border-gray-50">
+                      <Image 
+                        src={cat.image} 
+                        alt={cat.title} 
+                        fill 
+                        className="object-contain p-2"
+                      />
+                    </div>
+                    <p className="text-[10px] font-bold text-gray-700 text-center uppercase tracking-tight leading-tight">
+                      {cat.title}
+                    </p>
+                  </div>
+                ))}
               </div>
             </div>
           )}
@@ -553,7 +640,7 @@ export default function MobileHeader() {
                 key={index}
                 href={item.href || "#"}
                 onClick={() => setIsMenuOpen(false)}
-                className="relative aspect-[4/4] overflow-hidden rounded-lg group bg-zinc-100"
+                className="relative aspect-4/4 overflow-hidden rounded-lg group bg-zinc-100"
               >
                 <Image
                   src={image}
@@ -622,7 +709,7 @@ export default function MobileHeader() {
                     />
                   )}
                 </div>
-                <div className="flex flex-col flex-grow min-w-0">
+                <div className="flex flex-col grow min-w-0">
                   <div className="flex items-center justify-between gap-1 w-full">
                     <span className="text-[13px] font-semibold leading-tight font-figtree text-gray-900 line-clamp-2">
                       {label}
@@ -775,7 +862,7 @@ export default function MobileHeader() {
               </button>
             </SheetTrigger>
             <SheetContent side="left" className="w-full p-0 border-none" showCloseButton={false}>
-              <div className="flex flex-col h-screen bg-[#fff] overflow-hidden">
+              <div className="flex flex-col h-screen bg-white overflow-hidden">
                 <SheetHeader className="px-4 py-4 border-b border-gray-200 flex flex-row items-center justify-between sticky top-0 bg-white z-10 shrink-0">
                   <div className="flex items-center gap-2">
                     {activeMenuPath.length > 0 ? (
@@ -783,7 +870,7 @@ export default function MobileHeader() {
                         <button onClick={handleBack} className="p-1 mr-1">
                           <ChevronLeft size={20} />
                         </button>
-                        <SheetTitle className="text-sm font-semibold capitalize font-figtree tracking-widest font-figtree font-semibold text-base leading-none tracking-normal align-middle">
+                        <SheetTitle className="text-sm capitalize font-figtree tracking-widest font-figtree font-semibold leading-none align-middle">
                           {getMenuTitle()}
                         </SheetTitle>
                       </>
@@ -827,7 +914,7 @@ export default function MobileHeader() {
                   </div>
                 </SheetHeader>
 
-                <ScrollArea className="flex-grow h-full overflow-y-auto overflow-x-hidden">
+                <ScrollArea className="grow h-full overflow-y-auto overflow-x-hidden">
                   <AnimatePresence mode="wait" initial={false} custom={menuDirection}>
                     <motion.div
                       key={activeMenuPath.join('-') || 'root'}
@@ -912,7 +999,7 @@ export default function MobileHeader() {
             <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500">
               <SearchIcon />
             </div>
-            <div className="relative h-full w-full flex items-center overflow-hidden ml-[2px]">
+            <div className="relative h-full w-full flex items-center overflow-hidden ml-0.5">
               <span className="text-[14px] text-gray-500 font-medium whitespace-nowrap">Search for&nbsp;</span>
                <AnimatePresence mode="wait">
                   <motion.span
