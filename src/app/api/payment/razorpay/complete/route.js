@@ -2,7 +2,7 @@ import crypto from "crypto";
 import { NextResponse } from "next/server";
 import clientPromise from "@/lib/mongodb";
 import { buildCartLookup, normalizeUserId } from "@/lib/cartIdentity";
-import { shopifyAdminFetch } from "@/lib/shopify";
+import { shopifyAdminFetch, shopifyAdminRestFetch } from "@/lib/shopify";
 
 function normalizeVariantId(variantId = "") {
   const value = String(variantId || "").trim();
@@ -10,6 +10,10 @@ function normalizeVariantId(variantId = "") {
   return value.includes("gid://shopify/ProductVariant/")
     ? value
     : `gid://shopify/ProductVariant/${value}`;
+}
+
+function getNumericShopifyId(gid = "") {
+  return String(gid || "").match(/\d+$/)?.[0] || "";
 }
 
 function asMoney(value) {
@@ -57,6 +61,23 @@ function buildMailingAddress(address = null) {
   };
 }
 
+function buildRestMailingAddress(address = null) {
+  if (!address) return null;
+
+  return {
+    first_name: address.firstName || "",
+    last_name: address.lastName || "",
+    company: formatCompanyWithGstin(address.company, address.gstin),
+    address1: address.address1 || "",
+    address2: address.address2 || "",
+    city: address.city || "",
+    province: address.province || "",
+    zip: String(address.zip || ""),
+    country: address.country || "",
+    phone: normalizePhone(address.phone || ""),
+  };
+}
+
 function buildLineItemProperties(item = {}) {
   const pairs = [
     ["EngravingText", item.engravingText || item.engraving || ""],
@@ -85,17 +106,29 @@ function buildLineItemProperties(item = {}) {
     }));
 }
 
+function buildRestLineItemProperties(item = {}) {
+  return buildLineItemProperties(item).map(({ key, value }) => ({
+    name: key,
+    value,
+  }));
+}
+
 function buildOrderCustomAttributes({
   shippingAddress,
   billingAddress,
   razorpayOrderId,
   razorpayPaymentId,
+  appliedCoupon,
   nectorPoints,
+  paymentMethod,
 }) {
   const pairs = [
-    ["payment_gateway", "Razorpay"],
+    ["payment_gateway", paymentMethod?.type === "partial_cod" ? "Partial COD" : "Razorpay"],
     ["razorpay_order_id", razorpayOrderId],
     ["razorpay_payment_id", razorpayPaymentId],
+    ["partial_cod_prepaid_amount", paymentMethod?.type === "partial_cod" ? paymentMethod.prepaidAmount : ""],
+    ["partial_cod_cod_amount", paymentMethod?.type === "partial_cod" ? paymentMethod.codAmount : ""],
+    ["partial_cod_grand_total", paymentMethod?.type === "partial_cod" ? paymentMethod.grandTotal : ""],
     ["shipping_address_id", shippingAddress?.id || ""],
     ["billing_address_id", billingAddress?.id || ""],
     ["shipping_gstin", shippingAddress?.gstin || ""],
@@ -115,9 +148,34 @@ function buildOrderCustomAttributes({
     .map(([key, value]) => ({ key, value: String(value) }));
 }
 
-function buildOrderNote({ shippingAddress, billingAddress }) {
+function buildRestNoteAttributes({
+  shippingAddress,
+  billingAddress,
+  razorpayOrderId,
+  razorpayPaymentId,
+  appliedCoupon,
+  nectorPoints,
+  paymentMethod,
+}) {
+  return buildOrderCustomAttributes({
+    shippingAddress,
+    billingAddress,
+    razorpayOrderId,
+    razorpayPaymentId,
+    nectorPoints,
+    paymentMethod,
+  }).map(({ key, value }) => ({
+    name: key,
+    value,
+  }));
+}
+
+function buildOrderNote({ shippingAddress, billingAddress, paymentMethod }) {
   return [
     "Order created via custom Razorpay checkout.",
+    paymentMethod?.type === "partial_cod"
+      ? `Partial COD: prepaid ${asMoney(paymentMethod.prepaidAmount)}, COD ${asMoney(paymentMethod.codAmount)}.`
+      : "",
     shippingAddress?.gstin ? `Shipping GSTIN: ${shippingAddress.gstin}` : "",
     billingAddress?.gstin ? `Billing GSTIN: ${billingAddress.gstin}` : "",
   ]
@@ -188,6 +246,202 @@ async function callNectorPerform({ userId, orderId, amount }) {
   }
 }
 
+async function recordPartialCodPayment({ orderId, amount, razorpayPaymentId }) {
+  const paymentAmount = Number(amount || 0);
+  if (!orderId || !paymentAmount) return null;
+
+  try {
+    const manualPaymentData = await shopifyAdminFetch(`
+      mutation orderCreateManualPayment($id: ID!, $amount: MoneyInput, $paymentMethodName: String, $processedAt: DateTime) {
+        orderCreateManualPayment(
+          id: $id,
+          amount: $amount,
+          paymentMethodName: $paymentMethodName,
+          processedAt: $processedAt
+        ) {
+          order {
+            id
+            displayFinancialStatus
+            totalOutstandingSet {
+              shopMoney {
+                amount
+                currencyCode
+              }
+            }
+            netPaymentSet {
+              shopMoney {
+                amount
+                currencyCode
+              }
+            }
+          }
+          userErrors {
+            field
+            message
+          }
+        }
+      }
+    `, {
+      id: orderId,
+      amount: {
+        amount: asMoney(paymentAmount),
+        currencyCode: "INR",
+      },
+      paymentMethodName: razorpayPaymentId ? `Razorpay ${razorpayPaymentId}` : "Razorpay",
+      processedAt: new Date().toISOString(),
+    }, "2026-01");
+
+    const payload = manualPaymentData.orderCreateManualPayment;
+    if (payload?.userErrors?.length) {
+      throw new Error(payload.userErrors[0].message);
+    }
+
+    return payload?.order || null;
+  } catch (error) {
+    console.error("GraphQL partial payment record failed, trying REST transaction:", error.message);
+  }
+
+  const numericOrderId = getNumericShopifyId(orderId);
+  if (!numericOrderId) return null;
+
+  const { data } = await shopifyAdminRestFetch(
+    `orders/${numericOrderId}/transactions.json`,
+    {},
+    {
+      method: "POST",
+      body: {
+        transaction: {
+          kind: "sale",
+          status: "success",
+          amount: asMoney(paymentAmount),
+          currency: "INR",
+          gateway: "Razorpay",
+          authorization: razorpayPaymentId || undefined,
+          source_name: "external",
+          message: "Partial COD prepaid amount captured via Razorpay",
+        },
+      },
+    }
+  );
+
+  return data?.transaction || null;
+}
+
+async function createPartialCodOrder({
+  cart,
+  customer,
+  shippingAddress,
+  billingAddress,
+  razorpayOrderId,
+  razorpayPaymentId,
+  appliedCoupon,
+  nectorPoints,
+  paymentMethod,
+}) {
+  const lineItems = (cart?.items || []).map((item) => {
+    const numericVariantId = getNumericShopifyId(item.variantId);
+    const price = Number(item.price || 0);
+    const lineItem = {
+      quantity: Number(item.quantity || 1),
+      price: asMoney(price),
+      properties: buildRestLineItemProperties(item),
+    };
+
+    if (numericVariantId) {
+      lineItem.variant_id = Number(numericVariantId);
+    } else {
+      lineItem.title = item.title || "Custom item";
+    }
+
+    return lineItem;
+  });
+
+  const subtotalBeforeDiscount = (cart?.items || []).reduce(
+    (acc, item) => acc + (Number(item.price || 0) * Number(item.quantity || 1)),
+    0
+  );
+  const couponDetails = typeof appliedCoupon === "object" ? appliedCoupon : { code: appliedCoupon, value: 0, valueType: "FIXED_AMOUNT" };
+  let couponDiscountAmount = 0;
+  if (appliedCoupon) {
+    if (couponDetails.valueType === "FIXED_AMOUNT") {
+      couponDiscountAmount = Number(couponDetails.value || 0);
+    } else if (couponDetails.valueType === "PERCENTAGE") {
+      couponDiscountAmount = (subtotalBeforeDiscount * Number(couponDetails.value || 0)) / 100;
+    }
+  }
+  const nectorValue = Number(nectorPoints?.fiat_value || 0);
+  const discountCodes = [
+    couponDiscountAmount > 0
+      ? {
+          code: couponDetails.code || "Coupon Discount",
+          amount: asMoney(couponDiscountAmount),
+          type: "fixed_amount",
+        }
+      : null,
+    nectorValue > 0
+      ? {
+          code: nectorPoints?.id || "Nector Discount",
+          amount: asMoney(Math.min(nectorValue, subtotalBeforeDiscount)),
+          type: "fixed_amount",
+        }
+      : null,
+  ].filter(Boolean);
+  const tags = ["Razorpay", "Partial COD"];
+  if (nectorPoints?.coin_value) tags.push("nector_redeem");
+
+  const { data } = await shopifyAdminRestFetch(
+    "orders.json",
+    {},
+    {
+      method: "POST",
+      body: {
+        order: {
+          email: customer?.email || "",
+          phone: normalizePhone(customer?.phone || ""),
+          send_receipt: false,
+          send_fulfillment_receipt: false,
+          inventory_behaviour: "decrement_obeying_policy",
+          financial_status: "partially_paid",
+          currency: "INR",
+          tags: tags.join(", "),
+          note: buildOrderNote({ shippingAddress, billingAddress, paymentMethod }),
+          note_attributes: buildRestNoteAttributes({
+            shippingAddress,
+            billingAddress,
+            razorpayOrderId,
+            razorpayPaymentId,
+            nectorPoints,
+            paymentMethod,
+          }),
+          line_items: lineItems,
+          shipping_address: buildRestMailingAddress(shippingAddress),
+          billing_address: buildRestMailingAddress(billingAddress || shippingAddress),
+          shipping_lines: [
+            {
+              title: "Shipping Rate - FREE",
+              code: "FREE",
+              price: "0.00",
+            },
+          ],
+          discount_codes: discountCodes,
+          transactions: [
+            {
+              kind: "sale",
+              status: "success",
+              amount: asMoney(paymentMethod.prepaidAmount),
+              currency: "INR",
+              gateway: "Razorpay",
+              authorization: razorpayPaymentId || razorpayOrderId,
+            },
+          ],
+        },
+      },
+    }
+  );
+
+  return data?.order || null;
+}
+
 export async function POST(req) {
   try {
     const body = await req.json();
@@ -198,6 +452,9 @@ export async function POST(req) {
     const razorpaySignature = String(body?.razorpaySignature || "").trim();
     const draftId = body?.draftId;
     const nectorPoints = body?.nectorPoints;
+    const paymentMethod = body?.paymentMethod?.type === "partial_cod"
+      ? body.paymentMethod
+      : { type: "razorpay" };
 
     console.log("COMPLETE ORDER REQUEST:", { userId, sessionId, razorpayOrderId, razorpayPaymentId, draftId });
 
@@ -224,10 +481,88 @@ export async function POST(req) {
     const cartLookup = buildCartLookup({ userId, sessionId });
     const cart = await cartCollection.findOne(cartLookup);
 
+    if (paymentMethod.type === "partial_cod") {
+      const partialOrder = await createPartialCodOrder({
+        cart,
+        customer: body?.customer,
+        shippingAddress: body?.shippingAddress,
+        billingAddress: body?.billingAddress || body?.shippingAddress,
+        razorpayOrderId,
+        razorpayPaymentId,
+        appliedCoupon: body?.appliedCoupon,
+        nectorPoints,
+        paymentMethod,
+      });
+
+      if (!partialOrder?.id) {
+        return NextResponse.json({ error: "Failed to create Partial COD order" }, { status: 500 });
+      }
+
+      try {
+        await shopifyAdminFetch(`
+          mutation draftOrderDelete($input: DraftOrderDeleteInput!) {
+            draftOrderDelete(input: $input) {
+              deletedId
+              userErrors { field message }
+            }
+          }
+        `, { input: { id: draftId } });
+      } catch (deleteDraftError) {
+        console.error("Unable to delete unused Partial COD draft:", deleteDraftError);
+      }
+
+      const shopifyOrderId = partialOrder.admin_graphql_api_id || `gid://shopify/Order/${partialOrder.id}`;
+      if (nectorPoints?.coin_value) {
+        const cartTotalAmount = cart?.items?.reduce((acc, item) =>
+          acc + (Number(item.price || 0) * Number(item.quantity || 1)), 0) || 0;
+
+        await callNectorPerform({
+          userId,
+          orderId: shopifyOrderId,
+          amount: Math.max(cartTotalAmount, 1)
+        });
+      }
+
+      const orderRecord = {
+        shopifyOrderId,
+        shopifyOrderName: partialOrder.name,
+        razorpayOrderId,
+        razorpayPaymentId,
+        userId: userId || null,
+        sessionId: sessionId || null,
+        totalAmount: Number(partialOrder.total_price || paymentMethod.grandTotal || 0),
+        customer: body?.customer,
+        shippingAddress: body?.shippingAddress,
+        billingAddress: body?.billingAddress,
+        paymentMethod,
+        partialCodPaymentRecorded: true,
+        status: "PARTIAL_COD",
+        createdAt: new Date(),
+      };
+
+      await ordersCollection.insertOne(orderRecord);
+      await paymentCollection.insertOne({
+        ...orderRecord,
+        razorpaySignature,
+        updatedAt: new Date()
+      });
+
+      await cartCollection.updateOne(cartLookup, { $set: { items: [], updatedAt: new Date() } });
+
+      return NextResponse.json({
+        success: true,
+        shopifyOrderId,
+        shopifyOrderName: partialOrder.name,
+      });
+    }
+
     // STEP 1: Update Draft Order with final details (Address, Properties, etc.)
     // We omit lineItems here to preserve the complex properties and discounts 
     // set during the initial draftOrderCreate step.
     const tags = ["Razorpay"];
+    if (paymentMethod.type === "partial_cod") {
+      tags.push("Partial COD");
+    }
     if (nectorPoints?.coin_value) {
       tags.push("nector_redeem");
     }
@@ -246,7 +581,8 @@ export async function POST(req) {
         billingAddress: buildMailingAddress(body?.billingAddress || body?.shippingAddress),
         note: buildOrderNote({
           shippingAddress: body?.shippingAddress,
-          billingAddress: body?.billingAddress
+          billingAddress: body?.billingAddress,
+          paymentMethod,
         }),
         tags: tags,
         customAttributes: buildOrderCustomAttributes({
@@ -255,6 +591,7 @@ export async function POST(req) {
           razorpayOrderId,
           razorpayPaymentId,
           nectorPoints,
+          paymentMethod,
         })
       }
     });
@@ -262,8 +599,8 @@ export async function POST(req) {
     // STEP 2: Complete Shopify Draft Order
     console.log("Completing draft order:", draftId);
     const shopifyData = await shopifyAdminFetch(`
-      mutation draftOrderComplete($id: ID!) {
-        draftOrderComplete(id: $id) {
+      mutation draftOrderComplete($id: ID!, $paymentPending: Boolean) {
+        draftOrderComplete(id: $id, paymentPending: $paymentPending) {
           draftOrder {
             id
             order {
@@ -282,12 +619,13 @@ export async function POST(req) {
           }
         }
       }
-    `, { id: draftId });
+    `, { id: draftId, paymentPending: paymentMethod.type === "partial_cod" });
 
     const payload = shopifyData.draftOrderComplete;
     
     if (payload?.userErrors?.some(e => e.message.toLowerCase().includes("already completed") || e.message.toLowerCase().includes("not open"))) {
       console.log("Draft order already completed or not open:", draftId);
+      await cartCollection.updateOne(cartLookup, { $set: { items: [], updatedAt: new Date() } });
       return NextResponse.json({
         success: true,
         message: "Order already completed"
@@ -301,6 +639,22 @@ export async function POST(req) {
 
     const order = payload.draftOrder.order;
     console.log("Order completed successfully:", order.name);
+
+    let partialCodPaymentRecorded = false;
+    if (paymentMethod.type === "partial_cod") {
+      try {
+        const recordedPaymentOrder = await recordPartialCodPayment({
+          orderId: order.id,
+          amount: paymentMethod.prepaidAmount,
+          razorpayPaymentId,
+        });
+
+        partialCodPaymentRecorded = Boolean(recordedPaymentOrder);
+        console.log("Partial COD payment record result:", recordedPaymentOrder);
+      } catch (paymentRecordError) {
+        console.error("Partial COD payment could not be recorded in Shopify:", paymentRecordError);
+      }
+    }
 
     // STEP 3: Nector Point Redemption (Server-Side)
     if (nectorPoints?.coin_value) {
@@ -328,7 +682,9 @@ export async function POST(req) {
       customer: body?.customer,
       shippingAddress: body?.shippingAddress,
       billingAddress: body?.billingAddress,
-      status: "PAID",
+      paymentMethod,
+      partialCodPaymentRecorded,
+      status: paymentMethod.type === "partial_cod" ? "PARTIAL_COD" : "PAID",
       createdAt: new Date(),
     };
 
