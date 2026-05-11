@@ -237,8 +237,8 @@ export function getArticleSchema(article, blogHandle) {
     "description": article.excerpt || article.content?.replace(/<[^>]*>?/gm, '').slice(0, 160),
     "image": article.image?.url ? [article.image.url] : [],
     "author": {
-      "@type": "Organization",
-      "name": "Lucira Jewelry"
+      "@type": "Person",
+      "name": article.author_name?.value || article.authorV2?.name || "Lucira Jewelry"
     },
     "publisher": {
       "@id": `${baseUrl}/#org`
