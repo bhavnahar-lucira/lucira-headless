@@ -6,6 +6,7 @@ import {
 } from "@/lib/blogs";
 import BlogArticleClient from "@/components/blogs/BlogArticleClient";
 import "./blog-article.css";
+import { getArticleSchema, getBreadcrumbSchema } from "@/lib/seo";
 
 function stripHtml(value) {
   return value?.replace(/<[^>]*>?/gm, "").replace(/\s+/g, " ").trim() || "";
@@ -105,17 +106,33 @@ export default async function BlogArticlePage({ params }) {
     .filter((item) => item.handle !== article.handle)
     .slice(0, 4);
 
-
+  const jsonLd = getArticleSchema(article, blogHandle);
+  const breadcrumbs = [
+    { name: "Home", url: "/" },
+    { name: blogHandle.charAt(0).toUpperCase() + blogHandle.slice(1), url: `/blogs/${blogHandle}` },
+    { name: article.title, url: `/blogs/${blogHandle}/${article.handle}` }
+  ];
+  const breadcrumbLd = getBreadcrumbSchema(breadcrumbs);
 
   return (
-    <BlogArticleClient
-      article={article}
-      bodyHtml={bodyHtml}
-      toc={toc}
-      publishedDate={publishedDate}
-      readTime={readTime}
-      mostViewed={mostViewed}
-      featuredProducts={[]} // You can fetch products here if needed
-    />
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
+      />
+      <BlogArticleClient
+        article={article}
+        bodyHtml={bodyHtml}
+        toc={toc}
+        publishedDate={publishedDate}
+        readTime={readTime}
+        mostViewed={mostViewed}
+        featuredProducts={[]} // You can fetch products here if needed
+      />
+    </>
   );
 }

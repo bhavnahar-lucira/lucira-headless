@@ -10,6 +10,7 @@ import PointsResetHandler from "@/components/common/PointsResetHandler";
 import { GlobalAuthModal } from "@/components/auth/GlobalAuthModal";
 import Script from "next/script";
 import GtmPageView from "@/components/common/GtmPageView";
+import { organizationSchema, websiteSchema, storesSchema } from "@/lib/seo";
 
 const figtree = Figtree({
   subsets: ["latin"],
@@ -55,6 +56,15 @@ export default function RootLayout({ children }) {
               })(window,document,'script','dataLayer','GTM-MKZBJB8M');`}
           </Script>
         )}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@graph": [organizationSchema, websiteSchema, ...storesSchema],
+            }),
+          }}
+        />
       </head>
       <body className={`${figtree.variable} ${abhaya.variable} font-figtree antialiased`}>
         {isProd && (

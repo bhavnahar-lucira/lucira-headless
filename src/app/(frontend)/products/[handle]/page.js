@@ -1,6 +1,7 @@
 import clientPromise from "@/lib/mongodb";
 import { notFound } from "next/navigation";
 import ProductPageClient from "@/components/product/ProductPageClient";
+import { getProductSchema, getBreadcrumbSchema } from "@/lib/seo";
 
 export async function generateMetadata({ params }) {
   const { handle } = await params;
@@ -111,12 +112,30 @@ export default async function ProductPage({ params }) {
     getMatchingProducts(product)
   ]);
 
+  const jsonLd = getProductSchema(product);
+  const breadcrumbs = [
+    { name: "Home", url: "/" },
+    ...(product.category ? [{ name: product.category, url: `/collections/${product.category.toLowerCase().replace(/\s+/g, '-')}` }] : []),
+    { name: product.title, url: `/products/${product.handle}` }
+  ];
+  const breadcrumbLd = getBreadcrumbSchema(breadcrumbs);
+
   return (
-    <ProductPageClient 
-      product={product} 
-      complementaryProducts={complementaryProducts} 
-      matchingProducts={matchingProducts} 
-    />
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
+      />
+      <ProductPageClient 
+        product={product} 
+        complementaryProducts={complementaryProducts} 
+        matchingProducts={matchingProducts} 
+      />
+    </>
   );
 }
 
