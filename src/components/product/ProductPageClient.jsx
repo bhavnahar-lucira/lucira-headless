@@ -1929,7 +1929,7 @@ useEffect(() => {
                         e.preventDefault();
                         setIsSchemeOpen((prev) => !prev);
                       }}
-                      className={`w-full h-14 px-1.5 sm:px-3 font-medium flex items-center justify-between gap-1 sm:gap-2 bg-gray-50 hover:cursor-pointer group hover:bg-primary hover:text-white transition-all duration-150 active:scale-[0.98] rounded-md ${isSchemeOpen ? 'bg-primary text-white border-primary shadow-[0_5px_20px_rgba(163,110,110,0.4)]' : 'border-gray-200'}`}
+                      className={`w-full h-14 px-1.5 sm:px-3 font-medium flex items-center justify-between gap-1 sm:gap-2 bg-gray-50 hover:cursor-pointer group hover:bg-tertiary hover:text-white transition-all duration-150 active:scale-[0.98] rounded-md ${isSchemeOpen ? 'bg-tertiary text-white border-primary shadow-[0_5px_20px_rgba(163,110,110,0.4)]' : 'border-gray-200'}`}
                     >
                       <div className="w-6 sm:w-8 flex justify-start shrink-0">
                         <div className={`p-1 rounded-full transition-colors duration-150 flex items-center justify-center ${isSchemeOpen ? 'bg-white/20' : 'bg-primary/10'}`}>
@@ -1965,7 +1965,7 @@ useEffect(() => {
                                 <span className="text-gray-500 font-medium">Monthly Installment</span>
                                 <div className="text-right">
                                   <span className="font-bold text-primary">₹{formatPrice(schemeData.monthly)}</span>
-                                  <span className="text-gray-400 ml-1">x 9 Months</span>
+                                  <span className="text-gray-600 ml-1">x 9 Months</span>
                                 </div>
                               </div>
                               <div className="flex justify-between items-center text-[12px] sm:text-[13px]">
@@ -1988,7 +1988,7 @@ useEffect(() => {
                               </div>
                             </div>
 
-                            <Button className="w-full h-12 font-bold uppercase tracking-widest bg-primary hover:bg-accent text-white rounded-xl shadow-lg shadow-primary/20 transition-all duration-200 active:scale-[0.97]" asChild>
+                            <Button className="w-full h-12 font-bold uppercase tracking-widest bg-tertiary hover:bg-accent text-white rounded-sm shadow-lg shadow-primary/20 transition-all duration-200 active:scale-[0.97]" asChild>
                               <a href={schemeData.schemeUrl} target="_blank" rel="noopener noreferrer">
                                 ENROLL NOW <ArrowRight size={16} className="ml-2" />
                               </a>
@@ -1996,7 +1996,7 @@ useEffect(() => {
 
                             <div className="flex items-center justify-center gap-2 pt-1">
                               <div className="w-1 h-1 bg-[#2DB36F] rounded-full animate-pulse"></div>
-                              <p className="text-[9px] sm:text-[10px] text-gray-400 font-bold uppercase tracking-widest">
+                              <p className="text-[9px] sm:text-[10px] text-gray-700 font-bold uppercase tracking-widest">
                                 Secure & Instant Enrollment
                               </p>
                             </div>
