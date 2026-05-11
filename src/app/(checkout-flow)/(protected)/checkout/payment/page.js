@@ -1387,7 +1387,7 @@ export default function PaymentPage() {
             <span className="text-lg font-bold text-zinc-900 leading-none">₹ {selectedPayableAmount.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
             <button 
               onClick={scrollToSummary}
-              className="text-[11px] font-bold text-accent uppercase tracking-tight mt-1 text-left"
+              className="text-[11px] font-bold text-accent uppercase tracking-tight mt-1 text-left whitespace-nowrap"
             >
               View Order Summary
             </button>

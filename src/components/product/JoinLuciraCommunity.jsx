@@ -98,13 +98,13 @@ export function JoinLuciraCommunity() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Enter your email"
-                  className="h-14 bg-white/50 border-primary rounded-lg px-6 text-base placeholder:text-zinc-400 focus-visible:ring-1 focus-visible:ring-zinc-900"
+                  className="h-14 bg-white/50 border-primary rounded-sm px-6 text-base placeholder:text-zinc-400 focus-visible:ring-1 focus-visible:ring-zinc-900"
                   disabled={loading}
                 />
                 <Button
                   type="submit"
                   disabled={loading}
-                  className="h-14 w-full md:w-fit px-12 bg-primary hover:accent text-white font-bold text-base uppercase rounded-[4px] transition-all flex items-center justify-center gap-2"
+                  className="h-14 w-full md:w-fit px-12 bg-primary hover:accent text-white font-bold text-base uppercase rounded-sm transition-all flex items-center justify-center gap-2"
                 >
                   {loading ? (
                     <>

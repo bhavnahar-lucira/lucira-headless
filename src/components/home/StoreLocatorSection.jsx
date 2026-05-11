@@ -69,7 +69,7 @@ const stores = [
     city: "Pune",
     name: "Pune Lucira Store",
     rating: 4.8,
-    image: "/images/store/store.jpg",
+    image: "/images/store/Pune.jpg",
     storeHours: {
       weekday: { open: "10:30", close: "22:00" },
       weekend: { open: "10:30", close: "22:00" },
@@ -99,7 +99,7 @@ const stores = [
     city: "Chembur",
     name: "Chembur Lucira Store",
     rating: 4.7,
-    image: "/images/store/store.jpg",
+    image: "/images/store/Chembur.jpg",
     storeHours: {
       weekday: { open: "10:30", close: "22:00" },
       weekend: { open: "10:30", close: "22:00" },
@@ -127,7 +127,7 @@ const stores = [
     city: "Borivali",
     name: "Borivali Lucira Store",
     rating: 4.9,
-    image: "/images/store/store.jpg",
+    image: "/images/store/Borivali.jpg",
     storeHours: {
       weekday: { open: "10:30", close: "21:30" },
       weekend: { open: "10:30", close: "21:30" },

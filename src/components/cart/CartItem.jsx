@@ -428,7 +428,7 @@ export default function CartItem({ item, onAuthRequired }) {
               </p>
 
               {/* Selectors */}
-              <div className="flex items-center gap-3 pt-1">
+              <div className="flex items-center gap-3 pt-1 flex-wrap">
                 {item.size && (
                   <div className="flex items-center gap-0.5">
                     <span className="text-[13px] text-zinc-800 font-medium">
