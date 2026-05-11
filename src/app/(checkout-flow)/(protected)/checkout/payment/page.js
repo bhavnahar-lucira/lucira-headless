@@ -321,8 +321,8 @@ export default function PaymentPage() {
   const partialCodDetails = useMemo(() => {
     const total = Math.max(0, Number(finalAmount || 0));
     const isEligible = total > 0 && total < 50000;
-    const codAmount = isEligible ? Math.min(total * 0.8, 30000) : 0;
-    const prepaidAmount = isEligible ? Math.max(total - codAmount, total * 0.2) : 0;
+    const prepaidAmount = isEligible ? total * 0.2 : 0;
+    const codAmount = isEligible ? total - prepaidAmount : 0;
 
     return {
       isEligible,

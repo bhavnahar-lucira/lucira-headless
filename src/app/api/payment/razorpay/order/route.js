@@ -31,8 +31,8 @@ function buildPaymentMethod(body = {}, draftTotal = 0) {
     };
   }
 
-  const codAmount = Math.min(grandTotal * 0.8, 30000);
-  const prepaidAmount = Math.max(grandTotal - codAmount, grandTotal * 0.2);
+  const prepaidAmount = grandTotal * 0.2;
+  const codAmount = grandTotal - prepaidAmount;
 
   return {
     type: "partial_cod",
