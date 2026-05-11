@@ -41,7 +41,7 @@ import {
   updateCustomerAddress,
 } from "@/lib/api";
 import { useCart } from "@/hooks/useCart";
-import { pushAddShippingInfo } from "@/lib/gtm";
+import { pushAddShippingInfo, pushBeginCheckout } from "@/lib/gtm";
 import { MobileBottomSheet } from "@/components/common/MobileBottomSheet";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 
@@ -254,10 +254,77 @@ const SummarySkeleton = () => (
 export default function ShippingPage() {
   const router = useRouter();
   const isDesktop = useMediaQuery("(min-width: 1024px)");
-  const { items: cartItems, totalAmount, appliedCoupon } = useCart();
+  const { items: cartItems, totalAmount, appliedCoupon, nectorPoints } = useCart();
   const searchParams = useSearchParams();
   const [deliveryMethod, setDeliveryMethod] = useState(searchParams.get("method") || "ship");
   const summaryRef = useRef(null);
+  const hasFiredBeginCheckout = useRef(false);
+
+  useEffect(() => {
+    if (cartItems && cartItems.length > 0 && !hasFiredBeginCheckout.current) {
+      const getNumericId = (gid) => {
+        if (!gid) return 0;
+        if (typeof gid === 'number') return gid;
+        const match = String(gid).match(/\d+$/);
+        return match ? Number(match[0]) : 0;
+      };
+
+      const checkoutData = {
+        payment_type: "Pay Via UPI / COD",
+        send_to: "G-K6H0NZ4YJ8",
+        value: Number(totalAmount),
+        currency: "INR",
+        items: cartItems.map((item, idx) => {
+          const lowerTitle = (item.title || "").toLowerCase();
+          let category = item.type || item.productType || "";
+          if (!category) {
+            if (lowerTitle.includes("ring")) category = "Rings";
+            else if (lowerTitle.includes("earring") || lowerTitle.includes("bali")) category = "Earrings";
+            else if (lowerTitle.includes("pendant")) category = "Pendants";
+            else if (lowerTitle.includes("bracelet")) category = "Bracelets";
+            else if (item.variantId === GOLDCOIN_VARIANT_ID) category = "Gold Coin";
+            else if (item.variantId === INSURANCE_VARIANT_ID) category = "Insurance";
+          }
+          return {
+            item_id: getNumericId(item.productId || item.shopifyId || item.id),
+            shopify_product_id: item.sku || "",
+            variant_id: String(getNumericId(item.variantId)),
+            item_name: item.title,
+            item_variant: item.variantTitle || `${item.karat || ""} ${item.color || ""}`.trim(),
+            item_brand: "Lucira Jewelry",
+            item_category: "",
+            price: Number(item.price || 0),
+            quantity: item.quantity,
+            category: category,
+            index: idx
+          };
+        }),
+        coupon: (typeof appliedCoupon === 'object' ? appliedCoupon?.code : appliedCoupon) || "NA"
+      };
+
+      pushBeginCheckout(checkoutData);
+      hasFiredBeginCheckout.current = true;
+    }
+  }, [cartItems, totalAmount, appliedCoupon]);
+
+  const finalAmount = useMemo(() => {
+    const insuranceItem = (cartItems || []).find(item => item.variantId === INSURANCE_VARIANT_ID);
+    const insuranceValue = insuranceItem ? (insuranceItem.price * (insuranceItem.quantity || 1)) : 0;
+    const subtotalValue = (totalAmount || 0) - insuranceValue;
+
+    const couponDetails = typeof appliedCoupon === 'object' ? appliedCoupon : { code: appliedCoupon, value: 0, valueType: "FIXED_AMOUNT" };
+    let couponDiscountAmount = 0;
+    if (appliedCoupon) {
+      if (couponDetails.valueType === "FIXED_AMOUNT") {
+        couponDiscountAmount = couponDetails.value;
+      } else if (couponDetails.valueType === "PERCENTAGE") {
+        couponDiscountAmount = (subtotalValue * couponDetails.value) / 100;
+      }
+    }
+
+    const pointsDiscountAmount = nectorPoints?.fiat_value || 0;
+    return subtotalValue + insuranceValue - couponDiscountAmount - pointsDiscountAmount;
+  }, [cartItems, totalAmount, appliedCoupon, nectorPoints]);
 
   const [dbStores, setDbStores] = useState([]);
 
@@ -687,7 +754,8 @@ export default function ShippingPage() {
       }
     }
 
-    const grandTotalValue = subtotalValue + insuranceValue - couponDiscountAmount;
+    const pointsDiscountAmount = nectorPoints?.fiat_value || 0;
+    const grandTotalValue = subtotalValue + insuranceValue - couponDiscountAmount - pointsDiscountAmount;
 
     const shippingData = {
       value: grandTotalValue,
@@ -1108,7 +1176,7 @@ export default function ShippingPage() {
       <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-zinc-100 p-4 shadow-[0_-4px_15px_rgba(0,0,0,0.08)] z-60">
         <div className="flex items-center justify-between gap-6">
           <div className="flex flex-col">
-            <span className="text-lg font-bold text-zinc-900 leading-none">₹ {totalAmount.toLocaleString('en-IN')}</span>
+            <span className="text-lg font-bold text-zinc-900 leading-none">₹ {finalAmount.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
             <button 
               onClick={scrollToSummary}
               className="text-[11px] font-bold text-accent uppercase tracking-tight mt-1 text-left"
@@ -1116,20 +1184,14 @@ export default function ShippingPage() {
               View Summary
             </button>
           </div>
-          <Button 
-            disabled={isContinueDisabled}
-            onClick={() => {
-              if (isContinueDisabled) {
-                toast.error("Please select a valid shipping address");
-                return;
-              }
-              handleContinueToPayment();
-              router.push("/checkout/payment");
-            }}
-            className="grow bg-primary hover:bg-accent text-white font-bold h-12 uppercase tracking-widest rounded-lg text-sm"
-          >
-            CONTINUE TO PAYMENT
-          </Button>
+          <Link href="/checkout/payment" className={`grow ${isContinueDisabled ? "pointer-events-none opacity-50" : ""}`} onClick={handleContinueToPayment}>
+             <Button 
+              disabled={isContinueDisabled}
+              className="w-full bg-primary hover:bg-accent text-white font-bold h-12 uppercase tracking-widest rounded-lg text-sm"
+            >
+              Continue to payment
+            </Button>
+          </Link>
         </div>
       </div>
 

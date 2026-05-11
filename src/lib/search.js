@@ -106,12 +106,54 @@ export function mergeMongoFilters(...filters) {
   return { $and: normalized };
 }
 
-export async function resolveSearchMatch(productsCollection, baseFilter = {}, query = "") {
+export async function resolveSearchMatch(db, baseFilter = {}, query = "") {
+  const productsCollection = db.collection("products");
   const activeFilter = { status: "ACTIVE", isPublished: true };
   const combinedBaseFilter = { ...baseFilter, ...activeFilter };
   
   const { filter: intentFilter, normalizedQuery, keywords } = extractSearchIntent(query);
   const filters = [combinedBaseFilter, intentFilter];
+
+  // 0. Check for synonyms and matched collections
+  let matchedCollections = [];
+  const trimmedQuery = query.trim();
+
+  if (trimmedQuery.length >= 2) {
+    try {
+      const synonymsCollection = db.collection("search_synonyms");
+      const collectionsStore = db.collection("collections");
+      
+      const escapedQuery = escapeRegex(trimmedQuery);
+      const queryRegex = new RegExp(escapedQuery, "i");
+      
+      // Find synonym groups that match the query
+      const synonymGroups = await synonymsCollection.find({
+        $or: [
+          { title: queryRegex },
+          { synonyms: { $regex: escapedQuery, $options: "i" } }
+        ]
+      }).toArray();
+
+      const groupTitles = synonymGroups.map(g => g.title);
+      const handleFriendlyQuery = trimmedQuery.toLowerCase().replace(/\s+/g, "-");
+
+      // Find collections matching either the direct query or any of the synonym group titles
+      matchedCollections = await collectionsStore.find({
+        $or: [
+          { title: queryRegex },
+          { handle: handleFriendlyQuery },
+          { title: { $in: groupTitles } },
+          { handle: { $in: groupTitles.map(t => t.toLowerCase().replace(/\s+/g, "-")) } },
+          { "ruleSet.rules.condition": { $in: groupTitles } },
+          { "ruleSet.rules.condition": queryRegex },
+          { "metafields.custom.seo_keywords": { $in: groupTitles } },
+          { "metafields.custom.seo_keywords": queryRegex }
+        ]
+      }).limit(10).toArray();
+    } catch (err) {
+      console.error("Synonym lookup error:", err);
+    }
+  }
 
   if (!keywords.length) {
     return {
@@ -119,12 +161,11 @@ export async function resolveSearchMatch(productsCollection, baseFilter = {}, qu
       normalizedQuery,
       keywords,
       strategy: "base",
+      matchedCollections,
     };
   }
 
-  // 1. Check for exact match for title, handle or SKU first
-  // This ensures that if a user searches for a specific product by its full name or ID, they get it first
-  const trimmedQuery = query.trim();
+  // 1. Check for exact match for title, handle, SKU or TAG first
   const handleFriendlyQuery = normalizedQuery.replace(/\./g, "-").replace(/\s+/g, "-");
 
   const exactMatchFilter = {
@@ -135,7 +176,9 @@ export async function resolveSearchMatch(productsCollection, baseFilter = {}, qu
       { handle: normalizedQuery },
       { handle: handleFriendlyQuery },
       { "variants.sku": trimmedQuery },
-      { "variants.sku": trimmedQuery.toUpperCase() }
+      { "variants.sku": trimmedQuery.toUpperCase() },
+      { "variants.sku": { $regex: escapeRegex(trimmedQuery), $options: "i" } },
+      { tags: { $regex: `^${escapeRegex(trimmedQuery)}$`, $options: "i" } }
     ]
   };
 
@@ -145,14 +188,12 @@ export async function resolveSearchMatch(productsCollection, baseFilter = {}, qu
       filter: mergeMongoFilters(...filters, exactMatchFilter),
       normalizedQuery,
       keywords,
-      strategy: "base", // Don't use text score if we have exact matches
+      strategy: "base",
+      matchedCollections,
     };
   }
 
-  // 2. If no exact match, proceed with text search
-  // Use MongoDB $text search for relevance scoring
-  // If we have an intent filter (like price), we should prioritize the normalizedQuery
-  // because the original query contains "noise" like "under 30k"
+  // 2. If no exact match, proceed with text search (covers title, description, tags, type via $text index)
   const hasIntent = Object.keys(intentFilter).length > 0;
   const primaryPhrase = hasIntent ? normalizedQuery : trimmedQuery;
   
@@ -160,9 +201,6 @@ export async function resolveSearchMatch(productsCollection, baseFilter = {}, qu
   const searchString = phrases.map(p => `\"${p}\"`).join(" ") + " " + keywords.join(" ");
   
   const textFilter = { $text: { $search: searchString } };
-  
-  // Use text filter directly to avoid MongoDB $or restriction with $text
-  // $text index already covers title, type, tags, and description.
   const searchMatch = textFilter;
 
   const finalFilter = mergeMongoFilters(...filters, searchMatch);
@@ -176,5 +214,6 @@ export async function resolveSearchMatch(productsCollection, baseFilter = {}, qu
     normalizedQuery,
     keywords,
     strategy: "text",
+    matchedCollections,
   };
 }

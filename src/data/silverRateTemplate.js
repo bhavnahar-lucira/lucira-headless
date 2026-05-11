@@ -1,29 +1,155 @@
 export const SILVER_RATE_TEMPLATE = {
-  sections: {
-    main: {
-      type: "main-page",
-      disabled: true,
-      settings: {
-        padding_top: 28,
-        padding_bottom: 28,
+  "sections": {
+    "main": {
+      "type": "main-page",
+      "disabled": true,
+      "settings": {
+        "padding_top": 28,
+        "padding_bottom": 28
+      }
+    },
+    "silver_calculate_widget_Y9tR3F": {
+      "type": "silver-calculate-widget",
+      "name": "Silver Rate Calculate",
+      "settings": {
+        "background_image": "shopify://shop_images/baneer-gold.jpg",
+        "background_image_mobile": "shopify://shop_images/banner-gold-mobile.jpg",
+        "rate_today": "₹2,514",
+        "rate_avg": "₹2,51,410",
+        "rate_avg_label": "",
+        "button_label": "CALCULATE",
+        "investment_heading": "Silver Rate Today: Live Prices, Trends And Predictions",
+        "investment_description": "<p>Silver or <em>Chandi</em>, much like Gold, has been more than just a precious metal to Indians. It has been a part of our culture, traditions, festivities, and special occasions for centuries. It has held tremendous religious significance in the Indian heritage; from being offered in temples and gifted during wedding ceremonies, to donning infants with silver jewelry to keep the negative energies away. Its affordability, durability, and lasting beauty have made it a cultural favourite over decades, centuries, and generations. </p>",
+        "investment_quick_links": "<li><a href=\"#silver-price-breakdown\" style=\"text-decoration:none; color:black;\">Silver Price Breakdown by Weight </a></li>\n<li><a href=\"#latest-silver-trends\" style=\"text-decoration:none; color:black;\">Latest Silver trends</a></li>\n<li>\n<a href=\"#silver-trends-india\" style=\"text-decoration:none; color:black;\">Silver Trends in India</a> </li>"
+      }
+    },
+    "information_content_info_BWKLyd": {
+      "type": "information-content-info",
+      "blocks": {
+        "richtext_dtTJxA": {
+          "type": "richtext",
+          "name": "Silver Rate Today: Live Prices, Trends And Predictions",
+          "settings": {
+            "content": "<p>As Western Influences continue to grow, the urban dwellers are turning to silver for its affordability and lustrous aesthetic appeal. Silver fits perfectly in the culture-meets-style niche that has started growing popular in Indian urban hubs like Mumbai, Delhi, and Hyderabad. Indian designers are exploring more and more jewelry categories like <a href=\"https://www.lucirajewelry.com/collections/bracelets\" target=\"_blank\" title=\"Bracelets\">bracelets</a>, silver for men, bangles for women, and chains for both. For men, kadas and bracelets in silver are becoming a staple, whereas for women, dainty necklaces, <a href=\"https://www.lucirajewelry.com/collections/earrings\" target=\"_blank\" title=\"Earrings\">earrings</a>, and <a href=\"https://www.lucirajewelry.com/collections/rings\" target=\"_blank\" title=\"Rings\">rings</a> are gaining more prominence for daily use. </p><p>Much like Gold, Indians love silver for its investment value as well. However, whenever you’re purchasing silver, it is imperative to check the silver price that day to ensure you’re not purchasing it at a high cost. If today silver price is the highest it has ever been, it is advisable to wait until the price drops a little more to make your purchase. Since silver prices fluctuate on a daily basis, much like Gold, it is important to stay updated with the latest chandi rate today and chandi price today to make an informed and strategic purchase. </p><p>Another interesting fact, silver rates vary across the country. For example, a jewelry shop in Charminar looking for the silver price today Hyderabad is going to see a different rate than a jewelry shop in Zaveri Bazar or jewelry shop in Chembur searching for Mumbai silver rate on the same date. Similarly, the silver rate in Chennai is going to be different from the silver rate in Delhi. This is due to varied regional demand, different festive and cultural demands, and many more factors!</p><p>Silver’s dual nature as a profitable investment and as a fashionable accessory makes it a popular pick in the Indian market! A handcrafted silver bangle gifted during Raksha Bandhan, or Silver bangles for women gifted during a wedding, even a mens silver bangle, is more than just a style statement; it carries deep cultural significance as the metal is also regionally associated with prosperity. </p><p>In this blog, we’ll cover a wide array of financial topics like mcx silver price, 1 gram silver rate today, 1 kg silver price today, and even some trendy topics like rings designs in silver, latest necklace in silver, <a href=\"https://www.lucirajewelry.com/collections/stud-earrings\" target=\"_blank\" title=\"Studs\">studs</a> silver earrings, and a lot more! So without further ado, let’s dive right in!</p>"
+          }
+        }
       },
     },
-    silver_calculate_widget_Y9tR3F: {
-      type: "silver-calculate-widget",
-      name: "Silver Rate Calculate",
-      settings: {
-        background_image: "shopify://shop_images/baneer-gold.jpg",
-        background_image_mobile: "shopify://shop_images/banner-gold-mobile.jpg",
-        rate_today: "₹2,514",
-        rate_avg: "₹2,51,410",
-        rate_avg_label: "",
-        button_label: "CALCULATE",
-        investment_heading:
-          "Silver Rate Today: Live Prices, Trends And Predictions",
-        investment_description:
-          "<p>Silver or <em>Chandi</em>, much like Gold, has been more than just a precious metal to Indians. It has been a part of our culture, traditions, festivities, and special occasions for centuries. It has held tremendous religious significance in the Indian heritage; from being offered in temples and gifted during wedding ceremonies, to donning infants with silver jewelry to keep the negative energies away. Its affordability, durability, and lasting beauty have made it a cultural favourite over decades, centuries, and generations. </p>",
-        investment_quick_links:
-          '<li><a href="#silver-price-breakdown" style="text-decoration:none; color:black;">Silver Price Breakdown by Weight </a></li>\n<li><a href="#latest-silver-trends" style="text-decoration:none; color:black;">Latest Silver trends</a></li>\n<li>\n<a href="#silver-trends-india" style="text-decoration:none; color:black;">Silver Trends in India</a> </li>',
+    "information_content_info_nL3CXP": {
+      "type": "information-content-info",
+      "blocks": {
+        "heading_Ep8Qkw": {
+          "type": "heading",
+          "name": "Latest Silver Jewelry Trends in India",
+          "settings": {
+            "text": "Latest Silver Jewelry Trends in India",
+            "heading_level": "h2",
+            "heading_id": "latesttrends",
+            "alignment": "left"
+          }
+        },
+        "richtext_88Yicd": {
+          "type": "richtext",
+          "settings": {
+            "content": "<p>Traditional gold jewelry designs dominated Indian Markets, but with Western Influences, the modern urban shopper is exploring versatile, durable, and dainty, daily-wear designs. While Gold has most commonly dominated the discussions, silver has been gaining popularity among the younger generations seeking affordability without a compromise on aesthetic appeal. Because of this, the Indian silver market has boomed with a dazzling range of designs, each catering to a unique audience. Together, let’s dive into the latest and most popular trends in the current jewelry market. </p>"
+          }
+        },
+        "heading_khMXyN": {
+          "type": "heading",
+          "name": "Cultural And Contemporary Bracelets",
+          "settings": {
+            "text": "Cultural And Contemporary Bracelets",
+            "heading_level": "h3",
+            "heading_id": "cultural",
+            "alignment": "left"
+          }
+        },
+        "richtext_cWeyER": {
+          "type": "richtext",
+          "settings": {
+            "content": "<p>In silver, bracelets are the most popular category today. For men, silver bracelets have evolved beyond just an ornamental choice and have become a steady accessory staple. Younger professionals prefer a minimal look to match the rest of their corporate outfit while college students and younger learners prefer more bold, rugged, and stylish patterns for an aesthetic appeal. When talking about silver bracelets for men stylish picks usually cater to a younger audience trying to stand out. Designers are constantly on the hunt for new patterns and new style silver bracelet for men, constantly experimenting with oxidized looks, chunky chains, and matte finishes. Whether you prefer a minimalist or a bold appeal, there’s a stylish accessory waiting to bedazzle your wrist!</p><p>As other categories continue to evolve, even the stylish silver kada for men category has started adapting to the modern fashion choices and trends. While retaining its cultural roots, the category has started seeing more and more contemporary twists to appeal to newer and younger audiences looking for contemporary, unique designs. </p><p>Silver bracelets in the women’s category have evolved as well! Most trending silver bracelets feature a minimalist look perfect for the modern working woman but with statement pieces like silver diamond bracelets, it is safe to say that Indian women are spoiled for choice as well. Silver and diamond bracelets have started dominating the statement bracelets market. More and more modern shoppers are opting for silver diamond bracelets for women as gold prices continue to soar. If you’re also browsing the womens silver diamond bracelet category, you should definitely check out the tennis silver bracelet. These designs are really popular in the engagement and wedding segments, and pair effortlessly with lehengas and gowns. However, if you’re looking for something you can wear every day, you should check out stylish silver bracelets or explore silver trendy bracelets for ladies.</p>"
+          }
+        },
+        "heading_LMxcgH": {
+          "type": "heading",
+          "name": "Stylish And Traditional Silver Bangles",
+          "settings": {
+            "text": "Stylish And Traditional Silver Bangles",
+            "heading_level": "h3",
+            "heading_id": "stylish",
+            "alignment": "left"
+          }
+        },
+        "richtext_LUQpJr": {
+          "type": "richtext",
+          "settings": {
+            "content": "<p>Bangles have been a part of Indian Culture and Heritage for centuries. It has been a traditionally staple accessory for Indian women to flaunt. Yet, silver bangles are seeing an unexpected growth in demand and popularity. While traditional designs, like plain silver bangle and silver kada for women, are still popular due to their cultural and historic significance, younger buyers are looking for something else. With the western influence on the rise, youngsters are looking for contemporary takes on traditional concepts to stand out. For example, silver cuff bangles, sterling silver bangle bracelets, sterling silver bangles, and ladies silver bangles are a popular choice amongst these younger, modern shoppers. </p><p>Silver bangles are so cultural that their appeal extends even to the luxury category where the market has noticed a rising demand for pure silver bangles, real silver bangles, and antique silver bangles with a historic story to add more character to these accessories.</p>"
+          }
+        },
+        "heading_3zdkHN": {
+          "type": "heading",
+          "name": "Charming And Romantic Allure of Silver Rings",
+          "settings": {
+            "text": "Charming And Romantic Allure of Silver Rings",
+            "heading_level": "h3",
+            "heading_id": "charming",
+            "alignment": "left"
+          }
+        },
+        "richtext_7EU8RA": {
+          "type": "richtext",
+          "settings": {
+            "content": "<p>Rings are the most popular, and most commonly loved jewelry accessories; and in India, silver rings hold sentimental, financial, and cultural significance. With thousands of options of dainty daily-wear rings and iconic wedding and <a href=\"https://www.lucirajewelry.com/collections/engagement-rings\" target=\"_blank\" title=\"Engagement Rings\">engagement rings</a>, the modern shopper is truly spoiled for choice. Today, couples are exploring quirky and unique designs like gemstones rings silver and silver ring solitaire to stand out. </p><p>As the world begins to adopt the stackable rings trend, India is not far behind! Modern and urban shoppers are constantly experimenting with silver stacking rings, silver <a href=\"https://www.lucirajewelry.com/collections/stackable-wedding-rings\" target=\"_blank\" title=\"Stackable Wedding Rings\">stackable rings</a>, and silver stackable rings with gemstones. Fashionable buyers are constantly on the look out for unique and exclusive designs in the thin silver stacking rings, sterling silver stacking rings, or stackable sterling silver rings for women categories. Be experimental whenever you’re creating a ring stack - mix and match metals, use gemstones and diamonds, and use rings of varying thickness to create an aesthetically pleasing look. </p><p>Silver eternity rings are also growing in popularity in the romantic market with sterling silver <a href=\"https://www.lucirajewelry.com/collections/eternity-wedding-rings\" target=\"_blank\" title=\"Eternity Ring\">eternity ring</a>, silver diamond eternity ring, and silver eternity bands all experiencing a rise in demand due to gifting during the anniversary and wedding seasons. Romantic shoppers are also experimenting with silver ruby eternity ring, silver sapphire eternity ring, and silver and diamond eternity ring, enhancing the metal’s charm using gemstones while making for meaningful gifts to match the wearer’s personality!</p>"
+          }
+        },
+        "heading_KhKcmJ": {
+          "type": "heading",
+          "name": "Traditional And Contemporary Silver Necklaces in India",
+          "settings": {
+            "text": "Traditional And Contemporary Silver Necklaces in India",
+            "heading_level": "h3",
+            "heading_id": "traditional",
+            "alignment": "left"
+          }
+        },
+        "richtext_6zmyxb": {
+          "type": "richtext",
+          "settings": {
+            "content": "<p>Heavy Gold Necklaces have been a part of Indian heritage, culture, and bridal trousseau for centuries. However, with gold prices skyrocketing in recent times, silver has emerged as a popular alternative for gold. Modern shoppers are constantly on the lookout for new necklace silver designs. These <a href=\"https://www.lucirajewelry.com/collections/necklaces\" target=\"_blank\" title=\"Necklaces\">necklace</a> in silver are really versatile, pairing effortlessly with saris, kurtis and even western outfits. Chain necklace silver women have emerged as another popular option amongst contemporary shoppers. </p><p>Wedding markets are also bracing themselves for this drastic change in Indian fashion and mentality with designs like <a href=\"https://www.lucirajewelry.com/collections/tennis-necklaces\" target=\"_blank\" title=\"Tennis Necklace\">tennis necklace</a> silver, silver halo necklace, and sterling silver halo necklace becoming increasingly popular with the offline jewelers. Corporate employees are looking for minimalist pendant in silver, pendant silver necklace for women, or gemstone pendant silver which can be styled for their formal outfits daily. </p><p>Indian men are also catching up to this shift with an increase in demand for categories like pendant silver chain for men, combining masculinity and elegance. </p>"
+          }
+        },
+        "heading_NfGhY9": {
+          "type": "heading",
+          "name": "Trends in Silver Earrings",
+          "settings": {
+            "text": "Trends in Silver Earrings",
+            "heading_level": "h3",
+            "heading_id": "earrings",
+            "alignment": "left"
+          }
+        },
+        "richtext_bfDKdV": {
+          "type": "richtext",
+          "settings": {
+            "content": "<p>Earrings have evolved from being just a woman’s accessory. Today, they’re the most versatile accessory and perhaps, one of the most popular jewelry accessories for men with growing demand in categories like studs silver earrings and earrings men silver. </p><p>Luxury markets are filled with luxurious silver studs earrings for women and luxury silver earrings for women. These earrings make for really popular statement pieces and are often worn to weddings, engagement, and other important events. Shoppers with a more contemporary taste can be seen opting for unique and fun designs like dangle earrings silver, huggies earrings silver, and quirky designs like heart shaped earrings silver. Famous for its lustrous finish, shoppers have even started searching for phrases like earrings silver colour just to get their hands on designs with a similar aesthetic appeal!</p>"
+          }
+        },
+        "heading_gtgaFg": {
+          "type": "heading",
+          "name": "Silver Pendants for Dailywear ",
+          "settings": {
+            "text": "Silver Pendants for Dailywear",
+            "heading_level": "h3",
+            "heading_id": "dailywear",
+            "alignment": "left"
+          }
+        },
+        "richtext_XEQhee": {
+          "type": "richtext",
+          "settings": {
+            "content": "<p>Indians love pendants, as is obvious by the rapidly growing market brimming with designs like pendant silver, and pendant silver necklace for women. Silver necklaces for women and pendant in silver make for excellent birthday, anniversary or Valentine’s Day gifts. Men can make a similar minimalist and fashionable statement with a pendant silver chain for men. Corporate employees are looking for dainty silver halo pendant, silver halo pendant necklaces, and dainty silver solitaire necklaces as they prefer a subtle sparkle that does not overpower their corporate look. <br/><br/></p>"
+          }
+        }
       },
     },
     information_content_info_BWKLyd: {

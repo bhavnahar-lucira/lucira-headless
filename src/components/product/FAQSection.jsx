@@ -110,7 +110,7 @@ export default function QuestionsAnswered() {
 
         {/* RIGHT IMAGE */}
 
-        <div className="relative w-full min-h-132 rounded-lg overflow-hidden bg-gray-200">
+        <div className="relative w-full min-h-132 hidden lg:block rounded-lg overflow-hidden bg-gray-200">
 
           <Image
             src="/images/faq.jpg"

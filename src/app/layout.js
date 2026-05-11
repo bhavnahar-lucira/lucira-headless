@@ -25,7 +25,10 @@ const abhaya = Abhaya_Libre({
   display: "swap",
 });
 
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://www.lucirajewelry.com";
+
 export const metadata = {
+  metadataBase: new URL(baseUrl),
   title: "India's Best Lab Grown Diamond Jewellery Brand - Lucira Jewelry",
   description: "Shop premium diamond jewellery online in India at Lucira Jewelry. Discover elegant lab grown diamond designs, certified quality, modern craftsmanship, and timeless styles crafted for every occasion. Shop now.",
   icons: {

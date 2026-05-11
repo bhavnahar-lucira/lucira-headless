@@ -62,7 +62,7 @@ export function FindLuciraStore({
             <Button 
               onClick={handlePincodeCheck}
               disabled={checkingPincode}
-              className="h-10 sm:h-12 px-4 sm:px-10 rounded-l-none bg-black hover:bg-black/90 text-white text-xs sm:text-sm font-bold tracking-widest shrink-0"
+              className="h-10 sm:h-12 px-4 sm:px-10 rounded-l-none bg-tertiary hover:bg-accent/90 text-white text-xs sm:text-sm font-bold tracking-widest shrink-0"
             >
               {checkingPincode ? <Loader2 className="animate-spin" size={18} /> : "CHECK"}
             </Button>

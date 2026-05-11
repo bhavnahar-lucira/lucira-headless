@@ -144,7 +144,7 @@ export function ProductCustomizerMobile({
                       <div className="space-y-4 pb-4">
                         <div className="flex justify-between items-center">
                           <h4 className="text-sm font-bold uppercase tracking-wider">
-                            Select Ring Size:{" "}
+                            Select {product.type.replace(/s$/, "")} Size:{" "}
                             <span className="text-gray-600 normal-case font-medium ml-1">
                               {selectedSize} IND
                             </span>

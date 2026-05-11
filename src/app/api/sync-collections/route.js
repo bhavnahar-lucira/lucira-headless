@@ -26,6 +26,13 @@ export async function POST() {
                   url
                   altText
                 }
+                ruleSet {
+                  rules {
+                    column
+                    condition
+                    relation
+                  }
+                }
                 metafields(first: 50) {
                   edges {
                     node {
@@ -101,6 +108,7 @@ export async function POST() {
           description: node.description,
           descriptionHtml: node.descriptionHtml,
           image: node.image,
+          ruleSet: node.ruleSet,
           metafields,
           bestsellerProducts,
           updatedAt: new Date(),

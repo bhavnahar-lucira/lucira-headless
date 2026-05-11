@@ -476,46 +476,61 @@ export default function ProductGallery({ media = [], title = "", activeColor = "
             <div className="flex-1 relative flex items-center justify-center overflow-hidden px-4 md:px-24">
               <button 
                 onClick={prevSlide}
-                className="absolute left-4 md:left-8 z-[2001] bg-black/20 hover:bg-black/40 border border-white/10 p-4 rounded-full text-white transition-all backdrop-blur-sm"
+                className="absolute left-4 md:left-8 z-[2001] bg-black/20 hover:bg-black/40 border border-white/10 p-3 rounded-full text-white transition-all backdrop-blur-sm"
               >
-                <ChevronLeft size={36} strokeWidth={1.5} />
+                <ChevronLeft size={24} strokeWidth={2.5} />
               </button>
               
               <div className="w-full h-full flex items-center justify-center">
                 <motion.div
                   key={currentIndex}
                   initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ 
-                    opacity: 1, 
-                    scale: zoomLevel,
-                    cursor: zoomLevel > 1 ? "grab" : "zoom-in",
-                  }}
-                  whileDrag={{ cursor: "grabbing" }}
-                  drag={zoomLevel > 1}
-                  dragConstraints={{ left: -300, right: 300, top: -300, bottom: 300 }}
-                  dragElastic={0.1}
-                  onClick={(e) => {
-                    if (zoomLevel === 1) setZoomLevel(2);
-                    else {
-                      setZoomLevel(1);
-                      // Reset position on zoom out
+                  animate={{ opacity: 1, scale: zoomLevel, cursor: zoomLevel > 1 ? "grab" : "grab", }}
+                  transition={{ type: "spring", damping: 30, stiffness: 300, }}
+                  drag
+                  dragDirectionLock
+                  dragConstraints={
+                    zoomLevel > 1
+                      ? { left: -300, right: 300, top: -300, bottom: 300, }
+                      : { left: 0, right: 0, }
+                  }
+                  dragElastic={zoomLevel > 1 ? 0.08 : 0.18}
+                  whileDrag={{ cursor: "grabbing", }}
+                  onDragEnd={(e, info) => {
+                    if (zoomLevel > 1) return;
+                    const offsetX = info.offset.x;
+                    const velocityX = info.velocity.x;
+                    const swipe = Math.abs(offsetX) * velocityX;
+                    if (swipe < -8000) {
+                      nextSlide();
+                    }
+                    else if (swipe > 8000) {
+                      prevSlide();
                     }
                   }}
-                  transition={{ type: "spring", damping: 30, stiffness: 300 }}
-                  className="relative w-full h-full flex items-center justify-center max-w-[85vh] mx-auto"
+                  onClick={() => {
+                    if (zoomLevel === 1) {
+                      setZoomLevel(2);
+                    } else {
+                      setZoomLevel(1);
+                    }
+                  }}
+                  className="relative w-full h-full flex items-center justify-center max-w-[85vh] mx-auto select-none touch-pan-y"
                 >
-                  {sortedMedia[currentIndex].type === "VIDEO" || sortedMedia[currentIndex].type === "EXTERNAL_VIDEO" ? (
-                    <video 
+                  {sortedMedia[currentIndex].type === "VIDEO" ||
+                  sortedMedia[currentIndex].type === "EXTERNAL_VIDEO" ? (
+                    <video
                       src={sortedMedia[currentIndex].url || null}
                       controls
                       autoPlay
                       className="max-w-full max-h-full object-contain shadow-2xl"
                     />
                   ) : (
-                    <LazyImage 
+                    <LazyImage
                       src={sortedMedia[currentIndex].url || "/images/product/1.jpg"}
                       alt={sortedMedia[currentIndex].alt || title}
                       fill
+                      draggable={false}
                       className="object-contain shadow-2xl pointer-events-none"
                     />
                   )}
@@ -524,9 +539,9 @@ export default function ProductGallery({ media = [], title = "", activeColor = "
 
               <button 
                 onClick={nextSlide}
-                className="absolute right-4 md:right-8 z-[2001] bg-black/20 hover:bg-black/40 border border-white/10 p-4 rounded-full text-white transition-all backdrop-blur-sm"
+                className="absolute right-4 md:right-8 z-[2001] bg-black/20 hover:bg-black/40 border border-white/10 p-3 rounded-full text-white transition-all backdrop-blur-sm"
               >
-                <ChevronRight size={36} strokeWidth={1.5} />
+                <ChevronRight size={24} strokeWidth={2.5} />
               </button>
             </div>
           </motion.div>
