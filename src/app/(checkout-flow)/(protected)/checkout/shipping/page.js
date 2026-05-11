@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import {
   ChevronLeft,
@@ -40,8 +41,10 @@ import {
   selectDefaultCustomerAddress,
   updateCustomerAddress,
 } from "@/lib/api";
+import { selectUser } from "@/redux/features/user/userSlice";
 import { useCart } from "@/hooks/useCart";
 import { pushAddShippingInfo, pushBeginCheckout } from "@/lib/gtm";
+import { sendCheckoutCrmEvent } from "@/lib/checkout-crm";
 import { MobileBottomSheet } from "@/components/common/MobileBottomSheet";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 
@@ -254,14 +257,35 @@ const SummarySkeleton = () => (
 export default function ShippingPage() {
   const router = useRouter();
   const isDesktop = useMediaQuery("(min-width: 1024px)");
+  const user = useSelector(selectUser);
   const { items: cartItems, totalAmount, appliedCoupon, nectorPoints } = useCart();
   const searchParams = useSearchParams();
   const [deliveryMethod, setDeliveryMethod] = useState(searchParams.get("method") || "ship");
   const summaryRef = useRef(null);
   const hasFiredBeginCheckout = useRef(false);
 
+  const [addresses, setAddresses] = useState([]);
+  const [customer, setCustomer] = useState(null);
+  const [selectedAddressId, setSelectedAddressId] = useState("");
+  const [dbStores, setDbStores] = useState([]);
+  const [selectedStoreId, setSelectedStoreId] = useState("");
+  const [showStoreDialog, setShowStoreDialog] = useState(false);
+  const [storeSearchQuery, setStoreSearchQuery] = useState("");
+  const [searchCoords, setSearchCoords] = useState(null);
+  const [tempSelectedStoreId, setTempSelectedStoreId] = useState("");
+  const [loadingAddresses, setLoadingAddresses] = useState(true);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogMode, setDialogMode] = useState("create");
+  const [dialogSaving, setDialogSaving] = useState(false);
+  const [inlineSaving, setInlineSaving] = useState(false);
+  const [addressListOpen, setAddressListOpen] = useState(false);
+  const [addressForm, setAddressForm] = useState(emptyAddressForm);
+  const [makeDefault, setMakeDefault] = useState(true);
+  const [editingAddressId, setEditingAddressId] = useState("");
+
   useEffect(() => {
-    if (cartItems && cartItems.length > 0 && !hasFiredBeginCheckout.current) {
+    const currentCustomer = customer || user;
+    if (cartItems && cartItems.length > 0 && currentCustomer?.email && !hasFiredBeginCheckout.current) {
       const getNumericId = (gid) => {
         if (!gid) return 0;
         if (typeof gid === 'number') return gid;
@@ -303,9 +327,20 @@ export default function ShippingPage() {
       };
 
       pushBeginCheckout(checkoutData);
+
+      // Trigger CRM Webhook for Begin Checkout
+      sendCheckoutCrmEvent("begin_checkout", {
+        email: currentCustomer?.email || "",
+        mobile: currentCustomer?.phone || currentCustomer?.mobile || "",
+        firstName: currentCustomer?.firstName || currentCustomer?.name?.split(' ')[0] || "",
+        lastName: currentCustomer?.lastName || currentCustomer?.name?.split(' ')[1] || "",
+        totalCartValue: Number(totalAmount),
+        cartItems: cartItems
+      });
+
       hasFiredBeginCheckout.current = true;
     }
-  }, [cartItems, totalAmount, appliedCoupon]);
+  }, [cartItems, totalAmount, appliedCoupon, customer, user]);
 
   const finalAmount = useMemo(() => {
     const insuranceItem = (cartItems || []).find(item => item.variantId === INSURANCE_VARIANT_ID);
@@ -325,8 +360,6 @@ export default function ShippingPage() {
     const pointsDiscountAmount = nectorPoints?.fiat_value || 0;
     return subtotalValue + insuranceValue - couponDiscountAmount - pointsDiscountAmount;
   }, [cartItems, totalAmount, appliedCoupon, nectorPoints]);
-
-  const [dbStores, setDbStores] = useState([]);
 
   useEffect(() => {
     const fetchStores = async () => {
@@ -360,31 +393,6 @@ export default function ShippingPage() {
       summaryRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   };
-
-  useEffect(() => {
-    const method = searchParams.get("method");
-    if (method && (method === "ship" || method === "pickup")) {
-      setDeliveryMethod(method);
-    }
-  }, [searchParams]);
-
-  const [addresses, setAddresses] = useState([]);
-  const [customer, setCustomer] = useState(null);
-  const [selectedAddressId, setSelectedAddressId] = useState("");
-  const [selectedStoreId, setSelectedStoreId] = useState("");
-  const [showStoreDialog, setShowStoreDialog] = useState(false);
-  const [storeSearchQuery, setStoreSearchQuery] = useState("");
-  const [searchCoords, setSearchCoords] = useState(null);
-  const [tempSelectedStoreId, setTempSelectedStoreId] = useState("");
-  const [loadingAddresses, setLoadingAddresses] = useState(true);
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [dialogMode, setDialogMode] = useState("create");
-  const [dialogSaving, setDialogSaving] = useState(false);
-  const [inlineSaving, setInlineSaving] = useState(false);
-  const [addressListOpen, setAddressListOpen] = useState(false);
-  const [addressForm, setAddressForm] = useState(emptyAddressForm);
-  const [makeDefault, setMakeDefault] = useState(true);
-  const [editingAddressId, setEditingAddressId] = useState("");
 
   const hasSavedAddresses = addresses.length > 0;
   const orderedAddresses = useMemo(() => {

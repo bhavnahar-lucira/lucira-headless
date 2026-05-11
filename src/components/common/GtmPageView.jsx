@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useSelector } from "react-redux";
 import { pushCustomerData, pushMarketingData, pushPageView } from "@/lib/gtm";
+import { saveUtmsFromUrl } from "@/lib/checkout-crm";
 
 // Helper to determine the page type following Shopify conventions
 const getPageType = (pathname) => {
@@ -30,7 +31,10 @@ export default function GtmPageView() {
     const pageType = getPageType(pathname);
     const pageUrl = typeof window !== 'undefined' ? window.location.href : "";
 
-    // 2. Push the specific pageView event as requested
+    // 2. Save UTMs to localStorage for later use in checkout
+    saveUtmsFromUrl(searchParams);
+
+    // 3. Push the specific pageView event as requested
     pushPageView({
       pageType: pageType,
       pageUrl: pageUrl,
