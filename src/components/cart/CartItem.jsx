@@ -420,6 +420,10 @@ export default function CartItem({ item, onAuthRequired }) {
               <p className="text-[10px] text-zinc-400 font-medium uppercase tracking-tight">
                 {currentVariant?.sku || item.sku || "N/A"}
               </p>
+              
+              <p className="text-[11px] text-zinc-500 font-medium uppercase tracking-tight">
+                Metal: <span className="text-zinc-900">{item.karat} {item.color}</span>
+              </p>
 
               {/* Selectors */}
               <div className="flex items-center gap-3 pt-1">

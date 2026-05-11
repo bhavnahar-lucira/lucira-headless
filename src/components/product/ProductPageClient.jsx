@@ -774,8 +774,10 @@ useEffect(() => {
 
       const variantOptions = (product.variants || [])
         .filter((variant) => {
-          if (!variant?.size) return false;
-          return variant.color === `${activeKarat} ${activeColor}`;
+          if (!variant?.size || !variant?.color) return false;
+          const vColor = String(variant.color).toLowerCase().trim();
+          const targetColor = `${activeKarat} ${activeColor}`.toLowerCase().trim();
+          return vColor === targetColor;
         })
         .map((variant) => ({
           variantId: variant.id,
@@ -1126,8 +1128,27 @@ useEffect(() => {
     setActiveColor(metal);
     setActiveKarat(karat);
 
-    const variant = findMatchingVariant(metal, karat, selectedSize);
-    if (variant) setActiveVariant(variant);
+    let variant = findMatchingVariant(metal, karat, selectedSize);
+    
+    // If exact match with current size isn't found, pick the first available variant for this color
+    if (!variant) {
+      variant = product.variants?.find(v => {
+        const vColor = String(v.color || "").toLowerCase().trim();
+        const targetColor = `${karat} ${metal}`.toLowerCase().trim();
+        return vColor === targetColor && v.inStock;
+      }) || product.variants?.find(v => {
+        const vColor = String(v.color || "").toLowerCase().trim();
+        const targetColor = `${karat} ${metal}`.toLowerCase().trim();
+        return vColor === targetColor;
+      });
+    }
+
+    if (variant) {
+      setActiveVariant(variant);
+      if (variant.size && variant.size !== selectedSize) {
+        setSelectedSize(variant.size);
+      }
+    }
   };
 
   const handleSizeSelection = (size) => {

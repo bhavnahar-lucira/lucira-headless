@@ -32,8 +32,9 @@ export function ProductCustomizerMobile({
 
   const combinations = [];
   product.variants?.forEach((v) => {
-    const parts = v.color.split(" ");
-    if (parts.length >= 3) {
+    if (!v.color) return;
+    const parts = String(v.color).trim().split(" ");
+    if (parts.length >= 2) {
       const karat = parts[0];
       const metal = parts.slice(1).join(" ");
       if (!combinations.find((c) => c.karat === karat && c.metal === metal)) {
