@@ -9,34 +9,29 @@ export default function QuestionsAnswered() {
 
   const faqs = [
     {
-      question: "What is a Lab Grown Diamond?",
+      question: "Are Lucira diamonds certified and graded?",
       answer:
-        "Lab grown diamonds are real diamonds created using advanced technology, offering the same brilliance and durability as natural diamonds.",
+        "Yes. Every Lucira diamond is certified and graded for cut, clarity, colour, and quality. Each diamond comes with an internationally recognised certificate from IGI or SGL, ensuring complete authenticity and transparency.",
     },
     {
-      question: "What if I order the wrong ring size?",
+      question: "Do you offer a lifetime exchange policy and how much value will I receive?",
       answer:
-        "If the ring size is incorrect, we offer complimentary resizing within fifteen days of delivery for your convenience.",
+        "Yes. You can exchange your Lucira jewellery anytime and receive 100% of the metal (gold or platinum) value and 100% of the diamond value, calculated at current market rates.",
     },
     {
-      question: "Do you offer a free ring sizer?",
+      question: "Do you offer a buyback option and how much value will I receive?",
       answer:
-        "Yes, we provide a complimentary ring sizer so you can accurately measure your finger size at home.",
+        "Yes. Lucira offers a fair and transparent buyback policy where you receive 90% of the metal (gold or platinum) value and 90% of the diamond value, calculated at current market rates.",
     },
     {
-      question: "Can I get my engagement ring engraved for free?",
+      question: "Will a lab-grown diamond test as real?",
       answer:
-        "Yes, complimentary engraving is available on selected designs, allowing you to personalize your jewellery with a special message.",
+        "Yes. Lab-grown diamonds pass standard diamond testing methods just like natural diamonds.",
     },
     {
-      question: "What is your lifetime buyback policy?",
+      question: "Are lab-grown diamonds suitable for everyday wear?",
       answer:
-        "Lucira offers lifetime exchange and buyback options, ensuring long-term value and flexibility for your jewellery purchase.",
-    },
-    {
-      question: "What is made-to-order and how long does it take to deliver?",
-      answer:
-        "Made-to-order jewellery is crafted specially for you and typically ships within ten to fourteen days after confirmation.",
+        "Yes. They are as hard and durable as natural diamonds, making them perfect for daily wear.",
     },
   ];
 
@@ -92,7 +87,7 @@ export default function QuestionsAnswered() {
                         transition={{ duration: 0.25 }}
                         className="overflow-hidden"
                       >
-                        <p className="text-sm leading-relaxed mt-4 max-w-130">
+                        <p className="text-sm leading-relaxed mt-4">
                           {faq.answer}
                         </p>
                       </motion.div>
