@@ -516,7 +516,7 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle,
 
             {/* Product Labels (with Seamless Vertical Slide) */}
             {displayLabels.length > 0 && (
-              <div className="absolute top-0 lg:top-3 left-0 z-10 w-24 lg:w-28 h-6 lg:h-7 overflow-hidden bg-[#F1E4D1]">
+              <div className="absolute top-0 lg:top-3 left-0 z-10 w-28 lg:w-28 h-6 lg:h-7 overflow-hidden bg-[#F1E4D1]">
                 <AnimatePresence initial={false}>
                   <motion.div
                     key={displayLabels[currentLabelIndex]}
@@ -524,7 +524,7 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle,
                     animate={{ y: 0 }}
                     exit={{ y: -28 }}
                     transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
-                    className="absolute inset-0 text-black text-xs font-bold px-1 lg:px-2 font-figtree uppercase tracking-wider flex items-center justify-center whitespace-nowrap"
+                    className="absolute inset-0 text-black text-[10px] lg:text-xs font-bold px-2 lg:px-2 font-figtree uppercase tracking-wider flex items-center justify-center whitespace-nowrap"
                   >
                     {displayLabels[currentLabelIndex]}
                   </motion.div>
