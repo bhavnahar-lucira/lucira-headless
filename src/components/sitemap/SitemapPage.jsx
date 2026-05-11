@@ -19,7 +19,7 @@ const MANUAL_SITEMAP_DATA = [
           { label: "Eternity Rings", href: "/collections/eternity-rings" },
           { label: "Stackable Rings", href: "/collections/stackable-rings" },
           { label: "Casual Rings", href: "/collections/casual-rings" },
-          { label: "Men's Ring", href: "/collections/mens-ringss" },
+          { label: "Men's Ring", href: "/collections/mens-rings" },
         ],
       },
       {
