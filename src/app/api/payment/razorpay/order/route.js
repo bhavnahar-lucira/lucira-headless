@@ -8,6 +8,40 @@ function toSubunits(amount) {
   return Math.round(numericAmount * 100);
 }
 
+function buildPaymentMethod(body = {}, draftTotal = 0) {
+  const method = body?.paymentMethod || {};
+  const type = method?.type === "partial_cod" ? "partial_cod" : "razorpay";
+  const grandTotal = Number(draftTotal || 0);
+
+  if (type !== "partial_cod") {
+    return {
+      type: "razorpay",
+      prepaidAmount: grandTotal,
+      codAmount: 0,
+      grandTotal,
+    };
+  }
+
+  if (grandTotal <= 0 || grandTotal >= 50000) {
+    return {
+      type: "razorpay",
+      prepaidAmount: grandTotal,
+      codAmount: 0,
+      grandTotal,
+    };
+  }
+
+  const prepaidAmount = grandTotal * 0.2;
+  const codAmount = grandTotal - prepaidAmount;
+
+  return {
+    type: "partial_cod",
+    prepaidAmount: Math.round(prepaidAmount),
+    codAmount: Math.round(codAmount),
+    grandTotal,
+  };
+}
+
 function normalizeVariantId(variantId = "") {
   const value = String(variantId || "").trim();
   if (!value) return "";
@@ -151,6 +185,10 @@ export async function POST(req) {
     // STEP 1: Create Shopify Draft Order
     const customAttributes = [];
     const tags = ["Razorpay"];
+    const requestedPaymentMethod = body?.paymentMethod?.type === "partial_cod" ? "partial_cod" : "razorpay";
+    if (requestedPaymentMethod === "partial_cod") {
+      tags.push("Partial COD");
+    }
     if (nectorPoints?.coin_value) {
       customAttributes.push({ key: "NECTOR_USED_AMOUNT", value: String(nectorPoints.coin_value) });
       customAttributes.push({ key: "nector_points_used", value: String(nectorPoints.coin_value) });
@@ -198,8 +236,13 @@ export async function POST(req) {
       return NextResponse.json({ error: userErrors[0].message }, { status: 400 });
     }
 
-    // STEP 2: Create Razorpay Order using Draft Order Total
-    const amountInSubunits = toSubunits(draftOrder.totalPrice);
+    const paymentMethod = buildPaymentMethod(body, draftOrder.totalPrice);
+    if (requestedPaymentMethod === "partial_cod" && paymentMethod.type !== "partial_cod") {
+      return NextResponse.json({ error: "Partial COD is available only below ₹50,000 with COD up to ₹30,000" }, { status: 400 });
+    }
+
+    // STEP 2: Create Razorpay Order using Draft Order Total, or prepaid amount for Partial COD.
+    const amountInSubunits = toSubunits(paymentMethod.prepaidAmount);
     const razorpayResponse = await fetch("https://api.razorpay.com/v1/orders", {
       method: "POST",
       headers: {
@@ -224,6 +267,7 @@ export async function POST(req) {
       customer: body?.customer,
       shippingAddress: body?.shippingAddress,
       billingAddress: body?.billingAddress,
+      paymentMethod,
     });
   } catch (error) {
     console.error("DRAFT ORDER FLOW ERROR:", error);
