@@ -877,7 +877,7 @@ img.marquee-img {
   .Toastify__toast-container--bottom-center {
     left: 50% !important;
     transform: translateX(-50%) !important;
-    bottom: 24px !important;
+    bottom: 85px !important;
     width: auto !important;
   }
 }
@@ -890,8 +890,3 @@ img.marquee-img {
   }
 }
 
-@media (max-width: 1024px) {
-  .Toastify__toast {
-    margin-bottom: calc(var(--spacing) * 10.5) !important;
-  }
-}
