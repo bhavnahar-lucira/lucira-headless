@@ -10,7 +10,6 @@ import PointsResetHandler from "@/components/common/PointsResetHandler";
 import { GlobalAuthModal } from "@/components/auth/GlobalAuthModal";
 import Script from "next/script";
 import GtmPageView from "@/components/common/GtmPageView";
-import WebEngageRegistration from "@/components/common/WebEngageRegistration";
 
 const figtree = Figtree({
   subsets: ["latin"],
@@ -40,8 +39,8 @@ export const metadata = {
 };
 
 export default function RootLayout({ children }) {
-  const isProd = process.env.NODE_ENV === "production";
-  //const isProd = true;
+  //const isProd = process.env.NODE_ENV === "production";
+  const isProd = true;
   return (
     <html lang="en">
       <head>
@@ -77,7 +76,6 @@ export default function RootLayout({ children }) {
             )}
             <PointsResetHandler />
             <ZohoSalesIQ />
-            <WebEngageRegistration />
             {children}
             <GlobalAuthModal />
             <BackToTop />
