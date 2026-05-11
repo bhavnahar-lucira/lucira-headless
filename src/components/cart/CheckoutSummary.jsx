@@ -186,7 +186,12 @@ export default function CheckoutSummary({
                     </div>
                     <div className="flex-grow space-y-1">
                       <h3 className="text-sm font-medium text-zinc-800 leading-tight transition-colors">{item.title}</h3>
-                      <p className="text-xs text-zinc-500">Quantity:: {item.quantity}</p>
+                      <div className="flex flex-col gap-0.5">
+                        <p className="text-xs text-zinc-500 font-medium uppercase tracking-tight">
+                          Metal: <span className="text-zinc-800">{item.karat} {item.color}</span>
+                        </p>
+                        <p className="text-xs text-zinc-500">Quantity: {item.quantity}</p>
+                      </div>
                       <div className="flex items-center gap-2 pt-1">
                         <span className="text-sm font-bold text-zinc-900">₹{(item.price || 0).toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
                         {item.comparePrice > item.price && (
