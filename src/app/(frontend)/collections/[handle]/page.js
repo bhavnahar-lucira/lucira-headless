@@ -1,14 +1,23 @@
 import { shopifyStorefrontFetch } from "@/lib/shopify";
 import CollectionPageClient from "./CollectionPageClient";
+import { getCollectionSchema, getBreadcrumbSchema } from "@/lib/seo";
 
-async function getCollectionMetadata(handle) {
+async function getCollectionData(handle) {
   const query = `
-    query CollectionSEO($handle: String!) {
+    query CollectionSchema($handle: String!) {
       collectionByHandle(handle: $handle) {
         title
+        handle
         description
         seo { title description }
         image { url altText }
+        products(first: 24) {
+          nodes {
+            title
+            handle
+            description
+          }
+        }
       }
     }
   `;
@@ -26,7 +35,7 @@ export async function generateMetadata({ params }) {
     };
   }
 
-  const collection = await getCollectionMetadata(handle);
+  const collection = await getCollectionData(handle);
   if (!collection) return {};
 
   return {
@@ -44,5 +53,34 @@ export async function generateMetadata({ params }) {
 }
 
 export default async function Page({ params }) {
-  return <CollectionPageClient params={params} />;
+  const { handle } = await params;
+  const collection = await getCollectionData(handle);
+
+  if (!collection && handle !== "all") {
+    return <CollectionPageClient params={params} />;
+  }
+
+  const collectionSchema = collection ? getCollectionSchema(collection, collection.products?.nodes || []) : [];
+  const breadcrumbs = [
+    { name: "Home", url: "/" },
+    { name: collection?.title || "All Products", url: `/collections/${handle}` }
+  ];
+  const breadcrumbLd = getBreadcrumbSchema(breadcrumbs);
+
+  return (
+    <>
+      {collectionSchema.map((schema, index) => (
+        <script
+          key={index}
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+        />
+      ))}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
+      />
+      <CollectionPageClient params={params} />
+    </>
+  );
 }

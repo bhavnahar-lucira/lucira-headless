@@ -82,7 +82,7 @@ export default function Footer() {
                     <li><Link href="/collections/bracelets">Bracelets</Link></li>
                     <li><Link href="/collections/necklaces">Necklaces</Link></li>
                     <li><Link href="/collections/nosepins">Nosepins</Link></li>
-                    <li><Link href="/collections/mens-ring">Men's Rings</Link></li>
+                    <li><Link href="/collections/mens-rings">Men's Rings</Link></li>
                     <li><Link href="/collections/mens-stud">Men's Studs</Link></li>
                     <li><Link href="/collections/mens-bracelets">Men's Bracelets</Link></li>
                     <li><Link href="/collections/hexa">Collections</Link></li>
@@ -244,7 +244,7 @@ export default function Footer() {
                 <li><Link href="/collections/bracelets">Bracelets</Link></li>
                 <li><Link href="/collections/necklaces">Necklaces</Link></li>
                 <li><Link href="/collections/nosepins">Nosepins</Link></li>
-                <li><Link href="/collections/mens-ring">Men's Rings</Link></li>
+                <li><Link href="/collections/mens-rings">Men's Rings</Link></li>
                 <li><Link href="/collections/mens-stud">Men's Studs</Link></li>
                 <li><Link href="/collections/mens-bracelets">Men's Bracelets</Link></li>
                 <li><Link href="/collections/hexa">Collections</Link></li>

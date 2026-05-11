@@ -591,7 +591,7 @@ function ReviewCard({ review, onClick }) {
   return (
     <div
       onClick={onClick}
-      className="bg-white p-4 sm:p-6 md:p-8 lg:p-10 rounded-xl md:rounded-2xl flex flex-col gap-4 md:gap-6 border border-gray-50 shadow-[0_4px_30px_-10px_rgba(0,0,0,0.04)] hover:shadow-md transition-all group cursor-pointer"
+      className="bg-white p-4 sm:p-6 md:p-8 lg:p-6 rounded-xl md:rounded-2xl flex flex-col gap-4 md:gap-6 border border-gray-50 shadow-[0_4px_30px_-10px_rgba(0,0,0,0.04)] hover:shadow-md transition-all group cursor-pointer"
     >
       <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-3">
         <div className="flex items-start sm:items-center gap-3 sm:gap-4 min-w-0 flex-1">

@@ -17,7 +17,7 @@ const CATEGORIES = [
   { name: "Necklaces", image: "/images/range/Necklaces.jpg", href: "/collections/necklaces" },
   { name: "Nosepins", image: "/images/range/Nosepin.jpg", href: "/collections/nosepins" },
   { name: "Mangalsutra", image: "/images/range/Mangalsutra.jpg", href: "/collections/mangalsutra" },
-  { name: "Men's Ring", image: "/images/range/MensRing.jpg", href: "/collections/mens-ring" },
+  { name: "Men's Ring", image: "/images/range/MensRing.jpg", href: "/collections/mens-rings" },
   { name: "Men's Stud", image: "/images/range/MensStud.jpg", href: "/collections/mens-stud" },
 ];
 

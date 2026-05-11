@@ -22,7 +22,7 @@ export const MEGA_MENU = [
                 title: "Featured In",
                 items: [
                     { label: "New Arrivals", href: "/collections/new-arrivals" },
-                    { label: "Men's Ring", href: "/collections/mens-ring" },
+                    { label: "Men's Ring", href: "/collections/mens-rings" },
                     { label: "Best Selling", href: "/collections/bestsellers" }
                 ]
             }
