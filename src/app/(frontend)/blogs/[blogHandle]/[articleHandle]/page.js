@@ -74,13 +74,37 @@ export async function generateMetadata({ params }) {
     };
   }
 
+  const title = article.seo?.title || article.title;
+  let description = article.seo?.description || article.excerpt || stripHtml(article.excerptHtml);
+  
+  // Robust fallback for description
+  if (!description || description.length < 10) {
+    const contentText = stripHtml(article.contentHtml || article.content || "");
+    description = contentText.slice(0, 160);
+  }
+
+  const authorName = article.author_name?.value || article.authorV2?.name || "Lucira Jewelry";
+
   return {
-    title: article.seo?.title || article.title,
-    description: article.seo?.description || article.excerpt || stripHtml(article.excerptHtml),
+    title,
+    description,
+    keywords: article.tags?.join(", ") || "",
+    authors: [{ name: authorName }],
+    publisher: "Lucira Jewelry",
+    robots: {
+      index: true,
+      follow: true,
+    },
+    other: {
+      language: "English",
+    },
     openGraph: {
-      title: article.seo?.title || article.title,
-      description: article.seo?.description || article.excerpt || stripHtml(article.excerptHtml),
+      title,
+      description,
       images: article.image?.url ? [article.image.url] : [],
+      type: 'article',
+      publishedTime: article.publishedAt,
+      authors: [authorName],
     },
     alternates: {
       canonical: `/blogs/${blogHandle}/${articleHandle}`,

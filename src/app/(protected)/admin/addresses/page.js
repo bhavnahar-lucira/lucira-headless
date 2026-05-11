@@ -229,7 +229,7 @@ export default function SavedAddressesPage() {
                   <div className="size-10 rounded-xl bg-zinc-50 flex items-center justify-center text-zinc-400 group-hover:bg-primary group-hover:text-white transition-colors duration-500">
                     <MapPin size={19} />
                   </div>
-                  <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="flex items-center gap-1.5 transition-opacity">
                     <button
                       onClick={() => openEditDialog(address)}
                       className="size-8 rounded-lg bg-zinc-50 flex items-center justify-center text-zinc-500 hover:bg-zinc-900 hover:text-white transition-all"
