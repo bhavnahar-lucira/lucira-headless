@@ -184,6 +184,30 @@ const getValidSrc = (src, fallback = "/images/product/1.jpg") => {
   return fallback;
 };
 
+const getBaseColor = (color = "") => {
+  const normalized = String(color).toLowerCase();
+  if (normalized.includes("rose")) return "rose";
+  if (normalized.includes("white") || normalized.includes("silver") || normalized.includes("platinum")) return "white";
+  if (normalized.includes("yellow") || normalized.includes("gold")) return "yellow";
+  return "";
+};
+
+const getColorSpecificImage = (product, colorName) => {
+  if (!product?.media || product.media.length === 0) return null;
+  const baseColor = getBaseColor(colorName);
+  if (!baseColor) return null;
+  
+  const colorTerms = ["yellow", "white", "rose"];
+  
+  // Logic similar to ProductGallery: find image matching color base and not mentioning others
+  return product.media.find(m => {
+    if (m.type !== "IMAGE") return false;
+    const alt = (m.alt || "").toLowerCase();
+    const mentionsOtherColor = colorTerms.some(c => c !== baseColor && alt.includes(c));
+    return alt.includes(baseColor) || !mentionsOtherColor;
+  });
+};
+
 const getVariantSelection = (variant) => {
   const fallback = {
     karat: variant?.metafields?.metal_purity || "14KT",
@@ -786,6 +810,7 @@ useEffect(() => {
           price: variant.price,
           inStock: Boolean(variant.inStock),
           sku: variant.sku || "",
+          image: getValidSrc(variant.image || getColorSpecificImage(product, variant.color) || product.featuredImage),
         }))
         .sort((a, b) => Number(a.size) - Number(b.size));
 
@@ -799,7 +824,7 @@ useEffect(() => {
         sku: activeVariant.sku || "",
         price: activeVariant.price,
         sku: activeVariant.sku || "",
-        image: getValidSrc(activeVariant.image || product.featuredImage || (product.media && product.media[0]?.url)),
+        image: getValidSrc(activeVariant.image || getColorSpecificImage(product, activeColor) || product.featuredImage || (product.media && product.media[0]?.url)),
         quantity: 1,
         inStock: Boolean(activeVariant.inStock),
         color: activeColor,
@@ -846,7 +871,7 @@ useEffect(() => {
         return match ? Number(match[0]) : 0;
       };
 
-      const productImageUrl = getValidSrc(activeVariant?.image || product.images?.[0]);
+      const productImageUrl = getValidSrc(activeVariant?.image || getColorSpecificImage(product, activeColor) || product.images?.[0]);
       const currentUrl = typeof window !== 'undefined' ? window.location.origin + `/products/${product.handle}` : "";
 
       const sellingPrice = Number(activeVariant?.price || product.price || 0);
@@ -891,7 +916,7 @@ useEffect(() => {
     setWishlistLoading(true);
     try {
       const currentOrigin = typeof window !== 'undefined' ? window.location.origin : "";
-      const thumbnailImage = getValidSrc(product.images?.[0]?.url || product.featuredImage || (product.media && product.media[0]?.url));
+      const thumbnailImage = getValidSrc(activeVariant?.image || getColorSpecificImage(product, activeColor) || product.images?.[0]?.url || product.featuredImage || (product.media && product.media[0]?.url));
       const commonTrackingData = getStandardWishlistPayload(product, activeVariant, currentOrigin, thumbnailImage);
 
       if (isWishlisted) {
@@ -975,7 +1000,7 @@ useEffect(() => {
 
       // URL & Image
       product_url: typeof window !== 'undefined' ? window.location.href : "",
-      product_image: getValidSrc(activeVariant?.image || product.featuredImage || (product.media && product.media[0]?.url)),
+      product_image: getValidSrc(activeVariant?.image || getColorSpecificImage(product, activeColor) || product.featuredImage || (product.media && product.media[0]?.url)),
 
       // Pricing
       // price: Number(activeVariant?.compare_price || activeVariant?.compareAtPrice || product.compare_price || product.compareAtPrice || activeVariant?.price || product.price || 0),
@@ -1064,7 +1089,7 @@ useEffect(() => {
         return match ? Number(match[0]) : 0;
       };
 
-      const productImageUrl = getValidSrc(activeVariant?.image || product.images?.[0]);
+      const productImageUrl = getValidSrc(activeVariant?.image || getColorSpecificImage(product, activeColor) || product.images?.[0]);
       const currentUrl = typeof window !== 'undefined' ? window.location.origin + `/products/${product.handle}` : "";
 
       const sellingPrice = Number(activeVariant?.price || product.price || 0);
