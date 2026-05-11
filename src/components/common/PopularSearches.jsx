@@ -27,7 +27,7 @@ const SEARCH_DATA = [
       { label: "Lab Grown Diamond Engagement Rings", href: "/collections/engagement-rings" },
       { label: "Diamond Engagement Rings for Women", href: "/collections/engagement-rings-for-women" },
       { label: "Mens Engagement Rings", href: "/collections/mens-engagement-rings" },
-      { label: "Lab Grown Men’s Diamond Rings", href: "/collections/mens-ring" },
+      { label: "Lab Grown Men’s Diamond Rings", href: "/collections/mens-rings" },
     ],
   },
   {

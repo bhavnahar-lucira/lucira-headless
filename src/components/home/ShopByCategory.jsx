@@ -34,7 +34,7 @@ const CATEGORY_FILTERS = {
       { id: "Stackable", label: "Stackable", img: "/images/styles/stackable.png", href: "/collections/stackable-rings" },
       { id: "Casual", label: "Casual", img: "/images/styles/Casual.png", href: "/collections/casual-rings" },
       { id: "Gemstone", label: "Gemstone", img: "/images/styles/gemstone.png", href: "/collections/gemstone-rings" },
-      { id: "mens", label: "men's", img: "/images/styles/mens.png", href: "/collections/mens-ring" },
+      { id: "mens", label: "men's", img: "/images/styles/mens.png", href: "/collections/mens-rings" },
     ],
   },
   "earrings": {
