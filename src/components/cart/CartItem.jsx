@@ -57,6 +57,8 @@ export default function CartItem({ item, onAuthRequired }) {
       ? variantOptions
       : (item.availableSizes || [item.size]).map((size) => ({ size }));
 
+  const displayImage = currentVariant?.image || item.image;
+
   const handleRemove = async () => {
     setRemoving(true);
     try {
@@ -243,7 +245,7 @@ export default function CartItem({ item, onAuthRequired }) {
             className="aspect-square w-full shrink-0 overflow-hidden rounded-sm border border-zinc-100/50 bg-zinc-50 md:w-48 block transition-opacity hover:opacity-90"
           >
             <Image
-              src={item.image || "/images/product/1.jpg"}
+              src={displayImage || "/images/product/1.jpg"}
               alt={item.title}
               width={200}
               height={200}
@@ -391,7 +393,7 @@ export default function CartItem({ item, onAuthRequired }) {
             <div className="relative aspect-square w-32 shrink-0 overflow-hidden rounded-sm border border-zinc-100 bg-[#F9F9F9]">
               <Link href={productLink} className="block h-full w-full p-2">
                 <Image
-                  src={item.image || "/images/product/1.jpg"}
+                  src={displayImage || "/images/product/1.jpg"}
                   alt={item.title}
                   width={150}
                   height={150}
