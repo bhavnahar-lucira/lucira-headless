@@ -155,7 +155,7 @@ const stores = [
     city: "Noida",
     name: "Noida Lucira Store",
     rating: 4.9,
-    image: "/images/store/store.jpg",
+    image: "/images/store/Noida.jpg",
     storeHours: {
       weekday: { open: "10:30", close: "22:00" },
       weekend: { open: "10:30", close: "22:00" },
