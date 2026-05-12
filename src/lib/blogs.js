@@ -1,3 +1,4 @@
+import { fetchWithRetry } from "@/utils/helpers";
 import clientPromise from "./mongodb";
 import { shopifyAdminRestFetch, shopifyStorefrontFetch } from "./shopify";
 
@@ -187,8 +188,8 @@ export async function getArticleByBlogAndHandleAdminRest(blogHandle, articleHand
 }
 
 export async function getArticleRenderedFromLiveSite(blogHandle, articleHandle) {
-  const res = await fetch(
-    `https://www.lucirajewelry.com/blogs/${blogHandle}/${articleHandle}`,
+  const res = await fetchWithRetry(
+    `https://luciraonline.myshopify.com/blogs/${blogHandle}/${articleHandle}`,
     {
       next: { revalidate: 3600 },
     }
@@ -203,7 +204,7 @@ export async function getArticleRenderedFromLiveSite(blogHandle, articleHandle) 
 
   const contentHtml = liveContentHtml
     .replace(/src="\/\//g, 'src="https://')
-    .replace(/href="\//g, 'href="https://www.lucirajewelry.com/');
+    .replace(/href="\//g, 'href="https://luciraonline.myshopify.com/');
 
   return {
     content: stripHtml(contentHtml),
