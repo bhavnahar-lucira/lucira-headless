@@ -944,7 +944,7 @@ export default function CollectionPage({ params: paramsPromise }) {
           <button onClick={() => setIsFilterSheetOpen(true)} className="flex-1 flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-wider">
             <SlidersHorizontal size={16} /> Filter
             {activeFilterCount > 0 && (
-              <span className="bg-[#FF69B4] text-white text-[10px] min-w-4 h-4 rounded-full flex items-center justify-center px-1">
+              <span className="bg-accent text-white text-[10px] min-w-4 h-4 rounded-full flex items-center justify-center px-1">
                 {activeFilterCount}
               </span>
             )}

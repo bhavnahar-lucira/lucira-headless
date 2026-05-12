@@ -18,8 +18,8 @@ export async function getArticleByBlogAndHandle(blogHandle, articleHandle) {
     blogHandle,
   });
 
-  // Only return immediately if we have content AND the new metafields
-  if ((article?.contentHtml || article?.content) && article?.author_name) return serialize(article);
+  // Only return immediately if we have content AND the new metafields AND SEO description AND tags
+  if ((article?.contentHtml || article?.content) && article?.author_name && article?.seo?.description && article?.tags?.length > 0) return serialize(article);
 
   const storefrontArticle = await getArticleByBlogAndHandleStorefront(blogHandle, articleHandle);
   const adminArticle =

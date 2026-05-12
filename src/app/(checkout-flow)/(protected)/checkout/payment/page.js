@@ -37,6 +37,7 @@ import { selectUser } from "@/redux/features/user/userSlice";
 import { useCart } from "@/hooks/useCart";
 import { toast } from "react-toastify";
 import { pushAddPaymentInfo } from "@/lib/gtm";
+import { sendCheckoutCrmEvent } from "@/lib/checkout-crm";
 import { MobileBottomSheet } from "@/components/common/MobileBottomSheet";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 
@@ -265,6 +266,45 @@ export default function PaymentPage() {
   const user = useSelector(selectUser);
   const {items, totalAmount, appliedCoupon, nectorPoints } = useCart();
 
+  const finalAmount = useMemo(() => {
+    const insuranceItem = (items || []).find(item => item.variantId === INSURANCE_VARIANT_ID);
+    const insuranceValue = insuranceItem ? (insuranceItem.price * (insuranceItem.quantity || 1)) : 0;
+    const subtotalValue = (totalAmount || 0) - insuranceValue;
+
+    const couponDetails = typeof appliedCoupon === 'object' ? appliedCoupon : { code: appliedCoupon, value: 0, valueType: "FIXED_AMOUNT" };
+    let couponDiscountAmount = 0;
+    if (appliedCoupon) {
+      if (couponDetails.valueType === "FIXED_AMOUNT") {
+        couponDiscountAmount = couponDetails.value;
+      } else if (couponDetails.valueType === "PERCENTAGE") {
+        couponDiscountAmount = (subtotalValue * couponDetails.value) / 100;
+      }
+    }
+
+    const pointsDiscountAmount = nectorPoints?.fiat_value || 0;
+    return subtotalValue + insuranceValue - couponDiscountAmount - pointsDiscountAmount;
+  }, [items, totalAmount, appliedCoupon, nectorPoints]);
+
+  const selectedAddress = useMemo(
+    () => addresses.find((address) => address.id === selectedAddressId) || null,
+    [addresses, selectedAddressId]
+  );
+
+  const billingModeRef = useRef("same");
+  const billingAddressIdRef = useRef("");
+
+  const selectedBillingAddress = useMemo(() => {
+    if (billingAddressMode === "same") return selectedAddress;
+    return (
+      addresses.find((address) => address.id === selectedBillingAddressId) ||
+      billingAddressSnapshot ||
+      null
+    );
+  }, [addresses, billingAddressMode, selectedAddress, selectedBillingAddressId, billingAddressSnapshot]);
+
+  const isPickup = checkoutSelection?.deliveryMethod === "pickup";
+  const isIndiaShipping = (selectedAddress?.country || "").trim().toLowerCase() === "india";
+
   // Remove points when leaving the payment page
   useEffect(() => {
     return () => {
@@ -298,25 +338,6 @@ export default function PaymentPage() {
     };
     checkDelivery();
   }, [router]);
-
-  const finalAmount = useMemo(() => {
-    const insuranceItem = (items || []).find(item => item.variantId === INSURANCE_VARIANT_ID);
-    const insuranceValue = insuranceItem ? (insuranceItem.price * (insuranceItem.quantity || 1)) : 0;
-    const subtotalValue = (totalAmount || 0) - insuranceValue;
-
-    const couponDetails = typeof appliedCoupon === 'object' ? appliedCoupon : { code: appliedCoupon, value: 0, valueType: "FIXED_AMOUNT" };
-    let couponDiscountAmount = 0;
-    if (appliedCoupon) {
-      if (couponDetails.valueType === "FIXED_AMOUNT") {
-        couponDiscountAmount = couponDetails.value;
-      } else if (couponDetails.valueType === "PERCENTAGE") {
-        couponDiscountAmount = (subtotalValue * couponDetails.value) / 100;
-      }
-    }
-
-    const pointsDiscountAmount = nectorPoints?.fiat_value || 0;
-    return subtotalValue + insuranceValue - couponDiscountAmount - pointsDiscountAmount;
-  }, [items, totalAmount, appliedCoupon, nectorPoints]);
 
   const partialCodDetails = useMemo(() => {
     const total = Math.max(0, Number(finalAmount || 0));
@@ -439,25 +460,6 @@ export default function PaymentPage() {
       }
     }
   }, []);
-
-  const selectedAddress = useMemo(
-    () => addresses.find((address) => address.id === selectedAddressId) || null,
-    [addresses, selectedAddressId]
-  );
-
-  const billingModeRef = useRef("same");
-  const billingAddressIdRef = useRef("");
-
-  const selectedBillingAddress = useMemo(() => {
-    if (billingAddressMode === "same") return selectedAddress;
-    return (
-      addresses.find((address) => address.id === selectedBillingAddressId) ||
-      billingAddressSnapshot ||
-      null
-    );
-  }, [addresses, billingAddressMode, selectedAddress, selectedBillingAddressId, billingAddressSnapshot]);
-
-  const isIndiaShipping = (selectedAddress?.country || "").trim().toLowerCase() === "india";
 
   useEffect(() => {
     billingModeRef.current = billingAddressMode;
@@ -616,6 +618,23 @@ export default function PaymentPage() {
     }
 
     try {
+      // Trigger CRM Webhook for Add Payment Info on click
+      sendCheckoutCrmEvent("add_payment_info", {
+        email: customer?.email || user?.email || checkoutSelection?.customerEmail || "",
+        mobile: customer?.phone || user?.mobile || selectedAddress?.phone || "",
+        firstName: customer?.firstName || user?.name?.split(' ')[0] || "",
+        lastName: customer?.lastName || user?.name?.split(' ')[1] || "",
+        totalCartValue: Number(finalAmount),
+        cartItems: items,
+        paymentType: selectedPaymentGateway === "partial_cod" ? "Partial COD" : "Razorpay",
+        billingPincode: selectedBillingAddress?.zip || "",
+        billingCity: selectedBillingAddress?.city || "",
+        billingState: selectedBillingAddress?.province || "",
+        shippingPincode: isPickup ? checkoutSelection?.selectedStore?.zip : (selectedAddress?.zip || ""),
+        shippingCity: isPickup ? checkoutSelection?.selectedStore?.city : (selectedAddress?.city || ""),
+        shippingState: isPickup ? (checkoutSelection?.selectedStore?.state || checkoutSelection?.selectedStore?.province) : (selectedAddress?.province || "")
+      });
+
       setPaymentLoading(true);
 
       const getNumericId = (gid) => {
@@ -976,8 +995,6 @@ export default function PaymentPage() {
       setPaymentLoading(false);
     }
   };
-
-  const isPickup = checkoutSelection?.deliveryMethod === "pickup";
 
   const AddressListContent = ({ type }) => (
     <div className="max-h-[60vh] space-y-3 overflow-y-auto pr-1 custom-scrollbar">
@@ -1387,7 +1404,7 @@ export default function PaymentPage() {
             <span className="text-lg font-bold text-zinc-900 leading-none">₹ {selectedPayableAmount.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
             <button 
               onClick={scrollToSummary}
-              className="text-[11px] font-bold text-accent uppercase tracking-tight mt-1 text-left"
+              className="text-[11px] font-bold text-accent uppercase tracking-tight mt-1 text-left whitespace-nowrap"
             >
               View Order Summary
             </button>

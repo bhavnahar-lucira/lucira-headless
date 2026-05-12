@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import {
   ChevronLeft,
@@ -40,8 +41,10 @@ import {
   selectDefaultCustomerAddress,
   updateCustomerAddress,
 } from "@/lib/api";
+import { selectUser } from "@/redux/features/user/userSlice";
 import { useCart } from "@/hooks/useCart";
 import { pushAddShippingInfo, pushBeginCheckout } from "@/lib/gtm";
+import { sendCheckoutCrmEvent } from "@/lib/checkout-crm";
 import { MobileBottomSheet } from "@/components/common/MobileBottomSheet";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 
@@ -254,14 +257,35 @@ const SummarySkeleton = () => (
 export default function ShippingPage() {
   const router = useRouter();
   const isDesktop = useMediaQuery("(min-width: 1024px)");
+  const user = useSelector(selectUser);
   const { items: cartItems, totalAmount, appliedCoupon, nectorPoints } = useCart();
   const searchParams = useSearchParams();
   const [deliveryMethod, setDeliveryMethod] = useState(searchParams.get("method") || "ship");
   const summaryRef = useRef(null);
   const hasFiredBeginCheckout = useRef(false);
 
+  const [addresses, setAddresses] = useState([]);
+  const [customer, setCustomer] = useState(null);
+  const [selectedAddressId, setSelectedAddressId] = useState("");
+  const [dbStores, setDbStores] = useState([]);
+  const [selectedStoreId, setSelectedStoreId] = useState("");
+  const [showStoreDialog, setShowStoreDialog] = useState(false);
+  const [storeSearchQuery, setStoreSearchQuery] = useState("");
+  const [searchCoords, setSearchCoords] = useState(null);
+  const [tempSelectedStoreId, setTempSelectedStoreId] = useState("");
+  const [loadingAddresses, setLoadingAddresses] = useState(true);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogMode, setDialogMode] = useState("create");
+  const [dialogSaving, setDialogSaving] = useState(false);
+  const [inlineSaving, setInlineSaving] = useState(false);
+  const [addressListOpen, setAddressListOpen] = useState(false);
+  const [addressForm, setAddressForm] = useState(emptyAddressForm);
+  const [makeDefault, setMakeDefault] = useState(true);
+  const [editingAddressId, setEditingAddressId] = useState("");
+
   useEffect(() => {
-    if (cartItems && cartItems.length > 0 && !hasFiredBeginCheckout.current) {
+    const currentCustomer = customer || user;
+    if (cartItems && cartItems.length > 0 && currentCustomer?.email && !hasFiredBeginCheckout.current) {
       const getNumericId = (gid) => {
         if (!gid) return 0;
         if (typeof gid === 'number') return gid;
@@ -303,9 +327,20 @@ export default function ShippingPage() {
       };
 
       pushBeginCheckout(checkoutData);
+
+      // Trigger CRM Webhook for Begin Checkout
+      sendCheckoutCrmEvent("begin_checkout", {
+        email: currentCustomer?.email || "",
+        mobile: currentCustomer?.phone || currentCustomer?.mobile || "",
+        firstName: currentCustomer?.firstName || currentCustomer?.name?.split(' ')[0] || "",
+        lastName: currentCustomer?.lastName || currentCustomer?.name?.split(' ')[1] || "",
+        totalCartValue: Number(totalAmount),
+        cartItems: cartItems
+      });
+
       hasFiredBeginCheckout.current = true;
     }
-  }, [cartItems, totalAmount, appliedCoupon]);
+  }, [cartItems, totalAmount, appliedCoupon, customer, user]);
 
   const finalAmount = useMemo(() => {
     const insuranceItem = (cartItems || []).find(item => item.variantId === INSURANCE_VARIANT_ID);
@@ -325,8 +360,6 @@ export default function ShippingPage() {
     const pointsDiscountAmount = nectorPoints?.fiat_value || 0;
     return subtotalValue + insuranceValue - couponDiscountAmount - pointsDiscountAmount;
   }, [cartItems, totalAmount, appliedCoupon, nectorPoints]);
-
-  const [dbStores, setDbStores] = useState([]);
 
   useEffect(() => {
     const fetchStores = async () => {
@@ -360,31 +393,6 @@ export default function ShippingPage() {
       summaryRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   };
-
-  useEffect(() => {
-    const method = searchParams.get("method");
-    if (method && (method === "ship" || method === "pickup")) {
-      setDeliveryMethod(method);
-    }
-  }, [searchParams]);
-
-  const [addresses, setAddresses] = useState([]);
-  const [customer, setCustomer] = useState(null);
-  const [selectedAddressId, setSelectedAddressId] = useState("");
-  const [selectedStoreId, setSelectedStoreId] = useState("");
-  const [showStoreDialog, setShowStoreDialog] = useState(false);
-  const [storeSearchQuery, setStoreSearchQuery] = useState("");
-  const [searchCoords, setSearchCoords] = useState(null);
-  const [tempSelectedStoreId, setTempSelectedStoreId] = useState("");
-  const [loadingAddresses, setLoadingAddresses] = useState(true);
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [dialogMode, setDialogMode] = useState("create");
-  const [dialogSaving, setDialogSaving] = useState(false);
-  const [inlineSaving, setInlineSaving] = useState(false);
-  const [addressListOpen, setAddressListOpen] = useState(false);
-  const [addressForm, setAddressForm] = useState(emptyAddressForm);
-  const [makeDefault, setMakeDefault] = useState(true);
-  const [editingAddressId, setEditingAddressId] = useState("");
 
   const hasSavedAddresses = addresses.length > 0;
   const orderedAddresses = useMemo(() => {
@@ -829,10 +837,10 @@ export default function ShippingPage() {
                   <p className="text-sm text-zinc-500 leading-relaxed pr-8">
                     {store.address}, {store.city} {store.state}
                   </p>
-                  <div className="flex items-center gap-2 text-zinc-400 text-base">
+                  {/* <div className="flex items-center gap-2 text-zinc-400 text-base">
                     <Clock size={14} />
                     <span>{store.readyTime}</span>
-                  </div>
+                  </div> */}
                 </div>
               </div>
             );
@@ -1122,10 +1130,10 @@ export default function ShippingPage() {
                         <p className="text-sm text-zinc-500 leading-relaxed max-w-100">
                           {selectedStore.address}, {selectedStore.city} {selectedStore.state}
                         </p>
-                        <div className="flex items-center gap-2 text-zinc-500 text-sm">
+                        {/* <div className="flex items-center gap-2 text-zinc-500 text-sm">
                           <Clock size={16} />
                           <span>{selectedStore.readyTime}</span>
-                        </div>
+                        </div> */}
                       </div>
                     </div>
                   )}
@@ -1174,12 +1182,12 @@ export default function ShippingPage() {
 
       {/* Mobile Sticky Footer */}
       <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-zinc-100 p-4 shadow-[0_-4px_15px_rgba(0,0,0,0.08)] z-60">
-        <div className="flex items-center justify-between gap-6">
+        <div className="flex items-center justify-between gap-4">
           <div className="flex flex-col">
             <span className="text-lg font-bold text-zinc-900 leading-none">₹ {finalAmount.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
             <button 
               onClick={scrollToSummary}
-              className="text-[11px] font-bold text-accent uppercase tracking-tight mt-1 text-left"
+              className="text-[11px] font-bold text-accent uppercase tracking-tight mt-1 text-left whitespace-nowrap"
             >
               View Summary
             </button>

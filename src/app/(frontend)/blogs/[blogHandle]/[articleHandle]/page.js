@@ -6,6 +6,7 @@ import {
 } from "@/lib/blogs";
 import BlogArticleClient from "@/components/blogs/BlogArticleClient";
 import "./blog-article.css";
+import { getArticleSchema, getBreadcrumbSchema } from "@/lib/seo";
 
 function stripHtml(value) {
   return value?.replace(/<[^>]*>?/gm, "").replace(/\s+/g, " ").trim() || "";
@@ -73,13 +74,37 @@ export async function generateMetadata({ params }) {
     };
   }
 
+  const title = article.seo?.title || article.title;
+  let description = article.seo?.description || article.excerpt || stripHtml(article.excerptHtml);
+  
+  // Robust fallback for description
+  if (!description || description.length < 10) {
+    const contentText = stripHtml(article.contentHtml || article.content || "");
+    description = contentText.slice(0, 160);
+  }
+
+  const authorName = article.author_name?.value || article.authorV2?.name || "Lucira Jewelry";
+
   return {
-    title: article.seo?.title || article.title,
-    description: article.seo?.description || article.excerpt || stripHtml(article.excerptHtml),
+    title,
+    description,
+    keywords: article.tags?.join(", ") || "",
+    authors: [{ name: authorName }],
+    publisher: "Lucira Jewelry",
+    robots: {
+      index: true,
+      follow: true,
+    },
+    other: {
+      language: "English",
+    },
     openGraph: {
-      title: article.seo?.title || article.title,
-      description: article.seo?.description || article.excerpt || stripHtml(article.excerptHtml),
+      title,
+      description,
       images: article.image?.url ? [article.image.url] : [],
+      type: 'article',
+      publishedTime: article.publishedAt,
+      authors: [authorName],
     },
     alternates: {
       canonical: `/blogs/${blogHandle}/${articleHandle}`,
@@ -105,17 +130,33 @@ export default async function BlogArticlePage({ params }) {
     .filter((item) => item.handle !== article.handle)
     .slice(0, 4);
 
-
+  const jsonLd = getArticleSchema(article, blogHandle);
+  const breadcrumbs = [
+    { name: "Home", url: "/" },
+    { name: blogHandle.charAt(0).toUpperCase() + blogHandle.slice(1), url: `/blogs/${blogHandle}` },
+    { name: article.title, url: `/blogs/${blogHandle}/${article.handle}` }
+  ];
+  const breadcrumbLd = getBreadcrumbSchema(breadcrumbs);
 
   return (
-    <BlogArticleClient
-      article={article}
-      bodyHtml={bodyHtml}
-      toc={toc}
-      publishedDate={publishedDate}
-      readTime={readTime}
-      mostViewed={mostViewed}
-      featuredProducts={[]} // You can fetch products here if needed
-    />
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
+      />
+      <BlogArticleClient
+        article={article}
+        bodyHtml={bodyHtml}
+        toc={toc}
+        publishedDate={publishedDate}
+        readTime={readTime}
+        mostViewed={mostViewed}
+        featuredProducts={[]} // You can fetch products here if needed
+      />
+    </>
   );
 }

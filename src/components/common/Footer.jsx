@@ -29,7 +29,7 @@ export default function Footer() {
 
   if (isMobile) {
     return (
-      <footer className="w-full bg-primary text-white mt-12 pt-10 pb-6">
+      <footer className="w-full bg-primary text-white pt-10 pb-6">
         <div className="px-6 flex flex-col items-center">
           {/* LOGO & TAGLINE */}
           <div className="mb-10 text-center">
@@ -82,7 +82,7 @@ export default function Footer() {
                     <li><Link href="/collections/bracelets">Bracelets</Link></li>
                     <li><Link href="/collections/necklaces">Necklaces</Link></li>
                     <li><Link href="/collections/nosepins">Nosepins</Link></li>
-                    <li><Link href="/collections/mens-ring">Men's Rings</Link></li>
+                    <li><Link href="/collections/mens-rings">Men's Rings</Link></li>
                     <li><Link href="/collections/mens-stud">Men's Studs</Link></li>
                     <li><Link href="/collections/mens-bracelets">Men's Bracelets</Link></li>
                     <li><Link href="/collections/hexa">Collections</Link></li>
@@ -97,7 +97,7 @@ export default function Footer() {
                   Lucira Jewelry Guide
                 </AccordionTrigger>
                 <AccordionContent className="pb-6">
-                  <ul className="space-y-3 font-figtree text-[13px]">
+                  <ul className="grid grid-cols-2 gap-y-3 gap-x-4 font-figtree text-[13px]">
                     <li><Link href="/pages/diamond-education">Diamond Education</Link></li>
                     <li><Link href="/pages/metal-education">Metal Education</Link></li>
                     <li><Link href="/pages/gemstone-education-page">Gemstone Education</Link></li>
@@ -118,7 +118,7 @@ export default function Footer() {
                   About Lucira
                 </AccordionTrigger>
                 <AccordionContent className="pb-6">
-                  <ul className="space-y-3 font-figtree text-[13px]">
+                  <ul className="grid grid-cols-2 gap-y-3 gap-x-4 font-figtree text-[13px]">
                     <li><Link href="/pages/about-our-company">About Our Company</Link></li>
                     <li><Link href="/pages/purpose-and-value">Purpose & Value</Link></li>
                     <li><Link href="/blogs/stories">Blogs</Link></li>
@@ -161,7 +161,7 @@ export default function Footer() {
                   Experience Lucira
                 </AccordionTrigger>
                 <AccordionContent className="pb-6">
-                  <ul className="space-y-3 font-figtree text-[13px]">
+                  <ul className="grid grid-cols-2 gap-y-3 gap-x-4 font-figtree text-[13px]">
                     <li><Link href="/pages/careers">Careers</Link></li>
                     <li><Link href="/pages/franchise-page">Franchise</Link></li>
                     <li><Link href="/pages/customized-jewelry">Bespoke</Link></li>
@@ -244,7 +244,7 @@ export default function Footer() {
                 <li><Link href="/collections/bracelets">Bracelets</Link></li>
                 <li><Link href="/collections/necklaces">Necklaces</Link></li>
                 <li><Link href="/collections/nosepins">Nosepins</Link></li>
-                <li><Link href="/collections/mens-ring">Men's Rings</Link></li>
+                <li><Link href="/collections/mens-rings">Men's Rings</Link></li>
                 <li><Link href="/collections/mens-stud">Men's Studs</Link></li>
                 <li><Link href="/collections/mens-bracelets">Men's Bracelets</Link></li>
                 <li><Link href="/collections/hexa">Collections</Link></li>

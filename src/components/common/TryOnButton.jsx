@@ -109,6 +109,7 @@ export default function TryOnButton({ sku, productTitle, isAvailable, className 
     <button
       id={id} // 👈 IMPORTANT (must match config)
       onClick={pushDataLayer} // 👈 tracking only (Camweara handles actual click)
+      style={{visibility: "hidden"}}
       className={className || `
         bg-[#EDEDED]
         text-black
@@ -118,23 +119,23 @@ export default function TryOnButton({ sku, productTitle, isAvailable, className 
       `}
     >
       {/* Eye Icon */}
-      <span className="w-6 h-6 shrink-0 flex items-center justify-center">
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        className="w-4 h-4"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-        strokeWidth={1.8}
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          d="M2.25 12s3.75-6.75 9.75-6.75S21.75 12 21.75 12s-3.75 6.75-9.75 6.75S2.25 12 2.25 12z"
-        />
-        <circle cx="12" cy="12" r="3" />
-      </svg>
-</span>
+      <span className="w-[24px] h-[24px] shrink-0 flex items-center justify-center">
+        <svg width="34" height="34"
+          xmlns="http://www.w3.org/2000/svg"
+          className="w-4 h-4"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth={1.8}
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M2.25 12s3.75-6.75 9.75-6.75S21.75 12 21.75 12s-3.75 6.75-9.75 6.75S2.25 12 2.25 12z"
+          />
+          <circle cx="12" cy="12" r="3" />
+        </svg>
+      </span>
       <span className="btn-text text-xs font-bold uppercase tracking-wider">Virtual try on</span>
     </button>
   );

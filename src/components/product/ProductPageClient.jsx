@@ -184,6 +184,30 @@ const getValidSrc = (src, fallback = "/images/product/1.jpg") => {
   return fallback;
 };
 
+const getBaseColor = (color = "") => {
+  const normalized = String(color).toLowerCase();
+  if (normalized.includes("rose")) return "rose";
+  if (normalized.includes("white") || normalized.includes("silver") || normalized.includes("platinum")) return "white";
+  if (normalized.includes("yellow") || normalized.includes("gold")) return "yellow";
+  return "";
+};
+
+const getColorSpecificImage = (product, colorName) => {
+  if (!product?.media || product.media.length === 0) return null;
+  const baseColor = getBaseColor(colorName);
+  if (!baseColor) return null;
+  
+  const colorTerms = ["yellow", "white", "rose"];
+  
+  // Logic similar to ProductGallery: find image matching color base and not mentioning others
+  return product.media.find(m => {
+    if (m.type !== "IMAGE") return false;
+    const alt = (m.alt || "").toLowerCase();
+    const mentionsOtherColor = colorTerms.some(c => c !== baseColor && alt.includes(c));
+    return alt.includes(baseColor) || !mentionsOtherColor;
+  });
+};
+
 const getVariantSelection = (variant) => {
   const fallback = {
     karat: variant?.metafields?.metal_purity || "14KT",
@@ -786,6 +810,7 @@ useEffect(() => {
           price: variant.price,
           inStock: Boolean(variant.inStock),
           sku: variant.sku || "",
+          image: getValidSrc(variant.image || getColorSpecificImage(product, variant.color) || product.featuredImage),
         }))
         .sort((a, b) => Number(a.size) - Number(b.size));
 
@@ -799,7 +824,7 @@ useEffect(() => {
         sku: activeVariant.sku || "",
         price: activeVariant.price,
         sku: activeVariant.sku || "",
-        image: getValidSrc(activeVariant.image || product.featuredImage || (product.media && product.media[0]?.url)),
+        image: getValidSrc(activeVariant.image || getColorSpecificImage(product, activeColor) || product.featuredImage || (product.media && product.media[0]?.url)),
         quantity: 1,
         inStock: Boolean(activeVariant.inStock),
         color: activeColor,
@@ -846,7 +871,7 @@ useEffect(() => {
         return match ? Number(match[0]) : 0;
       };
 
-      const productImageUrl = getValidSrc(activeVariant?.image || product.images?.[0]);
+      const productImageUrl = getValidSrc(activeVariant?.image || getColorSpecificImage(product, activeColor) || product.images?.[0]);
       const currentUrl = typeof window !== 'undefined' ? window.location.origin + `/products/${product.handle}` : "";
 
       const sellingPrice = Number(activeVariant?.price || product.price || 0);
@@ -891,7 +916,7 @@ useEffect(() => {
     setWishlistLoading(true);
     try {
       const currentOrigin = typeof window !== 'undefined' ? window.location.origin : "";
-      const thumbnailImage = getValidSrc(product.images?.[0]?.url || product.featuredImage || (product.media && product.media[0]?.url));
+      const thumbnailImage = getValidSrc(activeVariant?.image || getColorSpecificImage(product, activeColor) || product.images?.[0]?.url || product.featuredImage || (product.media && product.media[0]?.url));
       const commonTrackingData = getStandardWishlistPayload(product, activeVariant, currentOrigin, thumbnailImage);
 
       if (isWishlisted) {
@@ -975,7 +1000,7 @@ useEffect(() => {
 
       // URL & Image
       product_url: typeof window !== 'undefined' ? window.location.href : "",
-      product_image: getValidSrc(activeVariant?.image || product.featuredImage || (product.media && product.media[0]?.url)),
+      product_image: getValidSrc(activeVariant?.image || getColorSpecificImage(product, activeColor) || product.featuredImage || (product.media && product.media[0]?.url)),
 
       // Pricing
       // price: Number(activeVariant?.compare_price || activeVariant?.compareAtPrice || product.compare_price || product.compareAtPrice || activeVariant?.price || product.price || 0),
@@ -1064,7 +1089,7 @@ useEffect(() => {
         return match ? Number(match[0]) : 0;
       };
 
-      const productImageUrl = getValidSrc(activeVariant?.image || product.images?.[0]);
+      const productImageUrl = getValidSrc(activeVariant?.image || getColorSpecificImage(product, activeColor) || product.images?.[0]);
       const currentUrl = typeof window !== 'undefined' ? window.location.origin + `/products/${product.handle}` : "";
 
       const sellingPrice = Number(activeVariant?.price || product.price || 0);
@@ -1904,7 +1929,7 @@ useEffect(() => {
                         e.preventDefault();
                         setIsSchemeOpen((prev) => !prev);
                       }}
-                      className={`w-full h-14 px-1.5 sm:px-3 font-medium flex items-center justify-between gap-1 sm:gap-2 bg-gray-50 hover:cursor-pointer group hover:bg-primary hover:text-white transition-all duration-150 active:scale-[0.98] rounded-md ${isSchemeOpen ? 'bg-primary text-white border-primary shadow-[0_5px_20px_rgba(163,110,110,0.4)]' : 'border-gray-200'}`}
+                      className={`w-full h-14 px-1.5 sm:px-3 font-medium flex items-center justify-between gap-1 sm:gap-2 bg-gray-50 hover:cursor-pointer group hover:bg-tertiary hover:text-white transition-all duration-150 active:scale-[0.98] rounded-md ${isSchemeOpen ? 'bg-tertiary text-white border-primary shadow-[0_5px_20px_rgba(163,110,110,0.4)]' : 'border-gray-200'}`}
                     >
                       <div className="w-6 sm:w-8 flex justify-start shrink-0">
                         <div className={`p-1 rounded-full transition-colors duration-150 flex items-center justify-center ${isSchemeOpen ? 'bg-white/20' : 'bg-primary/10'}`}>
@@ -1940,7 +1965,7 @@ useEffect(() => {
                                 <span className="text-gray-500 font-medium">Monthly Installment</span>
                                 <div className="text-right">
                                   <span className="font-bold text-primary">₹{formatPrice(schemeData.monthly)}</span>
-                                  <span className="text-gray-400 ml-1">x 9 Months</span>
+                                  <span className="text-gray-600 ml-1">x 9 Months</span>
                                 </div>
                               </div>
                               <div className="flex justify-between items-center text-[12px] sm:text-[13px]">
@@ -1963,7 +1988,7 @@ useEffect(() => {
                               </div>
                             </div>
 
-                            <Button className="w-full h-12 font-bold uppercase tracking-widest bg-primary hover:bg-accent text-white rounded-xl shadow-lg shadow-primary/20 transition-all duration-200 active:scale-[0.97]" asChild>
+                            <Button className="w-full h-12 font-bold uppercase tracking-widest bg-tertiary hover:bg-accent text-white rounded-sm shadow-lg shadow-primary/20 transition-all duration-200 active:scale-[0.97]" asChild>
                               <a href={schemeData.schemeUrl} target="_blank" rel="noopener noreferrer">
                                 ENROLL NOW <ArrowRight size={16} className="ml-2" />
                               </a>
@@ -1971,7 +1996,7 @@ useEffect(() => {
 
                             <div className="flex items-center justify-center gap-2 pt-1">
                               <div className="w-1 h-1 bg-[#2DB36F] rounded-full animate-pulse"></div>
-                              <p className="text-[9px] sm:text-[10px] text-gray-400 font-bold uppercase tracking-widest">
+                              <p className="text-[9px] sm:text-[10px] text-gray-700 font-bold uppercase tracking-widest">
                                 Secure & Instant Enrollment
                               </p>
                             </div>
