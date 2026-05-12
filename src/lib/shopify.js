@@ -77,7 +77,7 @@ export async function shopifyAdminRestFetch(endpoint, params = {}, options = {})
   }
 
   const method = options.method || "GET";
-  const apiVersion = options.apiVersion || "2026-01";
+  const apiVersion = options.apiVersion || "2024-10";
   const url = new URL(`https://${SHOP_DOMAIN}/admin/api/${apiVersion}/${endpoint}`);
   Object.entries(params).forEach(([key, value]) => {
     if (value !== undefined && value !== null) {
@@ -85,11 +85,14 @@ export async function shopifyAdminRestFetch(endpoint, params = {}, options = {})
     }
   });
 
+  console.log(`[Shopify REST] ${method} ${url.toString()}`);
+
   const res = await fetchWithRetry(url.toString(), {
     method,
     headers: {
       "Content-Type": "application/json",
       "X-Shopify-Access-Token": adminToken,
+      ...options.headers,
     },
     body: options.body ? JSON.stringify(options.body) : undefined,
   });

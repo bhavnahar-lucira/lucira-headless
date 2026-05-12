@@ -24,6 +24,7 @@ export default function DashboardHeader() {
           <Link href="/dashboard/reviews" className="hover:text-white transition-colors whitespace-nowrap">Reviews</Link>
           <Link href="/dashboard/stores" className="hover:text-white transition-colors whitespace-nowrap">Stores</Link>
           <Link href="/dashboard/pincodes" className="hover:text-white transition-colors whitespace-nowrap">Pincodes</Link>
+          <Link href="/dashboard/redirect-url" className="hover:text-white transition-colors whitespace-nowrap">Redirects</Link>
           <Link href="/dashboard/webhooks" className="hover:text-white transition-colors whitespace-nowrap">Webhooks</Link>
           <Link href="/dashboard/sync" className="hover:text-white transition-colors whitespace-nowrap">Sync</Link>
           <Link href="/dashboard/topbar-offers" className="hover:text-white transition-colors whitespace-nowrap">TopBar Offers</Link>
