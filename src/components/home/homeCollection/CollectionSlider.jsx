@@ -59,11 +59,11 @@ export default function CollectionSlider ({ products = [], loading = false, coll
             enabled: true,
             sticky: true,
           }}
-          // autoplay={{
-          //   delay: 6000,
-          //   disableOnInteraction: false,
-          //   pauseOnMouseEnter: true,
-          // }}
+          autoplay={{
+            delay: 6000,
+            disableOnInteraction: false,
+            pauseOnMouseEnter: true,
+          }}
           pagination={{
             el: `.${paginationElClass}`,
             type: 'progressbar',
