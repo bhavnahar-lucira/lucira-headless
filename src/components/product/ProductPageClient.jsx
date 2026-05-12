@@ -322,6 +322,17 @@ export default function ProductPageClient({ product, complementaryProducts = [],
     count: product.reviews?.count || product.reviewStats?.count || 0,
   });
 
+  const [isGoldCoinEnabled, setIsGoldCoinEnabled] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/settings/gold-coin")
+      .then((res) => res.json())
+      .then((data) => {
+        setIsGoldCoinEnabled(data.enabled ?? false);
+      })
+      .catch((err) => console.error("Error fetching gold coin setting:", err));
+  }, []);
+
   useEffect(() => {
     async function fetchReviewStats() {
       if (reviewStats.count === 0) {
@@ -1480,7 +1491,7 @@ useEffect(() => {
                     text: <>You&apos;re saving flat <span className="font-extrabold text-black">{mcDiscount}% OFF</span> on making charges.</>
                   });
                 }
-                if (isGoldCoinEligible) {
+                if (isGoldCoinEligible && isGoldCoinEnabled) {
                   slides.push({
                     icon: "🪙",
                     text: <>Complimentary <span className="font-extrabold text-black">Gold Coin</span> available on this order</>
@@ -1499,7 +1510,6 @@ useEffect(() => {
                       loopPreventsSliding
                       autoplay={{ delay: 3000, disableOnInteraction: false }}
                       loop={slides.length > 2}
-                      // loopedSlides={slides.length} 
                       className="w-full"
                     >
                       {slides.map((slide, idx) => (

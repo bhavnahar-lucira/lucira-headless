@@ -27,6 +27,7 @@ export default function DashboardHeader() {
           <Link href="/dashboard/webhooks" className="hover:text-white transition-colors whitespace-nowrap">Webhooks</Link>
           <Link href="/dashboard/sync" className="hover:text-white transition-colors whitespace-nowrap">Sync</Link>
           <Link href="/dashboard/topbar-offers" className="hover:text-white transition-colors whitespace-nowrap">TopBar Offers</Link>
+          <Link href="/dashboard/gold-coin-offer" className="hover:text-white transition-colors whitespace-nowrap">Gold Coin Offer</Link>
           <Link href="/dashboard/silver" className="hover:text-white transition-colors whitespace-nowrap">Silver</Link>
         </nav>
 
