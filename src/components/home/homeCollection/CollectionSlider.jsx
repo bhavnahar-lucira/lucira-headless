@@ -59,11 +59,11 @@ export default function CollectionSlider ({ products = [], loading = false, coll
             enabled: true,
             sticky: true,
           }}
-          autoplay={{
-            delay: 6000,
-            disableOnInteraction: false,
-            pauseOnMouseEnter: true,
-          }}
+          // autoplay={{
+          //   delay: 6000,
+          //   disableOnInteraction: false,
+          //   pauseOnMouseEnter: true,
+          // }}
           pagination={{
             el: `.${paginationElClass}`,
             type: 'progressbar',
@@ -108,21 +108,6 @@ export default function CollectionSlider ({ products = [], loading = false, coll
         </div>
       </div>  
       <style jsx global>{`
-        .collection-swiper .swiper-pagination-progressbar {
-          background: rgba(0,0,0,0.05) !important;
-          height: 2px !important;
-          position: relative !important;
-          width: 100% !important;
-          border-radius: 2px !important;
-          overflow: hidden !important;
-        }
-        
-        .collection-swiper .swiper-pagination-progressbar-fill {
-          background: #5B4740 !important;
-          height: 2px !important;
-          border-radius: 2px !important;
-        }
-
         .swiper-pagination-tracker {
             position: relative !important;
             width: 100% !important;
