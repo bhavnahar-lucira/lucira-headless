@@ -15,19 +15,20 @@ import {
 } from "@/components/ui/dialog";
 
 const sizeData = [
-  { ind: 5, us: "3", diaIn: 0.56, cirIn: 1.74 },
-  { ind: 6, us: "3.5", diaIn: 0.57, cirIn: 1.80 },
-  { ind: 7, us: "4", diaIn: 0.59, cirIn: 1.84 },
+  { ind: 5, us: "3", diaIn: 0.56, cirIn: 1.77 },
+  { ind: 6, us: "3.5", diaIn: 0.58, cirIn: 1.82 },
+  { ind: 7, us: "4", diaIn: 0.59, cirIn: 1.87 },
   { ind: 8, us: "4.5", diaIn: 0.60, cirIn: 1.89 },
-  { ind: 9, us: "5", diaIn: 0.62, cirIn: 1.94 },
-  { ind: 10, us: "5.5", diaIn: 0.63, cirIn: 1.99 },
-  { ind: 11, us: "6", diaIn: 0.65, cirIn: 2.04 },
-  { ind: 12, us: "6.5", diaIn: 0.67, cirIn: 2.09 },
-  { ind: 13, us: "7", diaIn: 0.68, cirIn: 2.14 },
-  { ind: 14, us: "7.5", diaIn: 0.70, cirIn: 2.19 },
-  { ind: 15, us: "8", diaIn: 0.71, cirIn: 2.24 },
-  { ind: 16, us: "8.5", diaIn: 0.73, cirIn: 2.29 },
-  { ind: 17, us: "9", diaIn: 0.74, cirIn: 2.34 },
+  { ind: 9, us: "5", diaIn: 0.61, cirIn: 1.92 },
+  { ind: 10, us: "5.5", diaIn: 0.63, cirIn: 1.97 },
+  { ind: 11, us: "6", diaIn: 0.64, cirIn: 2.02 },
+  { ind: 12, us: "6.5", diaIn: 0.65, cirIn: 2.04 },
+  { ind: 13, us: "7", diaIn: 0.67, cirIn: 2.09 },
+  { ind: 14, us: "7.5", diaIn: 0.68, cirIn: 2.14 },
+  { ind: 15, us: "8", diaIn: 0.69, cirIn: 2.16 },
+  { ind: 16, us: "8.5", diaIn: 0.70, cirIn: 2.21 },
+  { ind: 17, us: "9", diaIn: 0.71, cirIn: 2.24 },
+  { ind: 18, us: "9.5", diaIn: 0.73, cirIn: 2.29 },
 ];
 
 export function SizeGuideMobile({ children, nearestStore, availableStores = [], availableStoreCount = 0, deliveryInfo, getStoreDisplayName  }) {
@@ -37,9 +38,7 @@ export function SizeGuideMobile({ children, nearestStore, availableStores = [], 
   
 
   const convert = (val) => {
-    if (unit === "cm") {
-      return (val * 2.54).toFixed(2);
-    }
+    if (unit === "mm") return (val * 25.4).toFixed(2);
     return val.toFixed(2);
   };
 
@@ -152,11 +151,11 @@ export function SizeGuideMobile({ children, nearestStore, availableStores = [], 
                       {unit === 'inch' && <div className="absolute bottom-0 left-0 w-full h-0.5 bg-gray-900"></div>}
                     </button>
                     <button 
-                      onClick={() => setUnit("cm")}
-                      className={`pb-3 text-sm font-bold transition-all relative ${unit === 'cm' ? 'text-gray-900' : 'text-gray-400'}`}
+                      onClick={() => setUnit("mm")}
+                      className={`pb-3 text-sm font-bold transition-all relative ${unit === 'mm' ? 'text-gray-900' : 'text-gray-400'}`}
                     >
-                      cm
-                      {unit === 'cm' && <div className="absolute bottom-0 left-0 w-full h-0.5 bg-gray-900"></div>}
+                      mm
+                      {unit === 'mm' && <div className="absolute bottom-0 left-0 w-full h-0.5 bg-gray-900"></div>}
                     </button>
                   </div>
 
@@ -164,9 +163,9 @@ export function SizeGuideMobile({ children, nearestStore, availableStores = [], 
                   <div className="w-full overflow-x-auto pb-4">
                     <table className="w-full text-center border-collapse table-fixed">
                       <thead>
-                        <tr className="text-xs font-bold text-gray-400 uppercase tracking-widest border-b border-gray-100">
-                          <th className="py-4 px-2 font-bold">DIA ({unit === 'inch' ? 'IN' : 'CM'})</th>
-                          <th className="py-4 px-2 font-bold">CIR ({unit === 'inch' ? 'IN' : 'CM'})</th>
+                        <tr className="text-xs font-bold text-gray-900 border-b border-gray-100">
+                          <th className="py-4 px-2 font-bold">Dia ({unit === 'inch' ? 'in' : 'mm'})</th>
+                          <th className="py-4 px-2 font-bold">Cir ({unit === 'inch' ? 'in' : 'mm'})</th>
                           <th className="py-4 px-2 font-bold">IND</th>
                           <th className="py-4 px-2 font-bold">US</th>
                         </tr>

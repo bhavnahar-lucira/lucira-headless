@@ -12,8 +12,10 @@ import "swiper/css/navigation";
 import "swiper/css/pagination";
 
 const slideData = [
-  { name: "Eterna-Band", alt: "Eterna Band Collection", url: "/collections/all" },
-  { name: "Hina-Khan", alt: "Hina Khan Signature Series", url: "/collections/all" },
+  { name: "Mothers-Day", alt: "Mother's Day Gift", url: "/collections/gifts-for-mother" },
+  { name: "Birthday", alt: "Birthday", url: "/collections/birthday-gifts" },
+  { name: "NineKT", alt: "9KT Collection", url: "/collections/9kt-collection" },
+  { name: "Eterna-Band", alt: "Eterna Band Collection", url: "/collections/eterna" },
 ];
 
 export default function HeroBanner() {
