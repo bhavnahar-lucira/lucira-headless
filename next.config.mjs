@@ -13,6 +13,11 @@ const nextConfig = {
       },
       {
         protocol: 'https',
+        hostname: 'luciraonline.myshopify.com',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
         hostname: 'upload.wikimedia.org',
         pathname: '/**',
       },
