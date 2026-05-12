@@ -139,8 +139,34 @@ export default function CollectionPage({ params: paramsPromise }) {
       const res = await fetch(`/api/products/filters?handle=${handle}&${filterParamsString}`);
       const data = await res.json();
 
-      const sortedData = {};
+      const mergedData = {};
       Object.entries(data || {}).forEach(([groupKey, options]) => {
+        if (groupKey === "Price") {
+          mergedData[groupKey] = options;
+        } else if (Array.isArray(options)) {
+          const mergedOptionsMap = new Map();
+          options.forEach(opt => {
+            let label = (opt.label || "").trim();
+            // Handle K vs KT duplicates
+            if (groupKey === "Metal Purity") {
+              if (label === "14K") label = "14KT";
+              else if (label === "18K") label = "18KT";
+              else if (label === "9K") label = "9KT";
+            }
+
+            if (mergedOptionsMap.has(label)) {
+              const existing = mergedOptionsMap.get(label);
+              existing.count += opt.count;
+            } else {
+              mergedOptionsMap.set(label, { ...opt, label });
+            }
+          });
+          mergedData[groupKey] = Array.from(mergedOptionsMap.values());
+        }
+      });
+
+      const sortedData = {};
+      Object.entries(mergedData).forEach(([groupKey, options]) => {
         if (groupKey === "Price") {
           sortedData[groupKey] = options;
         } else if (Array.isArray(options)) {
