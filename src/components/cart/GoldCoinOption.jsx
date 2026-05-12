@@ -2,13 +2,21 @@
 
 import { useCart } from "@/hooks/useCart";
 import { Loader2, Check, Coins, Plus, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export const GOLDCOIN_VARIANT_ID = "gid://shopify/ProductVariant/47661824082138";
 
 export default function GoldCoinOption() {
   const { items, addToCart, removeFromCart, loading } = useCart();
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isEnabled, setIsEnabled] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/settings/gold-coin")
+      .then(res => res.json())
+      .then(data => setIsEnabled(data.enabled ?? false))
+      .catch(err => console.error("Error fetching gold coin setting:", err));
+  }, []);
 
   const goldCoinItem = items.find(item => item.variantId === GOLDCOIN_VARIANT_ID);
   const isApplied = !!goldCoinItem;
@@ -53,6 +61,7 @@ export default function GoldCoinOption() {
     }
   };
 
+  if (!isEnabled) return null;
   if (eligibleQuantity <= 0 && !isApplied) return null;
 
   return (
