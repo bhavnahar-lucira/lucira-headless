@@ -74,7 +74,7 @@ export default async function Page({ params }) {
           id="promo-banner"
           className="relative flex items-center justify-center w-full"
           style={{
-            backgroundImage: `url('https://www.lucirajewelry.com/cdn/shop/files/Offer-T-_-C-Desktop.jpg?v=1754045882&width=2000')`,
+            backgroundImage: `url('https://luciraonline.myshopify.com/cdn/shop/files/Offer-T-_-C-Desktop.jpg?v=1754045882&width=2000')`,
             backgroundSize: "cover",
             backgroundPosition: "center",
             backgroundRepeat: "no-repeat",
@@ -84,7 +84,7 @@ export default async function Page({ params }) {
           <style>{`
             @media screen and (max-width: 749px) {
                 #promo-banner {
-                    background-image: url('https://www.lucirajewelry.com/cdn/shop/files/Offer-T-_-C-Mobile.jpg?v=1754045881&width=1000') !important;
+                    background-image: url('https://luciraonline.myshopify.com/cdn/shop/files/Offer-T-_-C-Mobile.jpg?v=1754045881&width=1000') !important;
                     min-height: 400px !important;
                 }
             }
@@ -117,7 +117,7 @@ export default async function Page({ params }) {
           id="accessibility-banner"
           className="relative flex items-center justify-center w-full"
           style={{
-            backgroundImage: `url('https://www.lucirajewelry.com/cdn/shop/files/Accesiblity_20Page_20Banner_201920_20600.png?v=1768908054&width=2000')`,
+            backgroundImage: `url('https://luciraonline.myshopify.com/cdn/shop/files/Accesiblity_20Page_20Banner_201920_20600.png?v=1768908054&width=2000')`,
             backgroundSize: "cover",
             backgroundPosition: "center",
             backgroundRepeat: "no-repeat",
@@ -127,7 +127,7 @@ export default async function Page({ params }) {
           <style>{`
             @media screen and (max-width: 749px) {
               #accessibility-banner {
-                background-image: url('https://www.lucirajewelry.com/cdn/shop/files/Accesiblity_20Page_20Banner_201920_20600.png?v=1768908054&width=1000') !important;
+                background-image: url('https://luciraonline.myshopify.com/cdn/shop/files/Accesiblity_20Page_20Banner_201920_20600.png?v=1768908054&width=1000') !important;
                 min-height: 400px !important;
               }
             }

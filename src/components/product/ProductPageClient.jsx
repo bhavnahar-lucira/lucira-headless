@@ -256,11 +256,11 @@ const mapShapeCode = (code) => {
 };
 
 const serviceSlider = [
-  {
-    img: "/images/service/PDPGoldCoin.png",
-    title: "Complimentary Gold Coin",
-    desc: "Receive a free gold coin with this ring, making your order even more special."
-  },
+  // {
+  //   img: "/images/service/PDPGoldCoin.png",
+  //   title: "Complimentary Gold Coin",
+  //   desc: "Receive a free gold coin with this ring, making your order even more special."
+  // },
   {
     img: "/images/service/PDPOldGoldExchange.jpg",
     title: "Old Gold Exchange",
@@ -2157,7 +2157,7 @@ useEffect(() => {
                       style={{ width: `${(activePromoSlide / 3) * 100}%` }}
                     ></div>
                   </div>
-                  <span className="text-[12px] font-bold tracking-tight text-black">{activePromoSlide}/3</span>
+                  <span className="text-[12px] font-bold tracking-tight text-black">{activePromoSlide}/2</span>
                 </div>
               </div>
               <Separator />

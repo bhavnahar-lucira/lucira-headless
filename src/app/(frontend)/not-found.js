@@ -6,7 +6,7 @@ import Footer from "@/components/common/Footer";
 export default function NotFound() {
   // Replace these with CMS / API later if needed
   const data = {
-    ringImage: "https://www.lucirajewelry.com/cdn/shop/files/Group_1321315630_9e9275ff-1542-4638-b680-f1903f950cf9.png?v=1750417573", // put your image in /public/images/
+    ringImage: "https://luciraonline.myshopify.com/cdn/shop/files/Group_1321315630_9e9275ff-1542-4638-b680-f1903f950cf9.png?v=1750417573", // put your image in /public/images/
     heading: "LOOKS LIKE THE GEM IS MISSING…",
     subheading: "But don’t worry, treasures waiting for you.",
     collectionLink: "/collections/all",

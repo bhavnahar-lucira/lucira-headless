@@ -45,7 +45,7 @@ export default function MetalEducationPage() {
           <div className="p-6 md:p-10 flex flex-col md:flex-row gap-10">
             <div className="md:w-1/3">
               <Image
-                src="https://www.lucirajewelry.com/cdn/shop/files/LJ-PGR013YG_1.jpg"
+                src="https://luciraonline.myshopify.com/cdn/shop/files/LJ-PGR013YG_1.jpg"
                 alt="Gold Jewelry"
                 width={500}
                 height={500}
@@ -142,7 +142,7 @@ export default function MetalEducationPage() {
           <div className="p-6 md:p-10 flex flex-col md:flex-row gap-10">
             <div className="md:w-1/3">
               <Image
-                src="https://www.lucirajewelry.com/cdn/shop/files/LJ-R00820WG_1.jpg"
+                src="https://luciraonline.myshopify.com/cdn/shop/files/LJ-R00820WG_1.jpg"
                 alt="Platinum Jewelry"
                 width={500}
                 height={500}

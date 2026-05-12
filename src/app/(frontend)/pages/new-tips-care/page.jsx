@@ -7,9 +7,9 @@ export default function JewelryCareTipsPage() {
             subtitle:
                 "A little care goes a long way in keeping your jewelry radiant.",
             video:
-                "https://www.lucirajewelry.com/cdn/shop/videos/c/vp/4ddaecef9c3649658f64f0d6fee078a6/4ddaecef9c3649658f64f0d6fee078a6.HD-1080p-4.8Mbps-53552721.mp4",
+                "https://luciraonline.myshopify.com/cdn/shop/videos/c/vp/4ddaecef9c3649658f64f0d6fee078a6/4ddaecef9c3649658f64f0d6fee078a6.HD-1080p-4.8Mbps-53552721.mp4",
             poster:
-                "https://www.lucirajewelry.com/cdn/shop/files/preview_images/4ddaecef9c3649658f64f0d6fee078a6.thumbnail.0000000000_small.jpg",
+                "https://luciraonline.myshopify.com/cdn/shop/files/preview_images/4ddaecef9c3649658f64f0d6fee078a6.thumbnail.0000000000_small.jpg",
             reverse: true,
             points: [
                 "Put your jewelry on after makeup, perfume, and lotion, let it be the final touch.",
@@ -23,9 +23,9 @@ export default function JewelryCareTipsPage() {
             subtitle:
                 "With the right touch and proper cleaning, your jewelry shines like the day you got it.",
             video:
-                "https://www.lucirajewelry.com/cdn/shop/videos/c/vp/915d9a20ae4945b3b1c870dc00ddfd2a/915d9a20ae4945b3b1c870dc00ddfd2a.HD-1080p-3.3Mbps-53552869.mp4",
+                "https://luciraonline.myshopify.com/cdn/shop/videos/c/vp/915d9a20ae4945b3b1c870dc00ddfd2a/915d9a20ae4945b3b1c870dc00ddfd2a.HD-1080p-3.3Mbps-53552869.mp4",
             poster:
-                "https://www.lucirajewelry.com/cdn/shop/files/preview_images/915d9a20ae4945b3b1c870dc00ddfd2a.thumbnail.0000000000_small.jpg",
+                "https://luciraonline.myshopify.com/cdn/shop/files/preview_images/915d9a20ae4945b3b1c870dc00ddfd2a.thumbnail.0000000000_small.jpg",
             reverse: false,
             points: [
                 "Use a soft cloth to gently clean any tarnish or discoloration. This method is safe for most jewelry pieces and helps maintain their shine without causing damage.",
@@ -39,22 +39,22 @@ export default function JewelryCareTipsPage() {
         {
             title: "Divide and Rule",
             description: "Store each piece separately in a soft pouch or a lined Jewelry Box.",
-            image: "https://www.lucirajewelry.com/cdn/shop/files/Divide_n_Rule.jpg?v=1754030688",
+            image: "https://luciraonline.myshopify.com/cdn/shop/files/Divide_n_Rule.jpg?v=1754030688",
         },
         {
             title: "Prevent Tangles",
             description: "Close the clasps and lay necklaces flat or hang them to prevent knots.",
-            image: "https://www.lucirajewelry.com/cdn/shop/files/Prevent_Tangle.jpg?v=1754030688",
+            image: "https://luciraonline.myshopify.com/cdn/shop/files/Prevent_Tangle.jpg?v=1754030688",
         },
         {
             title: "Control Humidity",
             description: "Use anti-tarnish strips or silica gel / packs in your Jewelry Box.",
-            image: "https://www.lucirajewelry.com/cdn/shop/files/Control_Humidity.png?v=1754030689",
+            image: "https://luciraonline.myshopify.com/cdn/shop/files/Control_Humidity.png?v=1754030689",
         },
         {
             title: "Individual Care",
             description: "Opt for thoughtful storage options, such as individual pouches for each diamond piece.",
-            image: "https://www.lucirajewelry.com/cdn/shop/files/Individual_Care.jpg?v=1754030687",
+            image: "https://luciraonline.myshopify.com/cdn/shop/files/Individual_Care.jpg?v=1754030687",
         },
     ];
 
@@ -62,43 +62,43 @@ export default function JewelryCareTipsPage() {
         {
             text: "Avoid soaking delicate diamonds in soap and water, as it can leave residue and dull their shine.",
             image:
-            "https://www.lucirajewelry.com/cdn/shop/files/Dont_use_soap.jpg?v=1754030688",
-            icon: "https://www.lucirajewelry.com/cdn/shop/files/Group_1321315714.svg",
+            "https://luciraonline.myshopify.com/cdn/shop/files/Dont_use_soap.jpg?v=1754030688",
+            icon: "https://luciraonline.myshopify.com/cdn/shop/files/Group_1321315714.svg",
             reverse: false,
         },
         {
             text: "Gently wipe them with a soft cloth or use a diamond-safe cleaner to preserve their sparkle without causing harm.",
             image:
-            "https://www.lucirajewelry.com/cdn/shop/files/Use_cloth_to_clean.png?v=1754047007",
-            icon: "https://www.lucirajewelry.com/cdn/shop/files/Group_1321315717.svg",
+            "https://luciraonline.myshopify.com/cdn/shop/files/Use_cloth_to_clean.png?v=1754047007",
+            icon: "https://luciraonline.myshopify.com/cdn/shop/files/Group_1321315717.svg",
             reverse: true,
         },
         {
             text: "Don’t use toothpaste to clean as it scratches diamonds and their metal settings over time.",
             image:
-            "https://www.lucirajewelry.com/cdn/shop/files/Dont_use_toothpaste_V2.jpg?v=1754048931",
-            icon: "https://www.lucirajewelry.com/cdn/shop/files/Group_1321315714.svg",
+            "https://luciraonline.myshopify.com/cdn/shop/files/Dont_use_toothpaste_V2.jpg?v=1754048931",
+            icon: "https://luciraonline.myshopify.com/cdn/shop/files/Group_1321315714.svg",
             reverse: false,
         },
         {
             text: "Use a Gentle Jewelry Cleaner instead.",
             image:
-            "https://www.lucirajewelry.com/cdn/shop/files/Jewelry_cleaning.jpg?v=1754030688",
-            icon: "https://www.lucirajewelry.com/cdn/shop/files/Group_1321315717.svg",
+            "https://luciraonline.myshopify.com/cdn/shop/files/Jewelry_cleaning.jpg?v=1754030688",
+            icon: "https://luciraonline.myshopify.com/cdn/shop/files/Group_1321315717.svg",
             reverse: true,
         },
         {
             text: "Storing jewelry in spaces with poor air circulation can trap moisture and lead to tarnishing.",
             image:
-            "https://www.lucirajewelry.com/cdn/shop/files/Don_t_store_jewellery_in_any_space.jpg?v=1754030687",
-            icon: "https://www.lucirajewelry.com/cdn/shop/files/Group_1321315714.svg",
+            "https://luciraonline.myshopify.com/cdn/shop/files/Don_t_store_jewellery_in_any_space.jpg?v=1754030687",
+            icon: "https://luciraonline.myshopify.com/cdn/shop/files/Group_1321315714.svg",
             reverse: false,
         },
         {
             text: "Wrap each piece in anti-tarnish cloth or keep it in an airtight pouch with silica gel.",
             image:
-            "https://www.lucirajewelry.com/cdn/shop/files/anti_tarnish.jpg?v=1754030688",
-            icon: "https://www.lucirajewelry.com/cdn/shop/files/Group_1321315717.svg",
+            "https://luciraonline.myshopify.com/cdn/shop/files/anti_tarnish.jpg?v=1754030688",
+            icon: "https://luciraonline.myshopify.com/cdn/shop/files/Group_1321315717.svg",
             reverse: true,
         },
     ];
@@ -109,21 +109,21 @@ export default function JewelryCareTipsPage() {
             description:
             "Sprinkle baby powder or apply a drop of oil (like coconut or olive oil) to loosen the knots. Use a pin to gently separate them.",
             image:
-            "https://www.lucirajewelry.com/cdn/shop/files/Use_powder.jpg",
+            "https://luciraonline.myshopify.com/cdn/shop/files/Use_powder.jpg",
         },
         {
             title: "Ring Too Tight?",
             description:
             "Fingers swell in heat. Soak your hand in cold water for a few minutes and keep it elevated to reduce swelling.",
             image:
-            "https://www.lucirajewelry.com/cdn/shop/files/Tightness_Ring.jpg",
+            "https://luciraonline.myshopify.com/cdn/shop/files/Tightness_Ring.jpg",
         },
         {
             title: "Wobbly Stones?",
             description:
             "Avoid wearing them until they are repaired. As a quick temporary fix, apply a small dab of clear nail polish to secure the loose stone.",
             image:
-            "https://www.lucirajewelry.com/cdn/shop/files/Wobbly_stone.jpg",
+            "https://luciraonline.myshopify.com/cdn/shop/files/Wobbly_stone.jpg",
         },
     ];
 
@@ -132,7 +132,7 @@ export default function JewelryCareTipsPage() {
             <section className="relative w-full">
                 <div className="hidden md:block relative w-full h-[calc(100dvh-200px)]">
                     <Image
-                    src="https://www.lucirajewelry.com/cdn/shop/files/Banner_V3_04e3d73c-3503-4bfc-9ece-862a4ad407d8.jpg"
+                    src="https://luciraonline.myshopify.com/cdn/shop/files/Banner_V3_04e3d73c-3503-4bfc-9ece-862a4ad407d8.jpg"
                     alt="Banner Desktop"
                     fill
                     priority
@@ -142,7 +142,7 @@ export default function JewelryCareTipsPage() {
                 
                 <div className="block md:hidden relative w-full h-[360px]">
                     <Image
-                        src="https://www.lucirajewelry.com/cdn/shop/files/Mobile_Banner_V2.png"
+                        src="https://luciraonline.myshopify.com/cdn/shop/files/Mobile_Banner_V2.png"
                         alt="Banner Mobile"
                         fill
                         className="object-cover object-bottom"

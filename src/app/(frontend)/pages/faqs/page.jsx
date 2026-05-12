@@ -115,8 +115,8 @@ export default function FAQPage() {
       <div className="w-full bg-white text-[#1a1a1a] font-['Figtree']">
         <section
           className="relative w-full h-[535px] md:h-[605px] flex items-end justify-center bg-cover bg-center bg-no-repeat
-            bg-[url('https://www.lucirajewelry.com/cdn/shop/files/9820f9dcdf6d0bb0c881f219d866707196ee8436_768x.jpg?v=1768888876')]
-            md:bg-[url('https://www.lucirajewelry.com/cdn/shop/files/Desktop-Banner_1920x.jpg?v=1769855955')]"
+            bg-[url('https://luciraonline.myshopify.com/cdn/shop/files/9820f9dcdf6d0bb0c881f219d866707196ee8436_768x.jpg?v=1768888876')]
+            md:bg-[url('https://luciraonline.myshopify.com/cdn/shop/files/Desktop-Banner_1920x.jpg?v=1769855955')]"
         >
           <div className="absolute inset-0 bg-black/0 z-10" />
 

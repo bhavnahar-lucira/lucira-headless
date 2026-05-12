@@ -143,7 +143,7 @@ export default function SizeGuidePage() {
                             </div>
                             <div className="flex-1 min-w-[300px]">
                                 <Image
-                                    src="https://www.lucirajewelry.com/cdn/shop/t/248/assets/ring-scale.webp?v=135522144173540751921758515040"
+                                    src="https://luciraonline.myshopify.com/cdn/shop/t/248/assets/ring-scale.webp?v=135522144173540751921758515040"
                                     alt="Ring measurement scale"
                                     width={600}
                                     height={600}

@@ -15,32 +15,32 @@ const educationSlides = [
   {
     title: "22 Carat Gold Hallmark",
     href: "/blogs/stories/22-carat-gold-hallmark",
-    desktopImg: "https://www.lucirajewelry.com/cdn/shop/files/Banner_7ab78e0c-831c-4131-9a38-b6c94ea3a3ae.jpg?v=1757059864&width=1200",
-    mobileImg: "https://www.lucirajewelry.com/cdn/shop/files/Mobile_Banner_08fac4dc-4342-401b-aacb-316eb5d66384.jpg?v=1757059976&width=600",
+    desktopImg: "https://luciraonline.myshopify.com/cdn/shop/files/Banner_7ab78e0c-831c-4131-9a38-b6c94ea3a3ae.jpg?v=1757059864&width=1200",
+    mobileImg: "https://luciraonline.myshopify.com/cdn/shop/files/Mobile_Banner_08fac4dc-4342-401b-aacb-316eb5d66384.jpg?v=1757059976&width=600",
   },
   {
     title: "The Attitude Shift Towards Lab Grown Diamonds",
     href: "/blogs/stories/the-attitude-shift-towards-lab-grown-diamonds",
-    desktopImg: "https://www.lucirajewelry.com/cdn/shop/files/The_Attitude_Shift_Towards_Lab_Grown_Diamonds.png?v=1750852322&width=1200",
-    mobileImg: "https://www.lucirajewelry.com/cdn/shop/files/The_Attitude_Shift_Towards_Lab_Grown_Diamonds_webp.jpg?v=1751268777&width=600",
+    desktopImg: "https://luciraonline.myshopify.com/cdn/shop/files/The_Attitude_Shift_Towards_Lab_Grown_Diamonds.png?v=1750852322&width=1200",
+    mobileImg: "https://luciraonline.myshopify.com/cdn/shop/files/The_Attitude_Shift_Towards_Lab_Grown_Diamonds_webp.jpg?v=1751268777&width=600",
   },
   {
     title: "Engagement Ring Hand Guide",
     href: "/blogs/stories/which-hand-engagement-ring-female",
-    desktopImg: "https://www.lucirajewelry.com/cdn/shop/files/Banenr_Old.jpg?v=1765623115&width=1200",
-    mobileImg: "https://www.lucirajewelry.com/cdn/shop/files/Mobile_Baner_Old.jpg?v=1765623133&width=600",
+    desktopImg: "https://luciraonline.myshopify.com/cdn/shop/files/Banenr_Old.jpg?v=1765623115&width=1200",
+    mobileImg: "https://luciraonline.myshopify.com/cdn/shop/files/Mobile_Baner_Old.jpg?v=1765623133&width=600",
   },
   {
     title: "Is 9KT Gold Real Gold?",
     href: "/blogs/stories/is-9kt-gold-real-gold",
-    desktopImg: "https://www.lucirajewelry.com/cdn/shop/files/Banner_cd7811ca-3813-4ba9-b261-699bfe0a54b9.jpg?v=1759577831&width=1200",
-    mobileImg: "https://www.lucirajewelry.com/cdn/shop/files/Mobile_Banner_205ab6e9-7047-47c1-9406-dcb706a112e8.jpg?v=1759577868&width=600",
+    desktopImg: "https://luciraonline.myshopify.com/cdn/shop/files/Banner_cd7811ca-3813-4ba9-b261-699bfe0a54b9.jpg?v=1759577831&width=1200",
+    mobileImg: "https://luciraonline.myshopify.com/cdn/shop/files/Mobile_Banner_205ab6e9-7047-47c1-9406-dcb706a112e8.jpg?v=1759577868&width=600",
   },
   {
     title: "What Is BIS Hallmark?",
     href: "/blogs/stories/what-is-bis-hallmark",
-    desktopImg: "https://www.lucirajewelry.com/cdn/shop/files/Banner_V3_BIS.jpg?v=1753689521&width=1200",
-    mobileImg: "https://www.lucirajewelry.com/cdn/shop/files/Mobile_Banner_1_3a756d42-c6ca-4913-80a5-c581d3f6f873.jpg?v=1753518221&width=600",
+    desktopImg: "https://luciraonline.myshopify.com/cdn/shop/files/Banner_V3_BIS.jpg?v=1753689521&width=1200",
+    mobileImg: "https://luciraonline.myshopify.com/cdn/shop/files/Mobile_Banner_1_3a756d42-c6ca-4913-80a5-c581d3f6f873.jpg?v=1753518221&width=600",
   },
 ];
 

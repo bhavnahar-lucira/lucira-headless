@@ -6,25 +6,25 @@ export default function LuciraPromise({ title, description }) {
     {
       title: "Certified Jewelry",
       image:
-        "https://www.lucirajewelry.com/cdn/shop/files/Frame_1321315897_1_8a6d4b51-56c2-4dc3-8356-5b1fcd8e2c24.png",
+        "https://luciraonline.myshopify.com/cdn/shop/files/Frame_1321315897_1_8a6d4b51-56c2-4dc3-8356-5b1fcd8e2c24.png",
       href: "/pages/certificate",
     },
     {
       title: "Lucira Support",
       image:
-        "https://www.lucirajewelry.com/cdn/shop/files/Frame_1321315898_1_4be12348-2029-4648-9fee-6553cee6bc51.png",
+        "https://luciraonline.myshopify.com/cdn/shop/files/Frame_1321315898_1_4be12348-2029-4648-9fee-6553cee6bc51.png",
       href: "/pages/contact-us",
     },
     {
       title: "15 Days Money Back",
       image:
-        "https://www.lucirajewelry.com/cdn/shop/files/Frame_1321315899_1_e801f813-4b5f-4342-99ba-27178f97826b.png",
+        "https://luciraonline.myshopify.com/cdn/shop/files/Frame_1321315899_1_e801f813-4b5f-4342-99ba-27178f97826b.png",
       href: "/pages/15-days-return",
     },
     {
       title: "100% Lifetime Exchange",
       image:
-        "https://www.lucirajewelry.com/cdn/shop/files/Frame_1321315900_1_f9cd91cb-2f02-4534-8eda-51f55f42cfd3.png",
+        "https://luciraonline.myshopify.com/cdn/shop/files/Frame_1321315900_1_f9cd91cb-2f02-4534-8eda-51f55f42cfd3.png",
       href: "/pages/lifetime-exchange-buyback-policy",
     },
   ]

@@ -12,8 +12,8 @@ export default function GemstoneEducationPage() {
         {
             month: "JAN",
             name: "Garnet",
-            tabIcon: "https://www.lucirajewelry.com/cdn/shop/files/Garnet_314878af-386a-465e-96d1-0d238294a020_120x120_crop_center.png",
-            image: "https://www.lucirajewelry.com/cdn/shop/files/Garnet_ec535ee4-2c08-446b-b86d-ead77275c934_600x600_crop_center.jpg",
+            tabIcon: "https://luciraonline.myshopify.com/cdn/shop/files/Garnet_314878af-386a-465e-96d1-0d238294a020_120x120_crop_center.png",
+            image: "https://luciraonline.myshopify.com/cdn/shop/files/Garnet_ec535ee4-2c08-446b-b86d-ead77275c934_600x600_crop_center.jpg",
             properties: "Garnet is a durable and vibrant gemstone known for its rich, fiery hues and exceptional brilliance. Belonging to a group of silicate minerals, garnet occurs in a spectrum of colours from deep red and raspberry pink to vivid green and bright orange. It has a glass-like lustre and typically forms in cubic crystals.",
             facts: "Garnet has been treasured for over 5,000 years, with discoveries in ancient Egyptian jewelry and Roman signet rings. The name “garnet” comes from the Latin word granatum, meaning pomegranate, inspired by its resemblance to the fruit’s deep red seeds.",
             hardness: "6.5–7.5",
@@ -23,8 +23,8 @@ export default function GemstoneEducationPage() {
         {
             month: "FEB",
             name: "Amethyst",
-            tabIcon: "https://www.lucirajewelry.com/cdn/shop/files/Amethyst_f4af72a5-aad7-4f0f-8d69-8e3656760906_120x120_crop_center.png",
-            image: "https://www.lucirajewelry.com/cdn/shop/files/Amethyst_600x600_crop_center.jpg",
+            tabIcon: "https://luciraonline.myshopify.com/cdn/shop/files/Amethyst_f4af72a5-aad7-4f0f-8d69-8e3656760906_120x120_crop_center.png",
+            image: "https://luciraonline.myshopify.com/cdn/shop/files/Amethyst_600x600_crop_center.jpg",
             properties: "Amethyst is a striking variety of quartz admired for its captivating purple hues, ranging from soft lavender to deep royal violet. Its glass-like lustre and transparent-to-translucent clarity enhance its refined brilliance. The gemstone’s colour comes from trace amounts of iron and natural irradiation within the crystal.",
             facts: "Amethyst has been admired for thousands of years, with origins dating back to ancient civilizations such as Greece, Egypt, and Rome. The name “amethyst” comes from the Greek word amethystos. Historically, it was considered as valuable as ruby and sapphire until large deposits were discovered in Brazil during the 19th century.",
             hardness: "7",
@@ -34,8 +34,8 @@ export default function GemstoneEducationPage() {
         {
             month: "MAR",
             name: "Aquamarine",
-            tabIcon: "https://www.lucirajewelry.com/cdn/shop/files/AquaMarine_025a81f7-90d5-4037-a6d6-769104c92c5d_120x120_crop_center.png",
-            image: "https://www.lucirajewelry.com/cdn/shop/files/AquaMarine_2f8d0e10-10b2-4f15-a1a6-e93435056fa7_600x600_crop_center.jpg",
+            tabIcon: "https://luciraonline.myshopify.com/cdn/shop/files/AquaMarine_025a81f7-90d5-4037-a6d6-769104c92c5d_120x120_crop_center.png",
+            image: "https://luciraonline.myshopify.com/cdn/shop/files/AquaMarine_2f8d0e10-10b2-4f15-a1a6-e93435056fa7_600x600_crop_center.jpg",
             properties: "Aquamarine is a variety of the mineral beryl, prized for its cool blue to blue-green hues. It has a glass-like lustre, excellent transparency, and strong durability. Symbolically, it represents peace, courage, clear communication, and harmony.",
             facts: "Historically treasured by sailors as a protective talisman, aquamarine derives its name from the Latin aqua marina, meaning “sea water.",
             hardness: "7.5–8",
@@ -45,8 +45,8 @@ export default function GemstoneEducationPage() {
         {
             month: "APR",
             name: "Diamond",
-            tabIcon: "https://www.lucirajewelry.com/cdn/shop/files/Diamond_970909be-d268-4fd0-b730-6bd0519b80a3_120x120_crop_center.png",
-            image: "https://www.lucirajewelry.com/cdn/shop/files/Diamond_77bde258-e081-4ad5-b185-f084d3ce09d9_600x600_crop_center.jpg",
+            tabIcon: "https://luciraonline.myshopify.com/cdn/shop/files/Diamond_970909be-d268-4fd0-b730-6bd0519b80a3_120x120_crop_center.png",
+            image: "https://luciraonline.myshopify.com/cdn/shop/files/Diamond_77bde258-e081-4ad5-b185-f084d3ce09d9_600x600_crop_center.jpg",
             properties: "Diamond is composed of pure carbon arranged in a crystal lattice structure, giving it extraordinary hardness and light performance. It has exceptional brilliance, fire, and durability, making it ideal for everyday fine jewelry.",
             facts: "The name Diamond comes from the ancient Greek word “adamas”, meaning unbreakable, invincible, or indestructible. Over time, adamas evolved through Latin (diamas) and Old French (diamant) into the modern English word diamond.",
             hardness: "10",
@@ -56,8 +56,8 @@ export default function GemstoneEducationPage() {
         {
             month: "MAY",
             name: "Emerald",
-            tabIcon: "https://www.lucirajewelry.com/cdn/shop/files/Emerald_f3de4bcb-d24a-4239-a0d3-19675335beda_120x120_crop_center.png",
-            image: "https://www.lucirajewelry.com/cdn/shop/files/Emerald_b37853cf-7742-4c01-9de3-92a661f5ae91_600x600_crop_center.jpg",
+            tabIcon: "https://luciraonline.myshopify.com/cdn/shop/files/Emerald_f3de4bcb-d24a-4239-a0d3-19675335beda_120x120_crop_center.png",
+            image: "https://luciraonline.myshopify.com/cdn/shop/files/Emerald_b37853cf-7742-4c01-9de3-92a661f5ae91_600x600_crop_center.jpg",
             properties: "Emerald is a variety of the mineral beryl, colored by traces of chromium and vanadium. It is prized for its intense green hue, natural inclusions (often called “jardin”), and refined brilliance. Though relatively hard, it is more delicate than it appears due to internal inclusions.",
             facts: "Emeralds have been treasured since ancient Egypt, famously adored by Cleopatra. Today, major sources include Colombia.",
             hardness: "7.5 - 8",
@@ -67,8 +67,8 @@ export default function GemstoneEducationPage() {
         {
             month: "JUN",
             name: "Pearl",
-            tabIcon: "https://www.lucirajewelry.com/cdn/shop/files/Pearl_7cf7afb9-a707-4ac0-b4d0-8041e78392dc_120x120_crop_center.png",
-            image: "https://www.lucirajewelry.com/cdn/shop/files/Pearl_3e59d06e-fdd0-4a2e-ae57-9fff2930e34f_600x600_crop_center.jpg",
+            tabIcon: "https://luciraonline.myshopify.com/cdn/shop/files/Pearl_7cf7afb9-a707-4ac0-b4d0-8041e78392dc_120x120_crop_center.png",
+            image: "https://luciraonline.myshopify.com/cdn/shop/files/Pearl_3e59d06e-fdd0-4a2e-ae57-9fff2930e34f_600x600_crop_center.jpg",
             properties: "Pearl is an organic gemstone formed inside mollusks. Unlike other gems, it is not mined but created naturally when an irritant is coated with layers of nacre. It is known for its smooth surface, subtle iridescence, and creamy to white hues, though it also appears in pink, gold, and black.",
             facts: "Treasured for over 4,000 years, pearls were once reserved for royalty and nobility. Ancient divers retrieved natural pearls from the Persian Gulf and Indian Ocean long before cultured pearls were developed in Japan in the early 20th century.",
             hardness: "2.5 - 4.5",
@@ -78,8 +78,8 @@ export default function GemstoneEducationPage() {
         {
             month: "JUL",
             name: "Ruby",
-            tabIcon: "https://www.lucirajewelry.com/cdn/shop/files/Ruby_c8b32bdf-7341-42cf-8fb1-6cd2a2856b6d_120x120_crop_center.png",
-            image: "https://www.lucirajewelry.com/cdn/shop/files/Ruby_ff39bb12-0614-4b18-999f-2eb4161f298b_600x600_crop_center.jpg",
+            tabIcon: "https://luciraonline.myshopify.com/cdn/shop/files/Ruby_c8b32bdf-7341-42cf-8fb1-6cd2a2856b6d_120x120_crop_center.png",
+            image: "https://luciraonline.myshopify.com/cdn/shop/files/Ruby_ff39bb12-0614-4b18-999f-2eb4161f298b_600x600_crop_center.jpg",
             properties: "Ruby is a variety of the mineral corundum, colored red by traces of chromium. It is prized for its vibrant “pigeon blood” red tone, exceptional durability, and strong brilliance. With a hardness of 9, ruby is ideal for everyday fine jewellery.",
             facts: "Rubies have been treasured for centuries, especially in ancient Burma (now Myanmar), where warriors believed they made them invincible in battle. Today, major sources include Myanmar, Mozambique, Thailand, Sri Lanka, and Madagascar, with Burmese rubies considered among the finest in the world.",
             hardness: "9",
@@ -89,8 +89,8 @@ export default function GemstoneEducationPage() {
         {
             month: "AUG",
             name: "Peridot",
-            tabIcon: "https://www.lucirajewelry.com/cdn/shop/files/Peridot_13fb1b9a-4492-41ba-9141-3c86da32bf85_120x120_crop_center.png",
-            image: "https://www.lucirajewelry.com/cdn/shop/files/Peridot_eddaf486-d149-4d6b-8059-ed002e98ed52_600x600_crop_center.jpg",
+            tabIcon: "https://luciraonline.myshopify.com/cdn/shop/files/Peridot_13fb1b9a-4492-41ba-9141-3c86da32bf85_120x120_crop_center.png",
+            image: "https://luciraonline.myshopify.com/cdn/shop/files/Peridot_eddaf486-d149-4d6b-8059-ed002e98ed52_600x600_crop_center.jpg",
             properties: "Peridot is a gem-quality variety of the mineral olivine, known for its distinctive yellow-green to olive hues caused by iron within its structure. It has a bright, glass-like lustre and is typically eye-clean with lively brilliance.",
             facts: "Peridot has been mined for over 3,500 years, first discovered on Egypt’s Zabargad Island in the Red Sea, where it was treasured by ancient pharaohs. Today, key sources include Myanmar, Pakistan, China, Vietnam, and the United States (Arizona). Rarely, peridot has even been found in meteorites, making it one of the few gemstones with extraterrestrial origins.",
             hardness: "6.5 - 7",
@@ -100,8 +100,8 @@ export default function GemstoneEducationPage() {
         {
             month: "SEP",
             name: "Sapphire",
-            tabIcon: "https://www.lucirajewelry.com/cdn/shop/files/Sapphire_4dbe553f-bed4-45c3-9222-e8d8efdae5d2_120x120_crop_center.png",
-            image: "https://www.lucirajewelry.com/cdn/shop/files/Sapphire_dee1e691-bf7c-4b02-b461-125f37fa6808_600x600_crop_center.jpg",
+            tabIcon: "https://luciraonline.myshopify.com/cdn/shop/files/Sapphire_4dbe553f-bed4-45c3-9222-e8d8efdae5d2_120x120_crop_center.png",
+            image: "https://luciraonline.myshopify.com/cdn/shop/files/Sapphire_dee1e691-bf7c-4b02-b461-125f37fa6808_600x600_crop_center.jpg",
             properties: "Sapphire is a variety of the mineral corundum, most famous for its deep blue colour, though it occurs in many shades, including pink, yellow, and white. Its exceptional hardness, brilliance, and durability make it a prized choice for rings and heirloom pieces.",
             facts: "Sapphire is a variety of the mineral corundum, most famous for its deep blue colour, though it occurs in many shades, including pink, yellow, and white. Its exceptional hardness, brilliance, and durability make it a prized choice for rings and heirloom pieces.",
             hardness: "9",
@@ -111,8 +111,8 @@ export default function GemstoneEducationPage() {
         {
             month: "OCT",
             name: "Opal",
-            tabIcon: "https://www.lucirajewelry.com/cdn/shop/files/Opal_V2-desktop_120x120_crop_center.png",
-            image: "https://www.lucirajewelry.com/cdn/shop/files/Opal_f97315c1-f187-46be-b231-5389669346eb_600x600_crop_center.jpg",
+            tabIcon: "https://luciraonline.myshopify.com/cdn/shop/files/Opal_V2-desktop_120x120_crop_center.png",
+            image: "https://luciraonline.myshopify.com/cdn/shop/files/Opal_f97315c1-f187-46be-b231-5389669346eb_600x600_crop_center.jpg",
             properties: "Opal is a hydrated form of silica known for its unique internal structure that diffracts light, creating its signature flashes of colour. It ranges from white and black to fire opal’s vibrant orange. With a soft, luminous glow and distinctive character.",
             facts: "Opals have been admired since ancient Rome, where they symbolized hope and purity. Today, Australia produces over 90% of the world’s opals, including the rare and prized black opal.",
             hardness: "5.5 - 6.5",
@@ -122,8 +122,8 @@ export default function GemstoneEducationPage() {
         {
             month: "NOV",
             name: "Topaz",
-            tabIcon: "https://www.lucirajewelry.com/cdn/shop/files/Topaz_04fbda1f-a983-405a-b510-aece8a9d158f_120x120_crop_center.png",
-            image: "https://www.lucirajewelry.com/cdn/shop/files/Topaz_0dfaff20-2867-4910-8c87-a2e7f73290ca_600x600_crop_center.jpg",
+            tabIcon: "https://luciraonline.myshopify.com/cdn/shop/files/Topaz_04fbda1f-a983-405a-b510-aece8a9d158f_120x120_crop_center.png",
+            image: "https://luciraonline.myshopify.com/cdn/shop/files/Topaz_0dfaff20-2867-4910-8c87-a2e7f73290ca_600x600_crop_center.jpg",
             properties: "Topaz is a silicate mineral admired for its wide range of colours, including blue, golden yellow, pink, and the rare Imperial topaz with warm orange tones. It has excellent transparency, a glass-like lustre, and impressive hardness.",
             facts: "The name “topaz” is believed to derive from the ancient Greek name Topazios, an island in the Red Sea. Historically treasured by royalty, major sources today include Brazil and Imperial topaz from Brazil is especially prized for its rich golden-orange hue.",
             hardness: "8",
@@ -133,8 +133,8 @@ export default function GemstoneEducationPage() {
         {
             month: "DEC",
             name: "Turquoise",
-            tabIcon: "https://www.lucirajewelry.com/cdn/shop/files/Turquoise_643b9ba0-4a93-4422-ba31-a953c04d3b78_120x120_crop_center.png",
-            image: "https://www.lucirajewelry.com/cdn/shop/files/Turquoise_1ca730d3-fe5c-4eea-9df9-b6b9b98f9ed9_600x600_crop_center.jpg",
+            tabIcon: "https://luciraonline.myshopify.com/cdn/shop/files/Turquoise_643b9ba0-4a93-4422-ba31-a953c04d3b78_120x120_crop_center.png",
+            image: "https://luciraonline.myshopify.com/cdn/shop/files/Turquoise_1ca730d3-fe5c-4eea-9df9-b6b9b98f9ed9_600x600_crop_center.jpg",
             properties: "Turquoise is an opaque gemstone composed of hydrated copper and aluminum phosphate, giving it its signature blue-green colour often accented with natural matrix patterns. It has a smooth, waxy lustre, and due to its relative softness and porosity, it benefits from gentle care.",
             facts: "Turquoise has been cherished for over 7,000 years, worn by ancient Egyptians, Persians, and Native American cultures as a protective talisman. The name derives from the French word “turquois,” meaning “Turkish,” as the stone reached Europe through Turkish trade routes.",
             hardness: "5 - 6",
@@ -146,28 +146,28 @@ export default function GemstoneEducationPage() {
     const cards = [
         {
             title: "CUT",
-            image: "https://www.lucirajewelry.com/cdn/shop/files/Cut.jpg",
+            image: "https://luciraonline.myshopify.com/cdn/shop/files/Cut.jpg",
             bg: "bg-[#6b6b6b]",
             flipTitle: "CUT",
             flipDesc: "Cut defines how well a gemstone’s facets are shaped and aligned. A precise cut maximizes brilliance, fire, and sparkle by allowing light to reflect beautifully through the stone.",
         },
         {
             title: "CARAT",
-            image: "https://www.lucirajewelry.com/cdn/shop/files/Carat_595ff833-04b7-4b50-92fd-a748b95ec1aa.jpg",
+            image: "https://luciraonline.myshopify.com/cdn/shop/files/Carat_595ff833-04b7-4b50-92fd-a748b95ec1aa.jpg",
             bg: "bg-[#5a7a6a]",
             flipTitle: "CARAT",
             flipDesc: "Carat measures a gemstone’s weight, not its size. While a higher carat often means a larger stone, overall appearance also depends on cut, shape, and proportions.",
         },
         {
             title: "COLOUR",
-            image: "https://www.lucirajewelry.com/cdn/shop/files/Color_54913866-0d4b-4283-b500-20a809c89735.jpg",
+            image: "https://luciraonline.myshopify.com/cdn/shop/files/Color_54913866-0d4b-4283-b500-20a809c89735.jpg",
             bg: "bg-[#7a6a8a]",
             flipTitle: "COLOUR",
             flipDesc: "Colour evaluates a gemstone’s hue, tone, and saturation. The most prized stones display rich, even colour with optimal intensity, adding to their rarity and value.",
         },
         {
             title: "CLARITY",
-            image: "https://www.lucirajewelry.com/cdn/shop/files/Clarity_e53d3414-ce91-47c4-b8d4-e68dcdadcb98.jpg",
+            image: "https://luciraonline.myshopify.com/cdn/shop/files/Clarity_e53d3414-ce91-47c4-b8d4-e68dcdadcb98.jpg",
             bg: "bg-[#4a6a8a]",
             flipTitle: "CLARITY",
             flipDesc: "Clarity indicates the presence of natural inclusions or surface blemishes within a gemstone. Stones with fewer visible imperfections appear more transparent, radiant, and visually pure.",
@@ -218,8 +218,8 @@ export default function GemstoneEducationPage() {
                     className="
                     relative w-full
                     h-[535px] md:h-[605px] lg:h-[725px]
-                    bg-[url('https://www.lucirajewelry.com/cdn/shop/files/Mobile-Banner_7db8d201-9ac7-418c-b376-6f2a5f0fcfc3_768x.jpg')]
-                    md:bg-[url('https://www.lucirajewelry.com/cdn/shop/files/Desktop-Banner_bd830e61-9714-4e35-a652-4c56df1c4e23_1920x.jpg')]
+                    bg-[url('https://luciraonline.myshopify.com/cdn/shop/files/Mobile-Banner_7db8d201-9ac7-418c-b376-6f2a5f0fcfc3_768x.jpg')]
+                    md:bg-[url('https://luciraonline.myshopify.com/cdn/shop/files/Desktop-Banner_bd830e61-9714-4e35-a652-4c56df1c4e23_1920x.jpg')]
                     bg-cover bg-center
                     flex items-end justify-center
                     "

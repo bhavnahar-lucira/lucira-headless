@@ -9,9 +9,9 @@ export default function AboutPage() {
     const data = {
         aboutBlack: "/images/aboutUs/about_us_2.png",
         aboutWhite: "/images/aboutUs/about_us_3.png",
-        founderImage: "https://www.lucirajewelry.com/cdn/shop/files/Group_1321315953_2.png",
-        signatureBlack: "https://www.lucirajewelry.com/cdn/shop/files/Group_1321315956_1.png",
-        signatureWhite: "https://www.lucirajewelry.com/cdn/shop/files/Group_1321315955_2.png",
+        founderImage: "https://luciraonline.myshopify.com/cdn/shop/files/Group_1321315953_2.png",
+        signatureBlack: "https://luciraonline.myshopify.com/cdn/shop/files/Group_1321315956_1.png",
+        signatureWhite: "https://luciraonline.myshopify.com/cdn/shop/files/Group_1321315955_2.png",
         founderName: "Rupesh Jain",
         founderRole: "Founder & CEO",
         founderQuote: "Jewelry runs in my blood—it's who I am. After building brands in India, I created Lucira to go beyond tradition and craft pieces that reflect elegance and meaning. For me, jewelry isn't just adornment—it's a celebration of moments, love, and legacy. Every piece we make is a promise.",
@@ -22,25 +22,25 @@ export default function AboutPage() {
             year: "APRIL 2025",
             title: "LUCIRA LAUNCH",
             description: "Lucira was founded with a vision to make diamond jewellery more contemporary and accessible.",
-            image: "https://www.lucirajewelry.com/cdn/shop/files/Group_1321316005_1.png",
+            image: "https://luciraonline.myshopify.com/cdn/shop/files/Group_1321316005_1.png",
         },
         {
             year: "JUNE 2025",
             title: "COLLECTION LAUNCH",
             description: "Introduced two collections - On The Move & Hexa Collection, combining everyday comfort with bold design.",
-            image: "https://www.lucirajewelry.com/cdn/shop/files/Group_1321316005_1.png",
+            image: "https://luciraonline.myshopify.com/cdn/shop/files/Group_1321316005_1.png",
         },
         {
             year: "SEPT 2025",
             title: "SEED INVESTMENT",
             description: "Backed by early investors who believed in our vision to reshape India’s modern jewelry landscape.",
-            image: "https://www.lucirajewelry.com/cdn/shop/files/Group_1321316005_1.png",
+            image: "https://luciraonline.myshopify.com/cdn/shop/files/Group_1321316005_1.png",
         },
         {
             year: "OCT 2025",
             title: "1st STORE LAUNCH",
             description: "Opened the first Lucira Experience Store in Mumbai, extending our journey beyond digital.",
-            image: "https://www.lucirajewelry.com/cdn/shop/files/Group_1321316005_1.png",
+            image: "https://luciraonline.myshopify.com/cdn/shop/files/Group_1321316005_1.png",
         },
     ];
 
@@ -240,7 +240,7 @@ export default function AboutPage() {
                     <div className="relative w-full rounded-lg overflow-hidden">
                         <div className="relative w-full h-45 lg:h-150 md:h-100">
                             <Image
-                                src="https://www.lucirajewelry.com/cdn/shop/files/WhatsApp_Image_2025-09-24_at_11.43.16_3c4dde0d_1_2_2000x.png?v=1760096833"
+                                src="https://luciraonline.myshopify.com/cdn/shop/files/WhatsApp_Image_2025-09-24_at_11.43.16_3c4dde0d_1_2_2000x.png?v=1760096833"
                                 alt="Our Team"
                                 fill
                                 className="object-contain"
