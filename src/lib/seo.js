@@ -10,11 +10,11 @@ export const organizationSchema = {
   "logo": {
     "@type": "ImageObject",
     "@id": `${baseUrl}/#logo`,
-    "url": "https://www.lucirajewelry.com/cdn/shop/files/LJ_Logo_Pink.svg?v=1759481962&width=240"
+    "url": "https://luciraonline.myshopify.com/cdn/shop/files/LJ_Logo_Pink.svg?v=1759481962&width=240"
   },
   "image": {
     "@type": "ImageObject",
-    "url": "https://www.lucirajewelry.com/cdn/shop/files/Stackable-Desktop_1.jpg"
+    "url": "https://luciraonline.myshopify.com/cdn/shop/files/Stackable-Desktop_1.jpg"
   },
   "sameAs": [
     "https://www.instagram.com/lucirajewelry/",
@@ -84,7 +84,7 @@ export const storesSchema = [
     "@id": `${baseUrl}/#chembur-store`,
     "name": "Chembur Lucira Store",
     "url": `${baseUrl}/`,
-    "image": "https://www.lucirajewelry.com/cdn/shop/files/LJ_Logo_Pink.svg?v=1759481962",
+    "image": "https://luciraonline.myshopify.com/cdn/shop/files/LJ_Logo_Pink.svg?v=1759481962",
     "telephone": "+919004402038",
     "parentOrganization": { "@id": `${baseUrl}/#org` },
     "address": {
@@ -106,7 +106,7 @@ export const storesSchema = [
     "@id": `${baseUrl}/#pune-store`,
     "name": "Pune Lucira Store",
     "url": `${baseUrl}/`,
-    "image": "https://www.lucirajewelry.com/cdn/shop/files/LJ_Logo_Pink.svg?v=1759481962",
+    "image": "https://luciraonline.myshopify.com/cdn/shop/files/LJ_Logo_Pink.svg?v=1759481962",
     "telephone": "+918433667236",
     "parentOrganization": { "@id": `${baseUrl}/#org` },
     "address": {
@@ -128,7 +128,7 @@ export const storesSchema = [
     "@id": `${baseUrl}/#borivali-store`,
     "name": "Sky City Borivali Store",
     "url": `${baseUrl}/`,
-    "image": "https://www.lucirajewelry.com/cdn/shop/files/LJ_Logo_Pink.svg?v=1759481962",
+    "image": "https://luciraonline.myshopify.com/cdn/shop/files/LJ_Logo_Pink.svg?v=1759481962",
     "telephone": "+918433667238",
     "parentOrganization": { "@id": `${baseUrl}/#org` },
     "address": {

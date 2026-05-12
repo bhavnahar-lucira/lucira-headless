@@ -89,27 +89,27 @@ const faqData = [
 
 const heroImages = [
   {
-    src: "https://www.lucirajewelry.com/cdn/shop/files/DSC_2176.jpg?v=1764398076&width=800",
+    src: "https://luciraonline.myshopify.com/cdn/shop/files/DSC_2176.jpg?v=1764398076&width=800",
     alt: "Lucira gallery 1",
   },
   {
-    src: "https://www.lucirajewelry.com/cdn/shop/files/DSC_2185_2.jpg?v=1765200019&width=800",
+    src: "https://luciraonline.myshopify.com/cdn/shop/files/DSC_2185_2.jpg?v=1765200019&width=800",
     alt: "Lucira gallery 2",
   },
   {
-    src: "https://www.lucirajewelry.com/cdn/shop/files/DSC_2427_1.jpg?v=1765198765&width=800",
+    src: "https://luciraonline.myshopify.com/cdn/shop/files/DSC_2427_1.jpg?v=1765198765&width=800",
     alt: "Lucira gallery 3",
   },
   {
-    src: "https://www.lucirajewelry.com/cdn/shop/files/DSC_2424_2_cb7dad77-df08-4d26-8ab5-9bfcfc99556f.jpg?v=1765200337&width=800",
+    src: "https://luciraonline.myshopify.com/cdn/shop/files/DSC_2424_2_cb7dad77-df08-4d26-8ab5-9bfcfc99556f.jpg?v=1765200337&width=800",
     alt: "Lucira gallery 4",
   },
   {
-    src: "https://www.lucirajewelry.com/cdn/shop/files/DSC_2253_2_1.jpg?v=1765200316&width=800",
+    src: "https://luciraonline.myshopify.com/cdn/shop/files/DSC_2253_2_1.jpg?v=1765200316&width=800",
     alt: "Lucira gallery 5",
   },
   {
-    src: "https://www.lucirajewelry.com/cdn/shop/files/DSC_2447_2_27ff37cf-7502-4e89-b110-2043ae6f7269.jpg?v=1765199990&width=800",
+    src: "https://luciraonline.myshopify.com/cdn/shop/files/DSC_2447_2_27ff37cf-7502-4e89-b110-2043ae6f7269.jpg?v=1765199990&width=800",
     alt: "Lucira gallery 6",
   },
 ];
@@ -154,22 +154,22 @@ const howItWorksSteps = [
   {
     stepLabel: "Step 01",
     heading: "Online Registration",
-    image: "https://www.lucirajewelry.com/cdn/shop/files/DSC_2176.jpg?v=1764398076&width=800",
+    image: "https://luciraonline.myshopify.com/cdn/shop/files/DSC_2176.jpg?v=1764398076&width=800",
   },
   {
     stepLabel: "Step 02",
     heading: "Support Call",
-    image: "https://www.lucirajewelry.com/cdn/shop/files/DSC_2185_2.jpg?v=1765200019&width=800",
+    image: "https://luciraonline.myshopify.com/cdn/shop/files/DSC_2185_2.jpg?v=1765200019&width=800",
   },
   {
     stepLabel: "Step 03",
     heading: "Paper Work",
-    image: "https://www.lucirajewelry.com/cdn/shop/files/DSC_2427_1.jpg?v=1765198765&width=800",
+    image: "https://luciraonline.myshopify.com/cdn/shop/files/DSC_2427_1.jpg?v=1765198765&width=800",
   },
   {
     stepLabel: "Step 04",
     heading: "Store Launch",
-    image: "https://www.lucirajewelry.com/cdn/shop/files/DSC_2447_2_27ff37cf-7502-4e89-b110-2043ae6f7269.jpg?v=1765199990&width=800",
+    image: "https://luciraonline.myshopify.com/cdn/shop/files/DSC_2447_2_27ff37cf-7502-4e89-b110-2043ae6f7269.jpg?v=1765199990&width=800",
   },
 ];
 
@@ -507,7 +507,7 @@ export default function FranchisePage() {
           "
         >
           <Image
-            src="https://www.lucirajewelry.com/cdn/shop/files/DSC_2445_1_40298bc3-12fc-4234-93c3-339092621f9e_1920x.jpg?v=1765198639"
+            src="https://luciraonline.myshopify.com/cdn/shop/files/DSC_2445_1_40298bc3-12fc-4234-93c3-339092621f9e_1920x.jpg?v=1765198639"
             alt="Franchise banner background"
             fill
             className="object-cover"

@@ -40,54 +40,54 @@ const collections = [
     title: "Rings",
     link: "/collections/rings",
     desktopImage:
-      "https://www.lucirajewelry.com/cdn/shop/files/NC_Ring.jpg?crop=center&height=692&v=1760525941&width=400",
+      "https://luciraonline.myshopify.com/cdn/shop/files/NC_Ring.jpg?crop=center&height=692&v=1760525941&width=400",
     mobileImage:
-      "https://www.lucirajewelry.com/cdn/shop/files/NC_Ring.jpg?crop=center&height=692&v=1760525941&width=400",
+      "https://luciraonline.myshopify.com/cdn/shop/files/NC_Ring.jpg?crop=center&height=692&v=1760525941&width=400",
   },
   {
     id: 2,
     title: "Earrings",
     link: "/collections/earrings",
     desktopImage:
-      "https://www.lucirajewelry.com/cdn/shop/files/Earrings_7f3ea122-c95a-4a57-9be0-05ab9f9672fb.jpg?crop=center&height=692&v=1760526503&width=400",
+      "https://luciraonline.myshopify.com/cdn/shop/files/Earrings_7f3ea122-c95a-4a57-9be0-05ab9f9672fb.jpg?crop=center&height=692&v=1760526503&width=400",
     mobileImage:
-      "https://www.lucirajewelry.com/cdn/shop/files/Earrings_7f3ea122-c95a-4a57-9be0-05ab9f9672fb.jpg?crop=center&height=692&v=1760526503&width=400",
+      "https://luciraonline.myshopify.com/cdn/shop/files/Earrings_7f3ea122-c95a-4a57-9be0-05ab9f9672fb.jpg?crop=center&height=692&v=1760526503&width=400",
   },
   {
     id: 3,
     title: "Necklaces",
     link: "/collections/necklaces",
     desktopImage:
-      "https://www.lucirajewelry.com/cdn/shop/files/Necklace_bb6f6704-59ca-429f-82c6-fbd8762eea47.jpg?crop=center&height=692&v=1760528650&width=400",
+      "https://luciraonline.myshopify.com/cdn/shop/files/Necklace_bb6f6704-59ca-429f-82c6-fbd8762eea47.jpg?crop=center&height=692&v=1760528650&width=400",
     mobileImage:
-      "https://www.lucirajewelry.com/cdn/shop/files/Necklace_bb6f6704-59ca-429f-82c6-fbd8762eea47.jpg?crop=center&height=692&v=1760528650&width=400",
+      "https://luciraonline.myshopify.com/cdn/shop/files/Necklace_bb6f6704-59ca-429f-82c6-fbd8762eea47.jpg?crop=center&height=692&v=1760528650&width=400",
   },
   {
     id: 4,
     title: "Bracelets",
     link: "/collections/bracelets",
     desktopImage:
-      "https://www.lucirajewelry.com/cdn/shop/files/Bracelets_collection.jpg?crop=center&height=692&v=1760529274&width=400",
+      "https://luciraonline.myshopify.com/cdn/shop/files/Bracelets_collection.jpg?crop=center&height=692&v=1760529274&width=400",
     mobileImage:
-      "https://www.lucirajewelry.com/cdn/shop/files/Bracelets_collection.jpg?crop=center&height=692&v=1760529274&width=400",
+      "https://luciraonline.myshopify.com/cdn/shop/files/Bracelets_collection.jpg?crop=center&height=692&v=1760529274&width=400",
   },
   {
     id: 5,
     title: "Mangalsutra",
     link: "/collections/mangalsutra",
     desktopImage:
-      "https://www.lucirajewelry.com/cdn/shop/files/NC_Mangalsutra.jpg?crop=center&height=692&v=1760525947&width=400",
+      "https://luciraonline.myshopify.com/cdn/shop/files/NC_Mangalsutra.jpg?crop=center&height=692&v=1760525947&width=400",
     mobileImage:
-      "https://www.lucirajewelry.com/cdn/shop/files/NC_Mangalsutra.jpg?crop=center&height=692&v=1760525947&width=400",
+      "https://luciraonline.myshopify.com/cdn/shop/files/NC_Mangalsutra.jpg?crop=center&height=692&v=1760525947&width=400",
   },
   {
     id: 6,
     title: "Pendants",
     link: "/collections/pendants",
     desktopImage:
-      "https://www.lucirajewelry.com/cdn/shop/files/NC_Pendant.jpg?crop=center&height=692&v=1760525935&width=400",
+      "https://luciraonline.myshopify.com/cdn/shop/files/NC_Pendant.jpg?crop=center&height=692&v=1760525935&width=400",
     mobileImage:
-      "https://www.lucirajewelry.com/cdn/shop/files/NC_Pendant.jpg?crop=center&height=692&v=1760525935&width=400",
+      "https://luciraonline.myshopify.com/cdn/shop/files/NC_Pendant.jpg?crop=center&height=692&v=1760525935&width=400",
   },
 ];
 
@@ -225,7 +225,7 @@ export default function VideoCallPage() {
       <section id="video-call-form" className="w-full pt-10 md:pt-20 pb-6">
         <div className="block md:hidden px-5 mb-8">
           <Image
-            src="https://www.lucirajewelry.com/cdn/shop/files/Macbook_Pro_8a067db9-0dce-4e3a-b3db-d3d5166c024c.png?v=1750666235"
+            src="https://luciraonline.myshopify.com/cdn/shop/files/Macbook_Pro_8a067db9-0dce-4e3a-b3db-d3d5166c024c.png?v=1750666235"
             alt="Video Call Mobile"
             width={800}
             height={800}
@@ -236,7 +236,7 @@ export default function VideoCallPage() {
         <div className="max-w-[1320px] mx-auto px-5 md:px-10 flex flex-col md:flex-row items-start justify-between gap-10 md:gap-16">
           <div className="hidden md:block flex-1">
             <Image
-              src="https://www.lucirajewelry.com/cdn/shop/files/Macbook_Pro_8a067db9-0dce-4e3a-b3db-d3d5166c024c.png?v=1750666235"
+              src="https://luciraonline.myshopify.com/cdn/shop/files/Macbook_Pro_8a067db9-0dce-4e3a-b3db-d3d5166c024c.png?v=1750666235"
               alt="Video Call Desktop"
               width={700}
               height={700}

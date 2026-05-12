@@ -9,19 +9,19 @@ import { toast } from "react-toastify";
 export default function BespokePage() {
     const bespokeDesign = [
         {
-            img: "https://www.lucirajewelry.com/cdn/shop/files/Images-5_600x.jpg",
+            img: "https://luciraonline.myshopify.com/cdn/shop/files/Images-5_600x.jpg",
             href: "/collections/tennis-necklaces"
         },
         {
-            img: "https://www.lucirajewelry.com/cdn/shop/files/Images-4_600x.jpg",
+            img: "https://luciraonline.myshopify.com/cdn/shop/files/Images-4_600x.jpg",
             href: "/collections/necklaces"
         },
         {
-            img: "https://www.lucirajewelry.com/cdn/shop/files/Images-3_600x.jpg",
+            img: "https://luciraonline.myshopify.com/cdn/shop/files/Images-3_600x.jpg",
             href: "/collections/all-charms-pendants"
         },
         {
-            img: "https://www.lucirajewelry.com/cdn/shop/files/Images-2_600x.jpg",
+            img: "https://luciraonline.myshopify.com/cdn/shop/files/Images-2_600x.jpg",
             href: "/collections/diamond-tennis-bracelets"
         }
     ]
@@ -172,7 +172,7 @@ export default function BespokePage() {
             <section className="relative w-full">
                 <div className="hidden md:block">
                     <Image
-                        src="https://www.lucirajewelry.com/cdn/shop/files/Bespoke-Desktop-Banner_2.jpg"
+                        src="https://luciraonline.myshopify.com/cdn/shop/files/Bespoke-Desktop-Banner_2.jpg"
                         alt="Bespoke Jewelry"
                         width={1600}
                         height={700}
@@ -183,7 +183,7 @@ export default function BespokePage() {
 
                 <div className="md:hidden">
                     <Image
-                        src="https://www.lucirajewelry.com/cdn/shop/files/7df9539829becce028c90cc314b6e75fad295914_1.jpg"
+                        src="https://luciraonline.myshopify.com/cdn/shop/files/7df9539829becce028c90cc314b6e75fad295914_1.jpg"
                         alt="Bespoke Jewelry"
                         width={800}
                         height={500}
@@ -205,7 +205,7 @@ export default function BespokePage() {
             <section className="max-w-7xl mx-auto px-4 py-16 flex flex-col md:flex-row items-center">
                 <div className="w-full md:w-1/2">
                     <Image
-                        src="https://www.lucirajewelry.com/cdn/shop/files/Middle-Banner-Desktop_2eb2e51d-562a-4640-97a6-d43497a9ec67_1200x.jpg"
+                        src="https://luciraonline.myshopify.com/cdn/shop/files/Middle-Banner-Desktop_2eb2e51d-562a-4640-97a6-d43497a9ec67_1200x.jpg"
                         alt="Jewelry design"
                         width={1000}
                         height={600}

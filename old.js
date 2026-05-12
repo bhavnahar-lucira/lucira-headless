@@ -10,7 +10,7 @@ module.exports = {
         "flip_card_description": "ItΓÇÖs about timing. Waiting for the ΓÇ£perfectΓÇ¥ rate often means missing real value. The right time for gold is rarely obvious in hindsight. Markets shift, but intent creates value. If youΓÇÖve been considering gold, this could be the moment. Value grows when you act.",
         "flip_card_link_label": "Know More.",
         "flip_card_link_url": "#investment",
-        "background_image": "https://www.lucirajewelry.com/cdn/shop/files/baneer-gold.jpg",
+        "background_image": "https://luciraonline.myshopify.com/cdn/shop/files/baneer-gold.jpg",
         "rate_today": "Γé╣1,54,002",
         "rate_yesterday": "Γé╣1,55,053",
         "rate_avg": "Γé╣1,41.682",

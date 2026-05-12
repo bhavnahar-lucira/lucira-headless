@@ -2,7 +2,7 @@ export const resolveShopifyImage = (url) => {
   if (!url) return "";
   if (url.startsWith("shopify://shop_images/")) {
     const filename = url.replace("shopify://shop_images/", "");
-    return `https://www.lucirajewelry.com/cdn/shop/files/${filename}`;
+    return `https://luciraonline.myshopify.com/cdn/shop/files/${filename}`;
   }
   return url;
 };

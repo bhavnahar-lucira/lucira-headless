@@ -463,8 +463,8 @@ export function OtpSpinAuth({
             className={`w-full h-[175px] md:h-auto bg-center bg-cover bg-no-repeat md:w-[50%] md:self-stretch`}
             style={{ 
               backgroundImage: isMobileView 
-                ? 'url("https://www.lucirajewelry.com/cdn/shop/files/Jan-Popup-Mobile_jpg.jpg?v=1770010490")' 
-                : 'url("https://www.lucirajewelry.com/cdn/shop/files/Jan-Popup-Desktop-New_2.jpg?v=1769844544")' 
+                ? 'url("https://luciraonline.myshopify.com/cdn/shop/files/Jan-Popup-Mobile_jpg.jpg?v=1770010490")' 
+                : 'url("https://luciraonline.myshopify.com/cdn/shop/files/Jan-Popup-Desktop-New_2.jpg?v=1769844544")' 
             }}
           />
         )

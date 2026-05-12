@@ -7,52 +7,52 @@ export default function FeaturedIn() {
   const logos = [
     {
       url: "https://www.bwdisrupt.com/article/lucira-founder-rupesh-jain-believes-indias-jewellery-sector-will-be-defined-by-co-existence-not-competition-556873",
-      image: "https://www.lucirajewelry.com/cdn/shop/files/bw-disrupt_250x.png?v=1763032304",
+      image: "https://luciraonline.myshopify.com/cdn/shop/files/bw-disrupt_250x.png?v=1763032304",
       alt: "BW Disrupt Logo"
     },
     {
       url: "https://mediabrief.com/candere-founder-rupesh-jain-launches-lab-grown-diamond-brand-lucira/",
-      image: "https://www.lucirajewelry.com/cdn/shop/files/Media_Brief_logo_250x.png?v=1763032386",
+      image: "https://luciraonline.myshopify.com/cdn/shop/files/Media_Brief_logo_250x.png?v=1763032386",
       alt: "Mediabrief Logo"
     },
     {
       url: "https://jewelbuzz.in/candere-founder-rupesh-jain-launches-lab-grown-diamond-jewelry-brand-lucira-taps-into-booming-industry-potential/",
-      image: "https://www.lucirajewelry.com/cdn/shop/files/jewelbuzz_logo_250x.png?v=1763032468",
+      image: "https://luciraonline.myshopify.com/cdn/shop/files/jewelbuzz_logo_250x.png?v=1763032468",
       alt: "JewelBuzz"
     },
     {
       url: "https://www.imagesbof.in/candere-founder-rupesh-jain-launches-lab-grown-diamond-jewellery-brand-lucira/",
-      image: "https://www.lucirajewelry.com/cdn/shop/files/bof_logo_250x.png?v=1763032485",
+      image: "https://luciraonline.myshopify.com/cdn/shop/files/bof_logo_250x.png?v=1763032485",
       alt: "BOF Logo"
     },
     {
       url: "https://www.entrepreneur.com/en-in/news-and-trends/from-candere-to-lucira-jains-new-chapter-in-purposeful/490616",
-      image: "https://www.lucirajewelry.com/cdn/shop/files/enterpreneur_250x.png?v=1763032353",
+      image: "https://luciraonline.myshopify.com/cdn/shop/files/enterpreneur_250x.png?v=1763032353",
       alt: "Entrepreneur"
     },
     {
       url: "https://retail.economictimes.indiatimes.com/news/apparel-fashion/jewellery/candere-founder-rupesh-jain-launches-lab-grown-diamond-jewelry-brand-lucira/120573620",
-      image: "https://www.lucirajewelry.com/cdn/shop/files/Retail.com_250x.png?v=1763032425",
+      image: "https://luciraonline.myshopify.com/cdn/shop/files/Retail.com_250x.png?v=1763032425",
       alt: "Retail.com"
     },
     {
       url: "https://inc42.com/startups/how-rupesh-jains-lucira-wants-to-redefine-luxury-with-lab-grown-diamonds/",
-      image: "https://www.lucirajewelry.com/cdn/shop/files/Inc_42_250x.png?v=1763032499",
+      image: "https://luciraonline.myshopify.com/cdn/shop/files/Inc_42_250x.png?v=1763032499",
       alt: "Inc_42"
     },
     {
       url: "https://madeinmedia.in/candere-founder-rupesh-jain-launches-lab-grown-diamond-jewellery-brand-lucira-taps-into-booming-industry-potential/",
-      image: "https://www.lucirajewelry.com/cdn/shop/files/MiM_2_250x.png?v=1763032023",
+      image: "https://luciraonline.myshopify.com/cdn/shop/files/MiM_2_250x.png?v=1763032023",
       alt: "madeinmedia"
     },
     {
       url: "https://www.indulgexpress.com/fashion/new-launches/2025/May/29/lucira-redefines-fine-jewellery-with-lab-grown-diamonds-and-sustainable-luxury",
-      image: "https://www.lucirajewelry.com/cdn/shop/files/indulge_logo_250x.png?v=1763032406",
+      image: "https://luciraonline.myshopify.com/cdn/shop/files/indulge_logo_250x.png?v=1763032406",
       alt: "Indulge"
     },
     {
       url: "https://startuptalky.com/news/candere-rupesh-jain-launches-lucira-lab-grown-diamond-jewellery/",
-      image: "https://www.lucirajewelry.com/cdn/shop/files/Startup_Talky_2_250x.png?v=1763032023",
+      image: "https://luciraonline.myshopify.com/cdn/shop/files/Startup_Talky_2_250x.png?v=1763032023",
       alt: "Startup_Talky"
     }
   ];

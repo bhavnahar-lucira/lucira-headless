@@ -126,7 +126,7 @@ export default function PlatinumRatePage({ page }) {
             <section className="relative w-full flex flex-col justify-start overflow-hidden pt-6 md:pt-10 lg:pt-12 pb-12 lg:pb-10 min-h-[600px] lg:min-h-[600px]">
                 <div
                     className="absolute inset-0 bg-cover bg-center transition-transform duration-[20s] hover:scale-105"
-                    style={{ backgroundImage: `url(${platinumWidgetSettings.background_image?.replace('shopify://shop_images/', 'https://www.lucirajewelry.com/cdn/shop/files/') || 'https://www.lucirajewelry.com/cdn/shop/files/baneer-gold.jpg'})` }}
+                    style={{ backgroundImage: `url(${platinumWidgetSettings.background_image?.replace('shopify://shop_images/', 'https://luciraonline.myshopify.com/cdn/shop/files/') || 'https://luciraonline.myshopify.com/cdn/shop/files/baneer-gold.jpg'})` }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-black/10 z-[1]" />
 
@@ -178,7 +178,7 @@ export default function PlatinumRatePage({ page }) {
                                         {platinumWidgetSettings.flip_founder_image && (
                                             <img
                                                 src={platinumWidgetSettings.flip_founder_image.startsWith('shopify://')
-                                                    ? platinumWidgetSettings.flip_founder_image.replace('shopify://shop_images/', 'https://www.lucirajewelry.com/cdn/shop/files/')
+                                                    ? platinumWidgetSettings.flip_founder_image.replace('shopify://shop_images/', 'https://luciraonline.myshopify.com/cdn/shop/files/')
                                                     : platinumWidgetSettings.flip_founder_image
                                                 }
                                                 alt={platinumWidgetSettings.flip_founder_name}

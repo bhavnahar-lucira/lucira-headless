@@ -13,7 +13,7 @@ const STORES = [
     phone: "+91 90044 36052",
     email: "care@lucirajewelry.com",
     address: "Office 1402-2, DLH Park, 14th Floor,\nSV Rd, Mumbai, Maharashtra 400062",
-    image: "https://www.lucirajewelry.com/cdn/shop/files/Lucira_contact_us_grid_900x.png?v=1757660196",
+    image: "https://luciraonline.myshopify.com/cdn/shop/files/Lucira_contact_us_grid_900x.png?v=1757660196",
     mapLink: "https://www.google.com/maps/place/Lucira+Jewelry+%7C+Jewellery+Store+in+Mumbai/data=!4m2!3m1!1s0x0:0x268fe0bb8a89f9bb?sa=X&ved=1t:2428&ictx=111",
     isHeadOffice: true
   },
@@ -22,7 +22,7 @@ const STORES = [
     phone: "+91 8433667238",
     email: "lcmbombor@lucirajewelry.com",
     address: "Sky City Mall, S-40, 2nd Floor,\nWestern Express Hwy, Borivali East,\nMumbai - 400066",
-    image: "https://www.lucirajewelry.com/cdn/shop/files/Store-Collection-Banner3_jpg_900x.jpg?v=1769237134",
+    image: "https://luciraonline.myshopify.com/cdn/shop/files/Store-Collection-Banner3_jpg_900x.jpg?v=1769237134",
     mapLink: "https://www.google.com/maps/place/Lucira+Jewelry+%7C+Jewelry+Store+in+Borivali+Mumbai/data=!4m2!3m1!1s0x0:0x8e0b915ac78ac1?sa=X&ved=1t:2428&ictx=111"
   },
   {
@@ -30,7 +30,7 @@ const STORES = [
     phone: "+91 9004402038",
     email: "lcsbomchb@lucirajewelry.com",
     address: "Shop No. 3 Ground Floor, 487, Geraldine CHS LTD,\nCentral Ave Rd, Chembur,\nMumbai, Maharashtra 400071",
-    image: "https://www.lucirajewelry.com/cdn/shop/files/Store-Collection-Banner-2_900x.jpg?v=1760699342",
+    image: "https://luciraonline.myshopify.com/cdn/shop/files/Store-Collection-Banner-2_900x.jpg?v=1760699342",
     mapLink: "https://www.google.com/maps/place/Lucira+Jewelry+%7C+Jewellery+Store+in+Chembur+Mumbai/@19.0576005,72.898121,17z/data=!3m1!4b1!4m6!3m5!1s0x3be7c782f7511b79:0xaa877f3bbd754bfc!8m2!3d19.0575954!4d72.9006959!16s%2Fg%2F11xtgz09vw"
   },
   {
@@ -38,7 +38,7 @@ const STORES = [
     phone: "+91 8433667236",
     email: "lcspnqjmr@lucirajewelry.com",
     address: "Shop no. 3,4, Balgandharv Chowk, Sai Square,\n5 & 6, Jangali Maharaj Rd,\nPune, Maharashtra 411005",
-    image: "https://www.lucirajewelry.com/cdn/shop/files/Store-PLP-2_900x.jpg?v=1765807125",
+    image: "https://luciraonline.myshopify.com/cdn/shop/files/Store-PLP-2_900x.jpg?v=1765807125",
     mapLink: "https://www.google.com/maps/place/Lucira+Jewelry+%7C+Jewellery+Store+in+JM+Road+Pune/@18.5233058,73.8452878,17z/data=!3m1!4b1!4m6!3m5!1s0x3bc2c1929b1639f7:0x7d0f5ff74de52a8d!8m2!3d18.5233007!4d73.8478627"
   },
   {
@@ -46,7 +46,7 @@ const STORES = [
     phone: "+91 8657392887",
     email: "lcnois18@lucirajewelry.com",
     address: "SCO-17, Wave One Courtyard, Sector 18,\nGautam Buddha Nagar, Noida,\nUttar Pradesh: 201301",
-    image: "https://www.lucirajewelry.com/cdn/shop/files/Noida_Store_1920_823_jpg_1920x823_crop_center.jpg?v=1776422892",
+    image: "https://luciraonline.myshopify.com/cdn/shop/files/Noida_Store_1920_823_jpg_1920x823_crop_center.jpg?v=1776422892",
     mapLink: "https://www.google.com/maps/place/Lucira+Jewelry+%7C+Jewellery+Store+in+Wave+One+Mall,+Noida/data=!4m2!3m1!1s0x0:0xbdc183588be81689?sa=X&ved=1t:2428&ictx=111"
   }
 ];
