@@ -381,13 +381,15 @@ export default function CollectionPage({ params: paramsPromise }) {
         if (isFirstPage && basePositions.includes(posOnPage)) {
           items.push(
             <div key={`inpage-${posOnPage}`} className="overflow-hidden rounded-lg">
-              <Image
-                src="/images/inpage.jpg"
-                alt="Promo"
-                width={800}
-                height={400}
-                className="w-full h-full object-cover rounded-lg"
-              />
+              <Link href="/collections/bestsellers">
+                <Image
+                  src="/images/inpage.jpg"
+                  alt="Promo"
+                  width={800}
+                  height={400}
+                  className="w-full h-full object-cover rounded-lg"
+                />
+              </Link>
             </div>
           );
         }
