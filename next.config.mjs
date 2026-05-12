@@ -61,6 +61,10 @@ const nextConfig = {
   async rewrites() {
     return [
       {
+        source: '/feeds/products.xml',
+        destination: '/api/feeds/products',
+      },
+      {
         source: '/sitemap.xml',
         destination: '/api/sitemap-proxy/sitemap.xml',
       },
