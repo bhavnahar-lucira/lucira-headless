@@ -1,3 +1,5 @@
+import { fetchWithRetry } from "@/utils/helpers";
+
 const SHOP = "luciraonline";
 const rawStore = process.env.SHOPIFY_STORE || process.env.SHOPIFYSTORE || SHOP;
 const SHOP_DOMAIN = rawStore.includes(".") ? rawStore : `${rawStore}.myshopify.com`;
@@ -8,7 +10,7 @@ export async function shopifyStorefrontFetch(query, variables = {}) {
   }
 
   try {
-    const res = await fetch(
+    const res = await fetchWithRetry(
       `https://${SHOP_DOMAIN}/api/2024-10/graphql.json`,
       {
         method: "POST",
@@ -40,7 +42,7 @@ export async function shopifyAdminFetch(query, variables = {}, apiVersion = "202
     throw new Error("ADMIN_TOKEN or SHOPIFY_ADMIN_TOKEN not configured");
   }
 
-  const res = await fetch(
+  const res = await fetchWithRetry(
     `https://${SHOP_DOMAIN}/admin/api/${apiVersion}/graphql.json`,
     {
       method: "POST",
@@ -83,7 +85,7 @@ export async function shopifyAdminRestFetch(endpoint, params = {}, options = {})
     }
   });
 
-  const res = await fetch(url.toString(), {
+  const res = await fetchWithRetry(url.toString(), {
     method,
     headers: {
       "Content-Type": "application/json",

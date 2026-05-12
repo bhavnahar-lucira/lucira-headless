@@ -1,3 +1,5 @@
+import { fetchWithRetry } from "@/utils/helpers";
+
 const PROXY_URL = 'https://api.lucirajewelry.com/nector-reviews/nector-proxy.php';
 
 /**
@@ -5,7 +7,7 @@ const PROXY_URL = 'https://api.lucirajewelry.com/nector-reviews/nector-proxy.php
  */
 export async function apiFetch(url) {
   // Add cache: 'no-store' to ensure we get fresh data after submission
-  const res = await fetch(url, { cache: 'no-store' });
+  const res = await fetchWithRetry(url, { cache: 'no-store' });
   if (!res.ok) throw new Error('Proxy HTTP ' + res.status);
   return res.json();
 }
@@ -14,7 +16,7 @@ export async function apiFetch(url) {
  * POST review via proxy
  */
 export async function submitReview(payload) {
-  const res = await fetch(PROXY_URL, {
+  const res = await fetchWithRetry(PROXY_URL, {
     method  : 'POST',
     headers : { 'Content-Type': 'application/json' },
     body    : JSON.stringify(payload),
@@ -33,7 +35,7 @@ export async function uploadSingleImage(file, reviewId) {
   formData.append('parent_id',   reviewId);
   formData.append('file',        file);
 
-  const res = await fetch(`${PROXY_URL}?action=upload`, {
+  const res = await fetchWithRetry(`${PROXY_URL}?action=upload`, {
     method : 'POST',
     body   : formData,
     // No Content-Type header — browser sets multipart boundary automatically

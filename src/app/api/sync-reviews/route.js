@@ -14,10 +14,25 @@ export async function POST(req) {
   const encoder = new TextEncoder();
   const stream = new ReadableStream({
     async start(controller) {
+      let isClosed = false;
+
       const sendUpdate = (data) => {
+        if (isClosed) return false;
         try {
           controller.enqueue(encoder.encode(JSON.stringify(data) + "\n"));
+          return true;
+        } catch (e) {
+          isClosed = true;
+          return false;
+        }
+      };
+
+      const safeClose = () => {
+        if (isClosed) return;
+        try {
+          controller.close();
         } catch (e) {}
+        isClosed = true;
       };
 
       try {
@@ -33,7 +48,7 @@ export async function POST(req) {
 
         if (total === 0) {
           sendUpdate({ status: "complete", message: "No ACTIVE products found to sync reviews.", progress: 100 });
-          controller.close();
+          safeClose();
           return;
         }
 
@@ -44,6 +59,8 @@ export async function POST(req) {
         });
 
         for (let i = skip; i < products.length; i++) {
+          if (isClosed) break;
+
           const product = products[i];
           try {
             const reviewsData = await fetchNectorReviews(product.shopifyId, { noFallback: true });
@@ -87,12 +104,12 @@ export async function POST(req) {
 
             const processed = i + 1;
             if (processed % 5 === 0 || processed === total) {
-              sendUpdate({ 
+              if (!sendUpdate({ 
                 status: "progress", 
                 message: `Synced reviews for ${processed}/${total} products...`, 
                 progress: Math.round((processed / total) * 100),
                 skip: i
-              });
+              })) break;
             }
 
             // Small delay to avoid hitting Nector too hard
@@ -103,14 +120,20 @@ export async function POST(req) {
           }
         }
 
-        sendUpdate({ status: "complete", message: `Successfully synced reviews for ${total} products!`, progress: 100 });
-        controller.close();
+        if (!isClosed) {
+          sendUpdate({ status: "complete", message: `Successfully synced reviews for ${total} products!`, progress: 100 });
+          safeClose();
+        }
 
       } catch (error) {
         console.error("Critical Review Sync Error:", error);
         sendUpdate({ status: "error", message: `Sync Failed: ${error.message}` });
-        controller.close();
+        safeClose();
       }
+    },
+    cancel() {
+      // This is called if the client cancels the request
+      console.log("Review sync stream cancelled by client");
     }
   });
 
