@@ -279,6 +279,12 @@ export async function GET(req) {
             value = storeMap[value]; 
           }
 
+          // Filter out short labels/values for Diamond and Gemstone Shape
+          if ((cat.name === "Diamond Shape" || cat.name === "Gemstone Shape") && 
+              (String(label || "").trim().length < 3 || String(value || "").trim().length < 3)) {
+            return;
+          }
+
           if (!mergedResults[label]) {
             mergedResults[label] = { 
                 label: label, 
