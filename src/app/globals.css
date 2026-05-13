@@ -553,7 +553,7 @@
     animation: peek-pulse 4s ease-in-out forwards;
   }
   .btn-peek-animation:hover {
-    max-width: 220px;
+    max-width: 360px;
   }
   .btn-peek-animation .btn-text {
     @apply ml-2 whitespace-nowrap;
@@ -570,14 +570,14 @@
     transform: translateX(0);
   }  
   .btn-peek-animation.auto-peek {
-    animation: auto-expand 4s ease-in-out forwards;
+    animation: auto-expand 8s ease-in-out forwards;
   }
   .btn-peek-animation.auto-peek .btn-text {
-    animation: auto-text 4s ease-in-out forwards;
+    animation: auto-text 8s ease-in-out forwards;
   }
   @keyframes auto-expand {
     0%, 15% {
-      max-width: 220px;
+      max-width: 360px;
     }
     25%, 100% {
       max-width: 44px;

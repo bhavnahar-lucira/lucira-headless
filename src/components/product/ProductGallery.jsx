@@ -2,7 +2,7 @@
 
 import React, { useMemo, useState, useEffect } from "react";
 import LazyImage from "../common/LazyImage";
-import { Play, Copy, X, ChevronLeft, ChevronRight, Maximize2, Share2, ZoomIn, ZoomOut, Eye, BookCopy } from "lucide-react";
+import { Play, Copy, X, ChevronLeft, ChevronRight, Maximize2, Share2, ZoomIn, ZoomOut, Eye, BookCopy, Info } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import ProductGallerySkeleton from "./ProductGallerySkeleton";
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -304,6 +304,14 @@ export default function ProductGallery({ media = [], title = "", activeColor = "
                   <span className="btn-text text-xs font-bold uppercase tracking-wider">Similar Items</span>
                 </button>
               )}
+              {index === 1 && product.tags?.includes("Only Pendant") && (
+                <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-sm rounded-full shadow-md border border-gray-100 px-2.5 py-2.5 z-10 btn-peek-animation">
+                  <span className="w-[24px] h-[24px] shrink-0 flex items-center justify-center">
+                    <Info size={16} />
+                  </span>
+                  <span className="btn-text text-xs font-bold uppercase tracking-wider">Chain is not included in the purchase</span>
+                </div>
+              )}
             </div>
           );
         })}
@@ -363,6 +371,14 @@ export default function ProductGallery({ media = [], title = "", activeColor = "
               <span key={index} className="bg-[#F1E4D1] text-black px-3 py-1.5 text-[10px] font-semibold uppercase w-fit">{label}</span>
             ))}
           </div>
+          {product.tags?.includes("Only Pendant") && (
+            <div className="absolute top-4 right-2 bg-white/95 backdrop-blur-sm rounded-full shadow-md border border-gray-100 px-2.5 py-2.5 z-10 btn-peek-animation">
+              <span className="w-[24px] h-[24px] shrink-0 flex items-center justify-center">
+                <Info size={16} />
+              </span>
+              <span className="btn-text text-xs font-bold uppercase tracking-wider">Chain is not included in the purchase</span>
+            </div>
+          )}
 
           {/* Action Buttons Overlay */}
           <div className="absolute bottom-4 left-2 right-2 flex justify-between items-center z-10">
