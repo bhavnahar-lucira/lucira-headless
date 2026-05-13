@@ -220,12 +220,12 @@ export default function StoreLocatorPage() {
       desc: "Experience the brilliance of Lucira in person. Visit our experience centers to explore over 700+ unique designs."
     },
     {
-      image: "/images/heroslider/banner-1.jpg",
+      image: "/images/store/Noida.jpg",
       title: "Visit Lucira",
       desc: "Get expert guidance for your perfect piece at our nearest experience center."
     },
     {
-      image: "/images/heroslider/banner-2.jpg",
+      image: "/images/store/Pune.jpg",
       title: "Store Locator",
       desc: "Find us in your city and explore our latest collections with personalized assistance."
     }

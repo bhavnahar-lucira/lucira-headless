@@ -15,10 +15,25 @@ export async function middleware(request) {
   }
 
   try {
-    const fetchUrl = `https://www.lucirajewelry.com/api/redirect-check?path=${encodeURIComponent(pathname)}`;
+    const origin = request.nextUrl.origin;
+    const publicUrl = `https://www.lucirajewelry.com/api/redirect-check?path=${encodeURIComponent(pathname)}`;
     
     // We pass the pathname to check for redirects
-    const checkRes = await fetch(fetchUrl);
+    let checkRes;
+    try {
+      // Try public URL first
+      checkRes = await fetch(publicUrl);
+    } catch (fetchError) {
+      // If public fetch fails (common on VPS self-resolution), fallback to internal loopback
+      const fallbackUrl = `http://127.0.0.1:3000/api/redirect-check?path=${encodeURIComponent(pathname)}`;
+      try {
+        checkRes = await fetch(fallbackUrl);
+      } catch (fallbackError) {
+        // If even fallback fails, we log it and continue
+        console.error("Middleware fallback fetch also failed:", fallbackError.message);
+        throw fetchError;
+      }
+    }
     
     if (checkRes && checkRes.ok) {
       const data = await checkRes.json();
@@ -28,7 +43,7 @@ export async function middleware(request) {
         if (data.target.startsWith("http")) {
           targetUrl = new URL(data.target);
         } else {
-          targetUrl = new URL(data.target, "https://www.lucirajewelry.com");
+          targetUrl = new URL(data.target, origin);
         }
         
         // Preserve original search params if desired
@@ -46,7 +61,10 @@ export async function middleware(request) {
     }
   } catch (error) {
     // Fail silently to not break the site if the redirect check fails
-    console.error("Middleware redirect check failed:", error);
+    // But don't log the "fetch failed" if it was handled by fallback
+    if (error.message !== "fetch failed") {
+      console.error("Middleware redirect check failed:", error);
+    }
   }
 
   return NextResponse.next();

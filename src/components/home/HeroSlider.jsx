@@ -14,9 +14,18 @@ import Image from "next/image";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 
 const slides = [
-  "/images/heroslider/banner-1.jpg",
-  "/images/heroslider/banner-2.jpg",
-  "/images/heroslider/banner-3.jpg",
+  {
+    desktop: "/images/heroslider/Eterna-Band-Desktop.jpg",
+    mobile: "/images/heroslider/Eterna-Band-Mobile.jpg",
+  },
+  {
+    desktop: "/images/heroslider/Birthday-Desktop.jpg",
+    mobile: "/images/heroslider/Birthday-Mobile.jpg",
+  },
+  {
+    desktop: "/images/heroslider/NineKT-Desktop.jpg",
+    mobile: "/images/heroslider/NineKT-Mobile.jpg",
+  },
 ];
 
 export default function HeroBanner() {
@@ -45,81 +54,84 @@ export default function HeroBanner() {
           }}
           className="h-full"
         >
-          {slides.map((img, index) => (
-            <SwiperSlide key={index}>
-              {isMobile ? (
-                <div className="flex flex-col bg-white">
-                  {/* TOP IMAGE ON MOBILE */}
-                  <div className="relative aspect-[4/3] w-full">
-                    {index === 0 ? (
-                      <Image
-                        src={img}
-                        alt="Hero Banner"
-                        fill
-                        priority
-                        className="object-cover"
-                      />
-                    ) : (
-                      <LazyImage
-                        src={img}
-                        alt="Hero Banner"
-                        fill
-                        className="object-cover"
-                      />
-                    )}
+          {slides.map((slide, index) => {
+            const img = isMobile ? slide.mobile : slide.desktop;
+            return (
+              <SwiperSlide key={index}>
+                {isMobile ? (
+                  <div className="flex flex-col bg-white">
+                    {/* TOP IMAGE ON MOBILE */}
+                    <div className="relative aspect-[4/3] w-full">
+                      {index === 0 ? (
+                        <Image
+                          src={img}
+                          alt="Hero Banner"
+                          fill
+                          priority
+                          className="object-cover"
+                        />
+                      ) : (
+                        <LazyImage
+                          src={img}
+                          alt="Hero Banner"
+                          fill
+                          className="object-cover"
+                        />
+                      )}
+                    </div>
+                    {/* BOTTOM TEXT ON MOBILE */}
+                    <div className="flex flex-col items-start px-6 py-8 bg-[#FDF7F4]">
+                      <h2 className="text-3xl font-bold mb-3 font-abhaya text-zinc-900 leading-tight">
+                        For Moments that Matter
+                      </h2>
+                      <p className="text-zinc-600 text-sm mb-6 leading-relaxed">
+                        Expertly crafted lab-grown diamonds with exceptional clarity & sparkle, designed to shine in every moment.
+                      </p>
+                      <Button className="h-12 px-8 py-3 w-full sm:w-fit text-sm font-bold tracking-widest bg-[#5B4740] hover:bg-[#4A3934] text-white uppercase rounded-sm transition-colors">
+                        SHOP BESTSELLERS
+                      </Button>
+                    </div>
                   </div>
-                  {/* BOTTOM TEXT ON MOBILE */}
-                  <div className="flex flex-col items-start px-6 py-8 bg-[#FDF7F4]">
-                    <h2 className="text-3xl font-bold mb-3 font-abhaya text-zinc-900 leading-tight">
-                      For Moments that Matter
-                    </h2>
-                    <p className="text-zinc-600 text-sm mb-6 leading-relaxed">
-                      Expertly crafted lab-grown diamonds with exceptional clarity & sparkle, designed to shine in every moment.
-                    </p>
-                    <Button className="h-12 px-8 py-3 w-full sm:w-fit text-sm font-bold tracking-widest bg-[#5B4740] hover:bg-[#4A3934] text-white uppercase rounded-sm transition-colors">
-                      SHOP BESTSELLERS
-                    </Button>
-                  </div>
-                </div>
-              ) : (
-                <div className="grid grid-cols-2 h-full bg-secondary">
-                  {/* LEFT TEXT */}
-                  <div className="flex flex-col justify-center pl-24 pr-16">
-                    <h1 className="text-[42px] font-semibold mb-4 font-abhaya">
-                      For Moments that Matter
-                    </h1>
-                    <p className="text-black max-w-105 mb-6">
-                      Expertly crafted with exceptional clarity & sparkle,
-                      designed to shine in every moment with effortless elegance.
-                    </p>
-                    <Button className="h-11 px-6 py-3 w-fit text-sm tracking-wide hover:cursor-pointer">
-                      SHOP BESTSELLERS
-                    </Button>
-                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 h-full bg-secondary">
+                    {/* LEFT TEXT */}
+                    <div className="flex flex-col justify-center pl-24 pr-16">
+                      <h1 className="text-[42px] font-semibold mb-4 font-abhaya">
+                        For Moments that Matter
+                      </h1>
+                      <p className="text-black max-w-105 mb-6">
+                        Expertly crafted with exceptional clarity & sparkle,
+                        designed to shine in every moment with effortless elegance.
+                      </p>
+                      <Button className="h-11 px-6 py-3 w-fit text-sm tracking-wide hover:cursor-pointer">
+                        SHOP BESTSELLERS
+                      </Button>
+                    </div>
 
-                  {/* RIGHT IMAGE */}
-                  <div className="relative h-full">
-                    {index === 0 ? (
-                      <Image
-                        src={img}
-                        alt="Hero Banner"
-                        fill
-                        priority
-                        className="object-cover"
-                      />
-                    ) : (
-                      <LazyImage
-                        src={img}
-                        alt="Hero Banner"
-                        fill
-                        className="object-cover"
-                      />
-                    )}
+                    {/* RIGHT IMAGE */}
+                    <div className="relative h-full">
+                      {index === 0 ? (
+                        <Image
+                          src={img}
+                          alt="Hero Banner"
+                          fill
+                          priority
+                          className="object-cover"
+                        />
+                      ) : (
+                        <LazyImage
+                          src={img}
+                          alt="Hero Banner"
+                          fill
+                          className="object-cover"
+                        />
+                      )}
+                    </div>
                   </div>
-                </div>
-              )}
-            </SwiperSlide>
-          ))}
+                )}
+              </SwiperSlide>
+            );
+          })}
         </Swiper>
 
         {/* NAVIGATION ARROWS - ONLY ON DESKTOP */}

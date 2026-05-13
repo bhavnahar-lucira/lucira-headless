@@ -201,7 +201,6 @@ export async function GET(request) {
       }
     }
 
-    console.log(`Applying sort: ${JSON.stringify(finalSort)} to collection: ${handle}`);
 
     let products = await productsCollection
       .find(resolvedFilter)
