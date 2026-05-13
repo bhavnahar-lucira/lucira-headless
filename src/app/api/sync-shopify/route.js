@@ -1,6 +1,7 @@
 import clientPromise from "@/lib/mongodb";
 import { NextResponse } from "next/server";
 import { fetchNectorReviews } from "@/lib/nector";
+import { fetchWithRetry } from "@/utils/helpers";
 
 export const dynamic = "force-dynamic";
 
@@ -10,7 +11,7 @@ export async function GET() {
   if (!SHOPIFY_DOMAIN || !ACCESS_TOKEN) return NextResponse.json({ error: "Missing credentials" }, { status: 500 });
 
   try {
-    const response = await fetch(`https://${SHOPIFY_DOMAIN}/admin/api/2024-01/products/count.json?status=active`, {
+    const response = await fetchWithRetry(`https://${SHOPIFY_DOMAIN}/admin/api/2024-01/products/count.json?status=active`, {
       headers: { "Content-Type": "application/json", "X-Shopify-Access-Token": ACCESS_TOKEN },
     });
     
@@ -64,7 +65,7 @@ export async function POST(req) {
 
         let totalToSync = 0;
         try {
-          const countRes = await fetch(`https://${SHOPIFY_DOMAIN}/admin/api/2024-01/products/count.json?status=active`, {
+          const countRes = await fetchWithRetry(`https://${SHOPIFY_DOMAIN}/admin/api/2024-01/products/count.json?status=active`, {
             headers: { "X-Shopify-Access-Token": ACCESS_TOKEN }
           });
           if (countRes.ok) {
@@ -135,7 +136,7 @@ export async function POST(req) {
             }
           `;
 
-          const response = await fetch(`https://${SHOPIFY_DOMAIN}/admin/api/2024-01/graphql.json`, {
+          const response = await fetchWithRetry(`https://${SHOPIFY_DOMAIN}/admin/api/2024-01/graphql.json`, {
             method: "POST",
             headers: { "Content-Type": "application/json", "X-Shopify-Access-Token": ACCESS_TOKEN },
             body: JSON.stringify({ query, variables: { cursor } }),
