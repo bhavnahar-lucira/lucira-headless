@@ -192,13 +192,11 @@ export async function GET(request) {
     };
 
     // If sorting by relevance, check if we actually did a text search
-    if (sort === "relevance") {
-      if (strategy === "text") {
-        projection.score = { $meta: "textScore" };
-      } else {
-        // If no text search was performed, fallback to featured sort
-        finalSort = SORT_MAP.featured;
-      }
+    if (sort === "relevance" && strategy === "text") {
+      projection.score = { $meta: "textScore" };
+    } else if (sort === "relevance") {
+      // If no text search was performed, fallback to featured sort
+      finalSort = SORT_MAP.featured;
     }
 
 

@@ -26,14 +26,12 @@ export async function fetchWithRetry(url, options = {}, retries = 3, backoff = 1
     const res = await fetch(url, options);
     // If it's a 5xx error, we might want to retry as well
     if (!res.ok && res.status >= 500 && retries > 0) {
-      console.warn(`[FetchRetry] HTTP ${res.status} for ${url}. Retrying in ${backoff}ms... (${retries} left)`);
       await new Promise(resolve => setTimeout(resolve, backoff));
       return fetchWithRetry(url, options, retries - 1, backoff * 2);
     }
     return res;
   } catch (err) {
     if (retries > 0) {
-      console.warn(`[FetchRetry] Network error for ${url}: ${err.message}. Retrying in ${backoff}ms... (${retries} left)`);
       await new Promise(resolve => setTimeout(resolve, backoff));
       return fetchWithRetry(url, options, retries - 1, backoff * 2);
     }
