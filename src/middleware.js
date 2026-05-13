@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-export async function proxy(request) {
+export async function middleware(request) {
   const { pathname, search } = request.nextUrl;
 
   // Skip static assets, api routes, and dashboard
@@ -15,27 +15,10 @@ export async function proxy(request) {
   }
 
   try {
-    const origin = request.nextUrl.origin;
-    const fetchUrl = `${origin}/api/redirect-check?path=${encodeURIComponent(pathname)}`;
+    const fetchUrl = `https://www.lucirajewelry.com/api/redirect-check?path=${encodeURIComponent(pathname)}`;
     
     // We pass the pathname to check for redirects
-    let checkRes;
-    try {
-      checkRes = await fetch(fetchUrl);
-    } catch (fetchError) {
-      console.error(`Proxy fetch failed for ${fetchUrl}:`, fetchError.message);
-      
-      // Fallback to internal loopback (127.0.0.1:3000)
-      // This solves issues where the server cannot resolve its own public domain (common on UAT/Prod)
-      const fallbackUrl = `http://127.0.0.1:3000/api/redirect-check?path=${encodeURIComponent(pathname)}`;
-      try {
-        console.log(`Attempting fallback fetch to: ${fallbackUrl}`);
-        checkRes = await fetch(fallbackUrl);
-      } catch (fallbackError) {
-        console.error(`Fallback fetch also failed:`, fallbackError.message);
-        throw fetchError; // Throw original error if fallback also fails
-      }
-    }
+    const checkRes = await fetch(fetchUrl);
     
     if (checkRes && checkRes.ok) {
       const data = await checkRes.json();
@@ -45,7 +28,7 @@ export async function proxy(request) {
         if (data.target.startsWith("http")) {
           targetUrl = new URL(data.target);
         } else {
-          targetUrl = new URL(data.target, origin);
+          targetUrl = new URL(data.target, "https://www.lucirajewelry.com");
         }
         
         // Preserve original search params if desired
@@ -63,7 +46,7 @@ export async function proxy(request) {
     }
   } catch (error) {
     // Fail silently to not break the site if the redirect check fails
-    console.error("Proxy redirect check failed:", error);
+    console.error("Middleware redirect check failed:", error);
   }
 
   return NextResponse.next();
