@@ -61,17 +61,38 @@ export async function POST(request) {
 
       for (const item of bulk) {
         try {
-          const res = await shopifyAdminRestFetch("redirects.json", {}, {
-            method: "POST",
-            body: {
-              redirect: {
-                path: item.path,
-                target: item.target
-              }
-            }
-          });
+          // Check if redirect already exists in Shopify to avoid "path has already been taken" error
+          let shopifyRedirect;
+          const existingRes = await shopifyAdminRestFetch("redirects.json", { path: item.path });
+          const existingRedirects = existingRes.data.redirects || [];
+          const existing = existingRedirects.find(r => r.path === item.path);
 
-          const shopifyRedirect = res.data.redirect;
+          if (existing) {
+            // Update existing in Shopify
+            const updateRes = await shopifyAdminRestFetch(`redirects/${existing.id}.json`, {}, {
+              method: "PUT",
+              body: {
+                redirect: {
+                  id: existing.id,
+                  target: item.target
+                }
+              }
+            });
+            shopifyRedirect = updateRes.data.redirect;
+          } else {
+            // Create in Shopify
+            const res = await shopifyAdminRestFetch("redirects.json", {}, {
+              method: "POST",
+              body: {
+                redirect: {
+                  path: item.path,
+                  target: item.target
+                }
+              }
+            });
+            shopifyRedirect = res.data.redirect;
+          }
+
           await collection.updateOne(
             { path: shopifyRedirect.path },
             { 
@@ -104,18 +125,43 @@ export async function POST(request) {
       );
     }
 
-    // Create in Shopify
-    const res = await shopifyAdminRestFetch("redirects.json", {}, {
-      method: "POST",
-      body: {
-        redirect: {
-          path,
-          target
-        }
-      }
-    });
+    // Check if redirect already exists in Shopify to avoid "path has already been taken" error
+    let shopifyRedirect;
+    try {
+      const existingRes = await shopifyAdminRestFetch("redirects.json", { path });
+      const existingRedirects = existingRes.data.redirects || [];
+      const existing = existingRedirects.find(r => r.path === path);
 
-    const shopifyRedirect = res.data.redirect;
+      if (existing) {
+        // Update existing in Shopify
+        const updateRes = await shopifyAdminRestFetch(`redirects/${existing.id}.json`, {}, {
+          method: "PUT",
+          body: {
+            redirect: {
+              id: existing.id,
+              target
+            }
+          }
+        });
+        shopifyRedirect = updateRes.data.redirect;
+      } else {
+        // Create in Shopify
+        const res = await shopifyAdminRestFetch("redirects.json", {}, {
+          method: "POST",
+          body: {
+            redirect: {
+              path,
+              target
+            }
+          }
+        });
+        shopifyRedirect = res.data.redirect;
+      }
+    } catch (shopifyError) {
+      // If direct check/create fails, try one last time to create (legacy behavior) or throw
+      console.error("Shopify redirect operation failed:", shopifyError);
+      throw shopifyError;
+    }
 
     // Save in MongoDB
     await collection.updateOne(
