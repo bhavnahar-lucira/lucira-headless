@@ -214,7 +214,6 @@ export async function GET(request) {
 
     // If no products found and we have a query, try fallback broad search
     if (products.length === 0 && query && fallbackFilter) {
-      console.log(`No results for primary search "${query}", trying fallback...`);
       products = await productsCollection
         .find(fallbackFilter)
         .project(projection)
