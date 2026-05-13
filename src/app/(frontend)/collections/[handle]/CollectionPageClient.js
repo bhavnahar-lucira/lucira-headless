@@ -473,9 +473,11 @@ export default function CollectionPage({ params: paramsPromise }) {
 
         switch (node.type) {
           case "heading":
-            const HeadingTag = `h${node.level || 2}`;
+            const level = node.level || 2;
+            const HeadingTag = `h${level}`;
+            const sizeClass = level === 1 ? "text-2xl" : level === 2 ? "text-xl" : level === 3 ? "text-lg" : "text-base";
             return (
-              <HeadingTag key={i} className="text-xl md:text-xl  mt-4 mb-4 text-gray-900 uppercase tracking-wider">
+              <HeadingTag key={i} className={`${sizeClass} md:${sizeClass} mt-4 mb-4 text-gray-900 uppercase tracking-wider`}>
                 {renderChildren(node.children)}
               </HeadingTag>
             );
