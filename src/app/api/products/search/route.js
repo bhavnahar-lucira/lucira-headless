@@ -212,9 +212,13 @@ export async function GET(request) {
 
     // If no products found and we have a query, try fallback broad search
     if (products.length === 0 && query && fallbackFilter) {
+      // Create a clean projection for fallback (no score metadata as fallback uses regex, not $text)
+      const fallbackProjection = { ...projection };
+      delete fallbackProjection.score;
+
       products = await productsCollection
         .find(fallbackFilter)
-        .project(projection)
+        .project(fallbackProjection)
         .sort(sort === "relevance" ? { title: 1 } : finalSort)
         .skip((page - 1) * limit)
         .limit(limit)
