@@ -71,14 +71,14 @@ export const getStandardWishlistPayload = (product, variant, currentOrigin, thum
   };
 
   // Robust SKU resolution
-  const sku = 
-    variant?.sku || 
-    product?.sku || 
-    variant?.variantSku || 
-    product?.variantSku || 
+  const sku =
+    variant?.sku ||
+    product?.sku ||
+    variant?.variantSku ||
+    product?.variantSku ||
     variant?.item_sku ||
     product?.item_sku ||
-    (product?.variants && product?.variants[0]?.sku) || 
+    (product?.variants && product?.variants[0]?.sku) ||
     (product?.variantOptions && product?.variantOptions[0]?.sku) ||
     "";
 
@@ -90,17 +90,22 @@ export const getStandardWishlistPayload = (product, variant, currentOrigin, thum
   const productType = product?.type || product?.productType || "";
   const productCategory = product?.category || product?.productCategory || productType || "";
 
+  const sellingPrice = variant?.price || product?.price || 0;
+  const originalPrice = variant?.compare_price || variant?.compareAtPrice || product?.compare_price || product?.compareAtPrice || sellingPrice;
+
   return {
     sku: sku,
     productId: productId,
+    variant_id: String(getNumericId(variant?.id || variant?.shopifyId)),
     productName: product?.title || product?.productName || "",
     brand: 'LuciraJewelry',
     productCategory: productCategory,
     productType: productType,
-    price: getNumeric(variant?.price || product?.price || 0),
+    price: String(sellingPrice),
+    offerPrice: String(Number(originalPrice).toFixed(2)),
     quantity: 1,
     productUrl: `${currentOrigin}/products/${product?.handle || ""}?variant=${variant?.id || variant?.shopifyId || variant?.variantId || ""}`,
-    thumbnailImage: thumbnailImage || variant?.image || product?.image?.url || product?.image || "",
+    thumbnailImage: [thumbnailImage || variant?.image || product?.image?.url || product?.image || ""],
     currency: "INR"
   };
 };
@@ -108,7 +113,7 @@ export const getStandardWishlistPayload = (product, variant, currentOrigin, thum
 export const getStandardCartItem = (item, idx = 0) => {
   const prodId = String(getNumericId(item.productId || item.shopifyId || item.id));
   const lowerTitle = (item.title || "").toLowerCase();
-  
+
   let category = item.type || item.productType || "";
   if (!category) {
     if (lowerTitle.includes("ring")) category = "Rings";
@@ -119,18 +124,18 @@ export const getStandardCartItem = (item, idx = 0) => {
 
   // Robust SKU resolution for cart items
   const variantId = item.variantId || item.id || item.shopifyId || "";
-  const currentVariant = item.variantOptions?.find(v => 
+  const currentVariant = item.variantOptions?.find(v =>
     String(getNumericId(v.variantId || v.id || v.shopifyId)) === String(getNumericId(variantId))
   );
 
-  const sku = 
-    item.sku || 
-    currentVariant?.sku || 
-    item.variantSku || 
-    item.item_sku || 
-    (item.variantOptions && item.variantOptions[0]?.sku) || 
+  const sku =
+    item.sku ||
+    currentVariant?.sku ||
+    item.variantSku ||
+    item.item_sku ||
+    (item.variantOptions && item.variantOptions[0]?.sku) ||
     "";
-  
+
   return {
     id: prodId,
     sku: sku,

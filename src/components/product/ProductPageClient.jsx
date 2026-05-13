@@ -143,19 +143,19 @@ function useMounted() {
 }
 
 const handleSafeScroll = (elementRef) => {
-  if (!elementRef.current) return;  
-  const isDesktop = window.innerWidth >= 768;  
+  if (!elementRef.current) return;
+  const isDesktop = window.innerWidth >= 768;
   const bodyRect = document.body.getBoundingClientRect().top;
   const elementRect = elementRef.current.getBoundingClientRect().top;
   const absoluteElementTop = elementRect - bodyRect;
-  const offset = isDesktop ? 80 : 20; 
+  const offset = isDesktop ? 80 : 20;
   const targetPosition = absoluteElementTop - offset;
-  
+
   window.scrollTo({
     top: targetPosition,
     behavior: "smooth",
   });
-  
+
   if (isDesktop) {
     setTimeout(() => {
       window.scrollTo({
@@ -196,9 +196,9 @@ const getColorSpecificImage = (product, colorName) => {
   if (!product?.media || product.media.length === 0) return null;
   const baseColor = getBaseColor(colorName);
   if (!baseColor) return null;
-  
+
   const colorTerms = ["yellow", "white", "rose"];
-  
+
   // Logic similar to ProductGallery: find image matching color base and not mentioning others
   return product.media.find(m => {
     if (m.type !== "IMAGE") return false;
@@ -419,28 +419,28 @@ export default function ProductPageClient({ product, complementaryProducts = [],
     coords: null
   });
 
-useEffect(() => {
-  if (
-    globalPincode &&
-    !pincode
-  ) {
-    setPincode(globalPincode);
-  }
-}, [globalPincode]);
+  useEffect(() => {
+    if (
+      globalPincode &&
+      !pincode
+    ) {
+      setPincode(globalPincode);
+    }
+  }, [globalPincode]);
 
-useEffect(() => {
-  const savedPincode = String(
-    getCookieValue(USER_PINCODE_COOKIE) || ""
-  )
-    .replace(/\D/g, "")
-    .slice(0, 6);
+  useEffect(() => {
+    const savedPincode = String(
+      getCookieValue(USER_PINCODE_COOKIE) || ""
+    )
+      .replace(/\D/g, "")
+      .slice(0, 6);
 
-  if (savedPincode) {
-    setPincode(savedPincode);
+    if (savedPincode) {
+      setPincode(savedPincode);
 
-    dispatch(setGlobalPincode(savedPincode));
-  }
-}, [dispatch]);
+      dispatch(setGlobalPincode(savedPincode));
+    }
+  }, [dispatch]);
 
   useEffect(() => {
     const fetchStores = async () => {
@@ -466,7 +466,7 @@ useEffect(() => {
     // If val is a string (like from useEffect), use it. 
     // Otherwise (from button click/event), use the current 'pincode' state.
     // const pincodeToCheck = (typeof val === 'string' ? val : pincode).trim();
-      const pincodeToCheck = String(
+    const pincodeToCheck = String(
       typeof val === "string" ? val : pincode
     ).trim();
 
@@ -528,35 +528,35 @@ useEffect(() => {
   }, []);
 
   useEffect(() => {
-  const applyPincode = (value) => {
-    const cookiePincode = String(value || "")
-      .replace(/\D/g, "")
-      .slice(0, 6);
+    const applyPincode = (value) => {
+      const cookiePincode = String(value || "")
+        .replace(/\D/g, "")
+        .slice(0, 6);
 
-    if (cookiePincode === pincode) return;
+      if (cookiePincode === pincode) return;
 
-    setPincode(cookiePincode);
+      setPincode(cookiePincode);
 
-    if (cookiePincode.length === 6) {
-      handlePincodeCheck(cookiePincode);
-    }
-  };
+      if (cookiePincode.length === 6) {
+        handlePincodeCheck(cookiePincode);
+      }
+    };
 
-  const handleUserPincode = (event) => {
-    applyPincode(event.detail?.pincode);
-  };
+    const handleUserPincode = (event) => {
+      applyPincode(event.detail?.pincode);
+    };
 
-  window.addEventListener(
-    "lucira:user-pincode",
-    handleUserPincode
-  );
-
-  return () =>
-    window.removeEventListener(
+    window.addEventListener(
       "lucira:user-pincode",
       handleUserPincode
     );
-}, [handlePincodeCheck, pincode]);
+
+    return () =>
+      window.removeEventListener(
+        "lucira:user-pincode",
+        handleUserPincode
+      );
+  }, [handlePincodeCheck, pincode]);
 
   // Update dispatch message when variant changes (size/color)
   useEffect(() => {
@@ -591,7 +591,7 @@ useEffect(() => {
 
       const storeNameLower = store.name.toLowerCase();
       const storeCityLower = (store.city || "").toLowerCase();
-      
+
       return inStoreTags.some(tag => {
         const tagLower = String(tag).toLowerCase();
         if (tagLower.includes("gid://")) return false;
@@ -874,7 +874,7 @@ useEffect(() => {
         eventId: `atc_${Date.now()}`,
         products: {
           productId: String(getNumericId(product.shopifyId || product.id)),
-          variantId: getNumericId(activeVariant?.id || activeVariant?.shopifyId),
+          variantId: String(getNumericId(activeVariant?.id || activeVariant?.shopifyId)),
           sku: activeVariant?.sku || product?.sku || activeVariant?.variantSku || product?.variantSku || (product?.variants && product?.variants[0]?.sku) || "",
           productName: product.title,
           productType: product.type || "",
@@ -882,7 +882,8 @@ useEffect(() => {
           offerPrice: String(originalPrice.toFixed(2)),
           productUrl: currentUrl,
           image: productImageUrl,
-          price: Number(sellingPrice),
+          price: String(sellingPrice),
+          quantity: 1,
           category: "",
           subCategory: "",
           productPersona: ""
@@ -960,7 +961,7 @@ useEffect(() => {
   const handlePromoClick = useCallback((creativeName, promoPosition = 'Product Details Section', extraData = {}, isMinimal = false) => {
     if (isMinimal) {
       const promoData = {
-        promo_id: activeVariant?.sku || product?.sku || "",
+        promo_id: String(activeVariant?.sku || product?.sku || ""),
         promo_name: product.title,
         creative_name: creativeName,
         ...extraData
@@ -968,7 +969,7 @@ useEffect(() => {
 
       // If promoPosition is provided and it's not the default, add it to promoData
       if (promoPosition && promoPosition !== 'Product Details Section') {
-        promoData.promo_position = promoPosition;
+        promoData.promo_position = String(promoPosition);
       }
 
       pushPromoClick(promoData);
@@ -980,16 +981,16 @@ useEffect(() => {
     const promoData = {
       // Promotion Info
       creative_name: creativeName,
-      promo_id: activeVariant?.sku || product?.sku || "",
+      promo_id: String(activeVariant?.sku || product?.sku || ""),
       promo_name: product.title,
-      promo_position: promoPosition,
+      promo_position: String(promoPosition),
 
       // Product Info
-      product_id: getNumericId(product.shopifyId || product.id),
+      product_id: String(getNumericId(product.shopifyId || product.id)),
       product_name: product.title,
       sku: activeVariant?.sku || "",
-      variant_id: getNumericId(activeVariant?.id),
-      location_id: getNumericId(activeVariant?.id),
+      variant_id: String(getNumericId(activeVariant?.id)),
+      location_id: String(getNumericId(activeVariant?.id)),
 
       // URL & Image
       product_url: typeof window !== 'undefined' ? window.location.href : "",
@@ -997,8 +998,8 @@ useEffect(() => {
 
       // Pricing
       // price: Number(activeVariant?.compare_price || activeVariant?.compareAtPrice || product.compare_price || product.compareAtPrice || activeVariant?.price || product.price || 0),
-      price: Number(activeVariant?.price || product.price || 0),
-      offer_price: Number(raw?.original_total || activeVariant?.compare_price || activeVariant?.price || 0),
+      price: String(activeVariant?.price || product.price || 0),
+      offer_price: String(raw?.original_total || activeVariant?.compare_price || activeVariant?.price || 0),
 
       // Price Breakup Values
       metal_label: (activeVariant?.metafields?.metal_purity || activeKarat) + ' ' + (activeVariant?.metafields?.metal_color || activeColor),
@@ -1091,7 +1092,10 @@ useEffect(() => {
       pushProductView({
         productId: getNumericId(product.shopifyId || product.id),
         sku: activeVariant?.sku || "",
-        variantId: getNumericId(activeVariant?.id || activeVariant?.shopifyId),
+        // variantId: getNumericId(activeVariant?.id || activeVariant?.shopifyId),
+        variantId: String(
+          getNumericId(activeVariant?.id || activeVariant?.shopifyId)
+        ),
         vendorCode: product.vendor || "Lucira Jewelry",
         productName: product.title,
         productType: product.type || "",
@@ -1147,7 +1151,7 @@ useEffect(() => {
     setActiveKarat(karat);
 
     let variant = findMatchingVariant(metal, karat, selectedSize);
-    
+
     // If exact match with current size isn't found, pick the first available variant for this color
     if (!variant) {
       variant = product.variants?.find(v => {
@@ -2037,7 +2041,8 @@ useEffect(() => {
                   <Input
                     placeholder="Enter Pincode"
                     value={pincode}
-                    onChange={(e) => {const value = e.target.value.replace(/\D/g, "").slice(0, 6);
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/\D/g, "").slice(0, 6);
                       setPincode(value);
                       dispatch(setGlobalPincode(value));
                     }}
@@ -2188,7 +2193,7 @@ useEffect(() => {
                   </div>
                   <Separator />
                 </div>
-                
+
               );
             })()}
             {/* Explore Section */}
@@ -2204,7 +2209,7 @@ useEffect(() => {
                 onClick={() => pushToDataLayer({
                   event: 'promoClick',
                   promoClick: {
-                    promo_id: getNumericId(product.shopifyId || product.id),
+                    promo_id: String(getNumericId(product.shopifyId || product.id)),
                     creative_name: 'Visit Store Button clicked',
                     location_id: 'Pdp',
                   }
@@ -2220,7 +2225,7 @@ useEffect(() => {
                 onClick={() => pushToDataLayer({
                   event: 'promoClick',
                   promoClick: {
-                    promo_id: activeVariant?.sku || product.id,
+                    promo_id: String(activeVariant?.sku || product.id),
                     promo_name: product.title,
                     creative_name: 'Try at Home Section',
                     location_id: 'PDP',
@@ -2700,16 +2705,16 @@ useEffect(() => {
 
                       <div className="flex flex-1 gap-3 pt-2">
                         <a
-                            href={`https://wa.me/919172499912?text=${encodeURIComponent(
-                              `Hi, I would like to check the availability for ${getStoreDisplayName(store.name)} store.`
-                            )}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="h-11 aspect-square bg-[#29a319] shadow-sm border-gray-200 rounded-sm flex items-center justify-center shrink-0"
-                          >
-                            <div className="relative w-7 h-7">
-                              <Image src="/images/icons/whatsapp_white.png" alt="WhatsApp" fill className="object-contain" />
-                            </div>
+                          href={`https://wa.me/919172499912?text=${encodeURIComponent(
+                            `Hi, I would like to check the availability for ${getStoreDisplayName(store.name)} store.`
+                          )}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="h-11 aspect-square bg-[#29a319] shadow-sm border-gray-200 rounded-sm flex items-center justify-center shrink-0"
+                        >
+                          <div className="relative w-7 h-7">
+                            <Image src="/images/icons/whatsapp_white.png" alt="WhatsApp" fill className="object-contain" />
+                          </div>
                         </a>
                         <Button variant="outline" className="flex-1 font-bold h-11 rounded-sm border-gray-200" asChild>
                           <a href={`tel:${store.phone || "+919172499912"}`}>CALL STORE</a>
