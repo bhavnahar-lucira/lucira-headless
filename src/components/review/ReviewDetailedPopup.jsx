@@ -83,7 +83,7 @@ export default function ReviewDetailedPopup({ isOpen, onClose, reviews, activeIn
           <div className="w-full md:w-1/2 relative bg-gray-50 flex items-center justify-center overflow-hidden border-r border-gray-100">
             {!isLoaded && (
                 <div className="absolute inset-0 flex items-center justify-center z-[5]">
-                    <Image src="/images/loader.gif" alt="Loading..." width={64} height={64} className="object-contain" />
+                    <Image src="/images/loader.gif" alt="Loading..." width={64} height={64} className="object-contain" unoptimized />
                 </div>
             )}
             <div className="relative w-full h-full aspect-square md:aspect-auto">
