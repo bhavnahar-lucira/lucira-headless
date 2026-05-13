@@ -60,7 +60,6 @@ async function getComplementaryProducts(product) {
     })
     .toArray();
 
-  console.log(`Product: ${product.handle}, Found ${complementaryProducts.length} complementary products.`);
 
   return complementaryProducts.map(p => {
     p._id = p._id.toString();
