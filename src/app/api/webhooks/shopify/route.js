@@ -293,31 +293,30 @@ async function processWebhook(topic, payload, eventId) {
         }
       }
 
-      // Perform surgical update for top-level if changes detected
-      if (Object.keys(updateSet).length > 0) {
-        await productsCollection.updateOne(
-          { shopifyId },
-          { $set: updateSet },
-          { upsert: !existingProduct }
-        );
-      }
+      // 5. Surgical Variant Updates (Merged into updateSet)
+      const finalVariants = [];
+      let variantsChanged = false;
 
-      // 5. Surgical Variant Updates
+      // Track which existing variant IDs we've processed
+      const processedVariantIds = new Set();
+
       for (const v of mappedVariants) {
+        processedVariantIds.add(v.id);
         const existingV = existingVariants.find(ev => ev.id === v.id);
-        const variantUpdate = {};
-
+        
         if (!existingV) {
-          // New variant
-          await productsCollection.updateOne(
-            { shopifyId, "variants.id": { $ne: v.id } },
-            { $push: { variants: v } }
-          );
+          finalVariants.push(v);
+          variantsChanged = true;
           changedFields.push(`New Variant:${v.id}`);
         } else {
+          let vChanged = false;
+          // Start with a clean merge of existing data to preserve fields NOT in webhook (like complex metafields)
+          const mergedV = { ...existingV };
+          
           const checkVariant = (field, newVal, oldVal) => {
             if (JSON.stringify(newVal) !== JSON.stringify(oldVal)) {
-              variantUpdate[`variants.$.${field}`] = newVal;
+              mergedV[field] = newVal;
+              vChanged = true;
               changedFields.push(`variant.${v.id}.${field}`);
             }
           };
@@ -331,13 +330,29 @@ async function processWebhook(topic, payload, eventId) {
           checkVariant("image", v.image || undefined, existingV.image);
           checkVariant("options", v.options, existingV.options);
 
-          if (Object.keys(variantUpdate).length > 0) {
-            await productsCollection.updateOne(
-              { shopifyId, "variants.id": v.id },
-              { $set: variantUpdate }
-            );
-          }
+          finalVariants.push(mergedV);
+          if (vChanged) variantsChanged = true;
         }
+      }
+
+      // Preserve variants that are in DB but not in current Shopify payload (deletion safety)
+      existingVariants.forEach(ev => {
+        if (!processedVariantIds.has(ev.id)) {
+          finalVariants.push(ev);
+        }
+      });
+
+      if (variantsChanged) {
+        updateSet.variants = finalVariants;
+      }
+
+      // Perform surgical update for top-level and variants if changes detected
+      if (Object.keys(updateSet).length > 0) {
+        await productsCollection.updateOne(
+          { shopifyId },
+          { $set: updateSet },
+          { upsert: !existingProduct }
+        );
       }
       
       const changesSummary = changedFields.join(", ") || "No relevant changes";
