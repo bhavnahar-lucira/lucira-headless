@@ -1,9 +1,23 @@
 import { NextResponse } from "next/server";
 
+export const config = {
+  matcher: [
+    /*
+     * Match all request paths except for the ones starting with:
+     * - api (API routes)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - Common image/font extensions
+     */
+    '/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|woff|woff2|ttf|css|js)$).*)',
+  ],
+};
+
 export async function middleware(request) {
   const { pathname, search } = request.nextUrl;
 
-  // Skip static assets, api routes, and dashboard
+  // Additional safety check to skip non-page routes
   if (
     pathname.startsWith("/_next") ||
     pathname.startsWith("/api") ||
@@ -21,17 +35,24 @@ export async function middleware(request) {
     // We pass the pathname to check for redirects
     let checkRes;
     try {
-      // Try public URL first
-      checkRes = await fetch(publicUrl);
+      // Try public URL with a 2-second timeout to prevent hanging the request
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 2000);
+      
+      checkRes = await fetch(publicUrl, { signal: controller.signal });
+      clearTimeout(timeoutId);
     } catch (fetchError) {
-      // If public fetch fails (common on VPS self-resolution), fallback to internal loopback
+      // Fallback to internal loopback if public fetch fails or times out
       const fallbackUrl = `http://127.0.0.1:3000/api/redirect-check?path=${encodeURIComponent(pathname)}`;
       try {
-        checkRes = await fetch(fallbackUrl);
+        const fallbackController = new AbortController();
+        const fallbackTimeoutId = setTimeout(() => fallbackController.abort(), 2000);
+        
+        checkRes = await fetch(fallbackUrl, { signal: fallbackController.signal });
+        clearTimeout(fallbackTimeoutId);
       } catch (fallbackError) {
-        // If even fallback fails, we log it and continue
-        console.error("Middleware fallback fetch also failed:", fallbackError.message);
-        throw fetchError;
+        // Fail silently
+        return NextResponse.next();
       }
     }
     
@@ -61,24 +82,11 @@ export async function middleware(request) {
     }
   } catch (error) {
     // Fail silently to not break the site if the redirect check fails
-    // But don't log the "fetch failed" if it was handled by fallback
-    if (error.message !== "fetch failed") {
+    // But don't log "fetch failed" or "aborted" errors as they are handled by fallbacks
+    if (!["fetch failed", "signal is aborted", "The operation was aborted"].includes(error.message)) {
       console.error("Middleware redirect check failed:", error);
     }
   }
 
   return NextResponse.next();
 }
-
-export const config = {
-  matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - api (API routes)
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     */
-    '/((?!api|_next/static|_next/image|favicon.ico).*)',
-  ],
-};

@@ -18,19 +18,16 @@ export async function GET(request, { params }) {
 
   try {
     // Construct the Shopify URL
-    const shopifySitemapUrl = `https://${shopifyDomain}/${path}`;
+    // Decode potential double-encoded entities like &amp; that crawlers sometimes send literally
+    let queryString = request.nextUrl.search || "";
+    if (queryString.includes("&amp;") || queryString.includes("&amp%3B")) {
+      queryString = queryString.replace(/&amp;/g, "&").replace(/&amp%3B/g, "&");
+    }
     
-    // Fetch with some search params if they were passed (like ?from=...&to=...)
-    const fullUrl = new URL(shopifySitemapUrl);
-    searchParams.forEach((value, key) => {
-      if (key !== "path") {
-        fullUrl.searchParams.set(key, value);
-      }
-    });
+    const shopifySitemapUrl = `https://${shopifyDomain}/${path}${queryString}`;
+    
 
-    console.log(`Proxying sitemap: ${fullUrl.toString()}`);
-
-    const res = await fetch(fullUrl.toString());
+    const res = await fetch(shopifySitemapUrl);
     
     if (!res.ok) {
       console.error(`Shopify sitemap fetch failed: ${res.status}`);

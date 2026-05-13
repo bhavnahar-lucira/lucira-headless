@@ -15,7 +15,6 @@ const formatHandle = (text = "") => {
 };
 
 export function CommonBreadcrumb({ handle }) {
-  console.log(handle)
   return (
     <Breadcrumb>
       <BreadcrumbList>
