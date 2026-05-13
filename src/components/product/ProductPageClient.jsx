@@ -260,10 +260,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
   const searchParams = useSearchParams();
   const variantIdFromUrl = searchParams.get("variant");
   const collectionContext = useSelector((state) => state.user.collectionContext);
-  const dispatch = useDispatch();
-
-  console.log("Product:", product, product.type);
-  
+  const dispatch = useDispatch();  
 
   useEffect(() => {
     window.__LUCIRA_PRODUCT__ = product;
