@@ -21,7 +21,7 @@ export default function HeroBanner() {
   const id = useId().replace(/:/g, "");
   const paginationElClass = `pagination-${id}`;
   
-  const bannerHeightClasses = "h-auto aspect-4/5 md:aspect-auto md:h-[calc(100dvh-225px)] md:min-h-[450px]";
+  const bannerHeightClasses = "h-auto aspect-4/5 md:aspect-auto md:h-[calc(100dvh-14rem)] md:min-h-[450px]";
 
   return (
     <div className="w-full bg-white">
