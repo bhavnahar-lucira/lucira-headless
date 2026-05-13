@@ -29,6 +29,14 @@ const sizeData = [
   { ind: 16, us: "8.5", diaIn: 0.70, cirIn: 2.21 },
   { ind: 17, us: "9", diaIn: 0.71, cirIn: 2.24 },
   { ind: 18, us: "9.5", diaIn: 0.73, cirIn: 2.29 },
+  { ind: 19, us: "10", diaIn: 0.74, cirIn: 2.34 },
+  { ind: 20, us: "10.5", diaIn: 0.76, cirIn: 2.39 },
+  { ind: 21, us: "11", diaIn: 0.77, cirIn: 2.41 },
+  { ind: 22, us: "11.5", diaIn: 0.78, cirIn: 2.46 },
+  { ind: 23, us: "12", diaIn: 0.80, cirIn: 2.51 },
+  { ind: 24, us: "12.5", diaIn: 0.81, cirIn: 2.56 },
+  { ind: 25, us: "13", diaIn: 0.83, cirIn: 2.61 },
+  { ind: 26, us: "13.5", diaIn: 0.84, cirIn: 2.63 },
 ];
 
 export function SizeGuideMobile({ children, nearestStore, availableStores = [], availableStoreCount = 0, deliveryInfo, getStoreDisplayName  }) {

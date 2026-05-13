@@ -1,6 +1,5 @@
 import clientPromise from "@/lib/mongodb";
 import { NextResponse } from "next/server";
-import { PINCODE_COORDINATES } from "@/utils/coordinateMapping";
 
 export const dynamic = "force-dynamic";
 
@@ -42,9 +41,41 @@ export async function POST(req) {
       let latitude = loc.latitude ? parseFloat(loc.latitude) : null;
       let longitude = loc.longitude ? parseFloat(loc.longitude) : null;
 
-      if (!latitude && pincode && PINCODE_COORDINATES[pincode]) {
-        latitude = PINCODE_COORDINATES[pincode].lat;
-        longitude = PINCODE_COORDINATES[pincode].lng;
+      try {
+        const metafieldRes = await fetch(
+          `https://${SHOPIFY_DOMAIN}/admin/api/2024-01/locations/${loc.id}/metafields.json`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              "X-Shopify-Access-Token": ACCESS_TOKEN,
+            },
+          }
+        );
+
+        const metafieldData = await metafieldRes.json();
+
+        if (metafieldRes.ok) {
+          const metafields = metafieldData.metafields || [];
+
+          const latitudeField = metafields.find(
+            (m) => m.namespace === "custom" && m.key === "latitude"
+          );
+
+          const longitudeField = metafields.find(
+            (m) => m.namespace === "custom" && m.key === "longitude"
+          );
+
+          if (latitudeField?.value) {
+            latitude = parseFloat(latitudeField.value);
+          }
+
+          if (longitudeField?.value) {
+            longitude = parseFloat(longitudeField.value);
+          }
+        }
+      } catch (err) {
+        console.error(`Failed metafields fetch for ${loc.name}`, err);
       }
 
       const storeData = {
