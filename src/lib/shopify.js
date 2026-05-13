@@ -85,7 +85,6 @@ export async function shopifyAdminRestFetch(endpoint, params = {}, options = {})
     }
   });
 
-  console.log(`[Shopify REST] ${method} ${url.toString()}`);
 
   const res = await fetchWithRetry(url.toString(), {
     method,
