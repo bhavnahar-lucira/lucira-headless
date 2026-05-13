@@ -15,11 +15,12 @@ export async function middleware(request) {
   }
 
   try {
-    const origin = request.nextUrl.origin;
-    // We pass the pathname to check for redirects
-    const checkRes = await fetch(`${origin}/api/redirect-check?path=${encodeURIComponent(pathname)}`);
+    const fetchUrl = `https://www.lucirajewelry.com/api/redirect-check?path=${encodeURIComponent(pathname)}`;
     
-    if (checkRes.ok) {
+    // We pass the pathname to check for redirects
+    const checkRes = await fetch(fetchUrl);
+    
+    if (checkRes && checkRes.ok) {
       const data = await checkRes.json();
       if (data.redirect && data.target) {
         // Construct the target URL
@@ -27,7 +28,7 @@ export async function middleware(request) {
         if (data.target.startsWith("http")) {
           targetUrl = new URL(data.target);
         } else {
-          targetUrl = new URL(data.target, origin);
+          targetUrl = new URL(data.target, "https://www.lucirajewelry.com");
         }
         
         // Preserve original search params if desired
