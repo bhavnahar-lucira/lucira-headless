@@ -100,7 +100,23 @@ export async function shopifyAdminRestFetch(endpoint, params = {}, options = {})
   const data = await res.json();
   if (!res.ok) {
     console.error("Admin REST Errors:", data);
-    throw new Error(data.errors?.[0]?.message || data.error || `Admin REST error ${res.status}`);
+    let errorMessage = `Admin REST error ${res.status}`;
+    if (data.errors) {
+      if (Array.isArray(data.errors)) {
+        errorMessage = data.errors[0]?.message || errorMessage;
+      } else if (typeof data.errors === 'object') {
+        // Handle errors like { path: ['has already been taken'] }
+        const details = Object.entries(data.errors)
+          .map(([field, msgs]) => `${field} ${Array.isArray(msgs) ? msgs.join(', ') : msgs}`)
+          .join('; ');
+        if (details) errorMessage = details;
+      } else if (typeof data.errors === 'string') {
+        errorMessage = data.errors;
+      }
+    } else if (data.error) {
+      errorMessage = data.error;
+    }
+    throw new Error(errorMessage);
   }
 
   return {
