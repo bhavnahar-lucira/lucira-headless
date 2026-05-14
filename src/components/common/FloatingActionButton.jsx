@@ -11,23 +11,43 @@ export default function FloatingActionButton() {
   const [tooltipShown, setTooltipShown] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isZohoActive, setIsZohoActive] = useState(false);
+  const [pageTitle, setPageTitle] = useState("");
   
   const fabTooltipRef = useRef(null);
 
   // ── Helpers ──────────────────────────────────────────────────────────────
 
+  useEffect(() => {
+    setPageTitle("");
+
+    const timer = setTimeout(() => {
+      const globalProduct = typeof window !== 'undefined' ? window.__LUCIRA_PRODUCT__ : null;
+
+      if (globalProduct?.title) {
+        setPageTitle(globalProduct.title);
+      } else {
+        const docTitle = document.title.split('|')[0].trim();
+        if (docTitle.length > 3) {
+          setPageTitle(docTitle);
+        }
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [pathname]);
+
   const getPageContext = () => {
     const globalProduct = typeof window !== 'undefined' ? window.__LUCIRA_PRODUCT__ : null;
-    const title = globalProduct?.title || (typeof document !== 'undefined' ? document.title.split('|')[0].trim() : "FAB Enquiry");
     const sku = globalProduct?.sku || "N/A";
-    
+    const title = pageTitle;
+
     if (pathname === "/") return { type: "index", title, sku };
     if (pathname.startsWith("/collections")) return { type: "collection", title, sku };
     if (pathname.startsWith("/products")) return { type: "product", title, sku };
     if (pathname.startsWith("/blogs")) return { type: "blog", title, sku };
     if (pathname.includes("gold-rate")) return { type: "gold-rate", title, slug: pathname.split('/').pop() };
     if (pathname.includes("platinum-rate")) return { type: "platinum-rate", title, slug: pathname.split('/').pop() };
-    
+
     return { type: "other", title, sku };
   };
 
@@ -53,7 +73,7 @@ export default function FloatingActionButton() {
       message = `Tell me more about ${city} platinum rate`;
     }
 
-    return `https://wa.me/919004435760?text=${encodeURIComponent(message)}`;
+    return `https://wa.me/+919004435760?text=${encodeURIComponent(message)}`;
   };
 
   const pushPromoClick = (creativeName) => {
