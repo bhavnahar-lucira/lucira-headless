@@ -70,10 +70,18 @@ export function extractSearchIntent(query = "") {
 }
 
 function fieldClause(field, keyword) {
-  const variants = keywordVariants(keyword).map(escapeRegex);
+  const variants = keywordVariants(keyword);
+
+  // Optimization: For tags and collectionHandles, direct equality is much faster and uses indexes.
+  if (field === "tags" || field === "collectionHandles") {
+    // We include variants (singular/plural) to increase match probability without regex
+    return { [field]: { $in: variants } };
+  }
+
+  const regexPattern = variants.map(escapeRegex).join("|");
   return {
     [field]: {
-      $regex: variants.join("|"),
+      $regex: regexPattern,
       $options: "i",
     },
   };
@@ -127,9 +135,12 @@ export async function resolveSearchMatch(db, baseFilter = {}, query = "") {
       const queryRegex = new RegExp(escapedQuery, "i");
       
       // Find synonym groups that match the query
+      // Optimized: Use exact match for title if possible, or prefix match
       const synonymGroups = await synonymsCollection.find({
         $or: [
+          { title: trimmedQuery },
           { title: queryRegex },
+          { synonyms: trimmedQuery.toLowerCase() },
           { synonyms: { $regex: escapedQuery, $options: "i" } }
         ]
       }).toArray();

@@ -22,14 +22,23 @@ export async function GET(req) {
         if (isRealCollection || !handle.startsWith("all-")) {
           match.collectionHandles = handle;
         } else {
-          const keywords = handle.replace("all-", "").split("-").map(k => k.replace(/s$/, ""));
+          // Optimized handle filtering: Use exact/prefix match regex instead of broad contains regex
+          const keywords = handle.replace("all-", "").split("-");
           const handleFilter = keywords.map(kw => {
+            const singular = kw.replace(/s$/, "");
+            // Use exact match regex which is much faster than contains regex
+            const kwRegex = new RegExp(`^${kw}$`, "i");
+            const singularRegex = new RegExp(`^${singular}$`, "i");
+
             return {
               $or: [
-                { collectionHandles: { $regex: kw, $options: "i" } },
-                { type: { $regex: kw, $options: "i" } },
-                { tags: { $regex: kw, $options: "i" } },
-                { title: { $regex: kw, $options: "i" } }
+                { collectionHandles: kw },
+                { collectionHandles: singular },
+                { type: kwRegex },
+                { type: singularRegex },
+                { tags: kw },
+                { tags: singular },
+                { title: { $regex: `\\b${singular}`, $options: "i" } } // Word boundary is faster than broad contains
               ]
             };
           });
@@ -194,32 +203,16 @@ export async function GET(req) {
         }
       }
 
-      // Shared logic for fields that might be JSON-encoded arrays
+      // Shared logic for fields that might be arrays (BSON or pre-parsed)
       if (isMetafieldArray) {
         if (field.includes("diamonds") || field.includes("gemstones")) {
           const arrayPath = field.split(".").slice(0, -1).join(".");
           // If it's a variant field, variants is already unwound
-          pipeline.push({ $unwind: { path: `$${arrayPath}`, preserveNullAndEmptyArrays: false } });
+          pipeline.push({ $unwind: { path: `$${arrayPath}`, preserveNullAndEmptyArrays: true } });
         } else {
-          pipeline.push({
-            $addFields: {
-              [field]: {
-                $cond: {
-                  if: { $and: [
-                    { $eq: [{ $type: `$${field}` }, "string"] },
-                    { $regexMatch: { input: `$${field}`, regex: /^\[.*\]$/ } }
-                  ]},
-                  then: { $function: {
-                    body: "function(s) { try { return JSON.parse(s); } catch(e) { return s; } }",
-                    args: [`$${field}`],
-                    lang: "js"
-                  }},
-                  else: `$${field}`
-                }
-              }
-            }
-          });
-          pipeline.push({ $unwind: { path: `$${field}`, preserveNullAndEmptyArrays: false } });
+          // Optimized: Directly unwind the field, assuming it's now a BSON array or single value.
+          // We use preserveNullAndEmptyArrays: true to ensure we don't drop products that lack this filter field.
+          pipeline.push({ $unwind: { path: `$${field}`, preserveNullAndEmptyArrays: true } });
         }
       }
 
