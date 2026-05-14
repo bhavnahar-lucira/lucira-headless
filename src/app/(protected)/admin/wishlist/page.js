@@ -352,7 +352,7 @@ export default function WishlistPage() {
 
                   {/* Price Section */}
                   <div className="flex items-center gap-3">
-                    <p className="text-xl font-black text-primary">₹ {formatPrice(priceNum)}</p>
+                    <p className="text-xl font-bold text-primary">₹ {formatPrice(priceNum)}</p>
                     {comparePriceNum > priceNum && (
                       <p className="text-base text-zinc-400 line-through">₹ {formatPrice(comparePriceNum)}</p>
                     )}
