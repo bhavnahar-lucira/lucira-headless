@@ -87,6 +87,12 @@ async function fetchFullProduct(productId) {
  * Process the webhook event asynchronously
  */
 async function processWebhook(topic, payload, eventId) {
+  // Check if this topic should be ignored (e.g., if user wants to remove product sync)
+  if (topic === 'products/create' || topic === 'products/update') {
+    // console.log(`Topic ${topic} is currently disabled. Skipping.`);
+    return;
+  }
+
   try {
     const client = await clientPromise;
     const db = client.db("next_local_db");
