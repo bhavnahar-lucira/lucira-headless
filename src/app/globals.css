@@ -53,15 +53,7 @@
   --font-abhaya: var(--font-abhaya);
   --font-figtree: var(--font-figtree);
   --color-success: var(--success);
-  --animate-progress: progress 4s linear forwards;
-  @keyframes progress {
-    0% {
-      width: 0%;
-    }
-    100% {
-      width: 100%;
-    }
-  }
+  
 }
 
 :root {
