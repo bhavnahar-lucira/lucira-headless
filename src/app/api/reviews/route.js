@@ -23,9 +23,7 @@ export async function GET(request) {
 
     // 1. Update product summary (count and average rating)
     const product = await productsCollection.findOne({ 
-      shopifyId: id,
-      status: "ACTIVE",
-      isPublished: true
+      shopifyId: id
     });
     
     if (product) {
@@ -36,35 +34,13 @@ export async function GET(request) {
             reviewStats: {
               count: reviews.count || 0,
               average: reviews.average || 0,
-              stats: reviews.stats || []
+              stats: reviews.stats || [],
+              usedFallback: reviews.usedFallback || false
             },
             lastReviewsUpdated: new Date() 
           } 
         }
       );
-    }
-
-    // 2. Store detailed reviews in a separate collection
-    if (reviews.list && reviews.list.length > 0) {
-      const reviewOps = reviews.list.map(review => ({
-        updateOne: {
-          filter: { id: review.id },
-          update: { 
-            $set: {
-              ...review,
-              productId: id,
-              productHandle: product?.handle || "",
-              productTitle: product?.title || reviews.title || "",
-              productImage: product?.image?.src || product?.images?.[0]?.src || ""
-            } 
-          },
-          upsert: true
-        }
-      }));
-
-      if (reviewOps.length > 0) {
-        await reviewsCollection.bulkWrite(reviewOps);
-      }
     }
 
     return NextResponse.json(reviews);

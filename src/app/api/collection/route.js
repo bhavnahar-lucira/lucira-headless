@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { shopifyStorefrontFetch, shopifyAdminFetch } from "@/lib/shopify";
 import { calculatePriceBreakup } from "@/lib/priceEngine";
+import clientPromise from "@/lib/mongodb";
 
 const SORT_MAP = {
   best_selling: { sortKey: "BEST_SELLING", reverse: false },
@@ -391,6 +392,32 @@ export async function GET(req) {
         };
       })
     );
+
+    // 5. Fetch Review Stats from MongoDB in Bulk
+    try {
+      const client = await clientPromise;
+      const db = client.db("next_local_db");
+      const productsCollection = db.collection("products");
+
+      const productHandles = products.map(p => p.handle);
+      const dbProducts = await productsCollection.find(
+        { handle: { $in: productHandles } },
+        { projection: { handle: 1, reviewStats: 1 } }
+      ).toArray();
+
+      const reviewStatsMap = {};
+      dbProducts.forEach(dbp => {
+        if (dbp.reviewStats) {
+          reviewStatsMap[dbp.handle] = dbp.reviewStats;
+        }
+      });
+
+      products.forEach(p => {
+        p.reviewStats = reviewStatsMap[p.handle] || { count: 0, average: 0 };
+      });
+    } catch (e) {
+      console.warn("⚠️ Bulk review stats fetch failed:", e.message);
+    }
 
     const processedFilters = {};
     productsData.filters.forEach((f) => {

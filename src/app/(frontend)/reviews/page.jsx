@@ -48,32 +48,38 @@ export default function ReviewsPage() {
     async function fetchReviews() {
       setLoading(true);
       try {
-        const result = await loadNectorReviews();
+        const res = await fetch(`/api/reviews/list?limit=1000`);
+        const data = await res.json();
+        
+        if (!data.success) throw new Error(data.error || "Failed to fetch");
+        
+        const items = data.reviews || [];
         
         // Transform stats array to breakdown object if needed
         const breakdown = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
-        if (Array.isArray(result.stats)) {
-            result.stats.forEach(s => {
-                breakdown[s.rating] = parseInt(s.count);
-            });
-        }
+        items.forEach(r => {
+          const rating = Math.round(parseFloat(r.rating));
+          if (breakdown[rating] !== undefined) {
+            breakdown[rating]++;
+          }
+        });
 
-        // Calculate average if not provided
-        let average = result.average || 0;
-        if (!average && result.items?.length > 0) {
-            const sum = result.items.reduce((s, r) => s + (parseFloat(r.rating) || 0), 0);
-            average = (sum / result.items.length).toFixed(1);
+        const count = items.length;
+        let average = 0;
+        if (count > 0) {
+          const sum = items.reduce((s, r) => s + (parseFloat(r.rating) || 0), 0);
+          average = (sum / count).toFixed(1);
         }
 
         setStats({
-          total: result.count,
+          total: count,
           average: average,
           breakdown: breakdown
         });
 
         // Extract gallery
         const galleryItems = [];
-        result.items.forEach((r, idx) => {
+        items.forEach((r) => {
             const uploads = Array.isArray(r.uploads) ? r.uploads : (r.uploads?.uploads || []);
             uploads.forEach(u => {
                 if (u?.link && u.type === 'image') {
@@ -82,7 +88,7 @@ export default function ReviewsPage() {
             });
         });
         setGallery(galleryItems);
-        setAllData(result.items);
+        setAllData(items);
       } catch (error) {
         console.error("Error fetching reviews:", error);
       } finally {
