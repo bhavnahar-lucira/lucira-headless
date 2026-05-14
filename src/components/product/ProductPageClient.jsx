@@ -1104,8 +1104,8 @@ export default function ProductPageClient({ product, complementaryProducts = [],
         productUrlw: `/products/${product.handle}`,
         thumbnailImage: productImageUrl,
         image: productImageUrl,
-        price: sellingPrice,
-        offerPrice: originalPrice,
+        price: String(sellingPrice),
+        offerPrice: String(originalPrice),
       });
     }
   }, [activeVariant, product]);

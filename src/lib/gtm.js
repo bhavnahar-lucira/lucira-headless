@@ -91,7 +91,7 @@ export const getStandardWishlistPayload = (product, variant, currentOrigin, thum
   const productCategory = product?.category || product?.productCategory || productType || "";
 
   const sellingPrice = variant?.price || product?.price || 0;
-  const originalPrice = variant?.compare_price || variant?.compareAtPrice || product?.compare_price || product?.compareAtPrice || sellingPrice;
+  const originalPrice = variant?.compare_price || product?.compare_price || sellingPrice;
 
   return {
     sku: sku,
@@ -102,7 +102,7 @@ export const getStandardWishlistPayload = (product, variant, currentOrigin, thum
     productCategory: productCategory,
     productType: productType,
     price: String(sellingPrice),
-    offerPrice: String(Number(originalPrice).toFixed(2)),
+    offerPrice: String(originalPrice),
     quantity: 1,
     productUrl: `${currentOrigin}/products/${product?.handle || ""}?variant=${variant?.id || variant?.shopifyId || variant?.variantId || ""}`,
     thumbnailImage: [thumbnailImage || variant?.image || product?.image?.url || product?.image || ""],
