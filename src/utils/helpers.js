@@ -34,11 +34,22 @@ export async function fetchWithRetry(url, options = {}, retries = 3, backoff = 1
 
     clearTimeout(timeoutId);
 
-    // If it's a 5xx error, we might want to retry as well
-    if (!res.ok && res.status >= 500 && retries > 0) {
+    // If it's a 5xx error or 429 (Too Many Requests), we might want to retry as well
+    if (!res.ok && (res.status >= 500 || res.status === 429) && retries > 0) {
       console.warn(`Fetch failed with ${res.status} for ${url}. Retrying... (${retries} left)`);
-      await new Promise(resolve => setTimeout(resolve, backoff));
-      return fetchWithRetry(url, options, retries - 1, backoff * 2);
+      
+      let currentBackoff = backoff;
+      if (res.status === 429) {
+        const retryAfter = res.headers.get('Retry-After');
+        if (retryAfter) {
+          const seconds = parseInt(retryAfter, 10);
+          if (!isNaN(seconds)) currentBackoff = seconds * 1000;
+          else currentBackoff = backoff * 2; // Default to larger backoff if header present but not numeric
+        }
+      }
+
+      await new Promise(resolve => setTimeout(resolve, currentBackoff));
+      return fetchWithRetry(url, options, retries - 1, currentBackoff * 2);
     }
     return res;
   } catch (err) {

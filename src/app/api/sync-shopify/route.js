@@ -297,6 +297,9 @@ export async function POST(req) {
 
               // Always update/upsert the product. Never delete it here.
               await productsCollection.updateOne({ shopifyId: p.id }, { $set: mappedProduct }, { upsert: true });
+              
+              // Small sleep to avoid hitting Nector too hard during sync
+              await sleep(200);
             }
 
             totalProcessed += products.length;

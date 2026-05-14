@@ -112,8 +112,8 @@ export async function POST(req) {
               })) break;
             }
 
-            // Small delay to avoid hitting Nector too hard
-            await new Promise(resolve => setTimeout(resolve, 100));
+            // Medium delay to avoid hitting Nector too hard
+            await new Promise(resolve => setTimeout(resolve, 500));
 
           } catch (err) {
             console.error(`Failed to sync reviews for ${product.handle}:`, err.message);
