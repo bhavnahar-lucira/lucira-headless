@@ -185,12 +185,14 @@ export default function CustomerReviews({
             <p className="text-gray-400 font-black uppercase tracking-widest mb-6">
               Be the first to review this product.
             </p>
-            <button
-              onClick={() => setIsWriteReviewOpen(true)}
-              className="px-10 py-4 bg-[#5A413F] text-white font-black text-xs uppercase tracking-[0.2em] rounded shadow-lg hover:bg-[#4a3533] transition-all active:scale-95"
-            >
-              Write a review
-            </button>
+            {false && productHandle !== 'round-cut-diamond-engagement-ring' && (
+              <button
+                onClick={() => setIsWriteReviewOpen(true)}
+                className="px-10 py-4 bg-[#5A413F] text-white font-black text-xs uppercase tracking-[0.2em] rounded shadow-lg hover:bg-[#4a3533] transition-all active:scale-95"
+              >
+                Write a review
+              </button>
+            )}
           </div>
         </div>
         <WriteReviewForm
@@ -359,12 +361,14 @@ export default function CustomerReviews({
 
         {/* Action Button */}
         <div className="flex justify-end mb-10">
-          <button
-            onClick={() => setIsWriteReviewOpen(true)}
-            className="text-xs font-bold uppercase tracking-widest border-b border-black pb-1 hover:text-gray-500 hover:border-gray-500 transition-colors"
-          >
-            Write a Review
-          </button>
+          {false && productHandle !== 'round-cut-diamond-engagement-ring' && (
+            <button
+              onClick={() => setIsWriteReviewOpen(true)}
+              className="text-xs font-bold uppercase tracking-widest border-b border-black pb-1 hover:text-gray-500 hover:border-gray-500 transition-colors"
+            >
+              Write a Review
+            </button>
+          )}
         </div>
 
         {/* Gallery Slider */}
