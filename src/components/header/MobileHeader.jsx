@@ -10,6 +10,7 @@ import { clearCart } from "@/redux/features/cart/cartSlice";
 import { restoreGuestWishlist } from "@/redux/features/wishlist/wishlistSlice";
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle, SheetClose } from "@/components/ui/sheet";
 import { useMenu } from "@/hooks/useMenu";
+import { useDebounce } from "@/hooks/useDebounce";
 import { MEGA_MENU as STATIC_MENU } from "@/data/megaMenu";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { pushLogout, pushViewCart } from "@/lib/gtm";
@@ -166,6 +167,7 @@ export default function MobileHeader() {
   const isProductPage = pathname.startsWith('/products/');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
   const [showSearch, setShowSearch] = useState(false);
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -183,6 +185,27 @@ export default function MobileHeader() {
   const [menuDirection, setMenuDirection] = useState(1);
 
   useEffect(() => {
+    const performSearch = async () => {
+      if (debouncedSearchQuery.length > 1) {
+        setIsSearching(true);
+        try {
+          const res = await fetch(`/api/search?q=${encodeURIComponent(debouncedSearchQuery)}`);
+          const data = await res.json();
+          setSearchResults(data.results || []);
+        } catch (err) {
+          console.error("Search error:", err);
+        } finally {
+          setIsSearching(false);
+        }
+      } else {
+        setSearchResults([]);
+      }
+    };
+
+    performSearch();
+  }, [debouncedSearchQuery]);
+
+  useEffect(() => {
     if (!isMenuOpen) {
       setActiveMenuPath([]);
       setMenuDirection(1);
@@ -196,24 +219,8 @@ export default function MobileHeader() {
     return () => clearInterval(interval);
   }, []);
 
-  const handleSearchChange = async (e) => {
-    const query = e.target.value;
-    setSearchQuery(query);
-    
-    if (query.length > 1) {
-      setIsSearching(true);
-      try {
-        const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
-        const data = await res.json();
-        setSearchResults(data.results || []);
-      } catch (err) {
-        console.error("Search error:", err);
-      } finally {
-        setIsSearching(false);
-      }
-    } else {
-      setSearchResults([]);
-    }
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value);
   };
 
   const handleKeyDown = (e) => {
