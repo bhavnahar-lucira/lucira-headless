@@ -50,12 +50,14 @@ export async function POST(req) {
         const shopData = await shopifyAdminFetch(shopQuery);
         const metalRates = JSON.parse(shopData?.shop?.metal_prices?.value || "{}");
         const stonePricingDb = JSON.parse(shopData?.shop?.stone_pricing?.value || "[]");
+        const stonePricingMap = new Map(stonePricingDb.map(p => [p.id, p]));
 
         let productsToSync = [];
         if (shopifyId) {
           const product = await productsCollection.findOne({ shopifyId });
           if (product) productsToSync = [product];
         } else {
+          // Use cursor for memory efficiency if many products
           productsToSync = await productsCollection.find({ status: "ACTIVE" }).toArray();
         }
 
@@ -80,6 +82,7 @@ export async function POST(req) {
             skip: i
           });
 
+          // ... (query same) ...
           const variantQuery = `
             query getProductVariants($id: ID!) {
               product(id: $id) {
@@ -157,16 +160,16 @@ export async function POST(req) {
           const variantData = await shopifyAdminFetch(variantQuery, { id: p.shopifyId });
           const shopifyVariants = variantData?.product?.variants?.edges?.map(e => e.node) || [];
 
-          // Fetch existing product to merge basic fields
-          const existingProduct = await productsCollection.findOne({ shopifyId: p.shopifyId });
-          const existingVariants = existingProduct?.variants || [];
+          // Redundancy Fixed: Using 'p.variants' instead of fetching from DB again
+          const existingVariants = p.variants || [];
 
           const variants = shopifyVariants.map((v) => {
             const config = v.variant_config?.value ? JSON.parse(v.variant_config.value) : null;
             let priceBreakup = null;
             if (config) {
               try {
-                priceBreakup = calculatePriceBreakup(config, metalRates, stonePricingDb);
+                // Optimization Fixed: Passing Map instead of array for O(1) lookups
+                priceBreakup = calculatePriceBreakup(config, metalRates, stonePricingMap);
               } catch (e) {
                 console.error(`Price breakup failed for variant ${v.id}:`, e.message);
               }
@@ -295,8 +298,13 @@ export async function POST(req) {
             }
           );
 
-          // Small delay to prevent rate limiting
-          if (i % 5 === 0) await new Promise(r => setTimeout(r, 500));
+          // Optimization: Yield event loop and prevent sustained CPU spikes
+          // Larger sleep every 5 products for rate limiting, tiny sleep for every product
+          if (i % 5 === 0) {
+            await new Promise(r => setTimeout(r, 500));
+          } else {
+            await new Promise(r => setTimeout(r, 50));
+          }
         }
 
         sendUpdate({ status: "complete", message: `Sync Complete for ${productsToSync.length} products!`, progress: 100 });

@@ -161,6 +161,10 @@ export async function POST(req) {
           const products = result.data?.products?.edges || [];
 
           if (products.length > 0) {
+            // Optimization: Fetch all existing products for the batch in one go
+            const shopifyIds = products.map(edge => edge.node.id);
+            const existingProducts = await productsCollection.find({ shopifyId: { $in: shopifyIds } }).toArray();
+
             for (const edge of products) {
               const p = edge.node;
               const media = p.media.edges.map(({ node: m }) => {
@@ -203,7 +207,7 @@ export async function POST(req) {
                 };
               });
 
-              const existingProduct = await productsCollection.findOne({ shopifyId: p.id });
+              const existingProduct = existingProducts.find(ep => ep.shopifyId === p.id);
               const existingVariants = existingProduct?.variants || [];
 
               const finalVariants = variants.map(newV => {

@@ -26,12 +26,15 @@ export function calculatePriceBreakup(config, metalRates, stonePricingDB) {
   let gemstonePcs = 0;
   let gemstoneTitle = "Gemstone";
 
+  const stonePricingMap = stonePricingDB instanceof Map ? stonePricingDB : null;
+
   for (const stone of config.advanced_stone_config || []) {
     if (!stone?.stone_quantity) continue;
 
-    const pricingRef = stonePricingDB.find(
-      (p) => p.id === stone.pricing_id
-    );
+    const pricingRef = stonePricingMap 
+      ? stonePricingMap.get(stone.pricing_id)
+      : stonePricingDB.find((p) => p.id === stone.pricing_id);
+      
     if (!pricingRef) continue;
 
     const avgWeight =
