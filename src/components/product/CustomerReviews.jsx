@@ -96,13 +96,21 @@ export default function CustomerReviews({
 
         // Extract gallery
         const galleryItems = [];
-        result.items.forEach((r, idx) => {
+       result.items.forEach((r) => {
           const uploads = Array.isArray(r.uploads)
             ? r.uploads
             : r.uploads?.uploads || [];
+
           uploads.forEach((u) => {
             if (u?.link && u.type === "image") {
-              galleryItems.push({ url: u.link, reviewIndex: idx });
+              galleryItems.push({
+                url: u.link,
+                reviewId:
+                r.id ||
+                r._id ||
+                r.review_id ||
+                r.nector_review_id,
+              });
             }
           });
         });
@@ -211,18 +219,16 @@ export default function CustomerReviews({
     return Math.round((count / total) * 100);
   };
 
-  const openPopup = (reviewIdOrIndex) => {
-    let index = -1;
-    if (typeof reviewIdOrIndex === "string") {
-      index = filteredAndSortedReviews.findIndex(
-        (r) => r.id === reviewIdOrIndex,
-      );
-    } else {
-      index = reviewIdOrIndex;
-    }
+  const openPopup = (reviewId) => {
+    const index = mappedReviews.findIndex(
+      (r) => r.id === reviewId
+    );
 
     if (index !== -1) {
-      setPopupState({ isOpen: true, index });
+      setPopupState({
+        isOpen: true,
+        index,
+      });
     }
   };
 
@@ -239,6 +245,12 @@ export default function CustomerReviews({
 
       return {
         ...r,
+        id:
+  r.id ||
+  r._id ||
+  r.review_id ||
+  r.nector_review_id ||
+  crypto.randomUUID(),
         productTitle: r.reference_product_name || productTitle,
         productImage: getValidSrc(r.reference_product_image || productImage),
         productHandle: r.reference_product_handle || productHandle,
@@ -372,11 +384,9 @@ export default function CustomerReviews({
               className="w-full !pb-10"
             >
               {gallery.map((item, i) => (
-                <SwiperSlide key={`gallery-slide-${i}`} className="!w-auto">
+                <SwiperSlide key={`gallery-slide-${item.reviewId}-${i}`} className="!w-auto">
                   <div
-                    onClick={() =>
-                      openPopup(isGlobal ? item.reviewId : item.reviewIndex)
-                    }
+                    onClick={() => openPopup(item.reviewId)}
                     className="relative w-32 h-32 md:w-44 md:h-44 rounded-xl overflow-hidden border-2 border-white shadow-md cursor-pointer group bg-gray-50"
                   >
                     <Image
@@ -496,7 +506,7 @@ export default function CustomerReviews({
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 lg:gap-10">
           {filteredAndSortedReviews?.slice(0, visibleCount).map((review, idx) => (
             <ReviewCard
-              key={review.id || `review-${idx}`}
+              key={review.id || review._id || `review-${idx}`}
               review={review}
               onClick={() => openPopup(idx)}
             />

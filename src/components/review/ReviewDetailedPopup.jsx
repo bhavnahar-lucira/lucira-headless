@@ -57,17 +57,17 @@ export default function ReviewDetailedPopup({ isOpen, onClose, reviews, activeIn
         onClick={handlePrev}
         className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 z-[500] text-white hover:text-gray-300 transition-colors cursor-pointer outline-none bg-black/20 hover:bg-black/40 rounded-full p-2"
       >
-        <ChevronLeft size={48} strokeWidth={1} />
+        <ChevronLeft size={36} strokeWidth={1} />
       </button>
       <button 
         onClick={handleNext}
         className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 z-[500] text-white hover:text-gray-300 transition-colors cursor-pointer outline-none bg-black/20 hover:bg-black/40 rounded-full p-2"
       >
-        <ChevronRight size={48} strokeWidth={1} />
+        <ChevronRight size={36} strokeWidth={1} />
       </button>
 
       {/* Main Container */}
-      <div className="relative w-full max-w-5xl bg-white rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300">
+      <div className="relative w-full h-[calc(90vh-64px)] md:h-auto max-w-5xl bg-white rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300">
         
         {/* Close Button */}
         <button

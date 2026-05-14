@@ -260,7 +260,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
   const searchParams = useSearchParams();
   const variantIdFromUrl = searchParams.get("variant");
   const collectionContext = useSelector((state) => state.user.collectionContext);
-  const dispatch = useDispatch();
+  const dispatch = useDispatch();  
 
   useEffect(() => {
     window.__LUCIRA_PRODUCT__ = product;
@@ -1323,7 +1323,7 @@ useEffect(() => {
             </BreadcrumbItem>
             <BreadcrumbSeparator><ChevronRight size={14} /></BreadcrumbSeparator>
             <BreadcrumbItem>
-              <BreadcrumbLink href={`/collections/${slugify(product.type)}`} className="text-sm font-medium text-black">{product.type}</BreadcrumbLink>
+              <BreadcrumbLink href={`/collections/${slugify(product.type)}`} className="text-sm font-medium text-black whitespace-nowrap">{product.type}</BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator><ChevronRight size={14} /></BreadcrumbSeparator>
             <BreadcrumbItem className="text-sm font-medium text-gray-400 truncate line-clamp-1">
@@ -2469,7 +2469,7 @@ useEffect(() => {
             {/* Certification */}
             {!isGoldCoin && (
               <div className="pt-6">
-                <div className="bg-gray-50 border border-gray-100 rounded-xl ps-4 pe-16 py-4">
+                <div className="bg-gray-50 border border-gray-100 rounded-xl p-4">
                   <div className="flex items-center gap-2 text-base font-semibold text-black mb-4">
                     Certified Quality Guaranteed.
                   </div>
@@ -2490,6 +2490,12 @@ useEffect(() => {
                         <Image src="/images/product/BIS.png" alt="BIS Hallmark" fill className="object-contain" />
                       </div>
                     </div>
+                  </div>
+                  <div className="flex items-center justify-center flex-col mt-5">
+                    <p className="text-sm text-black text-center"><strong>Note:</strong> Our products are handcrafted and personalized for you, hence weight variance may occur.</p>
+                    {product.tags?.includes("Only Pendant") && (
+                      <p className="text-sm text-black text-center mt-1">Chain is not included in the purchase.</p>
+                    )}
                   </div>
                 </div>
               </div>
