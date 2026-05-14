@@ -1211,7 +1211,7 @@ useEffect(() => {
   const renderEngravingContent = () => (
     <div className="flex-1 overflow-y-auto">
       {/* Ring Preview */}
-      <div className="relative w-full aspect-[16/9] bg-[#F9F9F9] flex items-center justify-center overflow-hidden">
+      <div className="relative w-full aspect-video bg-[#F9F9F9] flex items-center justify-center overflow-hidden">
         <Image
           src="/images/engraving_bg.jpg"
           alt="Ring band preview"
@@ -1632,7 +1632,7 @@ useEffect(() => {
                             </div>
                           </DialogTrigger>
 
-                          <DialogContent className="sm:max-w-[800px] p-0 overflow-hidden border-none bg-transparent shadow-none">
+                          <DialogContent className="sm:max-w-200 p-0 overflow-hidden border-none bg-transparent shadow-none">
                             <DialogHeader className="sr-only">
                               <DialogTitle>Ring Measurement Tutorial</DialogTitle>
                             </DialogHeader>
@@ -1725,7 +1725,7 @@ useEffect(() => {
                     onClose={() => setIsEngravingDrawerOpen(false)}
                     detents={[0.9]}
                   >
-                    <MobileSheet.Container className={`z-[499] ${lobster.variable} ${yellowtail.variable} ${satisfy.variable} ${abeezee.variable}`}>
+                    <MobileSheet.Container className={`z-499 ${lobster.variable} ${yellowtail.variable} ${satisfy.variable} ${abeezee.variable}`}>
                       <MobileSheet.Header />
                       <MobileSheet.Content>
                         <div className="flex flex-col h-full">
@@ -1752,7 +1752,7 @@ useEffect(() => {
                   </MobileSheet>
                 ) : (
                   <Sheet open={isEngravingDrawerOpen} onOpenChange={setIsEngravingDrawerOpen}>
-                    <SheetContent showCloseButton={false} side="right" className={`w-full sm:max-w-[450px] p-0 flex flex-col ${lobster.variable} ${yellowtail.variable} ${satisfy.variable} ${abeezee.variable}`}>
+                    <SheetContent showCloseButton={false} side="right" className={`w-full sm:max-w-112.5 p-0 flex flex-col ${lobster.variable} ${yellowtail.variable} ${satisfy.variable} ${abeezee.variable}`}>
                       <SheetHeader className="p-6 border-b border-gray-100 flex flex-row items-center justify-between space-y-0">
                         <SheetTitle className="text-lg font-bold">Engraving</SheetTitle>
                         <SheetClose asChild>
@@ -1801,7 +1801,7 @@ useEffect(() => {
               <Drawer open={showSimilar} onOpenChange={setShowSimilar}>
                 <DrawerContent className="max-h-[90vh] h-[90vh] bg-white rounded-t-[20px] flex flex-col">
                   <div className="mx-auto w-full flex flex-col h-full overflow-hidden">
-                    <DrawerHeader className="px-10 py-6 flex flex-row items-center justify-between border-b border-zinc-100 !text-left !flex-row shrink-0">
+                    <DrawerHeader className="px-10 py-6 flex flex-row items-center justify-between border-b border-zinc-100 text-left! shrink-0">
                       <DrawerTitle className="text-xl font-medium text-black uppercase">VIEW SIMILAR</DrawerTitle>
                       <DrawerClose asChild>
                         <button className="text-zinc-400 hover:text-black transition-colors hover:cursor-pointer p-1">
@@ -1925,7 +1925,7 @@ useEffect(() => {
                     >
                       <div className="w-6 sm:w-8 flex justify-start shrink-0">
                         <div className={`p-1 rounded-full transition-colors duration-150 flex items-center justify-center ${isSchemeOpen ? 'bg-white/20' : 'bg-primary/10'}`}>
-                          <Coins size={16} className={`sm:w-6 sm:h-[18px] ${isSchemeOpen ? 'text-white' : 'text-primary'} group-hover:text-white transition-all`} />
+                          <Coins size={16} className={`sm:w-6 sm:h-4.5 ${isSchemeOpen ? 'text-white' : 'text-primary'} group-hover:text-white transition-all`} />
                         </div>
                       </div>
 
@@ -1939,7 +1939,7 @@ useEffect(() => {
                     </Button>
 
                     {isSchemeOpen && (
-                      <div className="absolute top-full right-0 w-[calc(100vw-32px)] sm:w-[350px] lg:w-full pt-2 z-[100] animate-in fade-in zoom-in-95 slide-in-from-top-2 duration-200 ease-out origin-top-right">
+                      <div className="absolute top-full right-0 w-[calc(100vw-32px)] sm:w-87.5 lg:w-full pt-2 z-100 animate-in fade-in zoom-in-95 slide-in-from-top-2 duration-200 ease-out origin-top-right">
                         <div className="bg-white border border-primary/10 rounded-2xl overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.18)]">
                           <div className="p-4 sm:p-5 lg:p-6 space-y-4 sm:space-y-5">
 
@@ -2014,7 +2014,7 @@ useEffect(() => {
 
               {/* Lucira Coins */}
               <div className="flex gap-4 items-center bg-gray-50 border border-gray-100 rounded-xl p-4">
-                <div className="bg-gradient-to-br from-[#f9e8b8] to-[#e8c97a] shadow-[0_2px_10px_rgba(184,146,74,0.25),inset_0_1px_2px_rgba(255,255,255,0.6)] w-12 h-12 rounded-lg flex items-center justify-center">
+                <div className="bg-linear-to-br from-[#f9e8b8] to-[#e8c97a] shadow-[0_2px_10px_rgba(184,146,74,0.25),inset_0_1px_2px_rgba(255,255,255,0.6)] w-12 h-12 rounded-lg flex items-center justify-center">
                   <Coins size={24} className="text-primary" />
                 </div>
                 <div className="space-y-1">
@@ -2556,10 +2556,10 @@ useEffect(() => {
           onClose={() => setIsStoreDrawerOpen(false)}
           detents={[0.9, 0.5]}
         >
-          <MobileSheet.Container className="z-[499]">
+          <MobileSheet.Container className="z-499">
             <MobileSheet.Header />
             <MobileSheet.Content>
-              <div className="h-[100dvh]">
+              <div className="h-dvh">
                 <div className="flex items-center justify-between px-4 pb-6 border-b border-gray-100">
                   <h2 className="text-lg font-bold">Store Availability</h2>
                   <button onClick={() => setIsStoreDrawerOpen(false)} className="p-2">
@@ -2656,7 +2656,7 @@ useEffect(() => {
         </MobileSheet>
       ) : (
         <Sheet open={isStoreDrawerOpen} onOpenChange={setIsStoreDrawerOpen}>
-          <SheetContent side="right" className="w-full sm:max-w-[450px] p-0 flex flex-col">
+          <SheetContent side="right" className="w-full sm:max-w-112.5 p-0 flex flex-col">
             <SheetHeader className="p-6 border-b border-gray-100 flex flex-row items-center justify-between">
               <SheetTitle className="text-lg font-bold">Store Availability</SheetTitle>
             </SheetHeader>
@@ -2784,7 +2784,7 @@ function ExploreCard({ title, description, action, img, url, onClick }) {
       </div>
       <div className="flex-1 min-w-0 flex flex-col gap-2">
         <p className="text-sm md:text-base font-semibold leading-tight"> {title} </p>
-        <p className="text-xs md:text-sm font-medium leading-[1.5] text-gray-900"> {description} </p>
+        <p className="text-xs md:text-sm font-medium leading-normal text-gray-900"> {description} </p>
         <Button variant="link" className=" p-0 m-0 h-auto w-fit text-sm font-bold underline underline-offset-4 justify-start" asChild>
           <a href={url} target="_blank" rel="noopener noreferrer" onClick={onClick}>
             {action}

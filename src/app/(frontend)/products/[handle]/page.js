@@ -38,6 +38,12 @@ async function getProduct(handle) {
   return product;
 }
 
+function normalizeShopifyId(id) {
+  if (!id) return null;
+  if (String(id).includes("gid://shopify/Product/")) return String(id);
+  return `gid://shopify/Product/${String(id).trim()}`;
+}
+
 async function getComplementaryProducts(product) {
   if (!product.complementaryProductIds || product.complementaryProductIds.length === 0) {
     return [];
@@ -45,18 +51,19 @@ async function getComplementaryProducts(product) {
 
   const client = await clientPromise;
   const db = client.db("next_local_db");
-  
-  // Support both full GID and numeric ID strings using regex for shopifyId
-  const idFilters = product.complementaryProductIds.map(id => ({
-    shopifyId: { $regex: `${id}$` }
-  }));
+  const normalizedIds = product.complementaryProductIds
+    .map(normalizeShopifyId)
+    .filter(Boolean);
+
+  if (!normalizedIds.length) {
+    return [];
+  }
 
   const complementaryProducts = await db.collection("products")
     .find({ 
-      $and: [
-        { $or: idFilters },
-        { status: "ACTIVE", isPublished: true }
-      ]
+      shopifyId: { $in: normalizedIds },
+      status: "ACTIVE",
+      isPublished: true
     })
     .toArray();
 
@@ -76,17 +83,19 @@ async function getMatchingProducts(product) {
 
   const client = await clientPromise;
   const db = client.db("next_local_db");
-  
-  const idFilters = product.matchingProductIds.map(id => ({
-    shopifyId: { $regex: `${id}$` }
-  }));
+  const normalizedIds = product.matchingProductIds
+    .map(normalizeShopifyId)
+    .filter(Boolean);
+
+  if (!normalizedIds.length) {
+    return [];
+  }
 
   const matchingProducts = await db.collection("products")
     .find({ 
-      $and: [
-        { $or: idFilters },
-        { status: "ACTIVE", isPublished: true }
-      ]
+      shopifyId: { $in: normalizedIds },
+      status: "ACTIVE",
+      isPublished: true
     })
     .toArray();
 

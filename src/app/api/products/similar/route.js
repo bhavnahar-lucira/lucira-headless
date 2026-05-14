@@ -20,18 +20,20 @@ export async function GET(request) {
       return NextResponse.json({ products: [] });
     }
 
-    // 2. Fetch all matching products by their Shopify IDs
-    // Support both full GID and numeric ID strings using regex
-    const idFilters = product.matchingProductIds.map(id => ({
-      shopifyId: { $regex: `${id}$` }
-    }));
+    // 2. Fetch all matching products by their Shopify IDs using exact matching.
+    const normalizedIds = product.matchingProductIds
+      .map(id => {
+        if (!id) return null;
+        if (String(id).includes("gid://shopify/Product/")) return String(id);
+        return `gid://shopify/Product/${String(id).trim()}`;
+      })
+      .filter(Boolean);
 
     const similarProducts = await productsCollection
       .find({ 
-        $and: [
-          { $or: idFilters },
-          { status: "ACTIVE", isPublished: true }
-        ]
+        shopifyId: { $in: normalizedIds },
+        status: "ACTIVE",
+        isPublished: true
       })
       .toArray();
 
