@@ -9,6 +9,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { pushLogout, pushViewCart, getStandardCartItem } from "@/lib/gtm";
 import { useAuth } from "@/hooks/useAuth";
+import { useDebounce } from "@/hooks/useDebounce";
 import { useDispatch, useSelector } from "react-redux";
 import { setAvatar } from "@/redux/features/user/userSlice";
 import { fetchCart, clearCart } from "@/redux/features/cart/cartSlice";
@@ -77,6 +78,7 @@ export default function MainHeader() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
@@ -85,6 +87,27 @@ export default function MainHeader() {
   const { totalQuantity, totalAmount, items } = useSelector((state) => state.cart);
   const wishlistItems = useSelector((state) => state.wishlist.items);
   const guestWishlistItems = useSelector((state) => state.wishlist.guestItems);
+
+  useEffect(() => {
+    const performSearch = async () => {
+      if (debouncedSearchQuery.length > 1) {
+        setIsSearching(true);
+        try {
+          const res = await fetch(`/api/search?q=${encodeURIComponent(debouncedSearchQuery)}`);
+          const data = await res.json();
+          setSearchResults(data.results || []);
+        } catch (err) {
+          console.error("Search error:", err);
+        } finally {
+          setIsSearching(false);
+        }
+      } else {
+        setSearchResults([]);
+      }
+    };
+
+    performSearch();
+  }, [debouncedSearchQuery]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -166,24 +189,8 @@ export default function MainHeader() {
     return () => window.removeEventListener("profile-updated", handleProfileUpdate);
   }, [dispatch, user?.id, user?.avatar, wishlistItems.length, guestWishlistItems.length]);
 
-  const handleSearchChange = async (e) => {
-    const query = e.target.value;
-    setSearchQuery(query);
-    
-    if (query.length > 1) {
-      setIsSearching(true);
-      try {
-        const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
-        const data = await res.json();
-        setSearchResults(data.results || []);
-      } catch (err) {
-        console.error("Search error:", err);
-      } finally {
-        setIsSearching(false);
-      }
-    } else {
-      setSearchResults([]);
-    }
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value);
   };
 
   const handleKeyDown = (e) => {
