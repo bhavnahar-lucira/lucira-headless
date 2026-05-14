@@ -30,6 +30,17 @@ import {
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { pushProductImpression, formatGtmPrice } from "@/lib/gtm";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
+import StoreCollectionBanner from "@/components/collections/StoreCollectionBanner";
+
+const STORE_HANDLES = ["pune-store", "chembur-store", "noida-store", "sky-city-borivali-store", "malad"];
+
+const STORE_IMAGES = {
+  "pune-store": ["/images/store/Pune.jpg"],
+  "chembur-store": ["/images/store/Chembur.jpg"],
+  "noida-store": ["/images/store/Noida.jpg"],
+  "sky-city-borivali-store": ["/images/store/Borivali.jpg"],
+  "malad": ["/images/store/store.jpg"],
+};
 
 const SORT_OPTIONS = [
   { value: "best_selling", label: "Best selling" },
@@ -514,7 +525,12 @@ export default function CollectionPage({ params: paramsPromise }) {
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
-      {isMobile ? (
+      {STORE_HANDLES.includes(handle) ? (
+        <StoreCollectionBanner 
+          collectionHandle={handle} 
+          bannerImages={STORE_IMAGES[handle] || []} 
+        />
+      ) : isMobile ? (
         <div className="w-full">
           <div className="container-main mx-auto pt-2 px-4 py-3">
             <Breadcrumb>
