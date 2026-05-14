@@ -260,15 +260,14 @@ export default function ReviewsPage() {
         </div>
 
         {/* Action Button */}
-        <div className="flex justify-end mb-10">
+        {/* <div className="flex justify-end mb-10">
           <button
             onClick={() => setIsWriteReviewOpen(true)}
             className="text-xs font-bold uppercase tracking-widest border-b border-black pb-1 hover:text-gray-500 hover:border-gray-500 transition-colors"
           >
             Write a Review
           </button>
-        </div>
-
+        </div> */}
         {/* Gallery Slider */}
         {gallery.length > 0 && (
           <div className="mb-16 relative">
