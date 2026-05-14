@@ -504,13 +504,16 @@ export default function CustomerReviews({
 
         {/* Reviews Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 lg:gap-10">
-          {filteredAndSortedReviews?.slice(0, visibleCount).map((review, idx) => (
-            <ReviewCard
-              key={review.id || review._id || `review-${idx}`}
-              review={review}
-              onClick={() => openPopup(idx)}
-            />
-          ))}
+          {filteredAndSortedReviews?.slice(0, visibleCount).map((review, idx) => {
+            const reviewId = review.id || review._id || review.review_id || review.nector_review_id;
+            return (
+              <ReviewCard
+                key={reviewId || `review-${idx}`}
+                review={review}
+                onClick={() => openPopup(reviewId)}
+              />
+            );
+          })}
         </div>
 
       
