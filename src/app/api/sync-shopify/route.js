@@ -25,6 +25,17 @@ export async function GET() {
   } catch (error) { return NextResponse.json({ error: error.message }, { status: 500 }); }
 }
 
+const safeParseJSON = (val) => {
+  if (!val) return val;
+  if (typeof val !== "string") return val;
+  if (!val.startsWith("[") && !val.startsWith("{")) return val;
+  try {
+    return JSON.parse(val);
+  } catch (e) {
+    return val;
+  }
+};
+
 export async function POST(req) {
   const SHOPIFY_DOMAIN = process.env.SHOPIFY_STORE || process.env.SHOPIFYSTORE;
   const ACCESS_TOKEN = process.env.ADMIN_TOKEN || process.env.SHOPIFY_ADMIN_TOKEN;
@@ -201,7 +212,7 @@ export async function POST(req) {
                   image: v.image?.url || p.featuredImage?.url,
                   inventoryLevels,
                   metafields: {
-                    components: v.components?.value,
+                    components: safeParseJSON(v.components?.value),
                     in_store_available: inStoreAvailable
                   }
                 };
@@ -279,9 +290,15 @@ export async function POST(req) {
                 matchingProductIds,
                 complementaryProductIds,
                 productMetafields: {
-                  shop_for: p.shop_for?.value, weight: p.weight?.value, carat_range: p.carat_range?.value,
-                  material_type: p.material_type?.value, components: p.components?.value, finishing: p.finishing?.value,
-                  fit: p.fit?.value, lead_time: p.lead_time?.value, bestsellers: p.bestsellers?.value
+                  shop_for: safeParseJSON(p.shop_for?.value),
+                  weight: safeParseJSON(p.weight?.value),
+                  carat_range: safeParseJSON(p.carat_range?.value),
+                  material_type: safeParseJSON(p.material_type?.value),
+                  components: safeParseJSON(p.components?.value),
+                  finishing: safeParseJSON(p.finishing?.value),
+                  fit: safeParseJSON(p.fit?.value),
+                  lead_time: safeParseJSON(p.lead_time?.value),
+                  bestsellers: safeParseJSON(p.bestsellers?.value)
                 },
                 lastUpdated: new Date(),
                 lastReviewsUpdated: new Date()
