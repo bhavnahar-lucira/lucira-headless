@@ -1,5 +1,6 @@
 "use client"
 import { useState } from "react"
+import FAQSchema from "./FAQSchema"
 
 export default function FAQ({title, description, faqs}) {
     const [openIndex, setOpenIndex] = useState(0)
@@ -11,6 +12,7 @@ export default function FAQ({title, description, faqs}) {
 
     return (
         <section className="w-full py-16 px-6">
+            <FAQSchema faqs={faqs} />
             <div className="max-w-[1440px] mx-auto">
                 <div className="text-center mb-10">
                     <h2 className="text-[28px] tracking-wide uppercase">{title}</h2>

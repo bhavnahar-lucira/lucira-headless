@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
+import FAQSchema from "@/components/common/FAQSchema";
 
 const FAQ_ITEMS = [
   {
@@ -58,6 +59,7 @@ export default function HomeFAQSection() {
   return (
 
     <section className="w-full py-12 bg-gray-50">
+      <FAQSchema faqs={FAQ_ITEMS} />
 
       <div className="max-w-480 mx-auto px-5 md:px-17 min-[1440px]:px-17 grid lg:grid-cols-[1fr_480px] gap-16">
 

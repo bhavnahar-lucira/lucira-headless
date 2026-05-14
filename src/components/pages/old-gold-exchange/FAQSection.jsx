@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Plus, Minus } from "lucide-react";
+import FAQSchema from "@/components/common/FAQSchema";
 
 export default function FAQSection({ data }) {
   const { heading, description, items } = data;
@@ -11,8 +12,14 @@ export default function FAQSection({ data }) {
     setOpenIndex(openIndex === index ? -1 : index);
   };
 
+  const formattedFaqs = items.map(item => ({
+    question: item.question,
+    answer: item.answer
+  }));
+
   return (
     <section className="faq-section py-20 bg-white">
+      <FAQSchema faqs={formattedFaqs} />
       <div className="container-main mx-auto px-4 max-w-[1000px]">
         
         <div className="text-center mb-12">
@@ -58,25 +65,6 @@ export default function FAQSection({ data }) {
         </div>
 
       </div>
-
-      {/* Structured Data for SEO */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "FAQPage",
-            "mainEntity": items.map((item) => ({
-              "@type": "Question",
-              "name": item.question,
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": item.answer,
-              },
-            })),
-          }),
-        }}
-      />
     </section>
   );
 }

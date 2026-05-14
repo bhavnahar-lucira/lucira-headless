@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Plus, Minus } from "lucide-react";
+import FAQSchema from "@/components/common/FAQSchema";
 
 export default function SilverFAQSection({ cityName, stateName, todayRate, sectionData }) {
   const [openIndex, setOpenIndex] = useState(null);
@@ -35,8 +36,14 @@ export default function SilverFAQSection({ cityName, stateName, todayRate, secti
     return processed;
   };
 
+  const formattedFaqs = faqBlocks.map(block => ({
+    question: replaceShortcodes(block.settings.faq_question),
+    answer: replaceShortcodes(block.settings.faq_answer)
+  }));
+
   return (
     <section className="py-12 md:py-20 bg-[#FAF3EC]/30">
+      <FAQSchema faqs={formattedFaqs} />
       <div className="container-main max-w-6xl mx-auto">
         <div className="text-center mb-16 space-y-4">
           <h2 className="text-[18px] md:text-[28px] font-medium text-zinc-900 uppercase tracking-tight font-abhaya">

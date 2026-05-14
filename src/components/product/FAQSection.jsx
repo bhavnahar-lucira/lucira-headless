@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
+import FAQSchema from "@/components/common/FAQSchema";
 
 export default function QuestionsAnswered() {
   const [openIndex, setOpenIndex] = useState(0);
@@ -37,6 +38,7 @@ export default function QuestionsAnswered() {
 
   return (
     <section className="w-full py-12 bg-gray-50 mt-15"> 
+      <FAQSchema faqs={faqs} />
 
       <div className="max-w-480 mx-auto px-5 md:px-17 min-[1440px]:px-17 grid lg:grid-cols-[1fr_480px] gap-16">
 

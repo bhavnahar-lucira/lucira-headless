@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import FAQSchema from "@/components/common/FAQSchema";
 
 export default function FAQPage() {
   const [active, setActive] = useState({
@@ -110,8 +111,14 @@ export default function FAQPage() {
     }
   ];
 
+  const allFaqs = faqData.flatMap(block => block.faqs.map(faq => ({
+    question: faq.q,
+    answer: faq.a
+  })));
+
   return (
     <> 
+      <FAQSchema faqs={allFaqs} />
       <div className="w-full bg-white text-[#1a1a1a] font-['Figtree']">
         <section
           className="relative w-full h-[535px] md:h-[605px] flex items-end justify-center bg-cover bg-center bg-no-repeat
