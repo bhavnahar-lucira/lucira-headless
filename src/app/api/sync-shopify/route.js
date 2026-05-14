@@ -225,18 +225,6 @@ export async function POST(req) {
               let reviewsData = { count: 0, average: 0, list: [], stats: [] };
               try {
                 reviewsData = await fetchNectorReviews(p.id, { noFallback: true });
-                if (reviewsData.list && reviewsData.list.length > 0) {
-                  const reviewsCollection = db.collection("reviews");
-                  const productIdSimple = p.id.split("/").pop();
-                  const reviewOps = reviewsData.list.map(review => ({
-                    updateOne: {
-                      filter: { id: review.id },
-                      update: { $set: { ...review, productId: productIdSimple, productHandle: p.handle, productTitle: p.title, productImage: p.featuredImage?.url || "" } },
-                      upsert: true
-                    }
-                  }));
-                  if (reviewOps.length > 0) await reviewsCollection.bulkWrite(reviewOps);
-                }
               } catch (reviewErr) {}
 
               const matchingProductIds = p.matching_products?.value ? JSON.parse(p.matching_products.value).map(gid => gid.split("/").pop()) : [];
