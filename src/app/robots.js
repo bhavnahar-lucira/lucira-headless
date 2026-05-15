@@ -1,6 +1,5 @@
 export default function robots() {
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://www.lucirajewelry.com";
-  const sitemapUrl = `${baseUrl}/sitemap.xml`;
 
   return {
     rules: [
@@ -67,10 +66,7 @@ export default function robots() {
           "/*/products/*-[a-f0-9][a-f0-9][a-f0-9][a-f0-9][a-f0-9][a-f0-9][a-f0-9][a-f0-9]-remote",
           "/collections/*/products/*-[a-f0-9][a-f0-9][a-f0-9][a-f0-9][a-f0-9][a-f0-9][a-f0-9][a-f0-9]-remote",
           "/*/collections/*/products/*-[a-f0-9][a-f0-9][a-f0-9][a-f0-9][a-f0-9][a-f0-9][a-f0-9][a-f0-9]-remote",
-          "/*?page=",
-          "/*?*section_id=",
         ],
-        crawlDelay: 10,
       },
       // --- ✅ adsbot-google rules ---
       {
@@ -157,7 +153,20 @@ export default function robots() {
         userAgent: "Pinterest",
         crawlDelay: 1,
       },
+      // --- ✅ Crawl-delay for all other bots ---
+      {
+        userAgent: "*",
+        crawlDelay: 10,
+      },
+      // --- 🚫 Disallow Pagination URLs ---
+      {
+        userAgent: "*",
+        disallow: ["/*?page=", "/*?*section_id="],
+      },
     ],
-    sitemap: sitemapUrl,
+    sitemap: [
+      `${baseUrl}/sitemap.xml`,
+      "https://luciraonline.myshopify.com/sitemap.xml",
+    ],
   };
 }
