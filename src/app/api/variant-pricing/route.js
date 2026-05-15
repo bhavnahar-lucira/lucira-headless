@@ -183,6 +183,12 @@ export async function GET(req) {
         original_total: originalGrandTotal,
         total_savings: totalSavingsAmt
       }
+    },
+    {
+      headers: {
+        "Cache-Control":
+          "public, s-maxage=300, stale-while-revalidate=60",
+      },
     });
 
   } catch (err) {

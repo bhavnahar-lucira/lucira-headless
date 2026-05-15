@@ -29,7 +29,7 @@ async function importPincodes() {
     console.log('Connected to MongoDB');
     
     // Get database name from URI or use default
-    const db = client.db();
+    const db = client.db("next_local_db");
     const collection = db.collection('pincodes');
 
     // Create index on pincode for faster upserts and unique constraint

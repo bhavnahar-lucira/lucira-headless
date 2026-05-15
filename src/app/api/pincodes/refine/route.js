@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 export async function POST() {
   try {
     const client = await clientPromise;
-    const db = client.db();
+    const db = client.db("next_local_db");
     const pincodesCollection = db.collection("pincodes");
 
     const updatedCount = await refinePincodeData(pincodesCollection);

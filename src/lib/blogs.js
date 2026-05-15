@@ -12,7 +12,7 @@ function stripHtml(value) {
 
 export async function getArticleByBlogAndHandle(blogHandle, articleHandle) {
   const client = await clientPromise;
-  const db = client.db();
+  const db = client.db("next_local_db");
 
   const article = await db.collection("articles").findOne({
     handle: articleHandle,
@@ -50,7 +50,7 @@ export async function getArticleByBlogAndHandle(blogHandle, articleHandle) {
 
 export async function getBlogByHandle(blogHandle) {
   const client = await clientPromise;
-  const db = client.db();
+  const db = client.db("next_local_db");
 
   const blog = await db.collection("blogs").findOne({ handle: blogHandle });
 
@@ -280,7 +280,7 @@ export async function getArticlesByBlogHandle(blogHandle) {
 
   // Fallback to MongoDB
   const client = await clientPromise;
-  const db = client.db();
+  const db = client.db("next_local_db");
 
   const articles = await db
     .collection("articles")
@@ -337,7 +337,7 @@ export async function getArticlesByBlogHandleStorefront(blogHandle) {
 
 export async function getMostViewedArticles(limit = 4) {
   const client = await clientPromise;
-  const db = client.db();
+  const db = client.db("next_local_db");
 
   const articles = await db
     .collection("articles")

@@ -1,7 +1,8 @@
 import { shopifyAdminFetch } from "@/lib/shopify";
 import { NextResponse } from "next/server";
 
-export const dynamic = "force-dynamic";
+// export const dynamic = "force-dynamic";
+export const revalidate = 300
 
 export async function GET() {
   try {
@@ -23,7 +24,9 @@ export async function GET() {
 
     const rates = JSON.parse(data.shop.metal_prices.value);
 
-    return NextResponse.json(rates);
+    return NextResponse.json(rates, {
+      headers: { "Cache-Control": "public, s-maxage=300, stale-while-revalidate=60" }
+    });
   } catch (error) {
     console.error("Failed to fetch silver rates:", error);
     return NextResponse.json({ error: "Failed to fetch silver rates" }, { status: 500 });

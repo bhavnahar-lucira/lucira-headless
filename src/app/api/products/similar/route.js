@@ -23,7 +23,7 @@ export async function GET(request) {
     // 2. Fetch all matching products by their Shopify IDs
     // Support both full GID and numeric ID strings using regex
     const idFilters = product.matchingProductIds.map(id => ({
-      shopifyId: { $regex: `${id}$` }
+      shopifyId: { $in: product.matchingProductIds }
     }));
 
     const similarProducts = await productsCollection

@@ -33,7 +33,7 @@ export async function GET() {
     }
 
     const client = await clientPromise;
-    const db = client.db();
+    const db = client.db("next_local_db");
     const wishlistCollection = db.collection("wishlist");
     const items = await wishlistCollection
       .find({ customerId })
@@ -100,7 +100,7 @@ export async function POST(req) {
     };
 
     const client = await clientPromise;
-    const db = client.db();
+    const db = client.db("next_local_db");
     const wishlistCollection = db.collection("wishlist");
 
     await wishlistCollection.updateOne(
@@ -138,7 +138,7 @@ export async function DELETE(req) {
     }
 
     const client = await clientPromise;
-    const db = client.db();
+    const db = client.db("next_local_db");
     const wishlistCollection = db.collection("wishlist");
     
     if (variantId) {

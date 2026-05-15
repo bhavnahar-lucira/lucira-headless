@@ -10,7 +10,7 @@ async function inspectGiftingColumn() {
   const client = new MongoClient(uri);
   try {
     await client.connect();
-    const db = client.db();
+    const db = client.db("next_local_db");
     const menu = await db.collection("menus").findOne({ handle: "main-menu-official" });
     
     if (!menu) return;

@@ -94,6 +94,8 @@ export async function GET(request) {
           breakdown: stats
         },
         gallery: allGalleryImages
+    },{
+      headers: { "Cache-Control": "public, s-maxage=120, stale-while-revalidate=60" }
     });
   } catch (error) {
     console.error("All Reviews API Error:", error);

@@ -45,7 +45,7 @@ async function fetchAll(query, fieldName, variables = { first: 250 }) {
 export async function POST() {
   try {
     const client = await clientPromise;
-    const db = client.db();
+    const db = client.db("next_local_db");
 
     console.log("Starting Sitemap Sync...");
 
@@ -132,7 +132,7 @@ export async function POST() {
 export async function GET() {
   try {
     const client = await clientPromise;
-    const db = client.db();
+    const db = client.db("next_local_db");
     const sitemap = await db.collection("sitemaps").findOne({ type: "main" });
     
     if (!sitemap) {

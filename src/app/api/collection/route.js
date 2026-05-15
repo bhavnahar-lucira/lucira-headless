@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { shopifyStorefrontFetch, shopifyAdminFetch } from "@/lib/shopify";
+import { shopifyStorefrontFetch } from "@/lib/shopify";
 import { calculatePriceBreakup } from "@/lib/priceEngine";
 import clientPromise from "@/lib/mongodb";
 
@@ -88,23 +88,23 @@ export async function GET(req) {
     const sortConfig = SORT_MAP[sort] || SORT_MAP.best_selling;
 
     // 1. Fetch Shop-wide pricing data (Admin API)
-    let metalRates = {};
-    let stonePricingDB = [];
-    try {
-      const shopPricingQuery = `
-        query {
-          shop {
-            metalPrices: metafield(namespace: "DI-GoldPrice", key: "metal_prices") { value }
-            stonePricing: metafield(namespace: "DI-GoldPrice", key: "stone_pricing") { value }
-          }
-        }
-      `;
-      const shopData = await shopifyAdminFetch(shopPricingQuery);
-      if (shopData?.shop?.metalPrices?.value) metalRates = JSON.parse(shopData.shop.metalPrices.value);
-      if (shopData?.shop?.stonePricing?.value) stonePricingDB = JSON.parse(shopData.shop.stonePricing.value);
-    } catch (e) {
-      console.warn("⚠️ Shop pricing metadata fetch failed:", e.message);
-    }
+    // let metalRates = {};
+    // let stonePricingDB = [];
+    // try {
+    //   const shopPricingQuery = `
+    //     query {
+    //       shop {
+    //         metalPrices: metafield(namespace: "DI-GoldPrice", key: "metal_prices") { value }
+    //         stonePricing: metafield(namespace: "DI-GoldPrice", key: "stone_pricing") { value }
+    //       }
+    //     }
+    //   `;
+    //   const shopData = await shopifyAdminFetch(shopPricingQuery);
+    //   if (shopData?.shop?.metalPrices?.value) metalRates = JSON.parse(shopData.shop.metalPrices.value);
+    //   if (shopData?.shop?.stonePricing?.value) stonePricingDB = JSON.parse(shopData.shop.stonePricing.value);
+    // } catch (e) {
+    //   console.warn("⚠️ Shop pricing metadata fetch failed:", e.message);
+    // }
 
     // 2. Fetch Collection (Storefront API)
     const COLLECTION_QUERY = `
@@ -251,42 +251,77 @@ export async function GET(req) {
       });
     }
 
-    // 3. Fetch Variant Metafields in Bulk (Admin API)
-    const variantGids = [];
+    // 3. Fetch Cached Pricing Data from MongoDB
+    const client = await clientPromise;
+    const db = client.db("next_local_db");
+
+    const pricingCollection = db.collection("variant_pricing");
+
+    const variantIds = [];
+
     productsData.edges.forEach(({ node }) => {
-      node.variants.edges.forEach(({ node: v }) => variantGids.push(v.id));
+      node.variants.edges.forEach(({ node: v }) => {
+        variantIds.push(v.id.split("/").pop());
+      });
     });
 
-    const variantConfigs = {};
-    if (variantGids.length > 0) {
-      try {
-        const variantQuery = `
-          query getVariants($ids: [ID!]!) {
-            nodes(ids: $ids) {
-              ... on ProductVariant {
-                id
-                metafield(namespace: "DI-GoldPrice", key: "variant_config") { value }
-              }
-            }
+    const pricingDocs = await pricingCollection
+      .find(
+        {
+          variantId: { $in: variantIds }
+        },
+        {
+          projection: {
+            variantId: 1,
+            price_breakup: 1,
+            raw_breakup: 1,
           }
-        `;
-        
-        // Ensure unique IDs and Chunk to avoid Shopify limit of 250
-        const uniqueGids = [...new Set(variantGids)];
-        const CHUNK_SIZE = 100;
-        for (let i = 0; i < uniqueGids.length; i += CHUNK_SIZE) {
-          const chunk = uniqueGids.slice(i, i + CHUNK_SIZE);
-          const adminData = await shopifyAdminFetch(variantQuery, { ids: chunk });
-          adminData?.nodes?.forEach(node => {
-            if (node?.metafield?.value) {
-              variantConfigs[node.id] = node.metafield.value;
-            }
-          });
         }
-      } catch (e) {
-        console.warn("⚠️ Bulk variant metadata fetch failed:", e.message);
-      }
-    }
+      )
+      .toArray();
+
+    const pricingMap = {};
+
+    pricingDocs.forEach(doc => {
+      pricingMap[doc.variantId] = doc;
+    });
+
+    // 3. Fetch Variant Metafields in Bulk (Admin API)
+    // const variantGids = [];
+    // productsData.edges.forEach(({ node }) => {
+    //   node.variants.edges.forEach(({ node: v }) => variantGids.push(v.id));
+    // });
+
+    // const variantConfigs = {};
+    // if (variantGids.length > 0) {
+    //   try {
+    //     const variantQuery = `
+    //       query getVariants($ids: [ID!]!) {
+    //         nodes(ids: $ids) {
+    //           ... on ProductVariant {
+    //             id
+    //             metafield(namespace: "DI-GoldPrice", key: "variant_config") { value }
+    //           }
+    //         }
+    //       }
+    //     `;
+        
+    //     // Ensure unique IDs and Chunk to avoid Shopify limit of 250
+    //     const uniqueGids = [...new Set(variantGids)];
+    //     const CHUNK_SIZE = 100;
+    //     for (let i = 0; i < uniqueGids.length; i += CHUNK_SIZE) {
+    //       const chunk = uniqueGids.slice(i, i + CHUNK_SIZE);
+    //       const adminData = await shopifyAdminFetch(variantQuery, { ids: chunk });
+    //       adminData?.nodes?.forEach(node => {
+    //         if (node?.metafield?.value) {
+    //           variantConfigs[node.id] = node.metafield.value;
+    //         }
+    //       });
+    //     }
+    //   } catch (e) {
+    //     console.warn("⚠️ Bulk variant metadata fetch failed:", e.message);
+    //   }
+    // }
 
     // 4. Process Products & Calculate Metadata
     const products = await Promise.all(
@@ -296,21 +331,23 @@ export async function GET(req) {
           v.selectedOptions.forEach((o) => {
             options[o.name.toLowerCase()] = o.value;
           });
-
-          // A. Try Dynamic Calculation
+          
+          // A. Read Cached Pricing Data from MongoDB
           let dynamic = {};
-          const configValue = variantConfigs[v.id];
-          if (configValue) {
-            try {
-              const config = JSON.parse(configValue);
-              const breakup = calculatePriceBreakup(config, metalRates, stonePricingDB);
-              dynamic = {
-                carat: breakup.diamond.carat,
-                clarity: breakup.diamond.clarity,
-                color: breakup.diamond.color,
-                weight: breakup.metal.weight,
-              };
-            } catch (e) {}
+
+          const variantId = v.id.split("/").pop();
+
+          const pricingData = pricingMap[variantId];
+
+          if (pricingData?.raw_breakup) {
+            const breakup = pricingData.raw_breakup;
+
+            dynamic = {
+              carat: breakup?.diamond?.carat,
+              clarity: breakup?.diamond?.clarity,
+              color: breakup?.diamond?.color,
+              weight: breakup?.metal?.weight,
+            };
           }
 
           // B. Robust Option Fallbacks

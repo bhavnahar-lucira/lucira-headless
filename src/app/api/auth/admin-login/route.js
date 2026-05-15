@@ -10,7 +10,7 @@ export async function POST(req) {
     }
 
     const client = await clientPromise;
-    const db = client.db();
+    const db = client.db("next_local_db");
     const user = await db.collection('users').findOne({ username, password, role: 'admin' });
 
     // Hardcoded fallback for immediate access if DB record is missing

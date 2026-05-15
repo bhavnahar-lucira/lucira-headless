@@ -4,7 +4,7 @@ import clientPromise from "@/lib/mongodb";
 export async function GET() {
   try {
     const client = await clientPromise;
-    const db = client.db();
+    const db = client.db("next_local_db");
     const menus = await db.collection("menus").find({}).toArray();
 
     return NextResponse.json({ success: true, menus });

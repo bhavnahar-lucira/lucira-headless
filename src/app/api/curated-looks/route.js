@@ -5,7 +5,7 @@ import { ObjectId } from "mongodb";
 export async function GET() {
   try {
     const client = await clientPromise;
-    const db = client.db();
+    const db = client.db("next_local_db");
     const looks = await db.collection("curated_looks").find({}).sort({ order: 1 }).toArray();
     return NextResponse.json({ success: true, looks });
   } catch (error) {
@@ -18,7 +18,7 @@ export async function POST(request) {
   try {
     const data = await request.json();
     const client = await clientPromise;
-    const db = client.db();
+    const db = client.db("next_local_db");
     
     if (Array.isArray(data)) {
       // Bulk update/replace

@@ -11,7 +11,7 @@ export async function GET(req) {
     }
 
     const client = await clientPromise;
-    const db = client.db();
+    const db = client.db("next_local_db");
 
     const collection = await db.collection("collections").findOne({ handle });
 

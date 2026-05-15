@@ -5,7 +5,7 @@ import { ObjectId } from "mongodb";
 export async function GET() {
   try {
     const client = await clientPromise;
-    const db = client.db();
+    const db = client.db("next_local_db");
     const videos = await db.collection("styled_videos").find({}).sort({ order: 1 }).toArray();
     return NextResponse.json({ success: true, videos });
   } catch (error) {
@@ -18,7 +18,7 @@ export async function POST(request) {
   try {
     const data = await request.json();
     const client = await clientPromise;
-    const db = client.db();
+    const db = client.db("next_local_db");
     
     if (Array.isArray(data)) {
       // Bulk update/replace to handle ordering and full list sync
@@ -61,7 +61,7 @@ export async function DELETE(request) {
     if (!id) throw new Error("ID is required");
 
     const client = await clientPromise;
-    const db = client.db();
+    const db = client.db("next_local_db");
     await db.collection("styled_videos").deleteOne({ _id: new ObjectId(id) });
 
     return NextResponse.json({ success: true });

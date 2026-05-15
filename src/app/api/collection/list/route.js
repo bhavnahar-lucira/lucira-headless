@@ -9,7 +9,7 @@ export async function GET(req) {
     const query = searchParams.get("q") || "";
 
     const client = await clientPromise;
-    const db = client.db();
+    const db = client.db("next_local_db");
 
     const filter = query
       ? {

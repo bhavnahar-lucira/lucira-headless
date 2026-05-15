@@ -14,7 +14,7 @@ export async function POST(request) {
     }
 
     const client = await clientPromise;
-    const db = client.db();
+    const db = client.db("next_local_db");
     const collection = db.collection("pincodes");
 
     // Create index on pincode for faster upserts and unique constraint

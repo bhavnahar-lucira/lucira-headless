@@ -667,7 +667,7 @@ function SitemapSection({ section, url, columns }) {
 
 export default async function SitemapPage() {
   const client = await clientPromise;
-  const db = client.db();
+  const db = client.db("next_local_db");
   const sitemapData = await db.collection("sitemaps").findOne({ type: "main" });
 
   if (!sitemapData) {

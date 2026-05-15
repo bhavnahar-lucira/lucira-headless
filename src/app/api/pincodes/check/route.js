@@ -11,7 +11,7 @@ export async function GET(request) {
     }
 
     const client = await clientPromise;
-    const db = client.db();
+    const db = client.db("next_local_db");
     const collection = db.collection("pincodes");
 
     const record = await collection.findOne({ pincode: pincode.trim() });

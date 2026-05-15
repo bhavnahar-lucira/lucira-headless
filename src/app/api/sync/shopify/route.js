@@ -6,7 +6,7 @@ import { GET_PAGES_QUERY, GET_BLOGS_QUERY, GET_ARTICLES_QUERY } from "@/lib/grap
 export async function POST() {
   try {
     const client = await clientPromise;
-    const db = client.db();
+    const db = client.db("next_local_db");
 
     // 1. Sync Pages (Storefront API)
     let pagesHasNextPage = true;

@@ -6,7 +6,7 @@ async function checkTags() {
   const client = new MongoClient(uri);
   try {
     await client.connect();
-    const db = client.db();
+    const db = client.db("next_local_db");
     
     console.log("Checking articles for tags...");
     const article = await db.collection("articles").findOne({ tags: { $exists: true, $not: { $size: 0 } } });

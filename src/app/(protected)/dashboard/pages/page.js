@@ -3,7 +3,7 @@ import PagesTable from "./PagesTable";
 
 async function getPages() {
   const client = await clientPromise;
-  const db = client.db();
+  const db = client.db("next_local_db");
   const pages = await db.collection("pages").find({}).sort({ updatedAt: -1 }).toArray();
   return JSON.parse(JSON.stringify(pages));
 }

@@ -3,7 +3,7 @@ import ArticlesTable from "./ArticlesTable";
 
 async function getBlogsWithArticles() {
   const client = await clientPromise;
-  const db = client.db();
+  const db = client.db("next_local_db");
   const [blogs, articles] = await Promise.all([
     db.collection("blogs").find({}).sort({ title: 1 }).toArray(),
     db.collection("articles").find({}).sort({ publishedAt: -1 }).toArray(),

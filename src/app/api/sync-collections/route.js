@@ -5,7 +5,7 @@ import clientPromise from "@/lib/mongodb";
 export async function POST() {
   try {
     const client = await clientPromise;
-    const db = client.db();
+    const db = client.db("next_local_db");
 
     let hasNextPage = true;
     let cursor = null;

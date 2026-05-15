@@ -9,7 +9,7 @@ export async function GET(request) {
     const query = searchParams.get("q") || "";
 
     const client = await clientPromise;
-    const db = client.db();
+    const db = client.db("next_local_db");
     const collection = db.collection("pincodes");
 
     const filter = {};
@@ -60,7 +60,7 @@ export async function PUT(request) {
     }
 
     const client = await clientPromise;
-    const db = client.db();
+    const db = client.db("next_local_db");
     const collection = db.collection("pincodes");
 
     const updateData = {
