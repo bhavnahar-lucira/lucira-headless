@@ -24,12 +24,16 @@ export async function GET(req) {
         } else {
           const keywords = handle.replace("all-", "").split("-").map(k => k.replace(/s$/, ""));
           const handleFilter = keywords.map(kw => {
+            const wordBoundaryRegex = new RegExp(`\\b${kw}\\b`, "i");
             return {
               $or: [
-                { collectionHandles: { $regex: kw, $options: "i" } },
-                { type: { $regex: kw, $options: "i" } },
-                { tags: { $regex: kw, $options: "i" } },
-                { title: { $regex: kw, $options: "i" } }
+                { collectionHandles: kw }, // Direct equality first
+                { collectionHandles: wordBoundaryRegex },
+                { type: kw },
+                { type: wordBoundaryRegex },
+                { tags: kw },
+                { tags: wordBoundaryRegex },
+                { title: wordBoundaryRegex }
               ]
             };
           });
@@ -148,100 +152,8 @@ export async function GET(req) {
       }
     });
 
-    // 5. Aggregation Helper
+    // 5. Aggregation Helper with consolidated $facet
     const baseMatch = await buildBaseMatch();
-
-    const getFacetedCounts = async (field, isMetafieldArray = false) => {
-      const isVariantField = field.startsWith("variants.");
-      
-      // Start with baseMatch (Collection/Handle)
-      const pipeline = [{ $match: { ...baseMatch } }];
-
-      // Apply Price Filter (if any) to all facet counts
-      if (Object.keys(activePriceFilter).length > 0) {
-        pipeline[0].$match.price = activePriceFilter;
-      }
-
-      // Add product-level filters (exclude current field if it matches)
-      Object.entries(activeProductFilters).forEach(([activeField, val]) => {
-        if (activeField !== field) {
-          pipeline[0].$match[activeField] = val;
-        }
-      });
-
-      if (isVariantField) {
-        // For variant-level facets (e.g. In Store, Metal Purity): 
-        // We unwind first to count specific variants, then apply OTHER variant filters.
-        pipeline.push({ $unwind: "$variants" });
-        
-        Object.entries(activeVariantFilters).forEach(([activeField, val]) => {
-          if (activeField !== field) {
-            pipeline.push({ $match: { [activeField]: val } });
-          }
-        });
-      } else {
-        // For product-level facets (e.g. Shop For, Material Type):
-        // Use $elemMatch for active variant filters to ensure we only count products 
-        // that have AT LEAST ONE variant matching ALL active variant filters.
-        const variantElemMatch = {};
-        Object.entries(activeVariantFilters).forEach(([activeField, val]) => {
-          const vKey = activeField.replace("variants.", "");
-          variantElemMatch[vKey] = val;
-        });
-
-        if (Object.keys(variantElemMatch).length > 0) {
-          pipeline[0].$match.variants = { $elemMatch: variantElemMatch };
-        }
-      }
-
-      // Shared logic for fields that might be JSON-encoded arrays
-      if (isMetafieldArray) {
-        if (field.includes("diamonds") || field.includes("gemstones")) {
-          const arrayPath = field.split(".").slice(0, -1).join(".");
-          // If it's a variant field, variants is already unwound
-          pipeline.push({ $unwind: { path: `$${arrayPath}`, preserveNullAndEmptyArrays: false } });
-        } else {
-          pipeline.push({
-            $addFields: {
-              [field]: {
-                $cond: {
-                  if: { $and: [
-                    { $eq: [{ $type: `$${field}` }, "string"] },
-                    { $regexMatch: { input: `$${field}`, regex: /^\[.*\]$/ } }
-                  ]},
-                  then: { $function: {
-                    body: "function(s) { try { return JSON.parse(s); } catch(e) { return s; } }",
-                    args: [`$${field}`],
-                    lang: "js"
-                  }},
-                  else: `$${field}`
-                }
-              }
-            }
-          });
-          pipeline.push({ $unwind: { path: `$${field}`, preserveNullAndEmptyArrays: false } });
-        }
-      }
-
-      pipeline.push({ $group: { _id: { shopifyId: "$shopifyId", val: `$${field}` } } });
-      pipeline.push({ $group: { _id: "$_id.val", count: { $sum: 1 } } });
-
-      const data = await productsCollection.aggregate(pipeline).toArray();
-
-      return data.filter(d => d._id).map(d => {
-        let cleanVal = d._id;
-        if (typeof cleanVal === "string" && cleanVal.startsWith("[") && cleanVal.endsWith("]")) {
-          try {
-            const parsed = JSON.parse(cleanVal);
-            if (Array.isArray(parsed)) cleanVal = parsed[0];
-          } catch (e) {}
-        }
-        if (Array.isArray(cleanVal)) cleanVal = cleanVal[0];
-        return { label: cleanVal, value: cleanVal, count: d.count };
-      });
-    };
-
-    const results = {};
     const isCategoryHandle = handle && handle.startsWith("all-");
 
     const categories = [
@@ -259,96 +171,137 @@ export async function GET(req) {
       { name: "Fit", field: "productMetafields.fit", isM: true }
     ];
 
+    const facetStages = {};
+
+    categories.forEach(cat => {
+      if (cat.hideIfCategory && isCategoryHandle) return;
+
+      const facetPipeline = [];
+
+      // Apply shared Price Filter (if any)
+      if (Object.keys(activePriceFilter).length > 0) {
+        facetPipeline.push({ $match: { price: activePriceFilter } });
+      }
+
+      // Apply other product-level filters
+      const productMatch = {};
+      Object.entries(activeProductFilters).forEach(([activeField, val]) => {
+        if (activeField !== cat.field) productMatch[activeField] = val;
+      });
+      if (Object.keys(productMatch).length > 0) {
+        facetPipeline.push({ $match: productMatch });
+      }
+
+      const isVariantField = cat.field.startsWith("variants.");
+      if (isVariantField) {
+        facetPipeline.push({ $unwind: "$variants" });
+        Object.entries(activeVariantFilters).forEach(([activeField, val]) => {
+          if (activeField !== cat.field) {
+            facetPipeline.push({ $match: { [activeField]: val } });
+          }
+        });
+      } else {
+        const variantElemMatch = {};
+        Object.entries(activeVariantFilters).forEach(([activeField, val]) => {
+          if (activeField !== cat.field) {
+            variantElemMatch[activeField.replace("variants.", "")] = val;
+          }
+        });
+        if (Object.keys(variantElemMatch).length > 0) {
+          facetPipeline.push({ $match: { variants: { $elemMatch: variantElemMatch } } });
+        }
+      }
+
+      if (cat.isM) {
+        if (cat.field.includes("diamonds") || cat.field.includes("gemstones")) {
+          const arrayPath = cat.field.split(".").slice(0, -1).join(".");
+          facetPipeline.push({ $unwind: { path: `$${arrayPath}`, preserveNullAndEmptyArrays: false } });
+        } else {
+          facetPipeline.push({ $unwind: { path: `$${cat.field}`, preserveNullAndEmptyArrays: false } });
+        }
+      }
+
+      facetPipeline.push({ $group: { _id: { shopifyId: "$shopifyId", val: `$${cat.field}` } } });
+      facetPipeline.push({ $group: { _id: "$_id.val", count: { $sum: 1 } } });
+
+      facetStages[cat.name] = facetPipeline;
+    });
+
+    // Add Price Range facet (matches all filters EXCEPT price)
+    const priceFacetPipeline = [];
+    if (Object.keys(activeProductFilters).length > 0) {
+      priceFacetPipeline.push({ $match: activeProductFilters });
+    }
+    const priceVariantElemMatch = {};
+    Object.entries(activeVariantFilters).forEach(([activeField, val]) => {
+      priceVariantElemMatch[activeField.replace("variants.", "")] = val;
+    });
+    if (Object.keys(priceVariantElemMatch).length > 0) {
+      priceFacetPipeline.push({ $match: { variants: { $elemMatch: priceVariantElemMatch } } });
+    }
+    priceFacetPipeline.push({ $group: { _id: null, min: { $min: "$price" }, max: { $max: "$price" } } });
+    facetStages["__priceRange"] = priceFacetPipeline;
+
+    const [facetResults] = await productsCollection.aggregate([
+      { $match: baseMatch },
+      { $facet: facetStages }
+    ]).toArray();
+
+    // 6. Assemble Results
     const REVERSE_KEY_MAP = {};
     Object.entries(KEY_MAP).forEach(([shortKey, mongoKey]) => { REVERSE_KEY_MAP[mongoKey] = shortKey; });
 
-    const filterPromises = categories.map(async (cat) => {
-      if (cat.hideIfCategory && isCategoryHandle) return null;
+    const results = {};
+    categories.forEach((cat, index) => {
+      if (cat.hideIfCategory && isCategoryHandle) return;
       
-      try {
-        const counts = await getFacetedCounts(cat.field, cat.isM);
-        if (counts.length === 0) return null;
+      const data = facetResults[cat.name];
+      if (!data || data.length === 0) return;
 
-        const mergedResults = {};
-        counts.forEach(c => {
-          let label = c.label;
-          let value = c.value;
-          
-          if (cat.name === "In Store Available" && storeMap[value]) {
-            label = storeMap[value];
-            value = storeMap[value]; 
-          }
+      const mergedResults = {};
+      data.forEach(d => {
+        let label = d._id;
+        if (Array.isArray(label)) label = label[0];
+        if (!label) return;
 
-          // Filter out short labels/values for Diamond and Gemstone Shape
-          if ((cat.name === "Diamond Shape" || cat.name === "Gemstone Shape") && 
-              (String(label || "").trim().length < 3 || String(value || "").trim().length < 3)) {
-            return;
-          }
+        let value = label;
 
-          if (!mergedResults[label]) {
-            mergedResults[label] = { 
-                label: label, 
-                value: value, 
-                count: 0,
-                urlKey: REVERSE_KEY_MAP[cat.field] || cat.field.split(".").pop()
-            };
-          }
-          mergedResults[label].count += c.count;
-        });
+        if (cat.name === "In Store Available" && storeMap[value]) {
+          label = storeMap[value];
+          value = storeMap[value];
+        }
 
-        return { name: cat.name, data: Object.values(mergedResults) };
-      } catch (err) {
-        console.error(`Error fetching counts for ${cat.name}:`, err);
-        return null;
-      }
-    });
+        if ((cat.name === "Diamond Shape" || cat.name === "Gemstone Shape") &&
+            (String(label || "").trim().length < 3 || String(value || "").trim().length < 3)) {
+          return;
+        }
 
-    const filterResults = await Promise.all(filterPromises);
-    
-    // 6. Calculate Price Range
-    let priceData = null;
-    try {
-      // For price range, we want the range of products matching ALL active filters EXCEPT price itself
-      const priceMatch = { ...baseMatch, ...activeProductFilters };
-      const pricePipeline = [{ $match: priceMatch }];
-      
-      const variantElemMatch = {};
-      Object.entries(activeVariantFilters).forEach(([activeField, val]) => {
-        const vKey = activeField.replace("variants.", "");
-        variantElemMatch[vKey] = val;
+        if (!mergedResults[label]) {
+          mergedResults[label] = {
+              label: label,
+              value: value,
+              count: 0,
+              urlKey: REVERSE_KEY_MAP[cat.field] || cat.field.split(".").pop()
+          };
+        }
+        mergedResults[label].count += d.count;
       });
 
-      if (Object.keys(variantElemMatch).length > 0) {
-        pricePipeline[0].$match.variants = { $elemMatch: variantElemMatch };
+      const categoryData = Object.values(mergedResults);
+      if (categoryData.length > 0) {
+        results[cat.name] = categoryData;
       }
 
-      pricePipeline.push({ $group: { _id: null, minPrice: { $min: "$price" }, maxPrice: { $max: "$price" } } });
-      
-      const priceRangeResult = await productsCollection.aggregate(pricePipeline).toArray();
-      if (priceRangeResult.length > 0) {
-        priceData = {
-          min: priceRangeResult[0].minPrice,
-          max: priceRangeResult[0].maxPrice
-        };
-      }
-    } catch (err) {
-      console.error("Error calculating price range:", err);
-    }
-
-    // 7. Assemble Results in Specific Order
-    filterResults.forEach((res, index) => {
-      if (res) {
-        results[res.name] = res.data;
-      }
-      // Insert Price at 4th position (after 3rd category: Shop For)
-      if (index === 2 && priceData) {
-        results["Price"] = priceData;
+      // Insert Price at 4th position (after Shop For)
+      if (index === 2) {
+        const pr = facetResults["__priceRange"]?.[0];
+        if (pr) results["Price"] = { min: pr.min, max: pr.max };
       }
     });
 
-    // If Price hasn't been added (e.g. fewer than 3 categories), add it at the end
-    if (!results["Price"] && priceData) {
-      results["Price"] = priceData;
+    if (!results["Price"]) {
+      const pr = facetResults["__priceRange"]?.[0];
+      if (pr) results["Price"] = { min: pr.min, max: pr.max };
     }
 
     return NextResponse.json(results);

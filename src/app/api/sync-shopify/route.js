@@ -25,6 +25,21 @@ export async function GET() {
   } catch (error) { return NextResponse.json({ error: error.message }, { status: 500 }); }
 }
 
+const parseMetafield = (value) => {
+  if (!value) return null;
+  if (typeof value !== 'string') return value;
+
+  // Try to parse if it looks like JSON (starts with { or [)
+  if (value.trim().startsWith('{') || value.trim().startsWith('[')) {
+    try {
+      return JSON.parse(value);
+    } catch (e) {
+      return value;
+    }
+  }
+  return value;
+};
+
 export async function POST(req) {
   const SHOPIFY_DOMAIN = process.env.SHOPIFY_STORE || process.env.SHOPIFYSTORE;
   const ACCESS_TOKEN = process.env.ADMIN_TOKEN || process.env.SHOPIFY_ADMIN_TOKEN;
@@ -201,7 +216,7 @@ export async function POST(req) {
                   image: v.image?.url || p.featuredImage?.url,
                   inventoryLevels,
                   metafields: {
-                    components: v.components?.value,
+                    components: parseMetafield(v.components?.value),
                     in_store_available: inStoreAvailable
                   }
                 };
@@ -279,9 +294,15 @@ export async function POST(req) {
                 matchingProductIds,
                 complementaryProductIds,
                 productMetafields: {
-                  shop_for: p.shop_for?.value, weight: p.weight?.value, carat_range: p.carat_range?.value,
-                  material_type: p.material_type?.value, components: p.components?.value, finishing: p.finishing?.value,
-                  fit: p.fit?.value, lead_time: p.lead_time?.value, bestsellers: p.bestsellers?.value
+                  shop_for: parseMetafield(p.shop_for?.value),
+                  weight: parseMetafield(p.weight?.value),
+                  carat_range: parseMetafield(p.carat_range?.value),
+                  material_type: parseMetafield(p.material_type?.value),
+                  components: parseMetafield(p.components?.value),
+                  finishing: parseMetafield(p.finishing?.value),
+                  fit: parseMetafield(p.fit?.value),
+                  lead_time: parseMetafield(p.lead_time?.value),
+                  bestsellers: parseMetafield(p.bestsellers?.value)
                 },
                 lastUpdated: new Date(),
                 lastReviewsUpdated: new Date()
