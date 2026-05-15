@@ -65,6 +65,7 @@ const LazyImage = ({ src, alt, className, fill, width, height, priority, sizes, 
           height={height}
           priority={priority}
           sizes={sizes}
+          unoptimized
           onLoad={() => setLoaded(true)}
           className={`${className} transition-opacity duration-500 ${
             loaded ? "opacity-100" : "opacity-0"
