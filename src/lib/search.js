@@ -70,12 +70,16 @@ export function extractSearchIntent(query = "") {
 }
 
 function fieldClause(field, keyword) {
-  const variants = keywordVariants(keyword).map(escapeRegex);
+  const variants = keywordVariants(keyword);
+  const escapedVariants = variants.map(escapeRegex);
+
+  // Use $in for exact matches (including case-insensitive via variants)
+  // and anchored/word-boundary regex for the rest to utilize indexes better.
   return {
-    [field]: {
-      $regex: variants.join("|"),
-      $options: "i",
-    },
+    $or: [
+      { [field]: { $in: variants } },
+      { [field]: { $regex: escapedVariants.map(v => `\\b${v}\\b`).join("|"), $options: "i" } }
+    ]
   };
 }
 
