@@ -4,9 +4,11 @@ import { logout } from "../user/userSlice";
 
 export const fetchWishlist = createAsyncThunk(
   "wishlist/fetchWishlist",
-  async (_, { dispatch }) => {
+  async (_, { dispatch, getState }) => {
     try {
-      const data = await fetchWishlistApi();
+      const { user } = getState().user;
+      const { sessionId } = getState().cart; // Assuming sessionId is stored in cart or global state
+      const data = await fetchWishlistApi(user?.id, sessionId);
       return data.items || [];
     } catch (err) {
       if (err.message === "Customer not found" || err.message === "Unauthorized") {
@@ -19,9 +21,11 @@ export const fetchWishlist = createAsyncThunk(
 
 export const addWishlistItem = createAsyncThunk(
   "wishlist/addWishlistItem",
-  async (payload, { dispatch }) => {
+  async (payload, { dispatch, getState }) => {
     try {
-      const data = await addWishlistApi(payload);
+      const { user } = getState().user;
+      const { sessionId } = getState().cart;
+      const data = await addWishlistApi(payload, user?.id, sessionId);
       return data.item;
     } catch (err) {
       if (err.message === "Customer not found" || err.message === "Unauthorized") {
@@ -34,11 +38,13 @@ export const addWishlistItem = createAsyncThunk(
 
 export const removeWishlistItem = createAsyncThunk(
   "wishlist/removeWishlistItem",
-  async (payload, { dispatch }) => {
+  async (payload, { dispatch, getState }) => {
     const productId = typeof payload === 'string' ? payload : payload.productId;
     const variantId = typeof payload === 'string' ? "" : payload.variantId;
     try {
-      await removeWishlistApi(productId, variantId);
+      const { user } = getState().user;
+      const { sessionId } = getState().cart;
+      await removeWishlistApi(productId, variantId, user?.id, sessionId);
       return payload;
     } catch (err) {
       if (err.message === "Customer not found" || err.message === "Unauthorized") {
@@ -52,9 +58,12 @@ export const removeWishlistItem = createAsyncThunk(
 export const mergeGuestWishlist = createAsyncThunk(
   "wishlist/mergeGuestWishlist",
   async (_, { getState }) => {
+    const { user } = getState().user;
+    const { sessionId } = getState().cart;
     const { wishlist } = getState();
+    
     const guestItems = wishlist.guestItems || [];
-    const fetched = await fetchWishlistApi();
+    const fetched = await fetchWishlistApi(user?.id, sessionId);
     const remoteItems = fetched.items || [];
 
     if (!guestItems.length) {
@@ -65,10 +74,10 @@ export const mergeGuestWishlist = createAsyncThunk(
     const itemsToAdd = guestItems.filter((item) => !remoteUniqueKeys.has(`${item.productId}-${item.variantId || ""}`));
 
     await Promise.all(
-      itemsToAdd.map((item) => addWishlistApi(item))
+      itemsToAdd.map((item) => addWishlistApi(item, user?.id, sessionId))
     );
 
-    const merged = await fetchWishlistApi();
+    const merged = await fetchWishlistApi(user?.id, sessionId);
     return merged.items || [];
   }
 );

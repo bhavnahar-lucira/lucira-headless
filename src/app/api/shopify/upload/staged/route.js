@@ -1,31 +1,44 @@
 import { NextResponse } from "next/server";
-import { shopifyAdminFetch, STAGED_UPLOADS_CREATE_MUTATION } from "@/lib/shopify";
+import { shopifyAdminFetch } from "@/lib/shopify";
 
-export async function POST(req) {
+export async function POST(request) {
   try {
-    const { filename, mimeType, resourceType } = await req.json();
+    const { filename, mimeType } = await request.json();
 
-    const data = await shopifyAdminFetch(STAGED_UPLOADS_CREATE_MUTATION, {
+    const query = `
+      mutation stagedUploadsCreate($input: [StagedUploadInput!]!) {
+        stagedUploadsCreate(input: $input) {
+          stagedTargets {
+            url
+            resourceUrl
+            parameters { name value }
+          }
+          userErrors { field message }
+        }
+      }
+    `;
+
+    const variables = {
       input: [
         {
           filename,
           mimeType,
-          resource: resourceType || "IMAGE",
+          resource: "FILE",
           httpMethod: "POST",
         },
       ],
-    });
+    };
 
-    const stagedTarget = data.stagedUploadsCreate.stagedTargets[0];
-    const userErrors = data.stagedUploadsCreate.userErrors;
+    const data = await shopifyAdminFetch(query, variables);
+    const result = data.stagedUploadsCreate;
 
-    if (userErrors.length > 0) {
-      return NextResponse.json({ success: false, errors: userErrors }, { status: 400 });
+    if (result.userErrors.length > 0) {
+      return NextResponse.json({ error: result.userErrors[0].message }, { status: 400 });
     }
 
-    return NextResponse.json({ success: true, stagedTarget });
+    return NextResponse.json({ stagedTarget: result.stagedTargets[0] });
   } catch (error) {
-    console.error("Staged upload error:", error);
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    console.error("Staged Upload Error:", error);
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

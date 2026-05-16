@@ -50,6 +50,7 @@ export default function AtcBar({
                 src={getValidSrc(activeVariant?.image || product?.featuredImage || product?.images?.[0])}
                 alt={product?.title || "Product"}
                 fill
+                unoptimized={String(getValidSrc(activeVariant?.image || product?.featuredImage || product?.images?.[0])).includes("cdn.shopify.com") || String(getValidSrc(activeVariant?.image || product?.featuredImage || product?.images?.[0])).includes("myshopify.com")}
                 className="object-contain p-1"
               />
             </div>

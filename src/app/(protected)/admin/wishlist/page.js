@@ -86,8 +86,14 @@ export default function WishlistPage() {
       const q = new URLSearchParams();
       q.set("productId", productId);
       if (variantId) q.set("variantId", variantId);
+      
+      const { user } = useSelector((state) => state.user);
+      const { sessionId } = useSelector((state) => state.cart);
+      if (user?.id) q.set("userId", user.id);
+      if (sessionId) q.set("sessionId", sessionId);
 
-      const res = await fetch(`/api/wishlist?${q.toString()}`, {
+      const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8080";
+      const res = await fetch(`${baseUrl}/api/wishlist?${q.toString()}`, {
         method: "DELETE",
       });
       if (!res.ok) throw new Error("Failed to remove item");

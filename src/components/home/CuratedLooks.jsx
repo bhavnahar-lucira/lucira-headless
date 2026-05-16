@@ -190,7 +190,8 @@ export default function CuratedLooks() {
   useEffect(() => {
     async function fetchLooks() {
       try {
-        const res = await fetch("/api/curated-looks");
+        const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "";
+        const res = await fetch(`${baseUrl}/api/curated-looks`, { cache: "no-store" });
         const data = await res.json();
         if (data.success) {
           setLooks(data.looks || []);

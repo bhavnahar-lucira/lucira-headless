@@ -14,22 +14,12 @@ export default function DashboardHeader() {
         {/* Nav — absolutely centered in the header */}
         <nav className="hidden md:flex items-center gap-5 text-sm font-medium text-zinc-400 absolute left-1/2 -translate-x-1/2 overflow-x-auto scrollbar-none max-w-[calc(100%-280px)]">
           <Link href="/dashboard" className="hover:text-white transition-colors whitespace-nowrap">Overview</Link>
-          <Link href="/dashboard/collections" className="hover:text-white transition-colors whitespace-nowrap">Collections</Link>
-          <Link href="/dashboard/search-terms" className="hover:text-white transition-colors whitespace-nowrap">Search Terms</Link>
-          <Link href="/dashboard/variants" className="hover:text-white transition-colors whitespace-nowrap">Variants</Link>
-          <Link href="/dashboard/pages" className="hover:text-white transition-colors whitespace-nowrap">Pages</Link>
-          <Link href="/dashboard/blogs" className="hover:text-white transition-colors whitespace-nowrap">Blogs</Link>
-          <Link href="/dashboard/styled-videos" className="hover:text-white transition-colors whitespace-nowrap">Styled Videos</Link>
-          <Link href="/dashboard/curated-looks" className="hover:text-white transition-colors whitespace-nowrap">Curated Looks</Link>
-          <Link href="/dashboard/reviews" className="hover:text-white transition-colors whitespace-nowrap">Reviews</Link>
-          <Link href="/dashboard/stores" className="hover:text-white transition-colors whitespace-nowrap">Stores</Link>
+          <Link href="/dashboard/gold-coin-offer" className="hover:text-white transition-colors whitespace-nowrap">Gold Coin</Link>
+          <Link href="/dashboard/topbar-offers" className="hover:text-white transition-colors whitespace-nowrap">Topbar Offers</Link>
           <Link href="/dashboard/pincodes" className="hover:text-white transition-colors whitespace-nowrap">Pincodes</Link>
-          <Link href="/dashboard/redirect-url" className="hover:text-white transition-colors whitespace-nowrap">Redirects</Link>
-          <Link href="/dashboard/webhooks" className="hover:text-white transition-colors whitespace-nowrap">Webhooks</Link>
-          <Link href="/dashboard/sync" className="hover:text-white transition-colors whitespace-nowrap">Sync</Link>
-          <Link href="/dashboard/topbar-offers" className="hover:text-white transition-colors whitespace-nowrap">TopBar Offers</Link>
-          <Link href="/dashboard/gold-coin-offer" className="hover:text-white transition-colors whitespace-nowrap">Gold Coin Offer</Link>
-          <Link href="/dashboard/silver" className="hover:text-white transition-colors whitespace-nowrap">Silver</Link>
+          <Link href="/dashboard/stores" className="hover:text-white transition-colors whitespace-nowrap">Stores</Link>
+          <Link href="/dashboard/curated-looks" className="hover:text-white transition-colors whitespace-nowrap">Curated Looks</Link>
+          <Link href="/dashboard/styled-videos" className="hover:text-white transition-colors whitespace-nowrap">Styled Videos</Link>
         </nav>
 
         {/* Actions — pinned right */}

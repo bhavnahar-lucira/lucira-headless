@@ -107,11 +107,14 @@ export default function CustomerReview({
   useEffect(() => {
     async function fetchReviews() {
       try {
-        const response = await fetch("/api/home-reviews");
+        const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "";
+        const response = await fetch(`${baseUrl}/api/home-reviews`);
         const data = await response.json();
-        setReviews(data);
+        // The API returns { reviews: [...] }
+        setReviews(data?.reviews || []);
       } catch (error) {
         console.error("Error fetching reviews:", error);
+        setReviews([]);
       } finally {
         setLoading(false);
       }
@@ -141,7 +144,7 @@ export default function CustomerReview({
     );
   }
 
-  if (reviews.length === 0) return null;
+  if (!Array.isArray(reviews) || reviews.length === 0) return null;
 
   return (
     <section className="w-full my-8 md:my-12 bg-white overflow-hidden">

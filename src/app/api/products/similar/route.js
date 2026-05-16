@@ -1,49 +1,52 @@
-import clientPromise from "@/lib/mongodb";
 import { NextResponse } from "next/server";
+import { shopifyStorefrontFetch } from "@/lib/shopify";
 
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
-    const handle = searchParams.get("handle");
+    const productId = searchParams.get("id"); // Storefront API needs GID or product recommendations from handle
 
-    if (!handle) {
-      return NextResponse.json({ error: "Handle is required" }, { status: 400 });
-    }
-
-    const client = await clientPromise;
-    const db = client.db("next_local_db");
-    const productsCollection = db.collection("products");
-
-    // 1. Find the source product
-    const product = await productsCollection.findOne({ handle: handle });
-    if (!product || !product.matchingProductIds || product.matchingProductIds.length === 0) {
+    if (!productId) {
       return NextResponse.json({ products: [] });
     }
 
-    // 2. Fetch all matching products by their Shopify IDs
-    // Support both full GID and numeric ID strings using regex
-    const idFilters = product.matchingProductIds.map(id => ({
-      shopifyId: { $regex: `${id}$` }
+    const RECOMMENDATIONS_QUERY = `
+      query productRecommendations($productId: ID!) {
+        productRecommendations(productId: $productId) {
+          id
+          title
+          handle
+          featuredImage { url }
+          variants(first: 1) {
+            edges {
+              node {
+                price { amount }
+                compareAtPrice { amount }
+              }
+            }
+          }
+        }
+      }
+    `;
+
+    const data = await shopifyStorefrontFetch(RECOMMENDATIONS_QUERY, {
+      productId: productId.startsWith("gid://") ? productId : `gid://shopify/Product/${productId}`,
+    });
+
+    const products = (data?.productRecommendations || []).map(p => ({
+      id: p.id.split("/").pop(),
+      shopifyId: p.id,
+      title: p.title,
+      handle: p.handle,
+      image: p.featuredImage?.url,
+      price: Number(p.variants.edges[0]?.node?.price?.amount || 0),
+      compare_price: Number(p.variants.edges[0]?.node?.compareAtPrice?.amount || 0),
+      reviewStats: { count: 0, average: 0 }
     }));
 
-    const similarProducts = await productsCollection
-      .find({ 
-        $and: [
-          { $or: idFilters },
-          { status: "ACTIVE", isPublished: true }
-        ]
-      })
-      .toArray();
-
-    return NextResponse.json({ 
-      products: similarProducts.map(p => ({
-        ...p,
-        tags: Array.isArray(p.tags) ? p.tags : (typeof p.tags === 'string' ? p.tags.split(',').map(t => t.trim()).filter(Boolean) : []),
-        reviews: p.reviews || (p.reviewStats?.usedFallback ? null : p.reviewStats) || null
-      }))
-    });
+    return NextResponse.json({ products });
   } catch (error) {
     console.error("Similar Products Error:", error);
-    return NextResponse.json({ error: "Failed to fetch similar products", message: error.message }, { status: 500 });
+    return NextResponse.json({ products: [] });
   }
 }

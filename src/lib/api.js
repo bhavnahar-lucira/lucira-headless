@@ -1,31 +1,50 @@
 /* ================= GENERIC API FETCH ================= */
 
-const apiFetch = async (url, options = {}) => {
-  const res = await fetch(url, {
-    credentials: "include",
-    cache: "no-store",
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      ...(options.headers || {}),
-    },
-  });
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://127.0.0.1:8080";
 
-  const contentType = res.headers.get("content-type");
+export const apiFetch = async (url, options = {}) => {
+  // Determine if the URL should be prefixed with the backend base
+  const isExternal = url.startsWith("/api/cart") || 
+                    url.startsWith("/api/wishlist") || 
+                    url.startsWith("/api/pincodes") ||
+                    url.startsWith("/api/customer/orders") ||
+                    url.startsWith("/api/stores");
+  
+  const finalUrl = isExternal ? `${BACKEND_URL}${url}` : url;
 
-  let data;
+  try {
+    const res = await fetch(finalUrl, {
+      credentials: "include",
+      cache: "no-store",
+      ...options,
+      headers: {
+        "Content-Type": "application/json",
+        ...(options.headers || {}),
+      },
+    });
 
-  if (contentType?.includes("application/json")) {
-    data = await res.json();
-  } else {
-    throw new Error("Invalid server response");
+    const contentType = res.headers.get("content-type");
+
+    let data;
+
+    if (contentType?.includes("application/json")) {
+      data = await res.json();
+    } else {
+      console.error("API Fetch Error: Invalid content type", contentType, "from", finalUrl);
+      throw new Error("Invalid server response");
+    }
+
+    if (!res.ok) {
+      throw new Error(data?.error || "Something went wrong");
+    }
+
+    return data;
+  } catch (err) {
+    if (err.name === "TypeError" && err.message === "Failed to fetch") {
+      console.error("Network Error: Could not connect to the backend at " + finalUrl + ". Ensure your Fastify server is running on port 8080.");
+    }
+    throw err;
   }
-
-  if (!res.ok) {
-    throw new Error(data?.error || "Something went wrong");
-  }
-
-  return data;
 };
 /* ================= SEND OTP ================= */
 
@@ -82,16 +101,31 @@ export const deleteCustomerAddress = (addressId) =>
     method: "DELETE",
   });
 
-export const fetchWishlistApi = () => apiFetch("/api/wishlist");
-export const addWishlistApi = (payload) =>
-  apiFetch("/api/wishlist", {
+export const fetchWishlistApi = (userId = "", sessionId = "") => {
+  const q = new URLSearchParams();
+  if (userId) q.set("userId", userId);
+  if (sessionId) q.set("sessionId", sessionId);
+  const path = q.toString() ? `/api/wishlist?${q.toString()}` : "/api/wishlist";
+  return apiFetch(path);
+};
+
+export const addWishlistApi = (payload, userId = "", sessionId = "") => {
+  const q = new URLSearchParams();
+  if (userId) q.set("userId", userId);
+  if (sessionId) q.set("sessionId", sessionId);
+  const path = q.toString() ? `/api/wishlist?${q.toString()}` : "/api/wishlist";
+  return apiFetch(path, {
     method: "POST",
     body: JSON.stringify(payload),
   });
-export const removeWishlistApi = (productId, variantId = "") => {
+};
+
+export const removeWishlistApi = (productId, variantId = "", userId = "", sessionId = "") => {
   const q = new URLSearchParams();
   q.set("productId", productId);
   if (variantId) q.set("variantId", variantId);
+  if (userId) q.set("userId", userId);
+  if (sessionId) q.set("sessionId", sessionId);
   return apiFetch(`/api/wishlist?${q.toString()}`, {
     method: "DELETE",
   });

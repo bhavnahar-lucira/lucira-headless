@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { MEGA_MENU as STATIC_MENU } from "@/data/megaMenu";
 import { ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useMenu } from "@/hooks/useMenu";
@@ -16,16 +15,14 @@ export default function Navbar({ hideTop }) {
   const pathname = usePathname();
   const timeoutRef = useRef(null);
 
-  const MEGA_MENU = menuData || STATIC_MENU;
+  // No fallback to STATIC_MENU as requested ("api only", "dont use fall back")
+  const MEGA_MENU = menuData || [];
 
   const handleEnter = (index) => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    
-    // If a menu is already open, switch immediately for better UX
     if (activeMenu !== null) {
       setActiveMenu(index);
     } else {
-      // If no menu is open, wait 150ms to ensure the hover is intentional
       timeoutRef.current = setTimeout(() => {
         setActiveMenu(index);
       }, 150);
@@ -85,6 +82,7 @@ export default function Navbar({ hideTop }) {
               width={40}
               height={40}
               className="w-8 h-8 lg:w-9 lg:h-9 object-contain"
+              unoptimized={true}
             />
           </Link>
         </motion.div>
@@ -201,6 +199,7 @@ export default function Navbar({ hideTop }) {
                               alt={item.title}
                               fill
                               priority={true}
+                              unoptimized={item.image?.includes("cdn.shopify.com")}
                               className="object-cover transition duration-500 group-hover:scale-105"
                             />
                             <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/20 to-transparent" />
@@ -315,6 +314,7 @@ export default function Navbar({ hideTop }) {
                                             alt={item.label}
                                             fill
                                             priority={j < 6}
+                                            unoptimized={String(item.menuIcon || item.megaMenuImage || item.icon).includes("cdn.shopify.com")}
                                             className="object-contain p-1 transition-opacity duration-300"
                                           />
                                         </div>
@@ -344,6 +344,7 @@ export default function Navbar({ hideTop }) {
                                 alt={card.title}
                                 fill
                                 priority={true}
+                                unoptimized={card.image?.includes("cdn.shopify.com")}
                                 className="object-cover transition-opacity duration-300"
                               />
                               <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/20 to-transparent" />
@@ -376,7 +377,13 @@ export default function Navbar({ hideTop }) {
                               <Link key={i} href={item.href || "#"} onClick={closeMenu} className="flex items-center gap-3 group">
                                 {item.icon && (
                                   <div className="relative h-10 w-10 rounded-full bg-zinc-50 flex items-center justify-center overflow-hidden border border-transparent group-hover:border-primary transition-all">
-                                    <Image src={item.icon} alt={item.label} fill className="object-contain p-2" />
+                                    <Image 
+                                      src={item.icon} 
+                                      alt={item.label} 
+                                      fill 
+                                      unoptimized={item.icon?.includes("cdn.shopify.com")}
+                                      className="object-contain p-2" 
+                                    />
                                   </div>
                                 )}
                                 <span className="text-sm text-zinc-600 font-semibold group-hover:text-primary uppercase transition-colors whitespace-nowrap tracking-wide">

@@ -2,7 +2,6 @@ import { Figtree, Abhaya_Libre } from "next/font/google";
 import "./globals.css";
 import { Suspense } from "react";
 import ReduxProvider from "@/redux/provider";
-import QueryProvider from "@/providers/QueryProvider";
 import BackToTop from "@/components/common/BackToTop";
 import ZohoSalesIQ from "@/components/common/ZohoSalesIQ";
 import ToastProvider from "@/components/common/ToastProvider";
@@ -79,18 +78,16 @@ export default function RootLayout({ children }) {
           </noscript>
         )}
         <ReduxProvider>
-          <QueryProvider>
-            {isProd && (
-              <Suspense fallback={null}>
-                <GtmPageView />
-              </Suspense>
-            )}
-            <PointsResetHandler />
-            <ZohoSalesIQ />
-            {children}
-            <GlobalAuthModal />
-            <BackToTop />
-          </QueryProvider>
+          {isProd && (
+            <Suspense fallback={null}>
+              <GtmPageView />
+            </Suspense>
+          )}
+          <PointsResetHandler />
+          <ZohoSalesIQ />
+          {children}
+          <GlobalAuthModal />
+          <BackToTop />
         </ReduxProvider>
         <ToastProvider />
       </body>

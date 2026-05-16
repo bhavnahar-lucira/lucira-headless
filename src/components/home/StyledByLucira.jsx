@@ -17,7 +17,8 @@ export default function StyledByLucira() {
   useEffect(() => {
     const fetchVideos = async () => {
       try {
-        const res = await fetch("/api/styled-videos");
+        const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "";
+        const res = await fetch(`${baseUrl}/api/styled-videos`, { cache: "no-store" });
         const data = await res.json();
         if (data.success && data.videos?.length > 0) {
           setVideoData(data.videos);

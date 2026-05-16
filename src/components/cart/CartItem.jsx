@@ -249,6 +249,7 @@ export default function CartItem({ item, onAuthRequired }) {
               alt={item.title}
               width={200}
               height={200}
+              unoptimized={String(displayImage).includes("cdn.shopify.com") || String(displayImage).includes("myshopify.com")}
               className="h-full w-full object-contain mix-blend-multiply"
             />
           </Link>
@@ -397,6 +398,7 @@ export default function CartItem({ item, onAuthRequired }) {
                   alt={item.title}
                   width={150}
                   height={150}
+                  unoptimized={String(displayImage).includes("cdn.shopify.com") || String(displayImage).includes("myshopify.com")}
                   className="h-full w-full object-contain mix-blend-multiply"
                 />
               </Link>

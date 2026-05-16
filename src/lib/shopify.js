@@ -4,7 +4,7 @@ const SHOP = "luciraonline";
 const rawStore = process.env.SHOPIFY_STORE || process.env.SHOPIFYSTORE || SHOP;
 const SHOP_DOMAIN = rawStore.includes(".") ? rawStore : `${rawStore}.myshopify.com`;
 
-export async function shopifyStorefrontFetch(query, variables = {}) {
+export async function shopifyStorefrontFetch(query, variables = {}, options = {}) {
   if (!process.env.STOREFRONT_TOKEN) {
     throw new Error("STOREFRONT_TOKEN not configured");
   }
@@ -19,6 +19,11 @@ export async function shopifyStorefrontFetch(query, variables = {}) {
           "X-Shopify-Storefront-Access-Token": process.env.STOREFRONT_TOKEN,
         },
         body: JSON.stringify({ query, variables }),
+        next: {
+          revalidate: 3600, // ✅ 1 hour default cache
+          ...options.next
+        },
+        ...options
       }
     );
 
@@ -36,14 +41,14 @@ export async function shopifyStorefrontFetch(query, variables = {}) {
   }
 }
 
-export async function shopifyAdminFetch(query, variables = {}, apiVersion = "2024-10") {
+export async function shopifyAdminFetch(query, variables = {}, options = {}) {
   const adminToken = process.env.ADMIN_TOKEN || process.env.SHOPIFY_ADMIN_TOKEN;
   if (!adminToken) {
     throw new Error("ADMIN_TOKEN or SHOPIFY_ADMIN_TOKEN not configured");
   }
 
   const res = await fetchWithRetry(
-    `https://${SHOP_DOMAIN}/admin/api/${apiVersion}/graphql.json`,
+    `https://${SHOP_DOMAIN}/admin/api/${options.apiVersion || "2024-10"}/graphql.json`,
     {
       method: "POST",
       headers: {
@@ -51,6 +56,11 @@ export async function shopifyAdminFetch(query, variables = {}, apiVersion = "202
         "X-Shopify-Access-Token": adminToken,
       },
       body: JSON.stringify({ query, variables }),
+      next: {
+        revalidate: 3600, // ✅ 1 hour default cache
+        ...options.next
+      },
+      ...options
     }
   );
 

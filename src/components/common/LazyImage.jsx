@@ -66,6 +66,7 @@ const LazyImage = ({ src, alt, className, fill, width, height, priority, sizes, 
           priority={priority}
           sizes={sizes}
           onLoad={() => setLoaded(true)}
+          unoptimized={String(src).includes("cdn.shopify.com") || String(src).includes("myshopify.com")}
           className={`${className} transition-opacity duration-500 ${
             loaded ? "opacity-100" : "opacity-0"
           }`}

@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import clientPromise from "@/lib/mongodb";
-import { resolveSearchMatch } from "@/lib/search";
+import { shopifyStorefrontFetch } from "@/lib/shopify";
 
 export async function GET(req) {
   try {
@@ -11,67 +10,66 @@ export async function GET(req) {
       return NextResponse.json({ results: [] });
     }
 
-    const client = await clientPromise;
-    const db = client.db("next_local_db");
-    const productsCollection = db.collection("products");
+    const SEARCH_QUERY = `
+      query SearchProducts($query: String!) {
+        products(query: $query, first: 10) {
+          edges {
+            node {
+              id
+              title
+              handle
+              featuredImage { url }
+              variants(first: 1) {
+                edges {
+                  node {
+                    price { amount }
+                  }
+                }
+              }
+            }
+          }
+        }
+        collections(query: $query, first: 3) {
+          edges {
+            node {
+              id
+              title
+              handle
+              image { url }
+            }
+          }
+        }
+      }
+    `;
 
-    const { filter, fallbackFilter, strategy, matchedCollections } = await resolveSearchMatch(db, {}, query);
+    const data = await shopifyStorefrontFetch(SEARCH_QUERY, { query });
 
-    const projection = {
-      title: 1,
-      handle: 1,
-      price: 1,
-      images: 1,
-    };
+    const products = (data?.products?.edges || []).map(({ node: p }) => ({
+      id: p.id,
+      title: p.title,
+      handle: p.handle,
+      image: p.featuredImage?.url,
+      price: p.variants.edges[0]?.node?.price?.amount 
+        ? `₹${Number(p.variants.edges[0].node.price.amount).toLocaleString("en-IN")}` 
+        : "Price on request",
+      url: `/products/${p.handle}`,
+    }));
 
-    const queryOptions = productsCollection.find(filter).limit(10).project(projection);
+    const collections = (data?.collections?.edges || []).map(({ node: c }) => ({
+      id: c.id,
+      title: c.title,
+      handle: c.handle,
+      image: c.image?.url,
+      price: "Collection",
+      url: `/collections/${c.handle}`,
+      isCollection: true
+    }));
 
-    if (strategy === "text") {
-      queryOptions.sort({ score: { $meta: "textScore" } });
-    }
-
-    let products = await queryOptions.toArray();
-
-    // Fallback if no products found
-    if (products.length === 0 && fallbackFilter) {
-      products = await productsCollection
-        .find(fallbackFilter)
-        .limit(10)
-        .project(projection)
-        .sort({ title: 1 })
-        .toArray();
-    }
-
-    const results = products.map((p) => {
-      const firstImage = p.images && p.images.length > 0 ? p.images[0].url : null;
-      
-      return {
-        id: p._id.toString(),
-        title: p.title,
-        handle: p.handle,
-        image: firstImage,
-        price: p.price ? `₹${p.price.toLocaleString()}` : "Price on request",
-        url: `/products/${p.handle}`,
-      };
-    });
-
-    // If collections were matched via synonyms, prepend them to results
-    if (matchedCollections && matchedCollections.length > 0) {
-      const formattedCollections = matchedCollections.map(mc => ({
-        id: mc.id || mc._id.toString(),
-        title: mc.title,
-        handle: mc.handle,
-        image: mc.image?.url || null,
-        price: "Collection",
-        url: `/collections/${mc.handle}`,
-        isCollection: true
-      }));
-      results.unshift(...formattedCollections);
-    }
+    const results = [...collections, ...products];
 
     return NextResponse.json({ results });
   } catch (error) {
-    console.error("MongoDB Search error:", error);
-    return NextResponse.json({ error: "Search failed" }, { status: 500 });
+    console.error("Shopify Search error:", error);
+    return NextResponse.json({ results: [] });
   }
 }

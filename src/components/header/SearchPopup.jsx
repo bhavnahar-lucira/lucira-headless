@@ -88,6 +88,7 @@ export default function SearchPopup({ onClose, searchQuery, searchResults, isSea
                             src={cat.image} 
                             alt={cat.title} 
                             fill 
+                            unoptimized={String(cat.image).includes("cdn.shopify.com") || String(cat.image).includes("myshopify.com")}
                             className="object-contain p-2 md:p-3 group-hover:scale-110 transition-transform duration-500"
                           />
                         </div>
@@ -177,6 +178,7 @@ export default function SearchPopup({ onClose, searchQuery, searchResults, isSea
                           src={item.image || "/images/product/1.jpg"} 
                           alt={item.title} 
                           fill 
+                          unoptimized={String(item.image).includes("cdn.shopify.com") || String(item.image).includes("myshopify.com")}
                           className="object-contain p-1.5"
                         />
                       </div>

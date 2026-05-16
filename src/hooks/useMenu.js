@@ -8,7 +8,7 @@ export function useMenu(handle) {
   useEffect(() => {
     async function fetchMenu() {
       try {
-        const res = await fetch("/api/menus");
+        const res = await fetch("/api/menus", { cache: "no-store" });
         const data = await res.json();
         
         if (data.success) {

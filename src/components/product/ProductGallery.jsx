@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useMemo, useState, useEffect } from "react";
+import Image from "next/image";
 import LazyImage from "../common/LazyImage";
 import { Play, Copy, X, ChevronLeft, ChevronRight, Maximize2, Share2, ZoomIn, ZoomOut, Eye, BookCopy, Info } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -497,7 +498,7 @@ export default function ProductGallery({ media = [], title = "", activeColor = "
                 <ChevronLeft size={24} strokeWidth={2.5} />
               </button>
               
-              <div className="w-full h-full flex items-center justify-center">
+                  <div className="w-full h-full flex items-center justify-center">
                 <motion.div
                   key={currentIndex}
                   initial={{ opacity: 0, scale: 0.95 }}
@@ -542,11 +543,12 @@ export default function ProductGallery({ media = [], title = "", activeColor = "
                       className="max-w-full max-h-full object-contain shadow-2xl"
                     />
                   ) : (
-                    <LazyImage
+                    <Image
                       src={sortedMedia[currentIndex].url || "/images/product/1.jpg"}
                       alt={sortedMedia[currentIndex].alt || title}
                       fill
                       draggable={false}
+                      unoptimized={String(sortedMedia[currentIndex].url).includes("cdn.shopify.com") || String(sortedMedia[currentIndex].url).includes("myshopify.com")}
                       className="object-contain shadow-2xl pointer-events-none"
                     />
                   )}

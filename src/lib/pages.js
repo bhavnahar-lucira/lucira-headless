@@ -1,21 +1,24 @@
-import clientPromise from "./mongodb";
 import { shopifyStorefrontFetch } from "./shopify";
 
 export async function getAllPages() {
-    const client = await clientPromise
-    const db = client.db("next_local_db");
-
-    return db.collection("pages").find({}).toArray();
+    const query = `
+      query {
+        pages(first: 250) {
+          edges {
+            node {
+              id
+              title
+              handle
+            }
+          }
+        }
+      }
+    `;
+    const data = await shopifyStorefrontFetch(query);
+    return data?.pages?.edges.map(e => e.node) || [];
 }
 
 export async function getPageByHandle(handle) {
-    const client = await clientPromise;
-    const db = client.db("next_local_db");
-
-    return db.collection("pages").findOne({handle});
-}
-
-export async function getPageByHandleStorefront(handle) {
     const query = `
       query getPage($handle: String!) {
         page(handle: $handle) {
@@ -23,17 +26,14 @@ export async function getPageByHandleStorefront(handle) {
           title
           handle
           body
-          bodySummary
-          city: metafield(namespace: "custom", key: "city_name") {
-            value
-          }
-          state: metafield(namespace: "custom", key: "state_name") {
-            value
-          }
+          seo { title description }
         }
       }
     `;
-
     const data = await shopifyStorefrontFetch(query, { handle });
     return data?.page;
+}
+
+export async function getPageByHandleStorefront(handle) {
+    return getPageByHandle(handle);
 }

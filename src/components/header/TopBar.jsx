@@ -16,7 +16,8 @@ export default function TopBar() {
   useEffect(() => {
     const fetchAnnouncements = async () => {
       try {
-        const res = await fetch("/api/announcements");
+        const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "";
+        const res = await fetch(`${baseUrl}/api/announcements`);
         const data = await res.json();
         setSettingsVisible(data.isVisible ?? true);
         if (data.announcements && data.announcements.length > 0) {

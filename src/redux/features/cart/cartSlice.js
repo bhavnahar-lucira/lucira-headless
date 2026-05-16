@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { apiFetch } from "@/lib/api";
 
 // Helper to get or create session ID
 const getSessionId = () => {
@@ -15,9 +16,7 @@ export const fetchCart = createAsyncThunk(
   "cart/fetchCart",
   async ({ userId }) => {
     const sessionId = getSessionId();
-    const response = await fetch(`/api/cart/get?userId=${userId || ''}&sessionId=${sessionId || ''}`);
-    if (!response.ok) throw new Error('Failed to fetch cart');
-    return await response.json();
+    return await apiFetch(`/api/cart/get?userId=${userId || ''}&sessionId=${sessionId || ''}`);
   }
 );
 
@@ -25,13 +24,10 @@ export const addToCart = createAsyncThunk(
   "cart/addToCart",
   async ({ userId, sessionId, product }) => {
     const finalSessionId = sessionId || getSessionId();
-    const response = await fetch(`/api/cart/add`, {
+    return await apiFetch(`/api/cart/add`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ userId, sessionId: finalSessionId, product }),
     });
-    if (!response.ok) throw new Error('Failed to add to cart');
-    return await response.json();
   }
 );
 
@@ -39,13 +35,10 @@ export const removeFromCart = createAsyncThunk(
   "cart/removeFromCart",
   async ({ userId, sessionId, variantId }) => {
     const finalSessionId = sessionId || getSessionId();
-    const response = await fetch(`/api/cart/remove`, {
+    return await apiFetch(`/api/cart/remove`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ userId, sessionId: finalSessionId, variantId }),
     });
-    if (!response.ok) throw new Error('Failed to remove from cart');
-    return await response.json();
   }
 );
 
@@ -53,9 +46,8 @@ export const updateCartItem = createAsyncThunk(
   "cart/updateCartItem",
   async ({ userId, sessionId, currentVariantId, nextVariantId, quantity, size, price, variantTitle, inStock, sku }) => {
     const finalSessionId = sessionId || getSessionId();
-    const response = await fetch(`/api/cart/update`, {
+    return await apiFetch(`/api/cart/update`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         userId,
         sessionId: finalSessionId,
@@ -69,8 +61,6 @@ export const updateCartItem = createAsyncThunk(
         sku,
       }),
     });
-    if (!response.ok) throw new Error('Failed to update cart');
-    return await response.json();
   }
 );
 
@@ -78,16 +68,10 @@ export const mergeCart = createAsyncThunk(
   "cart/mergeCart",
   async ({ userId }) => {
     const sessionId = getSessionId();
-    console.log("REDUX MERGE START:", { userId, sessionId });
-    const response = await fetch(`/api/cart/merge`, {
+    return await apiFetch(`/api/cart/merge`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ userId, sessionId }),
     });
-    if (!response.ok) throw new Error('Failed to merge cart');
-    const data = await response.json();
-    console.log("REDUX MERGE SUCCESS:", data);
-    return data;
   }
 );
 
@@ -95,13 +79,10 @@ export const repriceCartForCheckout = createAsyncThunk(
   "cart/repriceCartForCheckout",
   async ({ userId }) => {
     const sessionId = getSessionId();
-    const response = await fetch("/api/cart/checkout", {
+    return await apiFetch("/api/cart/checkout", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ userId, sessionId }),
     });
-    if (!response.ok) throw new Error("Failed to recalculate checkout cart");
-    return await response.json();
   }
 );
 

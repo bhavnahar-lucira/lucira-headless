@@ -176,14 +176,14 @@ export default function CheckoutSummary({
                 <div key={index} className="space-y-3">
                   <div className="flex gap-4">
                     <div className="w-20 h-20 bg-zinc-50 rounded-md border border-zinc-100 p-1 shrink-0 block">
-                      <Image 
-                        src={item.image || "/images/product/1.jpg"} 
-                        alt={item.title} 
-                        width={80} 
-                        height={80} 
+                      <Image
+                        src={item.image || "/images/product/1.jpg"}
+                        alt={item.title}
+                        width={80}
+                        height={80}
+                        unoptimized={String(item.image).includes("cdn.shopify.com") || String(item.image).includes("myshopify.com")}
                         className="w-full h-full object-contain mix-blend-multiply"
-                      />
-                    </div>
+                      />                    </div>
                     <div className="flex-grow space-y-1">
                       <h3 className="text-sm font-medium text-zinc-800 leading-tight transition-colors">{item.title}</h3>
                       <div className="flex flex-col gap-0.5">

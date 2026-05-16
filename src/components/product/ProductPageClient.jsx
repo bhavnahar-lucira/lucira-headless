@@ -307,7 +307,8 @@ export default function ProductPageClient({ product, complementaryProducts = [],
   const [isGoldCoinEnabled, setIsGoldCoinEnabled] = useState(false);
 
   useEffect(() => {
-    fetch("/api/settings/gold-coin")
+    const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "";
+    fetch(`${baseUrl}/api/settings/gold-coin`)
       .then((res) => res.json())
       .then((data) => {
         setIsGoldCoinEnabled(data.enabled ?? false);
@@ -445,7 +446,8 @@ useEffect(() => {
   useEffect(() => {
     const fetchStores = async () => {
       try {
-        const res = await fetch("/api/stores");
+        const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "";
+        const res = await fetch(`${baseUrl}/api/stores`);
         const data = await res.json();
         setAllStores(data.stores || []);
       } catch (err) {
@@ -479,7 +481,8 @@ useEffect(() => {
     setDeliveryInfo({ status: "loading", message: "Checking..." });
 
     try {
-      const res = await fetch(`/api/pincodes/check?pincode=${pincodeToCheck}`);
+      const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "";
+      const res = await fetch(`${baseUrl}/api/pincodes/check?pincode=${pincodeToCheck}`);
       const data = await res.json();
 
       // GTM tracking for pincode entry
@@ -1541,7 +1544,8 @@ useEffect(() => {
                     {(() => {
                       const combinations = [];
                       product.variants?.forEach(v => {
-                        const parts = v.color.split(" ");
+                        const colorStr = String(v.color || v.title || "");
+                        const parts = colorStr.split(" ");
                         if (parts.length >= 3) {
                           const karat = parts[0];
                           const metal = parts.slice(1).join(" ");
@@ -1605,7 +1609,7 @@ useEffect(() => {
                   {availableSizes.length > 0 && availableSizes[0] !== null && availableSizes[0] !== undefined && (
                     <>
                       <div className="flex justify-between items-center text-sm">
-                        <span className="font-semibold text-base">Select {product.type.replace(/s$/, "")} Size: <span className="font-medium ml-1">{selectedSize} IND</span></span>
+                        <span className="font-semibold text-base">Select {(product.type || "").replace(/s$/, "")} Size: <span className="font-medium ml-1">{selectedSize} IND</span></span>
                         {String(product.type || "").toLowerCase().includes("ring") && (
                           <SizeGuideSheet>
                             <button
@@ -1826,6 +1830,7 @@ useEffect(() => {
                                     src={getValidSrc(item.image)}
                                     alt={item.title || "Similar product"}
                                     fill
+                                    unoptimized={String(item.image).includes("cdn.shopify.com") || String(item.image).includes("myshopify.com")}
                                     className="w-full h-full object-contain p-4 mix-blend-multiply transition-transform duration-500 group-hover:scale-105"
                                   />
                                 </div>

@@ -1,7 +1,72 @@
-import clientPromise from "@/lib/mongodb";
 import { notFound } from "next/navigation";
 import ProductPageClient from "@/components/product/ProductPageClient";
 import { getProductSchema, getBreadcrumbSchema } from "@/lib/seo";
+import { shopifyStorefrontFetch } from "@/lib/shopify";
+
+const PRODUCT_QUERY = `
+  query getProduct($handle: String!) {
+    product(handle: $handle) {
+      id
+      title
+      handle
+      description
+      descriptionHtml
+      vendor
+      productType
+      tags
+      createdAt
+      publishedAt
+      featuredImage { url }
+      images(first: 20) {
+        edges {
+          node {
+            url
+            altText
+          }
+        }
+      }
+      variants(first: 100) {
+        edges {
+          node {
+            id
+            title
+            sku
+            availableForSale
+            quantityAvailable
+            price { amount currencyCode }
+            compareAtPrice { amount currencyCode }
+            selectedOptions { name value }
+            image { url altText }
+          }
+        }
+      }
+      seo { title description }
+      category: metafield(namespace: "custom", key: "product_category") { value }
+      matching_products: metafield(namespace: "custom", key: "matching_product") { 
+        value 
+        reference {
+          ... on Product {
+            id title handle featuredImage { url }
+            variants(first: 1) { edges { node { price { amount } compareAtPrice { amount } } } }
+          }
+        }
+      }
+      complementary_products: metafield(namespace: "shopify--discovery--product_recommendation", key: "complementary_products") { 
+        value
+        references(first: 10) {
+          edges {
+            node {
+              ... on Product {
+                id title handle featuredImage { url }
+                variants(first: 1) { edges { node { price { amount } compareAtPrice { amount } } } }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+`;
 
 export async function generateMetadata({ params }) {
   const { handle } = await params;
@@ -9,12 +74,14 @@ export async function generateMetadata({ params }) {
 
   if (!product) return {};
 
+  const cleanDescription = product.description?.replace(/<[^>]*>?/gm, '').slice(0, 160) || "";
+
   return {
     title: product.seo?.title || `${product.title} | Lucira Jewelry`,
-    description: product.seo?.description || product.description?.replace(/<[^>]*>?/gm, '').slice(0, 160),
+    description: product.seo?.description || cleanDescription,
     openGraph: {
       title: product.seo?.title || product.title,
-      description: product.seo?.description || product.description?.replace(/<[^>]*>?/gm, '').slice(0, 160),
+      description: product.seo?.description || cleanDescription,
       images: [product.image],
     },
     alternates: {
@@ -24,98 +91,96 @@ export async function generateMetadata({ params }) {
 }
 
 async function getProduct(handle) {
-  const client = await clientPromise;
-  const db = client.db("next_local_db");
-  const product = await db.collection("products").findOne({ handle, status: "ACTIVE", isPublished: true });
+  const data = await shopifyStorefrontFetch(PRODUCT_QUERY, { handle });
+  const product = data?.product;
 
-  if (product) {
-    // Convert MongoDB ObjectId to string for Client Component serialization
-    product._id = product._id.toString();
-    if (product.lastUpdated instanceof Date) product.lastUpdated = product.lastUpdated.toISOString();
-    if (product.createdAt instanceof Date) product.createdAt = product.createdAt.toISOString();
-  }
+  if (!product) return null;
 
-  return product;
-}
+  const getOpt = (options, keys) => {
+    for (const key of keys) {
+      const lowerKey = key.toLowerCase();
+      if (options[lowerKey] !== undefined && options[lowerKey] !== null) return options[lowerKey];
+    }
+    return null;
+  };
 
-async function getComplementaryProducts(product) {
-  if (!product.complementaryProductIds || product.complementaryProductIds.length === 0) {
-    return [];
-  }
+  // Map to the internal format expected by the frontend
+  const mappedVariants = product.variants.edges.map(({ node: v }) => {
+    const options = {};
+    v.selectedOptions.forEach(o => { options[o.name.toLowerCase()] = o.value; });
+    
+    return {
+      id: v.id.split("/").pop(),
+      shopifyId: v.id,
+      title: v.title,
+      sku: v.sku,
+      price: Number(v.price.amount),
+      compare_price: v.compareAtPrice ? Number(v.compareAtPrice.amount) : null,
+      inStock: v.availableForSale,
+      inventoryQuantity: v.quantityAvailable || 0,
+      image: v.image?.url,
+      size: options.size || null,
+      color: getOpt(options, ["color", "metal", "metal color", "material color"]),
+      options
+    };
+  });
 
-  const client = await clientPromise;
-  const db = client.db("next_local_db");
-  
-  // Support both full GID and numeric ID strings using regex for shopifyId
-  const idFilters = product.complementaryProductIds.map(id => ({
-    shopifyId: { $regex: `${id}$` }
+  const images = product.images.edges.map(({ node: img }) => ({
+    url: img.url,
+    alt: img.altText || ""
   }));
 
-  const complementaryProducts = await db.collection("products")
-    .find({ 
-      $and: [
-        { $or: idFilters },
-        { status: "ACTIVE", isPublished: true }
-      ]
-    })
-    .toArray();
-
-
-  return complementaryProducts.map(p => {
-    p._id = p._id.toString();
-    if (p.lastUpdated instanceof Date) p.lastUpdated = p.lastUpdated.toISOString();
-    if (p.createdAt instanceof Date) p.createdAt = p.createdAt.toISOString();
-    return p;
-  });
+  return {
+    ...product,
+    id: product.id.split("/").pop(),
+    shopifyId: product.id,
+    type: product.productType, // Alias for component compatibility
+    description: product.descriptionHtml || product.description,
+    image: product.featuredImage?.url,
+    images,
+    variants: mappedVariants,
+    category: product.category?.value || product.productType,
+    complementaryProductIds: [], 
+    matchingProductIds: []
+  };
 }
 
-async function getMatchingProducts(product) {
-  if (!product.matchingProductIds || product.matchingProductIds.length === 0) {
-    return [];
-  }
-
-  const client = await clientPromise;
-  const db = client.db("next_local_db");
-  
-  const idFilters = product.matchingProductIds.map(id => ({
-    shopifyId: { $regex: `${id}$` }
-  }));
-
-  const matchingProducts = await db.collection("products")
-    .find({ 
-      $and: [
-        { $or: idFilters },
-        { status: "ACTIVE", isPublished: true }
-      ]
-    })
-    .toArray();
-
-  return matchingProducts.map(p => {
-    p._id = p._id.toString();
-    if (p.lastUpdated instanceof Date) p.lastUpdated = p.lastUpdated.toISOString();
-    if (p.createdAt instanceof Date) p.createdAt = p.createdAt.toISOString();
-    return p;
-  });
+function mapShopifyProduct(p) {
+    if (!p) return null;
+    return {
+        id: p.id.split("/").pop(),
+        shopifyId: p.id,
+        title: p.title,
+        handle: p.handle,
+        image: p.featuredImage?.url,
+        price: Number(p.variants?.edges?.[0]?.node?.price?.amount || 0),
+        compare_price: Number(p.variants?.edges?.[0]?.node?.compareAtPrice?.amount || 0),
+        reviewStats: { count: 0, average: 0 }
+    };
 }
 
 export default async function ProductPage({ params }) {
   const { handle } = await params;
-  const product = await getProduct(handle);
+  const rawProduct = await getProduct(handle);
 
-  if (!product) {
+  if (!rawProduct) {
     notFound();
   }
 
-  const [complementaryProducts, matchingProducts] = await Promise.all([
-    getComplementaryProducts(product),
-    getMatchingProducts(product)
-  ]);
+  // Handle complementary/matching products from metafield references
+  const complementaryProducts = (rawProduct.complementary_products?.references?.edges || [])
+    .map(({ node }) => mapShopifyProduct(node))
+    .filter(Boolean);
 
-  const jsonLd = getProductSchema(product);
+  const matchingProducts = rawProduct.matching_products?.reference 
+    ? [mapShopifyProduct(rawProduct.matching_products.reference)]
+    : [];
+
+  const jsonLd = getProductSchema(rawProduct);
   const breadcrumbs = [
     { name: "Home", url: "/" },
-    ...(product.category ? [{ name: product.category, url: `/collections/${product.category.toLowerCase().replace(/\s+/g, '-')}` }] : []),
-    { name: product.title, url: `/products/${product.handle}` }
+    ...(rawProduct.category ? [{ name: rawProduct.category, url: `/collections/${rawProduct.category.toLowerCase().replace(/\s+/g, '-')}` }] : []),
+    { name: rawProduct.title, url: `/products/${rawProduct.handle}` }
   ];
   const breadcrumbLd = getBreadcrumbSchema(breadcrumbs);
 
@@ -130,11 +195,10 @@ export default async function ProductPage({ params }) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
       />
       <ProductPageClient 
-        product={product} 
+        product={rawProduct} 
         complementaryProducts={complementaryProducts} 
         matchingProducts={matchingProducts} 
       />
     </>
   );
 }
-
