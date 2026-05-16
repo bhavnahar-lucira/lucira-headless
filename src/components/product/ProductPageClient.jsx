@@ -304,14 +304,16 @@ export default function ProductPageClient({ product, complementaryProducts = [],
     count: product.reviews?.count || product.reviewStats?.count || 0,
   });
 
-  const [isGoldCoinEnabled, setIsGoldCoinEnabled] = useState(false);
+  const [goldCoinConfig, setGoldCoinConfig] = useState({ enabled: false, threshold: 20000 });
 
   useEffect(() => {
-    const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "";
-    fetch(`${baseUrl}/api/settings/gold-coin`)
+    fetch("/api/settings/gold-coin")
       .then((res) => res.json())
       .then((data) => {
-        setIsGoldCoinEnabled(data.enabled ?? false);
+        setGoldCoinConfig({
+          enabled: data.enabled ?? false,
+          threshold: data.threshold || 20000
+        });
       })
       .catch((err) => console.error("Error fetching gold coin setting:", err));
   }, []);
@@ -789,8 +791,8 @@ useEffect(() => {
       const fallbackWeight = activeVariant?.metafields?.metal_weight || "0";
       const fallbackDiamondPcs = activeVariant?.metafields?.diamonds?.reduce((acc, d) => acc + (parseInt(d.pieces) || 0), 0) || 0;
 
-      // Extract raw technical data from the breakup if it exists (matches the new /api/variant-pricing structure)
-      const raw = priceBreakup?.raw_breakup || {};
+      // Extract technical data from the breakup
+      const raw = priceBreakup || {};
 
       const variantOptions = (product.variants || [])
         .filter((variant) => {

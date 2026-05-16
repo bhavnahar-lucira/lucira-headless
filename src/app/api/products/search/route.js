@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { shopifyStorefrontFetch, shopifyAdminFetch } from "@/lib/shopify";
 import { calculatePriceBreakup } from "@/lib/priceEngine";
+import { fetchNectorReviews } from "@/lib/nector";
+import clientPromise from "@/lib/mongodb";
 
 const SORT_MAP = {
   featured: { sortKey: "RELEVANCE", reverse: false },
@@ -18,6 +20,7 @@ const parseFilters = (rawFilters) => {
   if (!rawFilters) return [];
   try {
     const parsed = typeof rawFilters === "string" ? JSON.parse(rawFilters) : rawFilters;
+    if (Array.isArray(parsed)) return parsed;
     const shopifyFilters = [];
     Object.values(parsed).forEach((group) => {
       if (!Array.isArray(group)) return;
@@ -62,15 +65,17 @@ export async function GET(request) {
               }});
             }
           } else {
-            shopifyFilters.push(JSON.parse(value));
+            try {
+                shopifyFilters.push(JSON.parse(value));
+            } catch(e) {
+                shopifyFilters.push({ [key.replace("filter.", "")]: value });
+            }
           }
-        } catch (e) {
-           // Fallback for simple string filters if not JSON
-           const label = key.replace("filter.p.m.", "").replace("filter.v.", "");
-           shopifyFilters.push({ productMetafield: { namespace: "custom", key: label, value } });
-        }
+        } catch (e) {}
       }
     });
+
+    const finalFilters = shopifyFilters.length > 0 ? shopifyFilters : activeFilters;
 
     // 1. Fetch Shop-wide pricing data (Admin API)
     let metalRates = {};
@@ -91,13 +96,6 @@ export async function GET(request) {
       console.warn("⚠️ Shop pricing metadata fetch failed:", e.message);
     }
 
-    // Storefront API: filters and search logic usually via collection('all') or search(query: ...)
-    // If handle is provided, use collection.products. 
-    // If query is provided, use Query.products(query: ...) but note it doesn't support 'filters' argument directly.
-    // To support BOTH filters and query, we use collection('all') and include query in the search query if possible,
-    // OR we use the products(query: ...) but we'd have to handle filters differently.
-    
-    // Most robust for PLP with facets is using a collection.
     const COLLECTION_QUERY = `
       query SearchProducts(
         $handle: String!
@@ -107,7 +105,7 @@ export async function GET(request) {
         $reverse: Boolean
         $filters: [ProductFilter!]
       ) {
-        collection(handle: $handle) {
+        collectionByHandle(handle: $handle) {
           products(
             first: $first
             after: $after
@@ -125,13 +123,14 @@ export async function GET(request) {
                     node {
                       mediaContentType
                       ... on MediaImage { image { url altText } }
+                      ... on Video { sources { url mimeType } }
                     }
                   }
                 }
                 variants(first: 50) {
                   edges {
                     node {
-                      id price { amount } compareAtPrice { amount }
+                      id sku price { amount } compareAtPrice { amount }
                       availableForSale quantityAvailable selectedOptions { name value }
                       image { url altText }
                     }
@@ -157,13 +156,14 @@ export async function GET(request) {
                   node {
                     mediaContentType
                     ... on MediaImage { image { url altText } }
+                    ... on Video { sources { url mimeType } }
                   }
                 }
               }
               variants(first: 50) {
                 edges {
                   node {
-                    id price { amount } compareAtPrice { amount }
+                    id sku price { amount } compareAtPrice { amount }
                     availableForSale quantityAvailable selectedOptions { name value }
                     image { url altText }
                   }
@@ -190,9 +190,9 @@ export async function GET(request) {
         after: cursor || null,
         sortKey: sortConfig.sortKey === "RELEVANCE" ? "BEST_SELLING" : sortConfig.sortKey,
         reverse: sortConfig.reverse,
-        filters: shopifyFilters.length > 0 ? shopifyFilters : activeFilters,
+        filters: finalFilters,
       });
-      productsData = storefrontData?.collection?.products;
+      productsData = storefrontData?.collectionByHandle?.products;
     }
 
     if (!productsData) {
@@ -234,68 +234,156 @@ export async function GET(request) {
       }
     }
 
-    // 3. Process Products
-    const products = productsData.edges.map(({ node }) => {
-      const variants = node.variants.edges.map(({ node: v }) => {
-        const options = {};
-        v.selectedOptions.forEach((o) => {
-          options[o.name.toLowerCase()] = o.value;
+    // 3. Process Products & Calculate Metadata
+    let products = (await Promise.all(
+      productsData.edges.map(async ({ node }) => {
+        const variants = node.variants.edges.map(({ node: v }) => {
+          const options = {};
+          v.selectedOptions.forEach((o) => {
+            options[o.name.toLowerCase()] = o.value;
+          });
+
+          let dynamic = {};
+          let diamondDiscount = 0;
+          let makingDiscount = 0;
+
+          const configValue = variantConfigs[v.id];
+          if (configValue) {
+            try {
+              const config = JSON.parse(configValue);
+              const breakup = calculatePriceBreakup(config, metalRates, stonePricingDB);
+              dynamic = {
+                carat: breakup.diamond.carat,
+                clarity: breakup.diamond.clarity,
+                color: breakup.diamond.color,
+                weight: breakup.metal.weight,
+                diamondCharges: breakup.diamond.final,
+                components: configValue
+              };
+              diamondDiscount = breakup.diamond.discount_percent || 0;
+              makingDiscount = breakup.making_charges.discount_percent || 0;
+            } catch (e) {}
+          }
+
+          const getOpt = (keys) => {
+            for (const key of keys) {
+              const lowerKey = key.toLowerCase();
+              if (options[lowerKey] !== undefined && options[lowerKey] !== null) return options[lowerKey];
+            }
+            return null;
+          };
+
+          return {
+            id: v.id.split("/").pop(),
+            shopifyId: v.id,
+            sku: v.sku,
+            size: options.size || null,
+            color: getOpt(["color", "metal", "metal color", "material color"]),
+            carat: dynamic.carat ?? getOpt(["carat", "carat weight"]),
+            clarity: dynamic.clarity ?? getOpt(["clarity"]),
+            diamond_color: dynamic.color ?? getOpt(["diamond color"]),
+            weight: dynamic.weight ?? getOpt(["weight"]),
+            price: Number(v.price.amount),
+            compare_price: v.compareAtPrice ? Number(v.compareAtPrice.amount) : null,
+            inStock: v.availableForSale === true && Number(v.quantityAvailable || 0) > 0,
+            image: v.image?.url || null,
+            altText: v.image?.altText || "",
+            metafields: {
+                components: dynamic.components,
+                metal_weight: dynamic.weight,
+                metal_purity: getOpt(["metal purity", "purity"])
+            },
+            diamondDiscount,
+            makingDiscount
+          };
         });
 
-        let dynamic = {};
-        const configValue = variantConfigs[v.id];
-        if (configValue) {
-          try {
-            const config = JSON.parse(configValue);
-            const breakup = calculatePriceBreakup(config, metalRates, stonePricingDB);
-            dynamic = {
-              carat: breakup.diamond.carat,
-              clarity: breakup.diamond.clarity,
-              color: breakup.diamond.color,
-              weight: breakup.metal.weight,
-            };
-          } catch (e) {}
+        // 9KT Collection Filtering
+        if (handle === "9kt-collection") {
+            const has9kt = variants.some(v => String(v.color || v.metafields?.metal_purity || "").includes("9KT"));
+            if (!has9kt) return null;
         }
 
-        const getOpt = (keys) => {
-          for (const key of keys) {
-            const lowerKey = key.toLowerCase();
-            if (options[lowerKey] !== undefined && options[lowerKey] !== null) return options[lowerKey];
+        // Global In-Stock Filtering
+        const hasInStock = variants.some(v => v.inStock);
+        if (!hasInStock) return null;
+
+        let selectedVariant = variants.find((v) => v.inStock) || variants[0];
+
+        const images = [];
+        let video = null;
+
+        node.media?.edges?.forEach(({ node: m }) => {
+          if (m.mediaContentType === "IMAGE") {
+            images.push({
+              url: m.image.url,
+              alt: m.image.altText || "",
+            });
+          } else if (m.mediaContentType === "VIDEO") {
+            video = {
+                url: m.sources?.[0]?.url,
+                mimeType: m.sources?.[0]?.mimeType,
+                preview: node.featuredImage?.url,
+                sources: m.sources
+            };
           }
-          return null;
-        };
+        });
+
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        const isNew = new Date(node.createdAt) > thirtyDaysAgo;
+
+        const labelTag = node.tags?.find(tag =>
+          ["best seller", "hot", "trending", "limited"].includes(tag.toLowerCase())
+        );
 
         return {
-          id: v.id.split("/").pop(),
-          sku: v.sku,
-          size: options.size || null,
-          color: getOpt(["color", "metal", "metal color", "material color"]),
-          carat: dynamic.carat ?? getOpt(["carat", "carat weight"]),
-          clarity: dynamic.clarity ?? getOpt(["clarity"]),
-          diamond_color: dynamic.color ?? getOpt(["diamond color"]),
-          weight: dynamic.weight ?? getOpt(["weight"]),
-          price: Number(v.price.amount),
-          compare_price: v.compareAtPrice ? Number(v.compareAtPrice.amount) : null,
-          inStock: v.availableForSale === true,
-          image: v.image?.url || null,
+          id: node.id.split("/").pop(),
+          shopifyId: node.id,
+          title: node.title,
+          handle: node.handle,
+          description: node.description,
+          descriptionHtml: node.descriptionHtml,
+          video,
+          isNew: isNew,
+          label: labelTag || (isNew ? "New" : null),
+          images,
+          price: selectedVariant.price,
+          compare_price: selectedVariant.compare_price,
+          selectedColor: selectedVariant.color,
+          carat: selectedVariant.carat,
+          clarity: selectedVariant.clarity,
+          diamond_color: selectedVariant.diamond_color,
+          weight: selectedVariant.weight,
+          colors: [...new Set(variants.map((v) => v.color).filter(Boolean))],
+          image: selectedVariant.image || node.featuredImage?.url,
+          altText: selectedVariant.altText || "",
+          variants,
+          diamondDiscount: selectedVariant.diamondDiscount,
+          makingDiscount: selectedVariant.makingDiscount,
+          reviewStats: { count: 0, average: 0 }
         };
-      });
+      })
+    )).filter(Boolean);
 
-      let selectedVariant = variants.find((v) => v.inStock) || variants[0];
-
-      return {
-        id: node.id.split("/").pop(),
-        shopifyId: node.id,
-        title: node.title,
-        handle: node.handle,
-        images: node.media.edges.filter(m => m.node.mediaContentType === "IMAGE").map(m => ({ url: m.node.image.url })),
-        price: selectedVariant.price,
-        compare_price: selectedVariant.compare_price,
-        image: selectedVariant.image || node.featuredImage?.url,
-        variants,
-        reviewStats: { count: 0, average: 0 } 
-      };
-    });
+    // 4. Fetch Review Stats from Nector in Parallel
+    try {
+      await Promise.all(
+        products.map(async (p) => {
+          try {
+            const reviews = await fetchNectorReviews(p.shopifyId);
+            p.reviewStats = {
+              count: reviews.count || 0,
+              average: reviews.average || 0
+            };
+          } catch (e) {
+            p.reviewStats = { count: 0, average: 0 };
+          }
+        })
+      );
+    } catch (e) {
+      console.warn("⚠️ Parallel review stats fetch failed:", e.message);
+    }
 
     return NextResponse.json({
       products,
@@ -311,4 +399,3 @@ export async function GET(request) {
     return NextResponse.json({ error: "Failed to search products" }, { status: 500 });
   }
 }
-

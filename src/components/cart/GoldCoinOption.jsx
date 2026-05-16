@@ -9,26 +9,26 @@ export const GOLDCOIN_VARIANT_ID = "gid://shopify/ProductVariant/47661824082138"
 export default function GoldCoinOption() {
   const { items, addToCart, removeFromCart, loading } = useCart();
   const [isProcessing, setIsProcessing] = useState(false);
-  const [isEnabled, setIsEnabled] = useState(false);
+  const [globalConfig, setGlobalConfig] = useState({ enabled: false, threshold: 20000 });
 
   useEffect(() => {
     fetch("/api/settings/gold-coin")
       .then(res => res.json())
-      .then(data => setIsEnabled(data.enabled ?? false))
+      .then(data => setGlobalConfig({
+        enabled: data.enabled ?? false,
+        threshold: data.threshold || 20000
+      }))
       .catch(err => console.error("Error fetching gold coin setting:", err));
   }, []);
 
   const goldCoinItem = items.find(item => item.variantId === GOLDCOIN_VARIANT_ID);
   const isApplied = !!goldCoinItem;
 
-  // Logic: Only Diamond Jewellery counts (using diamondCharges > 0 as proxy)
-  // Gold jewellery collection (diamondCharges: 0 or undefined) does not count
   const diamondTotal = items
     .filter(item => item.variantId !== GOLDCOIN_VARIANT_ID && item.variantId !== "gid://shopify/ProductVariant/47709366026458" && (item.diamondCharges > 0))
     .reduce((acc, item) => acc + (item.price * (item.quantity || 1)), 0);
 
-  // Condition: Total diamond amount divided by 20000, floored
-  const eligibleQuantity = Math.floor(diamondTotal / 20000);
+  const eligibleQuantity = Math.floor(diamondTotal / globalConfig.threshold);
 
   const handleApply = async () => {
     if (eligibleQuantity <= 0) return;
@@ -61,7 +61,7 @@ export default function GoldCoinOption() {
     }
   };
 
-  if (!isEnabled) return null;
+  if (!globalConfig.enabled) return null;
   if (eligibleQuantity <= 0 && !isApplied) return null;
 
   return (

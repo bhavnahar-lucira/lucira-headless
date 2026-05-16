@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
 import { shopifyStorefrontFetch } from "@/lib/shopify";
+import { fetchNectorReviews } from "@/lib/nector";
 
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
-    const productId = searchParams.get("id"); // Storefront API needs GID or product recommendations from handle
+    const productId = searchParams.get("id"); 
 
     if (!productId) {
       return NextResponse.json({ products: [] });
@@ -33,15 +34,23 @@ export async function GET(request) {
       productId: productId.startsWith("gid://") ? productId : `gid://shopify/Product/${productId}`,
     });
 
-    const products = (data?.productRecommendations || []).map(p => ({
-      id: p.id.split("/").pop(),
-      shopifyId: p.id,
-      title: p.title,
-      handle: p.handle,
-      image: p.featuredImage?.url,
-      price: Number(p.variants.edges[0]?.node?.price?.amount || 0),
-      compare_price: Number(p.variants.edges[0]?.node?.compareAtPrice?.amount || 0),
-      reviewStats: { count: 0, average: 0 }
+    const products = await Promise.all((data?.productRecommendations || []).map(async (p) => {
+      let reviewStats = { count: 0, average: 0 };
+      try {
+        const reviews = await fetchNectorReviews(p.id);
+        reviewStats = { count: reviews.count || 0, average: reviews.average || 0 };
+      } catch(e) {}
+
+      return {
+        id: p.id.split("/").pop(),
+        shopifyId: p.id,
+        title: p.title,
+        handle: p.handle,
+        image: p.featuredImage?.url,
+        price: Number(p.variants.edges[0]?.node?.price?.amount || 0),
+        compare_price: Number(p.variants.edges[0]?.node?.compareAtPrice?.amount || 0),
+        reviewStats
+      };
     }));
 
     return NextResponse.json({ products });

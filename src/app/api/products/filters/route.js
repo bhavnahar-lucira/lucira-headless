@@ -5,6 +5,7 @@ const parseFilters = (rawFilters) => {
   if (!rawFilters) return [];
   try {
     const parsed = typeof rawFilters === "string" ? JSON.parse(rawFilters) : rawFilters;
+    if (Array.isArray(parsed)) return parsed;
     const shopifyFilters = [];
     Object.values(parsed).forEach((group) => {
       if (!Array.isArray(group)) return;
@@ -27,10 +28,9 @@ export async function GET(req) {
 
     const activeFilters = parseFilters(filtersRaw);
 
-    // Storefront API: filters are available on Collection.products
     const COLLECTION_QUERY = `
       query GetCollectionFilters($handle: String!, $filters: [ProductFilter!]) {
-        collection(handle: $handle) {
+        collectionByHandle(handle: $handle) {
           products(first: 250, filters: $filters) {
             filters {
               label
@@ -46,12 +46,23 @@ export async function GET(req) {
       }
     `;
 
-    // Extract dynamic filters from searchParams to pass to Shopify
+    const ALL_PRODUCTS_QUERY = `
+      query GetAllFilters($filters: [ProductFilter!]) {
+        products(first: 250, filters: $filters) {
+          filters {
+            label
+            type
+            values { label count input }
+          }
+        }
+      }
+    `;
+
+    // Extract dynamic filters from searchParams
     const shopifyFilters = [];
     searchParams.forEach((value, key) => {
       if (key.startsWith("filter.")) {
         try {
-          // Handle price range specially
           if (key === "filter.v.price.gte" || key === "filter.v.price.lte") {
               const existingPrice = shopifyFilters.find(f => f.price);
               if (existingPrice) {
@@ -64,22 +75,27 @@ export async function GET(req) {
                   }});
               }
           } else {
-              shopifyFilters.push(JSON.parse(value));
+              try {
+                  shopifyFilters.push(JSON.parse(value));
+              } catch(e) {
+                  shopifyFilters.push({ [key.replace("filter.", "")]: value });
+              }
           }
-        } catch (e) {
-          // If not JSON, it might be a standard string value from URL
-          const label = key.replace("filter.p.m.", "").replace("filter.v.", "");
-          shopifyFilters.push({ productMetafield: { namespace: "custom", key: label, value } });
-        }
+        } catch (e) {}
       }
     });
 
-    const storefrontData = await shopifyStorefrontFetch(COLLECTION_QUERY, {
-      handle: handle === "all" ? "all" : handle,
-      filters: shopifyFilters.length > 0 ? shopifyFilters : activeFilters,
-    });
+    const finalFilters = shopifyFilters.length > 0 ? shopifyFilters : activeFilters;
 
-    const filtersData = storefrontData?.collection?.products?.filters;
+    let storefrontData;
+    if (handle === "all") {
+        storefrontData = await shopifyStorefrontFetch(ALL_PRODUCTS_QUERY, { filters: finalFilters });
+    } else {
+        storefrontData = await shopifyStorefrontFetch(COLLECTION_QUERY, { handle, filters: finalFilters });
+    }
+
+    const productsData = handle === "all" ? storefrontData?.products : storefrontData?.collectionByHandle?.products;
+    const filtersData = productsData?.filters;
 
     if (!filtersData) {
       return NextResponse.json({});
@@ -88,8 +104,12 @@ export async function GET(req) {
     const results = {};
     filtersData.forEach((f) => {
       if (f.type === "PRICE_RANGE") {
-        // Find max price from values or defaults
-        results["Price"] = { min: 0, max: 1000000 }; 
+        results["Price"] = { 
+            min: 0, 
+            max: Math.max(...f.values.map(v => {
+                try { return JSON.parse(v.input).price.max || 1000000; } catch(e) { return 1000000; }
+            }))
+        }; 
         return;
       }
       results[f.label] = f.values.map((v) => ({
@@ -97,7 +117,7 @@ export async function GET(req) {
         value: v.label,
         count: v.count,
         input: v.input,
-        urlKey: f.label // Fallback for UI
+        urlKey: f.label 
       }));
     });
 

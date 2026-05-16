@@ -57,7 +57,7 @@ const parseOrnaverseComponent = (val) => {
 const formatPrice = (num) => {
   if (num === null || num === undefined) return "0";
   const val = Math.round(Number(num));
-  return new Intl.NumberFormat("en-IN", { 
+  return new Intl.NumberFormat("en-IN", {
     maximumFractionDigits: 0,
     minimumFractionDigits: 0
   }).format(val);
@@ -135,9 +135,9 @@ function getPrioritizedVariant(product, collectionHandle) {
 
   const variants = product.variants;
   // Handle both boolean and string stock status + check quantity fields as fallback
-  const inStockVariants = variants.filter(v => 
-    v.inStock === true || 
-    v.inStock === "true" || 
+  const inStockVariants = variants.filter(v =>
+    v.inStock === true ||
+    v.inStock === "true" ||
     (v.inventory_quantity !== undefined && v.inventory_quantity > 0) ||
     (v.inventoryQuantity !== undefined && v.inventoryQuantity > 0)
   );
@@ -145,16 +145,16 @@ function getPrioritizedVariant(product, collectionHandle) {
   // 1. Exception Logic (Promote 9KT) - Only for 9kt-collection AND Strictly 9KT products
   if (collectionHandle === "9kt-collection") {
     const handles = product.collectionHandles || [];
-    const isStrict9kt = handles.includes("9kt-collection") && 
-                       !handles.some(h => h !== "9kt-collection" && h !== "all" && h !== product.type?.toLowerCase() && 
+    const isStrict9kt = handles.includes("9kt-collection") &&
+                       !handles.some(h => h !== "9kt-collection" && h !== "all" && h !== product.type?.toLowerCase() &&
                        ["sports-collection", "cotton-candy", "hexa-collection", "solitaire-collection"].includes(h));
 
     if (isStrict9kt) {
       const nineKT = variants.filter(v => String(v.color || v.title).includes("9KT"));
       if (nineKT.length > 0) {
-        const inStock9KT = nineKT.find(v => 
-          v.inStock === true || 
-          v.inStock === "true" || 
+        const inStock9KT = nineKT.find(v =>
+          v.inStock === true ||
+          v.inStock === "true" ||
           (v.inventory_quantity !== undefined && v.inventory_quantity > 0)
         );
         if (inStock9KT) return inStock9KT;
@@ -167,7 +167,7 @@ function getPrioritizedVariant(product, collectionHandle) {
   if (inStockVariants.length > 0) {
     const type = String(product.type || "").toLowerCase();
     if (type.includes("ring")) {
-      // For Rings, we still try to prioritize Yellow Gold IF it's in stock, 
+      // For Rings, we still try to prioritize Yellow Gold IF it's in stock,
       // but otherwise we take the very first in-stock item found (like Rose Gold).
       const ygInStock = inStockVariants.find(v => String(v.color || v.title).includes("Yellow Gold"));
       if (ygInStock) return ygInStock;
@@ -181,6 +181,23 @@ function getPrioritizedVariant(product, collectionHandle) {
 
 const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle, index, singleStarRating = false }) => {
   const isMobile = useMediaQuery("(max-width: 1023px)");
+  const dispatch = useDispatch();
+  const user = useSelector((state) => state.user.user);
+  const wishlist = useSelector((state) => state.wishlist.items);
+  const guestWishlist = useSelector((state) => state.wishlist.guestItems);
+
+  const productId = String(product.shopifyId || product.id);
+  const productHandle = product.handle;
+
+  const isWishlisted = useMemo(() => {
+    if (user?.id) {
+      return wishlist.some((item) => String(item.productId) === productId);
+    }
+    return guestWishlist.some((item) => String(item.productId) === productId);
+  }, [user, wishlist, guestWishlist, productId]);
+
+  const [isWishlistAnimating, setIsWishlistAnimating] = useState(false);
+
   const baseColors = getUniqueBaseColors(product.colors || product.variants?.map((v) => v.color) || []);
 
   // Apply Global Variant Priority Hierarchy
@@ -210,71 +227,70 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle,
   const [similarProducts, setSimilarProducts] = useState([]);
   const [loadingSimilar, setLoadingSimilar] = useState(false);
   const [showVideoPopup, setShowVideoPopup] = useState(false);
-  const [isWishlistAnimating, setIsWishlistAnimating] = useState(false);
 
-  const dispatch = useDispatch();
-  const user = useSelector((state) => state.user.user);
-  const wishlistItems = useSelector((state) => state.wishlist.items);
-  const wishlistIds = useMemo(
-    () => (wishlistItems || []).map((item) => item.productId),
-    [wishlistItems]
-  );
+  // Extract video from media
+  const videoMedia = useMemo(() => {
+    if (product.video) return product.video;
+    // Handle cases where video might be inside images or media array
+    const videoObj = product.media?.find(m => m.mediaContentType === "VIDEO" || m.mimeType?.includes("video"));
+    return videoObj || null;
+  }, [product.video, product.media]);
 
-  const productId = product.shopifyId || product.id || product.handle;
-  const productHandle = product.handle || "";
-  const isWishlisted = productId ? wishlistIds.includes(productId) : false;
+  const currentVariant = useMemo(() => {
+    return (
+      product.variants?.find((v) => getBaseColor(v.color || v.title) === activeBase) ||
+      product.variants?.[0] ||
+      null
+    );
+  }, [product.variants, activeBase]);
 
-  const currentVariant = getVariantForBase(product, activeBase);
+  const displayPrice = fixedPrice || currentVariant?.price || product.price;
+  const displayComparePrice = fixedComparePrice || currentVariant?.compare_price || currentVariant?.compareAtPrice || product.compare_price || product.compareAtPrice;
+  const discountPercent = useMemo(() => {
+    if (!displayComparePrice || displayComparePrice <= displayPrice) return 0;
+    return Math.round(((displayComparePrice - displayPrice) / displayComparePrice) * 100);
+  }, [displayPrice, displayComparePrice]);
 
-  // Requirement: Lock price to the prioritized (in-stock) variant. 
-  // Clicking swatches should only change images, not the price.
-  const displayPrice = fixedPrice ?? (prioritizedVariant?.price ?? product.price);
-  const displayComparePrice = fixedComparePrice ?? (prioritizedVariant?.compare_price ?? prioritizedVariant?.compareAtPrice ?? product.compare_price ?? product.compareAtPrice);
-
-   const hasDiscount = displayPrice > 0 && displayPrice < displayComparePrice;
-    const discountPercent = hasDiscount
-      ? Math.round(((displayComparePrice - displayPrice) / displayComparePrice) * 100)
-      : 0;
-
-
-  const videoMedia = product.media?.find(m => m.type === "VIDEO" || m.type === "EXTERNAL_VIDEO");
-
-  // Derive up to 2 labels from tags with priority
   const displayLabels = useMemo(() => {
     const labels = [];
     if (product.label) labels.push(product.label);
 
-    const tags = Array.isArray(product.tags) ? product.tags : [];
-    const lowerTags = tags.map(t => String(t).toLowerCase());
+    // Add tags that should act as labels
+    const promoTags = ["Best Seller", "Hot", "Trending", "Limited", "New"];
+    product.tags?.forEach(tag => {
+      const match = promoTags.find(p => p.toLowerCase() === tag.toLowerCase());
+      if (match) labels.push(match);
+    });
 
-    const bestsellerMeta = String(product.productMetafields?.bestsellers || "").toLowerCase();
-
-    // Priority order: Fast Shipping > Best Seller > New Arrival > Trending
-    if (lowerTags.some(t => t.includes("fast shipping") || t.includes("fastshipping"))) labels.push("Fast Shipping");
-    if (lowerTags.some(t => t.includes("best seller") || t.includes("bestseller")) || bestsellerMeta === "bestseller") labels.push("Best Seller");
-    if (lowerTags.some(t => t.includes("new arrival") || t === "new")) labels.push("New Arrival");
-    if (lowerTags.some(t => t.includes("trending"))) labels.push("Trending");
+    if (product.productMetafields?.bestsellers === "true") labels.push("Best Seller");
 
     return [...new Set(labels)].slice(0, 2);
   }, [product.label, product.tags, product.productMetafields?.bestsellers]);
 
+  const offers = useMemo(() => {
+    const list = [];
+    if (product.diamondDiscount > 0) list.push(`${product.diamondDiscount}% OFF on Diamonds`);
+    if (product.makingDiscount > 0) list.push(`${product.makingDiscount}% OFF on Making Charges`);
+    return list;
+  }, [product.diamondDiscount, product.makingDiscount]);
+
   const [currentLabelIndex, setCurrentLabelIndex] = useState(0);
 
   useEffect(() => {
-    if (displayLabels.length > 1) {
+    if (displayLabels.length > 1 || offers.length > 1) {
       const interval = setInterval(() => {
-        setCurrentLabelIndex((prev) => (prev + 1) % 2);
-      }, 4000); // Slightly longer duration for better visibility
+        setCurrentLabelIndex((prev) => (prev + 1) % 4); // Use 4 to ensure enough range for both modulus
+      }, 4000); 
       return () => clearInterval(interval);
     } else {
       setCurrentLabelIndex(0);
     }
-  }, [displayLabels.length]);
+  }, [displayLabels.length, offers.length]);
 
-  // Reset index if labels change (e.g. during client-side navigation)
+  // Reset index if labels or offers change
   useEffect(() => {
     setCurrentLabelIndex(0);
-  }, [displayLabels]);
+  }, [displayLabels, offers]);
 
   const galleryImages = getImagesForBase(product, activeBase);
   const swiperId = `card-swiper-${String(product.shopifyId || product.id || product.handle).replace(/[^a-zA-Z0-9]/g, "")}`;
@@ -370,15 +386,15 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle,
     }
 
     pushProductClick(clickData);
-  }, [product, currentVariant, galleryImages, displayPrice, displayComparePrice, index]);
+  }, [product, currentVariant, galleryImages, displayPrice, displayComparePrice, index, collectionHandle, dispatch]);
 
   return (
     <>
       <div className="space-y-4">
         <div className="group/card block space-y-4">
           <div className="relative aspect-square w-full bg-[#fafafa] overflow-hidden">
-              <Link 
-                href={`/products/${product.handle}`} 
+              <Link
+                href={`/products/${product.handle}`}
                 className="block w-full h-full mix-blend-multiply"
                 onClick={handleProductClick}
               >
@@ -436,7 +452,7 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle,
             </Link>
 
             {videoMedia && (
-              <button 
+              <button
                 onClick={(e) => { e.preventDefault(); setShowVideoPopup(true); }}
                 className="absolute bottom-4 left-2 lg:left-4 z-10 w-6 h-6 lg:w-8 lg:h-8 flex items-center justify-center rounded-full bg-white/90 backdrop-blur-sm border border-zinc-200 text-zinc-900 shadow-sm hover:bg-black hover:text-white transition-all duration-300"
               >
@@ -453,19 +469,14 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle,
                 e.preventDefault();
 
                 const handleWishlistToggle = async () => {
-                  const getNumeric = (val) => {
-                    const num = Number(val);
-                    return isNaN(num) ? 0 : num;
-                  };
-
                   setIsWishlistAnimating(true);
                   try {
                     const currentOrigin = typeof window !== 'undefined' ? window.location.origin : "";
                     const thumbnailImage = galleryImages?.[0]?.url || product.image?.url || "";
-                    
+
                     // Prioritize currentVariant's SKU, then product level
                     const commonTrackingData = getStandardWishlistPayload(product, currentVariant, currentOrigin, thumbnailImage);
-                    
+
                     if (isWishlisted) {
                       if (user?.id) {
                         await dispatch(removeWishlistItem(productId)).unwrap();
@@ -519,14 +530,14 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle,
               <div className="absolute top-0 lg:top-3 left-0 z-10 w-28 lg:w-28 h-6 lg:h-7 overflow-hidden bg-[#F1E4D1]">
                 <AnimatePresence initial={false}>
                   <motion.div
-                    key={displayLabels[currentLabelIndex]}
+                    key={displayLabels[currentLabelIndex % displayLabels.length]}
                     initial={{ y: 28 }}
                     animate={{ y: 0 }}
                     exit={{ y: -28 }}
                     transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
-                    className="absolute inset-0 text-black text-[10px] lg:text-xs font-bold px-2 lg:px-2 font-figtree uppercase tracking-wider flex items-center justify-center whitespace-nowrap"
+                    className="absolute inset-0 text-black text-[10px] lg:text-xs font-bold px-2 lg:px-2 font-figtree uppercase tracking-wider flex items-center justify-center whitespace-nowrap"       
                   >
-                    {displayLabels[currentLabelIndex]}
+                    {displayLabels[currentLabelIndex % displayLabels.length]}
                   </motion.div>
                 </AnimatePresence>
               </div>
@@ -536,7 +547,7 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle,
             {hasSimilar && (
               <Drawer open={showSimilar} onOpenChange={setShowSimilar}>
                 <DrawerTrigger asChild>
-                  <button 
+                  <button
                     onClick={(e) => { e.preventDefault(); fetchSimilar(); }}
                     className="absolute bottom-4 right-2 lg:right-4 z-10 w-6 h-6 lg:w-8 lg:h-8 flex items-center justify-center rounded-full bg-white/90 backdrop-blur-sm border border-zinc-200 text-zinc-900 shadow-sm hover:bg-black hover:text-white transition-all duration-300"
                   >
@@ -589,7 +600,7 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle,
                                       )}
                                     </div>
                                     <div className="flex items-center gap-1 group/link">
-                                      <span className="text-[10px] font-bold text-zinc-900 uppercase tracking-widest border-b border-zinc-200 pb-0.5 group-hover/link:border-black transition-colors">
+                                      <span className="text-[10px] font-bold text-zinc-900 uppercase tracking-widest border-b border-zinc-200 pb-0.5 group-hover/link:border-black transition-colors">   
                                         VIEW DETAILS
                                       </span>
                                       <ChevronRight size={10} className="text-zinc-900" />
@@ -670,7 +681,7 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle,
                 const reviews = product.reviews || product.reviewStats;
                 const count = reviews?.count || 0;
                 const isFallback = reviews?.usedFallback === true || count === 495; // Extra safety for 495
-                
+
                 if (count > 0 && !isFallback) {
                   const average = reviews.average || 0;
                   return (
@@ -712,7 +723,7 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle,
 
             <div className="flex flex-col items-start gap-0.5">
               {/* Product Title */}
-              <Link 
+              <Link
                 href={`/products/${product.handle}`}
                 onClick={handleProductClick}
               >
@@ -729,7 +740,7 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle,
                   const ornaverseComp = parseOrnaverseComponent(variantMeta?.components || prodMeta?.components);
 
                   // Find the first diamond component for summary display
-                  const firstDiamond = ornaverseComp?.components?.find(c => 
+                  const firstDiamond = ornaverseComp?.components?.find(c =>
                     (c.item_group_name === "Diamond" || (c.quality_code && c.quality_code !== "NA")) && (parseFloat(c.weight) > 0 || parseInt(c.pieces) > 0)
                   );
 
@@ -745,8 +756,8 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle,
                       : (firstDiamond?.purity || variantDiamonds[0]?.quality || prodMeta?.quality);
 
                     // 2. Diamond Carat
-                    const carat = variantDiamonds[0]?.weight 
-                      ? `${variantDiamonds[0].weight}ct` 
+                    const carat = variantDiamonds[0]?.weight
+                      ? `${variantDiamonds[0].weight}ct`
                       : (firstDiamond?.weight ? `${firstDiamond.weight}ct` : prodMeta?.carat_range);
 
                     if (quality && quality !== "NA") parts.push(quality);
@@ -760,7 +771,8 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle,
                   }
 
                   // 3. Metal Weight
-                  const weightVal = variantMeta?.metal_weight || prodMeta?.weight;                  const weight = weightVal ? `${weightVal}${String(weightVal).toLowerCase().includes('g') ? '' : 'g'}` : null;
+                  const weightVal = variantMeta?.metal_weight || prodMeta?.weight;
+                  const weight = weightVal ? `${weightVal}${String(weightVal).toLowerCase().includes('g') ? '' : 'g'}` : null;
                   if (weight) parts.push(weight);
 
                   if (parts.length === 0) return null;
@@ -780,7 +792,7 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle,
               const offers = [];
               if (product.diamondDiscount > 0) offers.push(`${product.diamondDiscount}% OFF on Diamonds`);
               if (product.makingDiscount > 0) offers.push(`${product.makingDiscount}% OFF on Making Charges`);
-              
+
               if (offers.length === 0) return null;
 
               return (
@@ -804,10 +816,10 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle,
               );
             })()}
 
-            
+
           </div>
         </div>
-        
+
       </div>
 
       <style dangerouslySetInnerHTML={{ __html: `
@@ -815,14 +827,14 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle,
         .custom-product-swiper .swiper-button-next {
           display: none !important;
         }
-        
+
         .custom-product-swiper .swiper-pagination-progressbar {
           background: rgba(0,0,0,0.05) !important;
           height: 2px !important;
           bottom: 0 !important;
           top: auto !important;
         }
-        
+
         .custom-product-swiper .swiper-pagination-progressbar-fill {
           background: #5A413F !important;
         }
@@ -839,18 +851,18 @@ const ProductCard = ({ product, fixedPrice, fixedComparePrice, collectionHandle,
         <DialogContent className="max-w-2xl aspect-square bg-black border-none p-0 overflow-hidden shadow-2xl rounded-3xl w-4/5" showCloseButton={false}>
           <DialogTitle className="sr-only">Product Video: {product.title}</DialogTitle>
           <DialogDescription className="sr-only">Video preview of the product</DialogDescription>
-          
-          <button 
+
+          <button
             onClick={() => setShowVideoPopup(false)}
             className="absolute top-4 right-4 z-[210] p-2 bg-black/50 hover:bg-black text-white rounded-full transition-all duration-300 shadow-lg border border-white/10"
           >
             <X size={24} />
           </button>
-          
-          <video 
-            autoPlay 
-            muted 
-            loop 
+
+          <video
+            autoPlay
+            muted
+            loop
             playsInline
             controlsList="nodownload"
             onContextMenu={(e) => e.preventDefault()}

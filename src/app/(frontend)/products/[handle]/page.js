@@ -25,6 +25,25 @@ const PRODUCT_QUERY = `
           }
         }
       }
+      media(first: 20) {
+        edges {
+          node {
+            mediaContentType
+            ... on MediaImage {
+              image {
+                url
+                altText
+              }
+            }
+            ... on Video {
+              sources {
+                url
+                mimeType
+              }
+            }
+          }
+        }
+      }
       variants(first: 100) {
         edges {
           node {
@@ -116,7 +135,7 @@ async function getProduct(handle) {
       sku: v.sku,
       price: Number(v.price.amount),
       compare_price: v.compareAtPrice ? Number(v.compareAtPrice.amount) : null,
-      inStock: v.availableForSale,
+      inStock: v.availableForSale === true && Number(v.quantityAvailable || 0) > 0,
       inventoryQuantity: v.quantityAvailable || 0,
       image: v.image?.url,
       size: options.size || null,
@@ -124,6 +143,26 @@ async function getProduct(handle) {
       options
     };
   });
+
+  const media = product.media.edges.map(({ node: m }) => {
+    if (m.mediaContentType === "IMAGE") {
+      return {
+        type: "IMAGE",
+        url: m.image.url,
+        alt: m.image.altText || ""
+      };
+    } else if (m.mediaContentType === "VIDEO") {
+      return {
+        type: "VIDEO",
+        url: m.sources?.[0]?.url,
+        mimeType: m.sources?.[0]?.mimeType,
+        preview: product.featuredImage?.url,
+        sources: m.sources,
+        alt: product.title
+      };
+    }
+    return null;
+  }).filter(Boolean);
 
   const images = product.images.edges.map(({ node: img }) => ({
     url: img.url,
@@ -138,6 +177,7 @@ async function getProduct(handle) {
     description: product.descriptionHtml || product.description,
     image: product.featuredImage?.url,
     images,
+    media,
     variants: mappedVariants,
     category: product.category?.value || product.productType,
     complementaryProductIds: [], 
