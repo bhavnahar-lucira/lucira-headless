@@ -5,19 +5,13 @@ export const dynamic = "force-dynamic";
 
 export async function GET() {
   try {
-    const client = await clientPromise;
-    // Explicitly using shopify-app as verified by debug script
-    const db = client.db("shopify-app"); 
-    const settingsCollection = db.collection("settings");
-
-    const goldCoinSetting = await settingsCollection.findOne({ key: "gold_coin_offer" });
-
-    return NextResponse.json({
-      enabled: goldCoinSetting ? !!goldCoinSetting.enabled : false,
-      threshold: goldCoinSetting?.threshold || 20000
+    const res = await fetch("http://127.0.0.1:8080/api/settings/gold-coin", {
+      cache: "no-store"
     });
+    const data = await res.json();
+    return NextResponse.json(data);
   } catch (error) {
-    console.error("Error fetching gold coin setting from MongoDB:", error);
+    console.error("Error fetching gold coin setting from Fastify:", error);
     return NextResponse.json({ enabled: false, threshold: 20000 });
   }
 }

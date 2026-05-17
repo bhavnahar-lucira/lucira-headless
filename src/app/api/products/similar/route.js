@@ -2,27 +2,46 @@ import { NextResponse } from "next/server";
 import { shopifyStorefrontFetch } from "@/lib/shopify";
 import { fetchNectorReviews } from "@/lib/nector";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
-    const productId = searchParams.get("id"); 
+    const handle = searchParams.get("handle");
+    const productIdParam = searchParams.get("id");
 
-    if (!productId) {
+    if (!handle && !productIdParam) {
       return NextResponse.json({ products: [] });
     }
 
-    const RECOMMENDATIONS_QUERY = `
-      query productRecommendations($productId: ID!) {
-        productRecommendations(productId: $productId) {
+    // 1. Fetch manual 'matching_product' metafield (value or references)
+    const queryField = productIdParam ? 'id: $id' : 'handle: $handle';
+    const queryVars = productIdParam ? '$id: ID' : '$handle: String';
+
+    const GET_PRODUCT_META = `
+      query getProductMetadata(${queryVars}) {
+        product(${queryField}) {
           id
-          title
-          handle
-          featuredImage { url }
-          variants(first: 1) {
-            edges {
-              node {
-                price { amount }
-                compareAtPrice { amount }
+          matching_products: metafield(namespace: "custom", key: "matching_product") {
+            value
+            references(first: 20) {
+              edges {
+                node {
+                  ... on Product {
+                    id
+                    title
+                    handle
+                    featuredImage { url }
+                    variants(first: 1) {
+                      edges {
+                        node {
+                          price { amount }
+                          compareAtPrice { amount }
+                        }
+                      }
+                    }
+                  }
+                }
               }
             }
           }
@@ -30,11 +49,81 @@ export async function GET(request) {
       }
     `;
 
-    const data = await shopifyStorefrontFetch(RECOMMENDATIONS_QUERY, {
-      productId: productId.startsWith("gid://") ? productId : `gid://shopify/Product/${productId}`,
-    });
+    const metaData = await shopifyStorefrontFetch(GET_PRODUCT_META, {
+      handle: handle || null,
+      id: productIdParam || null
+    }, { cache: 'no-store' });
 
-    const products = await Promise.all((data?.productRecommendations || []).map(async (p) => {
+    const product = metaData?.product;
+    if (!product) {
+      return NextResponse.json({ products: [] });
+    }
+
+    let similarNodes = (product.matching_products?.references?.edges || []).map(edge => edge.node);
+    
+    // 2. If 'references' is empty but 'value' exists, it's likely a JSON array of GIDs
+    if (similarNodes.length === 0 && product.matching_products?.value) {
+      try {
+        const gids = JSON.parse(product.matching_products.value);
+        if (Array.isArray(gids) && gids.length > 0) {
+          const NODES_QUERY = `
+            query getNodes($ids: [ID!]!) {
+              nodes(ids: $ids) {
+                ... on Product {
+                  id
+                  title
+                  handle
+                  featuredImage { url }
+                  variants(first: 1) {
+                    edges {
+                      node {
+                        price { amount }
+                        compareAtPrice { amount }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          `;
+          const nodesData = await shopifyStorefrontFetch(NODES_QUERY, { ids: gids }, { cache: 'no-store' });
+          similarNodes = (nodesData?.nodes || []).filter(Boolean);
+        }
+      } catch (e) {
+        console.warn("Failed to parse matching_products JSON:", e.message);
+      }
+    }
+
+    // 3. Fallback to Shopify Recommendations if still empty
+    if (similarNodes.length === 0) {
+      const RECOMMENDATIONS_QUERY = `
+        query getRecommendations($productId: ID!) {
+          productRecommendations(productId: $productId) {
+            id
+            title
+            handle
+            featuredImage { url }
+            variants(first: 1) {
+              edges {
+                node {
+                  price { amount }
+                  compareAtPrice { amount }
+                }
+              }
+            }
+          }
+        }
+      `;
+
+      const recData = await shopifyStorefrontFetch(RECOMMENDATIONS_QUERY, {
+        productId: product.id
+      }, { cache: 'no-store' });
+
+      similarNodes = recData?.productRecommendations || [];
+    }
+
+    // 4. Map nodes and fetch review stats
+    const products = await Promise.all(similarNodes.map(async (p) => {
       let reviewStats = { count: 0, average: 0 };
       try {
         const reviews = await fetchNectorReviews(p.id);
@@ -55,7 +144,7 @@ export async function GET(request) {
 
     return NextResponse.json({ products });
   } catch (error) {
-    console.error("Similar Products Error:", error);
-    return NextResponse.json({ products: [] });
+    console.error("Similar Products API Error:", error);
+    return NextResponse.json({ products: [], error: error.message });
   }
 }

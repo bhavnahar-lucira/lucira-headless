@@ -287,7 +287,7 @@ export default function ProductGallery({ media = [], title = "", activeColor = "
                 </div>
               )}
 
-              {index === 1 && hasSimilar && (
+              {((index === 1) || (index === 0 && sortedMedia.length === 1)) && hasSimilar && (
                 <button 
                   onClick={(e) => {
                     e.stopPropagation();

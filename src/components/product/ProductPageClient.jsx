@@ -304,7 +304,7 @@ export default function ProductPageClient({ product, complementaryProducts = [],
     count: product.reviews?.count || product.reviewStats?.count || 0,
   });
 
-  const [goldCoinConfig, setGoldCoinConfig] = useState({ enabled: false, threshold: 20000 });
+  const [goldCoinConfig, setGoldCoinConfig] = useState({ enabled: false, threshold: 20000, message: "" });
 
   useEffect(() => {
     fetch("/api/settings/gold-coin")
@@ -312,7 +312,8 @@ export default function ProductPageClient({ product, complementaryProducts = [],
       .then((data) => {
         setGoldCoinConfig({
           enabled: data.enabled ?? false,
-          threshold: data.threshold || 20000
+          threshold: data.threshold || 20000,
+          message: data.message || ""
         });
       })
       .catch((err) => console.error("Error fetching gold coin setting:", err));
@@ -757,15 +758,15 @@ useEffect(() => {
         variants: product.variants || [],
         media: product.media || [],
         reviews: product.reviews,
-        reviewStats: product.reviewStats,
+        reviewStats: reviewStats, // Use state which might be updated
         matchingProductIds: product.matchingProductIds,
-        hasSimilar: product.hasSimilar,
+        hasSimilar: true,
         diamondDiscount: product.diamondDiscount,
         makingDiscount: product.makingDiscount,
         productMetafields: product.productMetafields,
       })
     );
-  }, [product, dispatch]);
+  }, [product, dispatch, reviewStats]);
 
   const hasSimilarItems = product.hasSimilar || (product.matchingProductIds && product.matchingProductIds.length > 0);
 
@@ -787,6 +788,22 @@ useEffect(() => {
 
     setAddingToCart(true);
     try {
+      // Calculate robust diamondCharges
+      let finalDiamondCharges = priceBreakup?.raw_breakup?.diamond?.final || 0;
+      
+      // Fallback: Calculate from variant_config if priceBreakup is not ready
+      if (finalDiamondCharges === 0) {
+        try {
+          const config = JSON.parse(activeVariant?.metafields?.variant_config || "{}");
+          if (config.advanced_stone_config) {
+            // This is a simplified calculation, but enough to trigger the > 0 check
+            finalDiamondCharges = config.advanced_stone_config.reduce((acc, s) => acc + (s.stone_weight * 50000), 0);
+          } else if (config.diamond_charges) {
+            finalDiamondCharges = config.diamond_charges;
+          }
+        } catch(e) {}
+      }
+
       // Calculate fallbacks from metafields
       const fallbackWeight = activeVariant?.metafields?.metal_weight || "0";
       const fallbackDiamondPcs = activeVariant?.metafields?.diamonds?.reduce((acc, d) => acc + (parseInt(d.pieces) || 0), 0) || 0;
@@ -821,7 +838,6 @@ useEffect(() => {
         variantTitle: activeVariant.title,
         sku: activeVariant.sku || "",
         price: activeVariant.price,
-        sku: activeVariant.sku || "",
         image: getValidSrc(activeVariant.image || getColorSpecificImage(product, activeColor) || product.featuredImage || (product.media && product.media[0]?.url)),
         quantity: 1,
         inStock: Boolean(activeVariant.inStock),
@@ -843,14 +859,15 @@ useEffect(() => {
           const y = date.getFullYear();
           return `${d}/${m}/${y}`;
         })(),
-        goldPricePerGram: raw?.metal?.rate_per_gram || 0,
-        goldWeight: raw?.metal?.weight || parseFloat(fallbackWeight),
-        goldPrice: raw?.metal?.cost || 0,
-        makingCharges: raw?.making_charges?.final || 0,
-        diamondCharges: raw?.diamond?.final || 0,
-        gst: raw?.gst?.amount || 0,
-        finalPrice: raw?.total || activeVariant.price,
-        diamondTotalPcs: raw?.diamond?.pcs || fallbackDiamondPcs,
+        goldPricePerGram: raw?.raw_breakup?.metal?.rate_per_gram || 0,
+        goldWeight: raw?.raw_breakup?.metal?.weight || parseFloat(fallbackWeight),
+        goldPrice: raw?.raw_breakup?.metal?.cost || 0,
+        makingCharges: raw?.raw_breakup?.making_charges?.final || 0,
+        diamondCharges: finalDiamondCharges,
+        gst: raw?.raw_breakup?.gst?.amount || 0,
+        finalPrice: raw?.raw_breakup?.total || activeVariant.price,
+        diamondTotalPcs: raw?.raw_breakup?.diamond?.pcs || fallbackDiamondPcs,
+        metafields: activeVariant.metafields || {},
         hasVideo: Boolean(product.media?.some((m) => m.type === "VIDEO" || m.type === "EXTERNAL_VIDEO")),
         hasSimilar: Boolean(product.handle),
         reviews: product.reviews || null,
@@ -1344,7 +1361,7 @@ useEffect(() => {
             title={product.title}
             activeColor={activeColor}
             onViewSimilar={fetchSimilar}
-            hasSimilar={hasSimilarItems}
+            hasSimilar={true}
             product={product}
             activeVariant={activeVariant}
           />
@@ -1370,7 +1387,7 @@ useEffect(() => {
                       );
 
                       const variantDiamonds = variantMeta?.diamonds?.filter(d => parseFloat(d.weight) > 0 || parseInt(d.pieces) > 0) || [];
-                      const isDiamondProduct = !!firstDiamond || variantDiamonds.length > 0 || (!!pricingDiamond && (parseFloat(pricingDiamond.weight) > 0 || parseInt(pricingDiamond.pcs) > 0));
+                      const isDiamondProduct = !!firstDiamond || variantDiamonds.length > 0 || (!!pricingDiamond && (parseFloat(pricingDiamond.carat) > 0 || parseInt(pricingDiamond.pcs) > 0));
 
                       const parts = [];
 
@@ -1378,15 +1395,15 @@ useEffect(() => {
                         // 1. Diamond Quality
                         const quality = (firstDiamond?.quality_code && firstDiamond?.stone_color_code && firstDiamond.quality_code !== "NA" && firstDiamond.stone_color_code !== "NA")
                           ? `${firstDiamond.quality_code}, ${firstDiamond.stone_color_code}`
-                          : (firstDiamond?.purity || variantDiamonds[0]?.quality || pricingDiamond?.title || prodMeta?.quality);
+                          : (firstDiamond?.purity || variantDiamonds[0]?.quality || (pricingDiamond?.color && pricingDiamond?.clarity ? `${pricingDiamond.clarity}, ${pricingDiamond.color}` : pricingDiamond?.title) || prodMeta?.quality);
 
                         // 2. Diamond Carat
                         const carat = variantDiamonds[0]?.weight
                           ? `${variantDiamonds[0].weight}ct`
-                          : (firstDiamond?.weight ? `${firstDiamond.weight}ct` : prodMeta?.carat_range);
+                          : (firstDiamond?.weight ? `${firstDiamond.weight}ct` : (pricingDiamond?.carat ? `${pricingDiamond.carat}ct` : prodMeta?.carat_range));
 
                         if (quality && quality !== "NA") parts.push(quality);
-                        if (carat && carat !== "NA" && !carat.startsWith("0ct")) parts.push(carat);
+                        if (carat && carat !== "NA" && !String(carat).startsWith("0ct")) parts.push(carat);
                       }
 
                       // If no diamond parts were added, or it's not a diamond product, show metal purity
@@ -1409,7 +1426,7 @@ useEffect(() => {
                       );
                     })()}
                     {/* Rating */}
-                    {((product.reviews?.count || product.reviewStats?.count) > 0) && (
+                    {(reviewStats.count > 0) && (
                       <div
                         className="flex items-center gap-1.5 cursor-pointer hover:opacity-80 transition-opacity"
                         onClick={() => handleSafeScroll(reviewsRef)}
@@ -1420,7 +1437,7 @@ useEffect(() => {
                           className="text-amber-400"
                         />
                         <span className="font-figtree text-[10px] lg:text-sm font-semibold text-gray-800 uppercase tracking-tight">
-                          {reviewStats.average} ({reviewStats.count})
+                          {parseFloat(reviewStats.average).toFixed(1)} ({reviewStats.count})
                         </span>
                       </div>
                     )}
@@ -1463,7 +1480,7 @@ useEffect(() => {
                 const mcDiscount = raw?.making_charges?.discount_percent || 0;
                 const isDiamondJewelry = (raw?.diamond?.final || 0) > 0;
                 const currentTotalPrice = activeVariant?.price || 0;
-                const isGoldCoinEligible = isDiamondJewelry && currentTotalPrice >= 20000;
+                const isGoldCoinEligible = isDiamondJewelry && currentTotalPrice >= goldCoinConfig.threshold;
 
                 const slides = [];
                 if (diamondDiscount > 0) {
@@ -1478,10 +1495,10 @@ useEffect(() => {
                     text: <>You&apos;re saving flat <span className="font-extrabold text-black">{mcDiscount}% OFF</span> on making charges.</>
                   });
                 }
-                if (isGoldCoinEligible && isGoldCoinEnabled) {
+                if (isGoldCoinEligible && goldCoinConfig.enabled) {
                   slides.push({
                     icon: "🪙",
-                    text: <>Complimentary <span className="font-extrabold text-black">Gold Coin</span> available on this order</>
+                    text: <>{goldCoinConfig.message || "Complimentary Gold Coin available on this order"}</>
                   });
                 }
 
@@ -2121,8 +2138,8 @@ useEffect(() => {
 
               const isGoldCoinEligible =
                 isDiamondJewelry &&
-                currentTotalPrice >= 20000 &&
-                isGoldCoinEnabled;
+                currentTotalPrice >= goldCoinConfig.threshold &&
+                goldCoinConfig.enabled;
 
               const slides = [];
 
@@ -2130,7 +2147,7 @@ useEffect(() => {
                 slides.push({
                   img: "/images/service/PDPGoldCoin.png",
                   title: "Complimentary Gold Coin",
-                  desc: "Receive a free gold coin with this ring, making your order even more special."
+                  desc: goldCoinConfig.message || "Receive a free gold coin with this ring, making your order even more special."
                 });
               }
 

@@ -289,8 +289,11 @@ export default function CollectionPage({ params: paramsPromise }) {
       try {
         const sort = searchParams.get("sort") || "best_selling";
         const apiUrl = `/api/collection?handle=${handle}&${filterParamsForApi}&sort=${sort}&limit=${limit}`;
+        console.log("Fetching from API:", apiUrl);
 
         const collRes = await fetch(apiUrl);
+        if (!collRes.ok) throw new Error("Failed to fetch collection");
+        
         const collData = await collRes.json();
         setCollection({
           title: collData.collection?.title || handle.replace(/-/g, " "),

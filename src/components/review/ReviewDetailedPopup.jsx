@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 // Helper to ensure image src is a valid string URL
-const getValidSrc = (src) => {
+const getValidSrc = (src, fallback = "/images/product/1.jpg") => {
   if (typeof src === 'string' && src.trim() !== '') return src;
   if (src && typeof src === 'object' && src.url) return src.url;
   return fallback;
@@ -49,10 +49,11 @@ export default function ReviewDetailedPopup({ isOpen, onClose, reviews, activeIn
     : (review.personImage || "/images/review/1.jpg");
     
   const currentImage = getValidSrc(currentImageRaw);
+
   return (
     <div className="fixed inset-0 z-[499] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 md:p-10 transition-all duration-300">
       
-      {/* Navigation - Hidden on very small mobile */}
+      {/* Navigation */}
       <button 
         onClick={handlePrev}
         className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 z-[500] text-white hover:text-gray-300 transition-colors cursor-pointer outline-none bg-black/20 hover:bg-black/40 rounded-full p-2"
@@ -94,6 +95,7 @@ export default function ReviewDetailedPopup({ isOpen, onClose, reviews, activeIn
                     onLoad={() => setIsLoaded(true)}
                     className={`object-cover transition-opacity duration-500 ${isLoaded ? "opacity-100" : "opacity-0"}`}
                     priority
+                    unoptimized={true}
                 />
             </div>
 
@@ -112,21 +114,21 @@ export default function ReviewDetailedPopup({ isOpen, onClose, reviews, activeIn
           </div>
 
           {/* Right Side: Review Content */}
-          <div className="w-full md:w-1/2 p-6 md:p-10 flex flex-col bg-white overflow-y-auto custom-scrollbar">
+          <div className="w-full md:w-1/2 p-6 md:p-10 flex flex-col bg-white overflow-y-auto custom-scrollbar font-figtree">
             
             {/* User Info */}
             <div className="flex items-center gap-4 mb-8">
-              <div className="w-16 h-16 rounded-full bg-primary text-white flex items-center justify-center font-bold text-2xl uppercase border-4 border-white shadow-md relative overflow-hidden flex-shrink-0">
+              <div className="w-16 h-16 rounded-full bg-[#5A413F] text-white flex items-center justify-center font-bold text-2xl uppercase border-4 border-white shadow-md relative overflow-hidden flex-shrink-0">
                 {review.personImage ? (
-                    <Image src={getValidSrc(review.personImage)} alt={review.personName} fill className="object-cover" />
+                    <Image src={getValidSrc(review.personImage)} alt={review.personName} fill className="object-cover" unoptimized={true} />
                 ) : (
-                    review.personName.charAt(0)
+                    (review.personName || "C").charAt(0)
                 )}
               </div>
               <div>
-                <h3 className="font-bold text-gray-800 text-xl leading-tight mb-1 capitalize tracking-widest">{review.personName}</h3>
-                <div className="flex items-center gap-1.5 text-xs text-accent font-bold uppercase tracking-wide">
-                    <BadgeCheck size={16} className="fill-accent text-white" />
+                <h3 className="font-bold text-gray-900 text-xl leading-tight mb-1 capitalize tracking-widest">{review.personName}</h3>
+                <div className="flex items-center gap-1.5 text-xs text-[#A8715A] font-bold uppercase tracking-wide">
+                    <BadgeCheck size={16} className="fill-[#A8715A] text-white" />
                     Verified Customer
                 </div>
               </div>
@@ -153,33 +155,29 @@ export default function ReviewDetailedPopup({ isOpen, onClose, reviews, activeIn
 
             {/* Review Text */}
             <div className="mb-8 flex-grow">
-              <h4 className="font-bold text-black text-xl lg:text-2xl mb-4 leading-tight tracking-tight">
-                {review.title }
-              </h4>
               <p className="text-gray-600 leading-relaxed text-lg italic">
                 "{review.review}"
               </p>
             </div>
 
             {/* Product Card */}
-            <Link 
-                href={`/products/${review.reference_product_slug}`} 
-                onClick={onClose}
-                className="mt-auto p-4 bg-gray-50 rounded-xl border border-gray-100 flex items-center gap-4 group hover:bg-gray-100 transition-all"
-            >
-              {/* <div className="w-16 h-16 bg-white rounded-lg border border-gray-100 overflow-hidden relative flex-shrink-0">
-                <Image src={review.productImage} alt={review.productTitle} fill className="object-cover group-hover:scale-110 transition-transform duration-500" />
-              </div> */}
-              <div className="min-w-0">
-                <span className="text-[10px] font-bold text-gray-900 uppercase tracking-widest block mb-1">Reviewed product</span>
-                <h4 className="text-sm font-bold text-black truncate group-hover:text-primary transition-colors">
-                  {review.productTitle}
-                </h4>
-              </div>
-              <div className="ml-auto text-gray-300 group-hover:text-gray-900 transition-colors">
-                <ChevronRight size={20} />
-              </div>
-            </Link>
+            {review.productHandle && (
+              <Link 
+                  href={`/products/${review.productHandle}`} 
+                  onClick={onClose}
+                  className="mt-auto p-4 bg-gray-50 rounded-xl border border-gray-100 flex items-center justify-between group hover:bg-gray-100 transition-all"
+              >
+                <div className="min-w-0">
+                  <span className="text-[10px] font-bold text-gray-900 uppercase tracking-widest block mb-1">Reviewed product</span>
+                  <h4 className="text-sm font-bold text-black truncate group-hover:text-primary transition-colors">
+                    {review.productTitle}
+                  </h4>
+                </div>
+                <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-gray-300 group-hover:bg-black group-hover:text-white transition-all ml-2">
+                  <ChevronRight size={16} />
+                </div>
+              </Link>
+            )}
           </div>
         </div>
       </div>

@@ -50,7 +50,7 @@ export default function PriceSavingsDetails({ priceBreakup, onTabChange }) {
                 />
               ))}
               
-              <div className="flex justify-between items-center pt-2 border-t border-gray-200">
+              <div className="flex justify-between items-center pt-5 border-t border-gray-200 mt-4">
                 <span className="text-base font-bold text-gray-900 uppercase">Grand Total</span>
                 <span className="text-lg font-bold text-gray-900">{priceBreakup.grand_total}</span>
               </div>
@@ -85,6 +85,7 @@ export default function PriceSavingsDetails({ priceBreakup, onTabChange }) {
           )}
         </Tabs>
       </div>
+      
     </div>
   );
 }

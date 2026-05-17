@@ -3,27 +3,28 @@ import { fetchWithRetry } from "@/utils/helpers";
 const reviewCache = new Map();
 
 /**
- * Main function to fetch Nector reviews using Direct API (No Proxy)
+ * Main function to fetch Nector reviews using Direct API
  */
 export const fetchNectorReviews = async (productId, options = {}) => {
-  if (!productId) return { count: 0, average: 0, list: [], items: [], stats: [], isProductView: false, usedFallback: false };
-
   // If running in the browser, call the local API route to protect keys
   if (typeof window !== 'undefined') {
     try {
-      const res = await fetch(`/api/reviews?productId=${encodeURIComponent(productId)}`);
+      const url = productId 
+        ? `/api/reviews?productId=${encodeURIComponent(productId)}`
+        : `/api/reviews/list?limit=1000`;
+      const res = await fetch(url);
       if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
       return await res.json();
     } catch (e) {
       console.error("Error fetching reviews via local API:", e.message);
-      return { count: 0, average: 0, list: [], items: [], stats: [], isProductView: true, usedFallback: false };
+      return { count: 0, average: 0, list: [], items: [], stats: [], isProductView: !!productId, usedFallback: false };
     }
   }
 
   // Convert shopify ID to simple ID
-  const id = productId.split("/").pop();
+  const id = productId ? String(productId).split("/").pop() : null;
 
-  if (reviewCache.has(id)) {
+  if (id && reviewCache.has(id)) {
     return reviewCache.get(id);
   }
 
@@ -31,66 +32,98 @@ export const fetchNectorReviews = async (productId, options = {}) => {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
 
-    const res = await fetch(
-      `https://cachefront.nector.io/api/v2/merchant/reviews?page=1&limit=10&sort=image_count&sort_op=DESC&reference_product_id=${id}&reference_product_source=shopify`,
-      {
-        headers: {
-          "x-apikey": process.env.NECTOR_API_KEY,
-          "x-workspaceid": process.env.NECTOR_WORKSPACE_ID,
-          "x-source": "web",
-        },
-        signal: controller.signal,
-      }
-    );
-    clearTimeout(timeoutId);
+    // Try cachefront first
+    const baseUrl = `https://cachefront.nector.io/api/v2/merchant/reviews`;
+    let url = id 
+      ? `${baseUrl}?page=1&limit=20&sort=image_count&sort_op=DESC&reference_product_id=${id}&reference_product_source=shopify`
+      : `${baseUrl}?page=1&limit=200&sort=created_at&sort_op=DESC`;
 
-    const json = await res.json();
-    if (!res.ok) {
-      console.error(`Nector API Error for ${id}:`, res.status, json);
-      return { count: 0, average: 0, list: [], items: [], stats: [] };
+    console.log(`[Nector] Fetching reviews from: ${url}`);
+
+    let res = await fetch(url, {
+      headers: {
+        "x-apikey": process.env.NECTOR_API_KEY,
+        "x-workspaceid": process.env.NECTOR_WORKSPACE_ID,
+        "x-source": "web",
+      },
+      signal: controller.signal,
+      cache: 'no-store'
+    });
+
+    let json = await res.json();
+    
+    // If global fetch returned nothing, try the main API endpoint
+    if (!id && (!json?.data?.items || json.data.items.length === 0)) {
+       console.log(`[Nector] Global fetch from cachefront empty, trying main API...`);
+       const mainApiUrl = `https://api.nector.io/v1/merchant/reviews?page=1&limit=100`;
+       const res2 = await fetch(mainApiUrl, {
+         headers: {
+           "x-apikey": process.env.NECTOR_API_KEY,
+           "x-workspaceid": process.env.NECTOR_WORKSPACE_ID,
+         },
+         cache: 'no-store'
+       });
+       if (res2.ok) {
+         const json2 = await res2.json();
+         if (json2?.data?.items?.length > 0) {
+           json = json2;
+         }
+       }
     }
+
+    clearTimeout(timeoutId);
 
     const data = json?.data || {};
     const stats = data.stats || [];
-    const count = data.count || 0;
+    const count = data.count || (data.items?.length || 0);
     const items = data.items || [];
 
     let total = 0;
     let ratingCount = 0;
 
-    stats.forEach(s => {
-      total += Number(s.rating) * Number(s.count);
-      ratingCount += Number(s.count);
-    });
+    if (Array.isArray(stats)) {
+      stats.forEach(s => {
+        total += Number(s.rating) * Number(s.count);
+        ratingCount += Number(s.count);
+      });
+    }
 
     const reviews = {
       count,
-      average: ratingCount ? Number((total / ratingCount).toFixed(1)) : 0,
-      stats: stats.map(s => ({ rating: Number(s.rating), count: Number(s.count) })),
+      average: ratingCount ? Number((total / ratingCount).toFixed(1)) : (data.average_rating || 0),
+      stats: Array.isArray(stats) ? stats.map(s => ({ rating: Number(s.rating), count: Number(s.count) })) : [],
       items: items.map(r => ({
-        id: r._id,
+        id: r._id || r.id,
         name: r.name || "Verified Buyer",
         rating: r.rating,
-        text: r.description,
+        text: r.description || r.body || "",
         date: r.posted_at || r.created_at,
+        posted_at: r.posted_at,
+        created_at: r.created_at,
+        is_verified: r.is_verified || r.verified,
         images: r.uploads?.filter(u => u.type === "image" && u.link).map(u => u.link) || [],
         videos: r.uploads?.filter(u => u.type === "video" && u.link).map(u => u.link) || [],
         image_count: r.image_count || 0,
         video_count: r.video_count || 0,
         title: r.title || r.reference_product_name || "",
-        uploads: r.uploads
+        uploads: r.uploads,
+        reference_product_name: r.reference_product_name,
+        reference_product_handle: r.reference_product_handle,
+        reference_product_image: r.reference_product_image
       })),
       isProductView: !!id,
       usedFallback: false
     };
 
     reviews.list = reviews.items;
-    reviewCache.set(id, reviews);
-    setTimeout(() => reviewCache.delete(id), 5 * 60 * 1000);
+    if (id) {
+      reviewCache.set(id, reviews);
+      setTimeout(() => reviewCache.delete(id), 5 * 60 * 1000);
+    }
 
     return reviews;
   } catch (e) {
-    console.error(`Error fetching Nector reviews for ${id}:`, e.message);
+    console.error(`Error fetching Nector reviews:`, e.message);
     return { count: 0, average: 0, list: [], items: [], stats: [], isProductView: !!id, usedFallback: false };
   }
 };

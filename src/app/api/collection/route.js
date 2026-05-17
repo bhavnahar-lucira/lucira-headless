@@ -137,7 +137,7 @@ export async function GET(req) {
           }
         }
       `;
-      const shopData = await shopifyAdminFetch(shopPricingQuery);
+      const shopData = await shopifyAdminFetch(shopPricingQuery, {}, { cache: 'no-store' });
       if (shopData?.shop?.metalPrices?.value) metalRates = JSON.parse(shopData.shop.metalPrices.value);
       if (shopData?.shop?.stonePricing?.value) stonePricingDB = JSON.parse(shopData.shop.stonePricing.value);
     } catch (e) {
@@ -185,6 +185,17 @@ export async function GET(req) {
                 createdAt
                 tags
                 featuredImage { url }
+                productMetafields: metafields(identifiers: [
+                  {namespace: "ornaverse", key: "weight"},
+                  {namespace: "ornaverse", key: "quality"},
+                  {namespace: "ornaverse", key: "carat_range"},
+                  {namespace: "ornaverse", key: "lead_time"},
+                  {namespace: "ornaverse", key: "components"},
+                  {namespace: "custom", key: "matching_product"}
+                ]) {
+                  key
+                  value
+                }
                 media(first: 20) {
                   edges {
                     node {
@@ -208,6 +219,7 @@ export async function GET(req) {
                   edges {
                     node {
                       id
+                      title
                       sku
                       price { amount }
                       compareAtPrice { amount }
@@ -218,6 +230,13 @@ export async function GET(req) {
                         url
                         altText
                       }
+                      metal_weight: metafield(namespace: "ornaverse", key: "metal_weight") { value }
+                      gross_weight: metafield(namespace: "ornaverse", key: "gross_weight") { value }
+                      top_width: metafield(namespace: "ornaverse", key: "top_width") { value }
+                      top_height: metafield(namespace: "ornaverse", key: "top_height") { value }
+                      diamonds_meta: metafield(namespace: "ornaverse", key: "diamonds") { value }
+                      gemstones_meta: metafield(namespace: "ornaverse", key: "gemstones") { value }
+                      components: metafield(namespace: "ornaverse", key: "components") { value }
                     }
                   }
                 }
@@ -229,13 +248,23 @@ export async function GET(req) {
     `;
 
     const ALL_PRODUCTS_QUERY = `
-      query AllProducts($first: Int!, $after: String, $sortKey: ProductSortKeys, $reverse: Boolean, $filters: [ProductFilter!]) {
-        products(first: $first, after: $after, sortKey: $sortKey, reverse: $reverse, filters: $filters) {
+      query AllProducts($first: Int!, $after: String, $sortKey: ProductSortKeys, $reverse: Boolean, $query: String) {
+        products(first: $first, after: $after, sortKey: $sortKey, reverse: $reverse, query: $query) {
           pageInfo { hasNextPage endCursor }
           filters { label type values { label count input } }
           edges {
             node {
               id title handle description descriptionHtml createdAt tags featuredImage { url }
+              productMetafields: metafields(identifiers: [
+                {namespace: "ornaverse", key: "weight"},
+                {namespace: "ornaverse", key: "quality"},
+                {namespace: "ornaverse", key: "carat_range"},
+                {namespace: "ornaverse", key: "lead_time"},
+                {namespace: "ornaverse", key: "components"}
+              ]) {
+                key
+                value
+              }
               media(first: 20) {
                 edges {
                   node {
@@ -248,9 +277,16 @@ export async function GET(req) {
               variants(first: 50) {
                 edges {
                   node {
-                    id sku price { amount } compareAtPrice { amount }
+                    id title sku price { amount } compareAtPrice { amount }
                     availableForSale quantityAvailable selectedOptions { name value }
                     image { url altText }
+                    metal_weight: metafield(namespace: "ornaverse", key: "metal_weight") { value }
+                    gross_weight: metafield(namespace: "ornaverse", key: "gross_weight") { value }
+                    top_width: metafield(namespace: "ornaverse", key: "top_width") { value }
+                    top_height: metafield(namespace: "ornaverse", key: "top_height") { value }
+                    diamonds_meta: metafield(namespace: "ornaverse", key: "diamonds") { value }
+                    gemstones_meta: metafield(namespace: "ornaverse", key: "gemstones") { value }
+                    components: metafield(namespace: "ornaverse", key: "components") { value }
                   }
                 }
               }
@@ -262,13 +298,22 @@ export async function GET(req) {
 
     let storefrontData;
     if (handle === "all") {
+      let filterQuery = "";
+      if (finalFilters.length > 0) {
+          finalFilters.forEach(f => {
+              if (f.productType) filterQuery += ` product_type:${f.productType}`;
+              if (f.tag) filterQuery += ` tag:${f.tag}`;
+              if (f.variantOption) filterQuery += ` variant_option:${f.variantOption.name}:${f.variantOption.value}`;
+          });
+      }
+
       storefrontData = await shopifyStorefrontFetch(ALL_PRODUCTS_QUERY, {
         first: limit,
         after: cursor || null,
         sortKey: sortConfig.sortKey === "BEST_SELLING" ? "BEST_SELLING" : sortConfig.sortKey === "PRICE" ? "PRICE" : "TITLE",
         reverse: sortConfig.reverse,
-        filters: finalFilters,
-      });
+        query: filterQuery.trim() || null,
+      }, { cache: 'no-store' });
     } else {
       storefrontData = await shopifyStorefrontFetch(COLLECTION_QUERY, {
         handle,
@@ -277,7 +322,7 @@ export async function GET(req) {
         sortKey: sortConfig.sortKey,
         reverse: sortConfig.reverse,
         filters: finalFilters,
-      });
+      }, { cache: 'no-store' });
     }
 
     const collectionData = storefrontData?.collectionByHandle;
@@ -287,7 +332,7 @@ export async function GET(req) {
       return NextResponse.json({
         collection: handle === "all" ? { title: "All Products", description: "All of our products" } : (collectionData || {}),
         products: [], filters: {}, pageInfo: {}, totalProducts: 0
-      });
+      }, { headers: { "Cache-Control": "no-store" } });
     }
 
     // 3. Fetch Variant Metafields in Bulk (Admin API)
@@ -314,7 +359,7 @@ export async function GET(req) {
         const CHUNK_SIZE = 100;
         for (let i = 0; i < uniqueGids.length; i += CHUNK_SIZE) {
           const chunk = uniqueGids.slice(i, i + CHUNK_SIZE);
-          const adminData = await shopifyAdminFetch(variantQuery, { ids: chunk });
+          const adminData = await shopifyAdminFetch(variantQuery, { ids: chunk }, { cache: 'no-store' });
           adminData?.nodes?.forEach(node => {
             if (node?.metafield?.value) {
               variantConfigs[node.id] = node.metafield.value;
@@ -329,6 +374,11 @@ export async function GET(req) {
     // 4. Process Products & Calculate Metadata
     let products = (await Promise.all(
       productsData.edges.map(async ({ node }) => {
+        const productMetafields = {};
+        node.productMetafields?.forEach(m => {
+          if (m) productMetafields[m.key] = m.value;
+        });
+
         const variants = node.variants.edges.map(({ node: v }) => {
           const options = {};
           v.selectedOptions.forEach((o) => {
@@ -338,6 +388,8 @@ export async function GET(req) {
           let dynamic = {};
           let diamondDiscount = 0;
           let makingDiscount = 0;
+          let fallbackDiamonds = [];
+          let configMetalPurity = null;
 
           const configValue = variantConfigs[v.id];
           if (configValue) {
@@ -350,10 +402,19 @@ export async function GET(req) {
                 color: breakup.diamond.color,
                 weight: breakup.metal.weight,
                 diamondCharges: breakup.diamond.final,
-                components: configValue // Store raw for ProductCard parseOrnaverseComponent
+                components: configValue
               };
               diamondDiscount = breakup.diamond.discount_percent || 0;
               makingDiscount = breakup.making_charges.discount_percent || 0;
+              configMetalPurity = config.purity;
+
+              if (config.advanced_stone_config) {
+                fallbackDiamonds = config.advanced_stone_config.map(s => ({
+                   quality: s.pricing_id,
+                   pieces: s.stone_quantity,
+                   weight: s.stone_weight
+                }));
+              }
             } catch (e) {}
           }
 
@@ -365,8 +426,45 @@ export async function GET(req) {
             return null;
           };
 
+          // Technical specifications mapping
+          let comps = null;
+          try {
+            comps = v.components?.value ? JSON.parse(v.components.value) : null;
+          } catch(e) {}
+          
+          const metalComp = comps?.components?.find(c => c.item_group_name === "Gold");
+          const diamondComps = comps?.components?.filter(c => c.item_group_name === "Diamond") || [];
+          const gemstoneComps = comps?.components?.filter(c => c.item_group_name === "Gemstone" || c.item_group_name === "Color Stone") || [];
+
+          let metal_purity = metalComp?.karat_code ? `${metalComp.karat_code}K` : null;
+          let metal_color = metalComp?.stone_color_code && metalComp.stone_color_code !== "NA" ? metalComp.stone_color_code : null;
+          
+          if (!metal_color) {
+            const t = v.title || "";
+            if (t.toLowerCase().includes('rose')) metal_color = 'Rose Gold';
+            else if (t.toLowerCase().includes('white')) metal_color = 'White Gold';
+            else if (t.toLowerCase().includes('yellow')) metal_color = 'Yellow Gold';
+            else if (t.toLowerCase().includes('platinum')) metal_color = 'Platinum';
+          }
+
+          const diamonds = diamondComps.map(d => ({
+            quality: d.quality_code && d.quality_code !== "NA" ? d.quality_code : (d.purity || "VVS-VS, EF"),
+            shape: d.shape_code,
+            pieces: d.pieces,
+            weight: d.weight
+          }));
+
+          const gemstones = gemstoneComps.map(g => ({
+            color: g.stone_color_code,
+            shape: g.shape_code,
+            pieces: g.pieces,
+            weight: g.weight
+          }));
+
+          const inStock = v.availableForSale === true && (v.quantityAvailable === null || Number(v.quantityAvailable) > 0);
+
           return {
-            id: v.id.split("/").pop(),
+            id: (v.id || "").split("/").pop() || Math.random().toString(),
             shopifyId: v.id,
             sku: v.sku,
             size: options.size || null,
@@ -375,30 +473,29 @@ export async function GET(req) {
             clarity: dynamic.clarity ?? getOpt(["clarity"]),
             diamond_color: dynamic.color ?? getOpt(["diamond color"]),
             weight: dynamic.weight ?? getOpt(["weight"]),
-            price: Number(v.price.amount),
+            diamondCharges: dynamic.diamondCharges || 0,
+            price: Number(v.price?.amount || 0),
             compare_price: v.compareAtPrice ? Number(v.compareAtPrice.amount) : null,
-            inStock: v.availableForSale === true && Number(v.quantityAvailable || 0) > 0,
+            inStock: inStock,
             image: v.image?.url || null,
             altText: v.image?.altText || "",
             metafields: {
-                components: dynamic.components,
-                metal_weight: dynamic.weight,
-                metal_purity: getOpt(["metal purity", "purity"])
+                metal_purity: metal_purity || configMetalPurity || getOpt(["metal purity", "purity"]),
+                metal_color: metal_color,
+                metal_weight: dynamic.weight || v.metal_weight?.value || metalComp?.weight,
+                gross_weight: v.gross_weight?.value,
+                top_width: v.top_width?.value,
+                top_height: v.top_height?.value,
+                diamonds: diamonds.length > 0 ? diamonds : (fallbackDiamonds.length > 0 ? fallbackDiamonds : (v.diamonds_meta?.value ? JSON.parse(v.diamonds_meta.value) : [])),
+                gemstones: gemstones.length > 0 ? gemstones : (v.gemstones_meta?.value ? JSON.parse(v.gemstones_meta.value) : []),
+                components: v.components?.value,
+                variant_config: configValue
             },
+            hasSimilar: true,
             diamondDiscount,
             makingDiscount
           };
         });
-
-        // 9KT Collection Filtering: Only show products with at least one 9KT variant
-        if (handle === "9kt-collection") {
-            const has9kt = variants.some(v => String(v.color || v.metafields?.metal_purity || "").includes("9KT"));
-            if (!has9kt) return null;
-        }
-
-        // Global In-Stock Filtering: Only show products that have at least one in-stock variant
-        const hasInStock = variants.some(v => v.inStock);
-        if (!hasInStock) return null;
 
         let selectedVariant = variants.find((v) => v.inStock) || variants[0];
 
@@ -430,12 +527,13 @@ export async function GET(req) {
         );
 
         return {
-          id: node.id.split("/").pop(),
+          id: (node.id || "").split("/").pop() || Math.random().toString(),
           shopifyId: node.id,
           title: node.title,
           handle: node.handle,
           description: node.description,
           descriptionHtml: node.descriptionHtml,
+          tags: node.tags,
           video,
           isNew: isNew,
           label: labelTag || (isNew ? "New" : null),
@@ -451,8 +549,10 @@ export async function GET(req) {
           image: selectedVariant.image || node.featuredImage?.url,
           altText: selectedVariant.altText || "",
           variants,
+          productMetafields,
           diamondDiscount: selectedVariant.diamondDiscount,
           makingDiscount: selectedVariant.makingDiscount,
+          hasSimilar: true,
           reviewStats: { count: 0, average: 0 }
         };
       })
@@ -473,9 +573,7 @@ export async function GET(req) {
           }
         })
       );
-    } catch (e) {
-      console.warn("⚠️ Parallel review stats fetch failed:", e.message);
-    }
+    } catch (e) {}
 
     const processedFilters = {};
     productsData.filters.forEach((f) => {
@@ -512,15 +610,14 @@ export async function GET(req) {
       },
       {
         headers: {
-          "Cache-Control":
-            "public, s-maxage=3600, stale-while-revalidate=3600",
+          "Cache-Control": "no-store, max-age=0, must-revalidate",
         },
       }
     );
   } catch (err) {
     console.error("❌ Collection API error:", err);
     return NextResponse.json(
-      { error: "Server error" },
+      { error: "Server error", message: err.message },
       { status: 500 }
     );
   }

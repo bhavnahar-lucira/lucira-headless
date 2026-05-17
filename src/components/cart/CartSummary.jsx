@@ -25,19 +25,54 @@ export default function CartSummary({ onPlaceOrder }) {
   
   const { items, totalAmount, totalQuantity, appliedCoupon, updateCartItem, removeFromCart } = useCart();
   const user = useSelector((state) => state.user.user);
+  const [goldCoinThreshold, setGoldCoinThreshold] = useState(20000);
+
+  useEffect(() => {
+    fetch("/api/settings/gold-coin")
+      .then(res => res.json())
+      .then(data => {
+        if (data.threshold) setGoldCoinThreshold(Number(data.threshold) || 20000);
+      })
+      .catch(err => console.error("Error fetching gold coin threshold:", err));
+  }, []);
 
   const otherItemsQuantity = items
     .filter(item => item.variantId !== INSURANCE_VARIANT_ID && item.variantId !== GOLDCOIN_VARIANT_ID)
-    .reduce((acc, item) => acc + (item.quantity || 1), 0);
+    .reduce((acc, item) => acc + (Number(item.quantity || item.qty || 1)), 0);
 
   const diamondTotal = items
-    .filter(item => item.variantId !== INSURANCE_VARIANT_ID && item.variantId !== GOLDCOIN_VARIANT_ID && (item.diamondCharges > 0))
-    .reduce((acc, item) => acc + (item.price * (item.quantity || 1)), 0);
+    .filter(item => item.variantId !== INSURANCE_VARIANT_ID && item.variantId !== GOLDCOIN_VARIANT_ID)
+    .reduce((acc, item) => {
+        const itemQty = Number(item.quantity || item.qty || 1);
+        let charges = Number(item.diamondCharges || 0);
+        
+        // Robust Fallback: Try parsing variant_config if diamondCharges is 0
+        if (charges === 0 && item.metafields?.variant_config) {
+            try {
+                const config = JSON.parse(item.metafields.variant_config);
+                if (config.advanced_stone_config) {
+                    charges = config.advanced_stone_config.reduce((sAcc, s) => sAcc + (s.stone_weight * 50000), 0);
+                } else if (config.diamond_charges) {
+                    charges = config.diamond_charges;
+                }
+            } catch(e) {}
+        }
 
-  const eligibleGoldCoins = Math.floor(diamondTotal / 20000);
+        // Final fallback: If it's a diamond ring but charges still 0, use price
+        if (charges === 0 && (item.title?.toLowerCase().includes("diamond") || item.handle?.toLowerCase().includes("diamond"))) {
+           charges = item.price;
+        }
+
+        if (charges > 0) {
+            return acc + (Number(item.price) * itemQty);
+        }
+        return acc;
+    }, 0);
+
+  const eligibleGoldCoins = Math.max(0, Math.floor(diamondTotal / goldCoinThreshold));
 
   const insuranceItem = items.find(item => item.variantId === INSURANCE_VARIANT_ID);
-  const insuranceAmount = insuranceItem ? insuranceItem.price * (insuranceItem.quantity || 1) : 0;
+  const insuranceAmount = insuranceItem ? insuranceItem.price * (Number(insuranceItem.quantity || insuranceItem.qty || 1)) : 0;
 
   const goldCoinItem = items.find(item => item.variantId === GOLDCOIN_VARIANT_ID);
 
@@ -45,9 +80,10 @@ export default function CartSummary({ onPlaceOrder }) {
   useEffect(() => {
     // Sync Insurance
     if (insuranceItem) {
+      const currentInsQty = Number(insuranceItem.quantity || insuranceItem.qty || 0);
       if (otherItemsQuantity <= 0) {
         removeFromCart(INSURANCE_VARIANT_ID);
-      } else if (insuranceItem.quantity !== otherItemsQuantity) {
+      } else if (currentInsQty !== otherItemsQuantity) {
         updateCartItem({
           currentVariantId: INSURANCE_VARIANT_ID,
           quantity: otherItemsQuantity
@@ -57,16 +93,17 @@ export default function CartSummary({ onPlaceOrder }) {
 
     // Sync Gold Coin
     if (goldCoinItem) {
+      const currentCoinQty = Number(goldCoinItem.quantity || goldCoinItem.qty || 0);
       if (eligibleGoldCoins <= 0) {
         removeFromCart(GOLDCOIN_VARIANT_ID);
-      } else if (goldCoinItem.quantity !== eligibleGoldCoins) {
+      } else if (currentCoinQty !== eligibleGoldCoins) {
         updateCartItem({
           currentVariantId: GOLDCOIN_VARIANT_ID,
           quantity: eligibleGoldCoins
         });
       }
     }
-  }, [otherItemsQuantity, insuranceItem?.quantity, eligibleGoldCoins, goldCoinItem?.quantity, updateCartItem, removeFromCart]);
+  }, [otherItemsQuantity, insuranceItem?.quantity, insuranceItem?.qty, eligibleGoldCoins, goldCoinItem?.quantity, goldCoinItem?.qty, updateCartItem, removeFromCart]);
 
   const couponDetails = (appliedCoupon && typeof appliedCoupon === 'object') 
     ? appliedCoupon 
@@ -183,7 +220,7 @@ export default function CartSummary({ onPlaceOrder }) {
         )}
         {goldCoinItem && (
           <div className="flex justify-between text-sm text-[#189351]">
-            <span>Free Gold Coin ({goldCoinItem.quantity})</span>
+            <span>Free Gold Coin ({Number(goldCoinItem.quantity || goldCoinItem.qty || 1)})</span>
             <span className="font-bold">₹ 0</span>
           </div>
         )}
@@ -231,7 +268,7 @@ export default function CartSummary({ onPlaceOrder }) {
 
             {goldCoinItem && (
               <div className="flex justify-between text-sm text-[#189351]">
-                <span>Free Gold Coin ({goldCoinItem.quantity})</span>
+                <span>Free Gold Coin ({Number(goldCoinItem.quantity || goldCoinItem.qty || 1)})</span>
                 <span className="font-bold">₹ 0</span>
               </div>
             )}
