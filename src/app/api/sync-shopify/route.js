@@ -35,6 +35,22 @@ export async function POST(req) {
 
   let startCursor = null;
   let startProcessed = 0;
+  const parseMetafield = (val) => {
+    if (!val) return null;
+    if (typeof val !== "string") return val;
+    try {
+      // Handle Shopify's JSON-encoded strings (arrays or objects)
+      if (val.startsWith("[") || val.startsWith("{")) {
+        return JSON.parse(val);
+      }
+      // Handle numeric strings if they should be numbers, but Shopify metafields
+      // often have units like "1.5 ct", so we mostly care about JSON arrays/objects.
+      return val;
+    } catch (e) {
+      return val;
+    }
+  };
+
   try {
     const body = await req.json().catch(() => ({}));
     startCursor = body.cursor || null;
@@ -201,7 +217,7 @@ export async function POST(req) {
                   image: v.image?.url || p.featuredImage?.url,
                   inventoryLevels,
                   metafields: {
-                    components: v.components?.value,
+                    components: parseMetafield(v.components?.value),
                     in_store_available: inStoreAvailable
                   }
                 };
@@ -279,9 +295,15 @@ export async function POST(req) {
                 matchingProductIds,
                 complementaryProductIds,
                 productMetafields: {
-                  shop_for: p.shop_for?.value, weight: p.weight?.value, carat_range: p.carat_range?.value,
-                  material_type: p.material_type?.value, components: p.components?.value, finishing: p.finishing?.value,
-                  fit: p.fit?.value, lead_time: p.lead_time?.value, bestsellers: p.bestsellers?.value
+                  shop_for: parseMetafield(p.shop_for?.value),
+                  weight: parseMetafield(p.weight?.value),
+                  carat_range: parseMetafield(p.carat_range?.value),
+                  material_type: parseMetafield(p.material_type?.value),
+                  components: parseMetafield(p.components?.value),
+                  finishing: parseMetafield(p.finishing?.value),
+                  fit: parseMetafield(p.fit?.value),
+                  lead_time: parseMetafield(p.lead_time?.value),
+                  bestsellers: parseMetafield(p.bestsellers?.value)
                 },
                 lastUpdated: new Date(),
                 lastReviewsUpdated: new Date()

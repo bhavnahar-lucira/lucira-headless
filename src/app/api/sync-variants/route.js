@@ -15,6 +15,19 @@ export async function POST(req) {
   const { searchParams } = new URL(req.url);
   const shopifyId = searchParams.get("shopifyId");
 
+  const parseMetafield = (val) => {
+    if (!val) return null;
+    if (typeof val !== "string") return val;
+    try {
+      if (val.startsWith("[") || val.startsWith("{")) {
+        return JSON.parse(val);
+      }
+      return val;
+    } catch (e) {
+      return val;
+    }
+  };
+
   const SHOPIFY_DOMAIN = process.env.SHOPIFY_STORE;
   const ACCESS_TOKEN = process.env.SHOPIFY_ADMIN_TOKEN;
 
@@ -262,7 +275,7 @@ export async function POST(req) {
                 gross_weight: v.ornaverse_gross_weight?.value || v.custom_gross_weight?.value,
                 top_height: v.top_height?.value,
                 top_width: v.top_width?.value,
-                ornaverse_components: v.ornaverse_components?.value ? JSON.parse(v.ornaverse_components.value) : (existingV?.metafields?.ornaverse_components || null),
+                ornaverse_components: parseMetafield(v.ornaverse_components?.value) || (existingV?.metafields?.ornaverse_components || null),
                 diamonds: diamonds.length > 0 ? diamonds : (existingV?.metafields?.diamonds || null),
                 gemstones: gemstones.length > 0 ? gemstones : (existingV?.metafields?.gemstones || null)
               }
